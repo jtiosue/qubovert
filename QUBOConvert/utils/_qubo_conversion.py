@@ -1,11 +1,20 @@
+from ._conversions import qubo_to_ising, ising_to_qubo
+
+
 class qubo_conversion:
     
     """
-    This acts a parent class to all the QUBO conversion problem classes.
-    The init method keeps track of the problem args. The repr method uses those
-    input args, such that eval(repr(cls)) == cls. Finally, we define a __eq__
-    method to determine if two problems are the same. The rest of the methods
-    are to be implemented in child classes.
+    This acts a parent class to all the QUBO and Ising conversion problem 
+    classes. The init method keeps track of the problem args. The repr method 
+    uses those input args, such that eval(repr(cls)) == cls. Finally, we define
+    a __eq__ method to determine if two problems are the same. The rest of the 
+    methods are to be implemented in child classes.
+    
+    Additionally, his class defines the to_qubo and to_ising methods. to_qubo
+    calls to_ising and then converts from ising to qubo. to_ising calls
+    to_qubo and then converts from qubo to ising. Thus, the child classes
+    MUST define either to_qubo or to_ising. In this way, by only defining
+    one of those, both are implemented.
     """
     
     def __init__(self, *args):
@@ -50,7 +59,9 @@ class qubo_conversion:
     def to_qubo(self, *args, **kwargs):
         """
         Create and return upper triangular QUBO representing the problem. 
-        Should be implemented in child classes.
+        Should be implemented in child classes. If this method is not 
+        implemented in the child class, then it simply calls to_ising and
+        converts the ising formulation to a QUBO formulation.
             
         returns the tuple (Q, offset).
             Q is the upper triangular QUBO matrix, a QUBOMatrix object.
@@ -60,19 +71,42 @@ class qubo_conversion:
             offset is a float. It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """
-        raise NotImplementedError("Method to be implemented in child classes")
+        return ising_to_qubo(*self.to_ising(*args, **kwargs))
     
+    def to_ising(self, *args, **kwargs):
+        """
+        Create and return upper triangular J representing the coupling of the
+        Ising formulation of the problem and the h representing the field. 
+        Should be implemented in child classes. If this method is not 
+        implemented in the child class, then it simply calls to_qubo and
+        converts the QUBO formulation to an Ising formulation.
+            
+        returns the tuple (h, J, offset).
+            h represents the field of each spin in the Ising formulation.
+                h is a IsingField object. For most practical purposes, you can
+                use IsingField in he same way as an ordinary dictionary. For
+                more information, see help(QUBOConver.utils.IsingField).
+            J is the upper triangular coupling matrix, a IsingCoupling object.
+                For most practical purposes, you can use IsingCoupling in the 
+                same way as an ordinary dictionary. For more information,
+                see help(QUBOConvert.utils.IsingCoupling).
+            offset is a float. It is the sum of the terms in the formulation in
+                the cited paper that don't involve any variables.
+        """
+        return qubo_to_ising(*self.to_qubo(*args, **kwargs))
     
     def convert_solution(self, solution):
         """
         Convert the solution to the QUBO to the solution to the problem. 
         Should be implemented in child classes.
         
-        solution is the QUBO solution output. The QUBO solution output is
-            either a list/tuple where indices specify the label of the binary 
+        solution is the QUBO or Ising solution output. The QUBO solution output 
+            is either a list/tuple where indices specify the label of the binary 
             variable and the element specifies whether it's 0 or 1, or it can 
             be a dictionary that maps the label of the binary variable to 
-            whether it is a 0 or 1.
+            whether it is a 0 or 1. The Ising solution output is the same, but
+            with -1 corresponding to the QUBO 0, and 1 corresponding to the
+            QUBO 1.
         """
         raise NotImplementedError("Method to be implemented in child classes")
     
@@ -82,11 +116,13 @@ class qubo_conversion:
         implemented in child classes.
         
         solution can either be the output of convert_solution or it
-            can be the actual QUBO solution output. The QUBO solution output is
-            either a list where indices specify the label of the binary 
-            variable and the element specifies whether it's 0 or 1, or it can 
-            be a dictionary that maps the label of the binary variable to 
-            whether it is a 0 or 1.
+            can be the actual QUBO or Ising solution output. The QUBO solution 
+            output is either a list where indices specify the label of the 
+            binary variable and the element specifies whether it's 0 or 1, or 
+            it can be a dictionary that maps the label of the binary variable 
+            to whether it is a 0 or 1. The Ising solution output is the same, 
+            but with -1 corresponding to the QUBO 0, and 1 corresponding to the
+            QUBO 1.
             
         returns a boolean, True if the proposed solution is valid, else False.
         """

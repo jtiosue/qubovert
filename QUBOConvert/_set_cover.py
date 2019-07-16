@@ -5,7 +5,8 @@ from .utils import qubo_conversion, QUBOMatrix
 class SetCover(qubo_conversion):
     
     """
-    Class to manage converting Set Cover to and from its QUBO formluation.
+    Class to manage converting Set Cover to and from its QUBO and
+    Ising formluations.
     """
     
     def __init__(self, U, V):
@@ -142,32 +143,36 @@ class SetCover(qubo_conversion):
     
     def convert_solution(self, solution):
         """
-        Convert the solution to the QUBO to the solution to the Set Cover
-        problem. 
+        Convert the solution to the QUBO or Ising to the solution to the Set 
+        Cover problem. 
         
-        solution is the QUBO solution output. The QUBO solution output is
-            either a list where indices specify the label of the binary 
+        solution is the QUBO or Ising solution output. The QUBO solution output 
+            is either a list where indices specify the label of the binary 
             variable and the element specifies whether it's 0 or 1, or it can 
             be a dictionary that maps the label of the binary variable to 
-            whether it is a 0 or 1.
+            whether it is a 0 or 1. The Ising solution output is the same, but
+            with -1 corresponding to the QUBO 0, and 1 corresponding to the
+            QUBO 1.
         
         returns a set of which sets are included in the set cover. So if this
         function returns {0, 2, 3}, then the set cover is the sets V[0], V[2],
         and V[3].
         """
-        return set(i for i in range(self._N) if solution[i])
+        return set(i for i in range(self._N) if solution[i] == 1)
     
     def is_solution_valid(self, solution):
         """
         Returns whether or not the proposed solution covers all the elements in
         U.
         
-        solution can either be the output of SetCover.convert_solution or it
-            can be the actual QUBO solution output. The QUBO solution output is
-            either a list where indices specify the label of the binary 
-            variable and the element specifies whether it's 0 or 1, or it can 
-            be a dictionary that maps the label of the binary variable to 
-            whether it is a 0 or 1.
+        solution can either be the output of convert_solution or it
+            can be the actual QUBO or Ising solution output. The QUBO solution 
+            output is either a list where indices specify the label of the 
+            binary variable and the element specifies whether it's 0 or 1, or 
+            it can be a dictionary that maps the label of the binary variable 
+            to whether it is a 0 or 1. The Ising solution output is the same, 
+            but with -1 corresponding to the QUBO 0, and 1 corresponding to the
+            QUBO 1.
             
         returns a boolean, True if the proposed solution is valid, else False.
         
@@ -180,12 +185,13 @@ class SetCover(qubo_conversion):
     
     def num_binary_variables(self, log_trick=True):
         """
-        Find the number of binary variables that the QUBO uses.
+        Find the number of binary variables that the QUBO and Ising use.
         
         log_trick: boolean, indicates whether to use the log trick mentioned
             in the paper. Defaults to True.
         
-        returns an integer, the number of variables in the QUBO formulation.
+        returns an integer, the number of variables in the QUBO/Ising 
+            formulation.
         """
         if log_trick: return self._N + self._n*(self._log_M+1)
         else: return self._N + self._n*self._M
