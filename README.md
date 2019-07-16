@@ -41,4 +41,5 @@ $$M = \max_{\alpha \in U}\sum_{i=1}^N \delta_{\alpha \in V_i}$$
 # References
 
 [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in Physics, 2:5, 2014.
+
 [Glover et al]  Fred Glover, Gary Kochenberger, and Yu Du. A tutorial on formulating and using qubo models. arXiv:1811.11538v5, 2019.
