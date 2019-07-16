@@ -4,7 +4,20 @@
 
 ## Convert common problems to QUBO form.
 
-**Make sure you run** `python -m pytest` **before committing anything to ensure that the build passes. **
+Add tests for any functionality that you add. Make sure you run `python -m pytest` before committing anything to ensure that the build passes. When you push changes to the master branch, travis-ci will automatically check to see if all the tests pass. I'm not sure if it will check if you push to another branch, but I think it does.
+
+
+So far we have just implemented the formulations from [Lucas]. For the log trick, we usually need a constraint like $$\sum_{i} x_i \geq 1$$. In order to enforce this constraint, we add a penalty to the QUBO of the form $$1 - \sum_i x_i + \sum_i < j x_i x_j$$ (the idea comes from [Glover et al]).
+
+
+Use Python's `help` function! I have very descriptive doc strings on all the functions and classes. To install from source:
+
+```shell
+git clone https://github.com/jiosue/QUBOConvert.git
+cd QUBOConvert
+pip install -r requirements.txt
+pip install -e .
+```
 
 
 
