@@ -1,4 +1,4 @@
-from QUBOConvert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 
 
 def test_solve_qubo_bruteforce():

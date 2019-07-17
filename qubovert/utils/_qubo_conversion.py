@@ -1,4 +1,5 @@
 from ._conversions import qubo_to_ising, ising_to_qubo
+from qubovert import name as MODULE_NAME
 
 
 class qubo_conversion:
@@ -17,30 +18,33 @@ class qubo_conversion:
     one of those, both are implemented.
     """
     
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         """
         This method just keeps track of the input args.
         """
-        self._problem_args = args
+        self._problem_args, self._problem_kwargs = args, kwargs.copy()
         
     def __repr__(self):
         """
         Defined such that the following is true (assuming you have imported
-        QUBOConvert as QUBOConvert).
+        qubovert as qubovert).
             >>> s = Class_derivedfrom_qubo_conversion(*args)
             >>> eval(repr(s)) == s
         """
-        return "QUBOConvert." + str(self)
+        return MODULE_NAME + "." + str(self)
         
     def __str__(self):
         """
         Defined such that the following is true (assuming you have imported
-        * from QUBOConvert).
+        * from qubovert).
             >>> s = Class_derivedfrom_qubo_conversion(*args)
             >>> eval(repr(s)) == s
         """
         s = self.__class__.__name__ + "("
         for a in self._problem_args: s += str(a) + ", "
+        for k, v in self._problem_kwargs.items():
+            val = str(v) if not isinstance(v, str) else "'%s'" % v
+            s += str(k) + "=" + val + ", "
         return s[:-2] + ")"
         
     def __eq__(self, other):
@@ -53,7 +57,8 @@ class qubo_conversion:
         """
         return (
             type(self) == type(other) and 
-            self._problem_args == other._problem_args
+            self._problem_args == other._problem_args and
+            self._problem_kwargs == other._problem_kwargs
         )
     
     def to_qubo(self, *args, **kwargs):
@@ -67,7 +72,7 @@ class qubo_conversion:
             Q is the upper triangular QUBO matrix, a QUBOMatrix object.
                 For most practical purposes, you can use QUBOMatrix in the 
                 same way as an ordinary dictionary. For more information,
-                see help(QUBOConvert.utils.QUBOMatrix).
+                see help(qubovert.utils.QUBOMatrix).
             offset is a float. It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """
@@ -89,7 +94,7 @@ class qubo_conversion:
             J is the upper triangular coupling matrix, a IsingCoupling object.
                 For most practical purposes, you can use IsingCoupling in the 
                 same way as an ordinary dictionary. For more information,
-                see help(QUBOConvert.utils.IsingCoupling).
+                see help(qubovert.utils.IsingCoupling).
             offset is a float. It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """

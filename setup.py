@@ -12,14 +12,14 @@ with open("requirements.txt") as f:
 
 
 setuptools.setup(
-    name="QUBOConvert",
+    name="qubovert",
     version="0.0.1",
     author="Joseph Iosue",
     author_email="joe.iosue@qcware.com",
     description="A package for converting common problems to QUBO form",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/jiosue/QUBOConvert",
+    url="https://github.com/jiosue/qubovert",
     license=license_text,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     test_suite="tests",

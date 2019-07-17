@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/jiosue/QUBOConvert.svg?branch=master)](https://travis-ci.org/jiosue/QUBOConvert)
+[![Build Status](https://travis-ci.org/jiosue/qubovert.svg?branch=master)](https://travis-ci.org/jiosue/qubovert)
 
-# QUBOConvert
+# QUBOVert
 
 ## Convert common problems to QUBO form.
 
@@ -13,10 +13,20 @@ So far we have just implemented the formulations from [Lucas]. For the log trick
 Use Python's `help` function! I have very descriptive doc strings on all the functions and classes. To install from source:
 
 ```shell
-git clone https://github.com/jiosue/QUBOConvert.git
-cd QUBOConvert
+git clone https://github.com/jiosue/qubovert.git
+cd qubovert
 pip install -r requirements.txt
 pip install -e .
+```
+
+Then you can use it in Python with
+
+```python
+import qubovert
+
+# get info
+help(qubovert)
+help(qubovert.utils)
 ```
 
 

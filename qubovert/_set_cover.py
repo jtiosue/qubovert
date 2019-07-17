@@ -64,7 +64,7 @@ class SetCover(qubo_conversion):
             Q is the upper triangular QUBO matrix, a QUBOMatrix object.
                 For most practical purposes, you can use QUBOMatrix in the 
                 same way as an ordinary dictionary. For more information,
-                see help(QUBOConvert.utils.QUBOMatrix).
+                see help(qubovert.utils.QUBOMatrix).
             offset is a float. It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """

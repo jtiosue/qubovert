@@ -1,4 +1,4 @@
-from QUBOConvert.utils import qubo_to_ising, ising_to_qubo
+from qubovert.utils import qubo_to_ising, ising_to_qubo
 
 
 def test_qubo_to_ising_to_qubo():

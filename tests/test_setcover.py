@@ -1,5 +1,5 @@
-from QUBOConvert import SetCover
-from QUBOConvert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert import SetCover
+from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
     
 
 U = {"a", "b", "c", "d"}

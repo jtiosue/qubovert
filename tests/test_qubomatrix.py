@@ -1,4 +1,4 @@
-from QUBOConvert.utils import QUBOMatrix, IsingCoupling, IsingField
+from qubovert.utils import QUBOMatrix, IsingCoupling, IsingField
 
 
 ## QUBO 
