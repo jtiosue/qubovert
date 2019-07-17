@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jiosue/QUBOVert.svg?branch=master)](https://travis-ci.org/jiosue/QUBOVert)
+[![Build Status](https://travis-ci.com/jiosue/QUBOVert.svg?branch=master)](https://travis-ci.org/jiosue/QUBOVert)
 
 # QUBOVert
 
