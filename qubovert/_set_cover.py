@@ -66,7 +66,10 @@ class SetCover(qubo_conversion):
                 same way as an ordinary dictionary. For more information,
                 see help(qubovert.utils.QUBOMatrix).
             offset is a float. It is the sum of the terms in the formulation in
-                the cited paper that don't involve any variables.
+                the cited paper that don't involve any variables. It is
+                formatted such that if all the constraints are satisfied, then
+                sum_{i <= j} x[i] x[j] Q[(i, j)] + offset will be equal to the
+                total number of sets in the cover.
         """
         # all naming conventions follow the paper listed in the docstring
         

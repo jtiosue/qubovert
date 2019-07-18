@@ -35,6 +35,11 @@ class QUBOMatrix(dict):
         >>> d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0})
         >>> print(d) # will print {(0, 0): 1, (0, 1): 2}
         
+    We also change the update method so that it follows all the conventions.
+        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+        >>> d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
+        >>> print(d)  # will print {(0, 1): 1, (1, 1): -1}
+        
     Finally, if you try to access a key out of order, it will sort the key.
     For example,
         >>> d = QUBOMatrix()
@@ -97,6 +102,15 @@ class QUBOMatrix(dict):
         k = tuple(sorted(key))
         if value: super().__setitem__(k, value)
         else: self.pop(k, 0)
+        
+    def update(self, *args, **kwargs):
+        """
+        Update the dictionary but following all the conventions of this class.
+        args and kwargs define a dictionary. ie d = dict(*args, **kwargs).
+        Each element in d will be added in place to this instance following
+        all the required convensions.
+        """
+        for k, v in dict(*args, **kwargs).items(): self[k] = v
 
 
 class IsingCoupling(QUBOMatrix):
@@ -140,6 +154,11 @@ class IsingCoupling(QUBOMatrix):
     example:
         >>> d = IsingCoupling({(0, 1): 1, (1, 0): 2, (2, 0): 0})
         >>> print(d) # will print {(0, 1): 3}
+        
+    We also change the update method so that it follows all the conventions.
+        >>> d = IsingCoupling({(0, 1): 1, (0, 2): 2})
+        >>> d.update({(1, 0): 0, (2, 1): 1})
+        >>> print(d)  # will print {(1, 2): 1, (0, 2): 2}
         
     Finally, if you try to access a key out of order, it will sort the key.
     For example,
@@ -202,6 +221,11 @@ class IsingField(QUBOMatrix):
     example:
         >>> d = IsingField({0: 1, 1: 2, 2: 0})
         >>> print(d) # will print {0: 1, 1: 2}
+        
+    We also change the update method so that it follows all the conventions.
+        >>> d = IsingField({0: 1, 2: -2})
+        >>> d.update({0: 0, 1: 1})
+        >>> print(d)  # will print {1: 1, 2: -2}
     """
     
     def __setitem__(self, key, value):

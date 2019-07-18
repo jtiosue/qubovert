@@ -24,6 +24,13 @@ def test_qubo_reinitialize_dictionary():
     
     d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
     assert d == {(0, 0): 1, (0, 1): 3}
+    
+    
+def test_qubo_update():
+    
+    d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
+    assert d == {(0, 1): 1, (1, 1): -1}
 
 
 ## Ising
@@ -62,3 +69,13 @@ def test_ising_reinitialize_dictionary():
     
     h = IsingField({0: -2, 2: 0})
     assert h == {0: -2}
+
+def test_ising_update():
+    
+    d = IsingCoupling({(0, 1): 1, (0, 2): 2})
+    d.update({(1, 0): 0, (2, 1): 1})
+    assert d == {(1, 2): 1, (0, 2): 2}
+    
+    d = IsingField({0: 1, 2: -2})
+    d.update({0: 0, 1: 1})
+    assert d == {1: 1, 2: -2}

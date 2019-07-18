@@ -38,10 +38,12 @@ class qubo_conversion:
         Defined such that the following is true (assuming you have imported
         * from qubovert).
             >>> s = Class_derivedfrom_qubo_conversion(*args)
-            >>> eval(repr(s)) == s
+            >>> eval(str(s)) == s
         """
         s = self.__class__.__name__ + "("
-        for a in self._problem_args: s += str(a) + ", "
+        for a in self._problem_args:
+            val = str(a) if not isinstance(a, str) else "'%s'" % a
+            s += val + ", "
         for k, v in self._problem_kwargs.items():
             val = str(v) if not isinstance(v, str) else "'%s'" % v
             s += str(k) + "=" + val + ", "
