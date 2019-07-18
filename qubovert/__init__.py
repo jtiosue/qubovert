@@ -8,7 +8,7 @@ qubovert.utils.__all__ for some utilities used.
 """
 
 
-name = "qubovert"
+name = __name__ = __str__ = "qubovert"
 from ._version import __version__
 from . import utils
 from .karp import *

@@ -3,7 +3,7 @@ Helper module. Contains necessary or convenient methods.
 """
 
 
-name = "utils"
+name = __name__ = __str__ = "utils"
 
 from ._qubo_conversion import qubo_conversion
 from ._solve_bruteforce import solve_qubo_bruteforce, solve_ising_bruteforce
