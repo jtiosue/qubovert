@@ -53,6 +53,30 @@ print(problem.is_solution_valid(solution)) # will print True, since V[0] + V[2] 
 print(obj == len(solution)) # will print True
 ```
 
+To use the Ising formulation instead:
+
+```python
+from qubovert import SetCover
+from any_module import ising_solver
+# or you can use my bruteforce solver...
+# from qubovert.utils import solve_ising_bruteforce as ising_solver
+
+U = {"a", "b", "c", "d"}
+V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
+
+problem = SetCover(U, V)
+h, J, offset = problem.to_ising()
+
+obj, sol = ising_solver(h, J)
+obj += offset
+
+solution = problem.convert_solution(sol)
+
+print(solution) # will print {0, 2}
+print(problem.is_solution_valid(solution)) # will print True, since V[0] + V[2] covers all of U
+print(obj == len(solution)) # will print True
+```
+
 
 # Technical details on the conversions
 

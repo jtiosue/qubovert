@@ -6,18 +6,44 @@ class SetCover(qubo_conversion):
     
     """
     Class to manage converting Set Cover to and from its QUBO and
-    Ising formluations.
+    Ising formluations. Based on the paper hereforth designated [Lucas]:
+    [Andrew Lucas. Ising formulations of many np problems. Frontiers in
+    Physics, 2:5, 2014.]
+    
+    Example usage:
+        
+        from qubovert import SetCover
+        from any_module import qubo_solver
+        # or you can use my bruteforce solver...
+        # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
+        
+        U = {"a", "b", "c", "d"}
+        V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
+        
+        problem = SetCover(U, V)
+        Q, offset = problem.to_qubo()
+        
+        obj, sol = qubo_solver(Q)
+        obj += offset
+        
+        solution = problem.convert_solution(sol)
+        
+        # will print {0, 2}
+        print(solution)
+        # will print True, since V[0] + V[2] covers all of U
+        print(problem.is_solution_valid(solution))
+        # will print True
+        print(obj == len(solution))
     """
     
     def __init__(self, U, V):
         """
         The goal of the SetCover problem is to find the smallest number of 
         elements in V such that union over the elements equals U. All naming
-        conventions follow the names in the paper 
-        https://arxiv.org/pdf/1302.5843.pdf.
+        conventions follow the names in the paper [Lucas].
         
         U: set, the set of all elements to cover.
-        V: dictionary that maps a name to a subset of U.
+        V: list or tuple of sets, where each set is one of the subsets.
         """
         self._U = U.copy()
         self._V = type(V)(x.copy() for x in V)
@@ -48,17 +74,16 @@ class SetCover(qubo_conversion):
     def to_qubo(self, A=2, B=1, log_trick=True):
         """
         Create and return the set cover problem in QUBO form following section 
-        5.1 of https://arxiv.org/pdf/1302.5843.pdf. The Q matrix for the QUBO 
+        5.1 of [Lucas]. The Q matrix for the QUBO 
         will be returned as an uppertriangular dictionary. Thus, the problem 
         becomes minimizing sum_{i <= j} x[i] x[j] Q[(i, j)]. A and B are
         parameters to enforce constraints.
         
-        A: positive float, defaults to 2. See section 5.1 of 
-            https://arxiv.org/pdf/1302.5843.pdf
-        B: positive float that is less than A, defaults to 1. See section 5.1 of 
-            https://arxiv.org/pdf/1302.5843.pdf
+        A: positive float, defaults to 2. See section 5.1 of [Lucas].
+        B: positive float that is less than A, defaults to 1. See section 5.1 
+            of [Lucas].
         log_trick: boolean, indicates whether or not to use the log trick
-            discussed in the paper. Defaults to True.
+            discussed in [Lucas]. Defaults to True.
             
         returns the tuple (Q, offset).
             Q is the upper triangular QUBO matrix, a QUBOMatrix object.
@@ -191,7 +216,7 @@ class SetCover(qubo_conversion):
         Find the number of binary variables that the QUBO and Ising use.
         
         log_trick: boolean, indicates whether to use the log trick mentioned
-            in the paper. Defaults to True.
+            in [Lucas]. Defaults to True.
         
         returns an integer, the number of variables in the QUBO/Ising 
             formulation.
