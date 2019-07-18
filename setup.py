@@ -9,11 +9,14 @@ with open('LICENSE') as f:
     
 with open("requirements.txt") as f:
     requirements = [line.strip() for line in f if line.strip()]
+    
+# read the __version__ variable from qubovert/_version.py
+exec(open("qubovert/_version.py").read())
 
 
 setuptools.setup(
     name="qubovert",
-    version="0.0.1",
+    version=__version__,
     author="Joseph Iosue",
     author_email="joe.iosue@qcware.com",
     description="A package for converting common problems to QUBO form",

@@ -9,12 +9,12 @@ qubovert.utils.__all__ for some utilities used.
 
 
 name = "qubovert"
-
-from ._set_cover import SetCover
-
-# if "from qubovert import *" is called, don't import utils
-__all__ = (
-    "SetCover",
-)
-
+from ._version import __version__
 from . import utils
+from .karp import *
+
+from .karp import __all__ as __karp__
+
+# if someone does `from qubovert import *`, import all of the problem, but
+# not utils.
+__all__ = __karp__

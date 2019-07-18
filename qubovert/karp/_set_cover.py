@@ -1,5 +1,5 @@
 from numpy import log2
-from .utils import qubo_conversion, QUBOMatrix
+from qubovert.utils import qubo_conversion, QUBOMatrix
 
 
 class SetCover(qubo_conversion):
