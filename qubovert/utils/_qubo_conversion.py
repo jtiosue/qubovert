@@ -105,22 +105,26 @@ class qubo_conversion:
     def convert_solution(self, solution):
         """
         Convert the solution to the QUBO to the solution to the problem. 
-        Should be implemented in child classes.
+        Should be implemented in child classes. If it is not implemented in the
+        child class, then this function will by default return the same
+        solution as what inputted.
         
         solution is the QUBO or Ising solution output. The QUBO solution output 
-            is either a list/tuple where indices specify the label of the binary 
-            variable and the element specifies whether it's 0 or 1, or it can 
-            be a dictionary that maps the label of the binary variable to 
-            whether it is a 0 or 1. The Ising solution output is the same, but
-            with -1 corresponding to the QUBO 0, and 1 corresponding to the
+            is either a list/tuple where indices specify the label of the 
+            binary variable and the element specifies whether it's 0 or 1, or 
+            it can be a dictionary that maps the label of the binary variable 
+            to whether it is a 0 or 1. The Ising solution output is the same, 
+            but with -1 corresponding to the QUBO 0, and 1 corresponding to the
             QUBO 1.
         """
-        raise NotImplementedError("Method to be implemented in child classes")
+        #raise NotImplementedError("Method to be implemented in child classes")
+        return solution
     
     def is_solution_valid(self, solution):
         """
         Returns whether or not the proposed solution is valid. Should be
-        implemented in child classes.
+        implemented in child classes. If it is not implemented in the child
+        class, then this function will by default return True.
         
         solution can either be the output of convert_solution or it
             can be the actual QUBO or Ising solution output. The QUBO solution 
@@ -133,11 +137,13 @@ class qubo_conversion:
             
         returns a boolean, True if the proposed solution is valid, else False.
         """
-        raise NotImplementedError("Method to be implemented in child classes")
+        #raise NotImplementedError("Method to be implemented in child classes")
+        return True
     
     def num_binary_variables(self, *args, **kwargs):
         """
-        Find the number of binary variables that the QUBO uses.
+        Find the number of binary variables that the QUBO uses. Should be 
+        implemented in the child class.
         
         returns an integer, the number of variables in the QUBO formulation.
         """
