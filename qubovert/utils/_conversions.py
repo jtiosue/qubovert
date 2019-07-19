@@ -1,3 +1,8 @@
+"""
+This file contains methods to convert to and from QUBO/Ising.
+"""
+
+
 from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
 
 

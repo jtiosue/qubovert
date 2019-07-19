@@ -1,29 +1,34 @@
+"""
+This file contains the class qubo_conversion, which is the parent class to all
+the problem classes.
+"""
+
 from ._conversions import qubo_to_ising, ising_to_qubo
 from qubovert import name as MODULE_NAME
 
 
 class qubo_conversion:
-    
+
     """
-    This acts a parent class to all the QUBO and Ising conversion problem 
-    classes. The init method keeps track of the problem args. The repr method 
+    This acts a parent class to all the QUBO and Ising conversion problem
+    classes. The init method keeps track of the problem args. The repr method
     uses those input args, such that eval(repr(cls)) == cls. Finally, we define
-    a __eq__ method to determine if two problems are the same. The rest of the 
+    a __eq__ method to determine if two problems are the same. The rest of the
     methods are to be implemented in child classes.
-    
+
     Additionally, his class defines the to_qubo and to_ising methods. to_qubo
     calls to_ising and then converts from ising to qubo. to_ising calls
     to_qubo and then converts from qubo to ising. Thus, the child classes
     MUST define either to_qubo or to_ising. In this way, by only defining
     one of those, both are implemented.
     """
-    
+
     def __init__(self, *args, **kwargs):
         """
         This method just keeps track of the input args.
         """
         self._problem_args, self._problem_kwargs = args, kwargs.copy()
-        
+
     def __repr__(self):
         """
         Defined such that the following is true (assuming you have imported
@@ -32,7 +37,7 @@ class qubo_conversion:
             >>> eval(repr(s)) == s
         """
         return MODULE_NAME + "." + str(self)
-        
+
     def __str__(self):
         """
         Defined such that the following is true (assuming you have imported
@@ -48,38 +53,38 @@ class qubo_conversion:
             val = str(v) if not isinstance(v, str) else "'%s'" % v
             s += str(k) + "=" + val + ", "
         return s[:-2] + ")"
-        
+
     def __eq__(self, other):
         """
-        Find if self and other define the same problem. 
-        
+        Find if self and other define the same problem.
+
         other: must be a class derived from qubo_conversion.
-        
+
         returns a boolean.
         """
         return (
-            type(self) == type(other) and 
+            type(self) == type(other) and
             self._problem_args == other._problem_args and
             self._problem_kwargs == other._problem_kwargs
         )
-    
+
     def to_qubo(self, *args, **kwargs):
         """
-        Create and return upper triangular QUBO representing the problem. 
-        Should be implemented in child classes. If this method is not 
+        Create and return upper triangular QUBO representing the problem.
+        Should be implemented in child classes. If this method is not
         implemented in the child class, then it simply calls to_ising and
         converts the ising formulation to a QUBO formulation.
-            
+
         returns the tuple (Q, offset).
             Q is the upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the 
+                For most practical purposes, you can use QUBOMatrix in the
                 same way as an ordinary dictionary. For more information,
                 see help(qubovert.utils.QUBOMatrix).
             offset is a float. It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """
         return ising_to_qubo(*self.to_ising(*args, **kwargs))
-    
+
     def to_ising(self, *args, **kwargs):
         """
         Create and return upper triangular J representing the coupling of the

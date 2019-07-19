@@ -5,7 +5,7 @@ including Karp's 21 NP-Complete problems. The conversions are based on
 2:5, 2014.]
 """
 
-name = __name__ = __str__ = "karp"
+name = __str__ = "karp"
 
 from ._set_cover import SetCover
 from ._number_partitioning import NumberPartitioning

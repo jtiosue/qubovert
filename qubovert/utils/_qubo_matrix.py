@@ -1,3 +1,9 @@
+"""
+This file contains QUBOMatrix, IsingCoupling, and IsingField objects, which
+are used for QUBO matrices Q, Ising coupling matrices J, and Ising fields h.
+"""
+
+
 class QUBOMatrix(dict):
     """
     A class to handle QUBO matrices. It is the same thing as a dictionary

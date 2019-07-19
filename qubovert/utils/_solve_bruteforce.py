@@ -1,3 +1,8 @@
+"""
+This file contains bruteforce solvers for QUBO and Ising.
+"""
+
+
 def solve_qubo_bruteforce(Q, offset=0):
     """
     Iterate through all the possible solutions to a QUBO formulated problem
