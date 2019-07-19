@@ -46,7 +46,18 @@ class QUBOMatrix(dict):
         >>> d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
         >>> print(d)  # will print {(0, 1): 1, (1, 1): -1}
         
-    Finally, if you try to access a key out of order, it will sort the key.
+    We also include arithmetic, addition, subtraction, scalar division,
+    scalar multiplication, and all those in place. For example,
+        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-2)
+        >>> g = d + {(0, 0): -1}
+        >>> print(g) # will print {(0, 1): -2}
+        >>> g *= 4
+        >>> print(g) # will print {(0, 1): -8}
+        >>> g -= {(0, 1): -8}
+        >>> print(g) # will print {}
+        
+    Finally, if you try to access a key out of order, it will sort the key. Be
+    careful with this, it can cause unexpected behavior if you don't know it.
     For example,
         >>> d = QUBOMatrix()
         >>> d[(0, 1)] += 2
@@ -109,6 +120,14 @@ class QUBOMatrix(dict):
         if value: super().__setitem__(k, value)
         else: self.pop(k, 0)
         
+    def copy(self, *args, **kwargs):
+        """
+        Same as dict.copy, but we adjust the method so that it returns a
+        QUBOMatrix object, or an IsingField or IsingCoupling object in those
+        subclasses.
+        """
+        return type(self)(super().copy(*args, **kwargs))
+        
     def update(self, *args, **kwargs):
         """
         Update the dictionary but following all the conventions of this class.
@@ -117,6 +136,163 @@ class QUBOMatrix(dict):
         all the required convensions.
         """
         for k, v in dict(*args, **kwargs).items(): self[k] = v
+        
+    def __add__(self, other):
+        """
+        Add two QUBOMatrices or dicts, return the sum. For example:
+            >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
+            >>> g = {(0, 0): 2, (1, 0): 1}
+            >>> print(d + g)  # will print {(0, 0): 3}
+            
+        other is a QUBOMatrix or dict object.
+        
+        returns a QUBOMatrix object.
+        """
+        d = self.copy()
+        d += other
+        return d
+    
+    def __radd__(self, other):
+        """
+        Add two QUBO Matrices. This will be called if the left one is just a
+        dict object. This is the same as the __add__ method, but is included
+        in case we are adding a dict and a QUBOMatrix object, instead of two
+        QUBOMatrix objects.
+        
+        other: dict object.
+        
+        returns a QUBOMatrix object.
+        """
+        return self + other
+    
+    def __iadd__(self, other):
+        """
+        Same as the __add__ method, but done in place.
+        returns self.
+        """
+        for k, v in other.items(): self[k] += v
+        return self
+        
+    def __sub__(self, other):
+        """
+        Subtract two QUBOMatrices or dicts, return the difference. For example:
+            >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
+            >>> g = {(0, 0): 2, (1, 0): 1}
+            >>> print(d - g)  # will print {(0, 0): -1}
+            
+        other is a QUBOMatrix or dict object.
+        
+        returns a QUBOMatrix object.
+        """
+        d = self.copy()
+        d -= other
+        return d
+    
+    def __rsub__(self, other):
+        """
+        Subtract two QUBO Matrices. This will be called if the left one is just
+        a dict object. This is the same as the __sub__ method, but is included
+        in case we are adding a dict and a QUBOMatrix object, instead of two
+        QUBOMatrix objects.
+        
+        other: dict object.
+        
+        returns a QUBOMatrix object.
+        """
+        return -1*self + other
+    
+    def __isub__(self, other):
+        """
+        Same as the __sub__ method, but done in place.
+        returns self.
+        """
+        for k, v in other.items(): self[k] -= v
+        return self
+        
+    def __mul__(self, other):
+        """
+        Multiplying a QUBOMatrix by a scalar. For example:
+            >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
+            >>> print(d * 2) # will print {(0, 0): 2, (0, 1): -1}
+        
+        other is a integer or float.
+        
+        returns a new QUBOMatrix.
+        """
+        d = self.copy()
+        d *= other
+        return d
+    
+    def __rmul__(self, other):
+        """
+        Same as __mul__, but for different ordering.
+        
+        other is an integer or float object.
+        
+        returns a QUBOMatrix object.
+        """
+        return self * other
+    
+    def __imul__(self, other):
+        """
+        Same as __mul__, but done in place.
+        
+        other is an integer or float.
+        
+        returns self.
+        """
+        for k in tuple(self.keys()): self[k] *= other
+        return self
+    
+    def __truediv__(self, other):
+        """
+        Dividing a QUBOMatrix by a scalar. For example:
+            >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
+            >>> print(d / 2) # will print {(0, 0): .5, (0, 1): -.5}
+        
+        other is a integer or float.
+        
+        returns a new QUBOMatrix.
+        """
+        d = self.copy()
+        d /= other
+        return d
+    
+    def __itruediv__(self, other):
+        """
+        Same as __floordiv__, but done in place.
+        
+        other is an integer or float.
+        
+        returns self.
+        """
+        for k in tuple(self.keys()): self[k] /= other
+        return self
+    
+    def __floordiv__(self, other):
+        """
+        Floor dividing a QUBOMatrix by a scalar. For example:
+            >>> d = QUBOMatrix((0, 0)=2, (0, 1)=-1)
+            >>> print(d // 2) # will print {(0, 0): 1, (0, 1): 0}
+        
+        other is a integer or float.
+        
+        returns a new QUBOMatrix.
+        """
+        d = self.copy()
+        d //= other
+        return d
+    
+    def __ifloordiv__(self, other):
+        """
+        Same as __floordiv__, but done in place.
+        
+        other is an integer or float.
+        
+        returns self.
+        """
+        for k in tuple(self.keys()): self[k] //= other
+        return self
 
 
 class IsingCoupling(QUBOMatrix):
@@ -166,7 +342,18 @@ class IsingCoupling(QUBOMatrix):
         >>> d.update({(1, 0): 0, (2, 1): 1})
         >>> print(d)  # will print {(1, 2): 1, (0, 2): 2}
         
-    Finally, if you try to access a key out of order, it will sort the key.
+    We also include arithmetic, addition, subtraction, scalar division,
+    scalar multiplication, and all those in place. For example,
+        >>> d = IsingCoupling((0, 2)=1, (0, 1)=-2)
+        >>> g = d + {(0, 2): -1}
+        >>> print(g) # will print {(0, 1): -2}
+        >>> g *= 4
+        >>> print(g) # will print {(0, 1): -8}
+        >>> g -= {(0, 1): -8}
+        >>> print(g) # will print {}
+        
+    Finally, if you try to access a key out of order, it will sort the key. Be
+    careful with this, it can unexpected behavior if you don't know it.
     For example,
         >>> d = IsingCoupling()
         >>> d[(0, 1)] += 2
@@ -232,6 +419,16 @@ class IsingField(QUBOMatrix):
         >>> d = IsingField({0: 1, 2: -2})
         >>> d.update({0: 0, 1: 1})
         >>> print(d)  # will print {1: 1, 2: -2}
+        
+    We also include arithmetic, addition, subtraction, scalar division,
+    scalar multiplication, and all those in place. For example,
+        >>> d = IsingField(0=1, 1=-2)
+        >>> g = d + {0: -1}
+        >>> print(g) # will print {1: -2}
+        >>> g *= 4
+        >>> print(g) # will print {1: -8}
+        >>> g -= {1: -8}
+        >>> print(g) # will print {}
     """
     
     def __setitem__(self, key, value):
