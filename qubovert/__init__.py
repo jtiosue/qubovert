@@ -11,10 +11,10 @@ qubovert.utils.__all__ for some utilities used.
 name = __str__ = "qubovert"
 from ._version import __version__
 from . import utils
-from .karp import *
+from .problems import *
 
-from .karp import __all__ as __karp__
+from .problems import __all__ as __all_problems__
 
 # if someone does `from qubovert import *`, import all of the problem, but
 # not utils.
-__all__ = __karp__
+__all__ = __all_problems__
