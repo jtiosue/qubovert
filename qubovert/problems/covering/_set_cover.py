@@ -10,6 +10,9 @@ class SetCover(qubo_conversion):
     [Andrew Lucas. Ising formulations of many np problems. Frontiers in
     Physics, 2:5, 2014.]
     
+    The goal of the SetCover problem is to find the smallest number of subsets 
+    of U in V such that union over the elements equals U.
+    
     Example usage:
         
         from qubovert import SetCover

@@ -8,7 +8,9 @@ The conversions are based on
 name = __str__ = "covering"
 
 from ._set_cover import SetCover
+from ._vertex_cover import VertexCover
 
 __all__ = (
     "SetCover",
+    "VertexCover",
 )

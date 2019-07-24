@@ -8,6 +8,17 @@ class NumberPartitioning(qubo_conversion):
     QUBO and Ising formluations. Based on the paper hereforth designated as
     [Lucas]: [Andrew Lucas. Ising formulations of many np problems. Frontiers 
     in Physics, 2:5, 2014.]
+
+    The goal of the NumberPartitioning problem is as follows (quoted from
+    [Lucas]): 
+        
+    Given a list of N positive numbers S = [n1, . . . , nN], is there a
+    partition of this set of numbers into two disjoint subsets R and S − R,
+    such that the sum of the elements in both sets is the same?
+    
+    Note that if we can't do this partitioning, then the next goal is to
+    find a partition that almost does this, ie a partition that minimizes
+    the difference in the sum between the two partitions.
     
     Example usage:
         
