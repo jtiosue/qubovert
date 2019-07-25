@@ -1,6 +1,53 @@
 """
-This file contains bruteforce solvers for QUBO and Ising.
+This file contains bruteforce solvers for QUBO and Ising, as well as QUBO and
+Ising objective function evaluators.
 """
+
+from ._conversions import binary_to_spin
+
+
+def qubo_value(x, Q, offset=0):
+    """
+    Find the value of
+        sum_{ij} Q_{ij} x_{i} x_{j} + offset.
+
+    x: dict or list mapping binary variable indices to their binary values,
+        0 or 1. Ie x[i] must be the binary value of variable i.
+    Q: dictionary mapping binary variables indices to the Q value. Q can
+        also be a qubovert.utils.QUBOMatrix object. For example,
+            >>> Q = {(0, 1): 1, (1, 1): -1, ...}
+    offset: an optional float that defaults to 0, the part of the objective
+        function that does not depend on the variables.
+
+    returns: float, sum_{ij}Q[(i, j)] x[i] x[j] + offset
+    """
+    return sum(v * x[i] * x[j] for (i, j), v in Q.items()) + offset
+
+
+def ising_value(z, h, J, offset=0):
+    """
+    Find the value of
+        sum_{ij} J_{ij} z_{i} z_{j} + sum_{i} h_{i} z_{i} +  offset.
+
+    z: dict or list mapping variable indices to their values, -1 or 1. Ie z[i]
+        must be the value of variable i.
+    J: dictionary mapping variables indices to the J value. J can also be a
+        qubovert.utils.IsingCoupling object. For example,
+            >>> J = {(0, 1): 1, (1, 2): -1, ...}
+    h: dictionary mapping variables indices to the h value. h can also be a
+        qubovert.utils.IsingField object. For example,
+            >>> h = {0: 1, 2: -1, ...}
+    offset: an optional float that defaults to 0, the part of the objective
+        function that does not depend on the variables.
+
+    returns: float,
+        sum_{ij} J[(i, j)] z[i] z[j] + sum_{i} h[i] z[i] +  offset.
+    """
+    return sum(
+        v * z[i] * z[j] for (i, j), v in J.items()
+    ) + sum(
+        v * z[i] for i, v in h.items()
+    ) + offset
 
 
 def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
@@ -18,11 +65,12 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
         >>> obj_val, solution = solve_qubo_bruteforce(Q)
     obj_val will be the smallest value of obj, for this example it will be -2.
     solution will be a list that indicated what each of x_0, x_1, and x_2 are
-    for the solution. In this case, x = [0, 0, 1], indicating that x_0 is 0,
-    x_1 is 0, x_2 is 1.
+    for the solution. In this case, x = {0: 0, 1: 0, 2: 1}, indicating that
+    x_0 is 0, x_1 is 0, x_2 is 1.
 
-    Q: dictionary mapping binary variables indices to the Q value. Note that
-        binary variable indices must be integer labeled starting from 0.
+    Q: dictionary mapping binary variables indices to the Q value. Q can also
+        be a qubovert.utils.QUBOMatrix object. For example,
+            >>> Q = {(0, 1): 1, (1, 1): -1, ...}
     offset: an optional float that defaults to 0, the part of the objective
         function that does not depend on the variables.
     all_solutions: an optional boolean that defaults to False. If all_solutions
@@ -35,38 +83,43 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
         if all_solutions is False:
             objective is a float equal to
                 sum(Q[(i, j)] * solution[i] * solution[j]) + offset
-            solution is a list, the value of each binary variable.
+            solution is a dictionary, mapping the label to the value of each
+                binary variable.
         if all_solutions is True:
             objective is a float equal to
                 sum(Q[(i, j)] * solution[x][i] * solution[x][j]) + offset
                 where solution[x] is one of the solutions to the QUBO.
-            solution is a list of lists, where each list contains the value of
-                each binary variable. Ie each s in solution is a solution that
-                gives the best objective function value.
+            solution is a list of dictionaries, where each dictionary maps the
+                label to the value of each binary variable. Ie each s in
+                solution is a solution that gives the best objective function
+                value.
     """
-    if not Q: return offset, []
+    if not Q:
+        return offset, []
 
-    N = max(y for x in Q for y in x) + 1
-    obj = lambda x: sum(
-        Q[(i, j)]*int(x[i])*int(x[j]) for i, j in Q
-    )
+    var = set(y for x in Q for y in x)
+    N = len(var)
 
-    best = None
+    # map qubit name to 0 through N-1
+    mapping = dict(enumerate(var))
+
+    best = None, None
     all_sols = {}
 
     for n in range(1 << N):
-        x = ("{0:0%db}" % N).format(n)
-        v = obj(x) + offset
-        if all_solutions and (best is None or v <= best[0]):
-            x_list = [int(i) for i in x]
-            best = v, x_list
-            all_sols.setdefault(v, []).append(x_list)
-        elif best is None or v < best[0]:
-            x_list = [int(i) for i in x]
-            best = v, x_list
+        test_sol = ("{0:0%db}" % N).format(n)
+        x = {mapping[i]: int(v) for i, v in enumerate(test_sol)}
+        v = qubo_value(x, Q, offset)
+        if all_solutions and (best[0] is None or v <= best[0]):
+            best = v, x
+            all_sols.setdefault(v, []).append(x)
+        elif best[0] is None or v < best[0]:
+            best = v, x
 
-    if not all_solutions: return best
-    else: return best[0], all_sols[best[0]]
+    if all_solutions:
+        best = best[0], all_sols[best[0]]
+
+    return best
 
 
 def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
@@ -88,10 +141,10 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
     for the solution. In this case, z = [-1, 1, 1], indicating that z_0 is -1,
     z_1 is 1, and z_2 is 1.
 
-    h: dictionary mapping spins indices to the field value. Note that
-        spin variable indices must be integer labeled starting from 0.
-    J: dictionary mapping tuples of spin indices to the coupling value. Note
-        that spin variable indices must be integer labeled starting from 0.
+    h: dictionary mapping spins indices to the field value. h can also be a
+        qubovert.utils.IsingField object.
+    J: dictionary mapping tuples of spin indices to the coupling value. J can
+        also be a qubovert.utils.IsingCoupling object.
     offset: an optional float, the part of the objective function that does
         not depend on the variables.
     all_solutions: an optional boolean that defaults to False. If all_solutions
@@ -117,32 +170,32 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
                 each Ising spin (-1 or 1). Ie each s in solution is a solution
                 that gives the best objective function value.
     """
-    if h and J: N = max(max(y for x in J for y in x), max(h.keys())) + 1
-    elif h: N = max(h.keys()) + 1
-    elif J: N = max(y for x in J for y in x) + 1
-    else: return offset, []
+    if not h and not J:
+        return offset, []
 
-    to_spin = lambda x: 2 * int(x) - 1
+    var = set(h.keys())
+    var.update(set(y for x in J for y in x))
+    N = len(var)
 
-    obj = lambda x: sum(
-        J[(i, j)]*to_spin(x[i])*to_spin(x[j]) for i, j in J
-    ) + sum(
-        h[i]*to_spin(x[i]) for i in h
-    )
+    # map qubit name to 0 through N-1
+    mapping = dict(enumerate(var))
 
-    best = None
+    best = None, None
     all_sols = {}
 
     for n in range(1 << N):
-        x = ("{0:0%db}" % N).format(n)
-        v = obj(x) + offset
-        if all_solutions and (best is None or v <= best[0]):
-            x_list = [to_spin(i) for i in x]
-            best = v, x_list
-            all_sols.setdefault(v, []).append(x_list)
-        elif best is None or v < best[0]:
-            x_list = [to_spin(i) for i in x]
-            best = v, x_list
+        test_sol = ("{0:0%db}" % N).format(n)
+        z = {
+            mapping[i]: binary_to_spin(int(v)) for i, v in enumerate(test_sol)
+        }
+        v = ising_value(z, h, J, offset)
+        if all_solutions and (best[0] is None or v <= best[0]):
+            best = v, z
+            all_sols.setdefault(v, []).append(z)
+        elif best[0] is None or v < best[0]:
+            best = v, z
 
-    if not all_solutions: return best
-    else: return best[0], all_sols[best[0]]
+    if all_solutions:
+        best = best[0], all_sols[best[0]]
+
+    return best

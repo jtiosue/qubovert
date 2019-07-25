@@ -6,7 +6,10 @@ language: python
 install:
   # - pip install -r requirements.txt
   - pip install -e .
+  - pip install pytest
+  - pip install pytest-codestyle
 
 script:
+  - pytest --codestyle
+  # I think pytest --codestyle also runs all the tests, but just in case ...
   - pytest
-  # - pytest --codestyle

@@ -1,28 +1,28 @@
 """
-This file contains methods to convert to and from QUBO/Ising.
+This file contains methods to convert to and from QUBO/Ising problems and
+variables.
 """
-
 
 from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
 
 
 def qubo_to_ising(Q, offset=0):
     """
-    Convert the specified QUBO problem into an Ising problem.
-    
-    Q: dictionary mapping binary variables indices to the Q value. Note that
-        binary variable indices must be integer labeled starting from 0. Q can
-        also be a qubovert.utils.QUBOMatrix object.
-    offset: an optional float, the part of the objective function that does 
-        not depend on the variables.    
-        
+    Convert the specified QUBO problem into an Ising problem. Note that
+    QUBO {0, 1} values go to Ising {-1, 1} values in that order!
+
+    Q: dictionary mapping binary variables indices to the Q value. Q can also
+        be a qubovert.utils.QUBOMatrix object.
+    offset: an optional float, the part of the objective function that does
+        not depend on the variables.
+
     returns the tuple (h, J, offset).
         h represents the field of each spin in the Ising formulation.
             h is a IsingField object. For most practical purposes, you can
             use IsingField in he same way as an ordinary dictionary. For
             more information, see help(QUBOConver.utils.IsingField).
         J is the upper triangular coupling matrix, a IsingCoupling object.
-            For most practical purposes, you can use IsingCoupling in the 
+            For most practical purposes, you can use IsingCoupling in the
             same way as an ordinary dictionary. For more information,
             see help(qubovert.utils.IsingCoupling).
         offset is a float. It is the sum of the terms in the formulation in
@@ -31,7 +31,7 @@ def qubo_to_ising(Q, offset=0):
     # IsingCoupling deals with keeping J upper triangular, so we don't have to
     # worry about it!
     h, J = IsingField(), IsingCoupling()
-    
+
     for (i, j), v in Q.items():
         if i != j:
             J[(i, j)] += v / 4
@@ -41,28 +41,26 @@ def qubo_to_ising(Q, offset=0):
         else:
             h[i] += v / 2
             offset += v / 2
-            
+
     return h, J, offset
-    
-    
+
+
 def ising_to_qubo(h, J, offset=0):
     """
     Convert the specified Ising problem into an upper triangular QUBO problem.
-    
-    h: dictionary mapping spins indices to the field value. Note that
-        spin variable indices must be integer labeled starting from 0. h can
-        also be a qubovert.utils.IsingField object.
-    J: dictionary mapping tuples of spin indices to the coupling value. Note 
-        that spin variable indices must be integer labeled starting from 0.
-        Also note that J cannot have a key that has a repeated index, ie
-        (1, 1) is an invalid key. J can also be a 
-        qubovert.utils.IsingCoupling object.
-    offset: an optional float, the part of the objective function that does 
+    Note that Ising {-1, 1} values go to QUBO {0, 1} values in that order!
+
+    h: dictionary mapping spins indices to the field value. h can also be a
+        qubovert.utils.IsingField object.
+    J: dictionary mapping tuples of spin indices to the coupling value. Note
+        that J cannot have a key that has a repeated index, ie (1, 1) is an
+        invalid key. J can also be a qubovert.utils.IsingCoupling object.
+    offset: an optional float, the part of the objective function that does
         not depend on the variables.
-        
+
     returns the tuple (Q, offset).
         Q is the upper triangular QUBO matrix, a QUBOMatrix object.
-            For most practical purposes, you can use QUBOMatrix in the 
+            For most practical purposes, you can use QUBOMatrix in the
             same way as an ordinary dictionary. For more information,
             see help(qubovert.utils.QUBOMatrix).
         offset is a float. It is the sum of the terms in the formulation in
@@ -71,7 +69,7 @@ def ising_to_qubo(h, J, offset=0):
     # QUBOMarix deals with keeping ! upper triangular, so we don't have to
     # worry about it!
     Q = QUBOMatrix()
-    
+
     for (i, j), v in J.items():
         if i == j:
             raise KeyError("J formatted incorrectly, key cannot "
@@ -80,9 +78,47 @@ def ising_to_qubo(h, J, offset=0):
         Q[(i, i)] -= 2 * v
         Q[(j, j)] -= 2 * v
         offset += v
-    
+
     for i, v in h.items():
         Q[(i, i)] += 2 * v
         offset -= v
-        
+
     return Q, offset
+
+
+def binary_to_spin(x):
+    """
+    Convert a binary number in {0, 1} to a spin in {-1, 1}, in that order.
+    For example,
+        >>> print(binary_to_spin(0))  # will print -1
+        >>> print(binary_to_spin(1))  # will print 1
+        >>> print(binary_to_spin([0, 1, 1]))  # will print [-1, 1, 1]
+
+    x: integer or iterable of integers, where each integer is either 0 or 1.
+
+    returns: integer or iterable of integers, where each integer is either -1
+        or 1.
+    """
+    convert = {0: -1, 1: 1}
+    if isinstance(x, (int, float)) and x in convert:
+        return convert[x]
+    return type(x)(convert[i] for i in x)
+
+
+def spin_to_binary(z):
+    """
+    Convert a spin in {-1, 1} to a binary number in {-1, 1}, in that order.
+    For example,
+        >>> print(spin_to_binary(-1))  # will print 0
+        >>> print(spin_to_binary(1))  # will print 1
+        >>> print(spin_to_binary([-, 1, 1]))  # will print [0, 1, 1]
+
+    z: integer or iterable of integers, where each integer is either -1 or 1.
+
+    returns: integer or iterable of integers, where each integer is either 0 or
+        1.
+    """
+    convert = {-1: 0, 1: 1}
+    if isinstance(z, (int, float)) and z in convert:
+        return convert[z]
+    return type(z)(convert[i] for i in z)
