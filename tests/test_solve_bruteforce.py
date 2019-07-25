@@ -36,7 +36,10 @@ def test_solve_ising_bruteforce():
 
     h = {'a': -1, 2: -2}
     J = {(0, 'a'): 1, ('a', 2): 1}
-    assert solve_ising_bruteforce(h, J) == (-3, {0: -1, 'a': 1, 2: 1})
+    assert solve_ising_bruteforce(h, J) in (
+        (-3, {0: -1, 'a': 1, 2: 1}),
+        (-3, {0: 1, 'a': -1, 2: 1}),
+    )
 
     h, J, offset = {0: 0.25, 1: -0.25}, {(0, 1): -0.25}, 1.25
     assert (
