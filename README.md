@@ -14,7 +14,6 @@ Use Python's `help` function! I have very descriptive doc strings on all the fun
 ```shell
 git clone https://github.com/jiosue/qubovert.git
 cd QUBOVert
-pip install -r requirements.txt
 pip install -e .
 ```
 
@@ -25,11 +24,29 @@ import qubovert
 
 # get info
 help(qubovert)
+
+# see all the problems specified
+print(qubovert.__all__)
+# or equivalently
+print(qubovert.problems.__all__)
+
+# see the utilities defined
 help(qubovert.utils)
+print(qubovert.utils.__all__)
+
+# to see specifically the np problems:
+help(qubovert.problems.np)
+print(qubovert.problems.np.__all__)
+
+# to see specifically the benchmarking problems:
+help(qubovert.problems.benchmarking)
+print(qubovert.problems.benchmarking.__all__)
+
+# etc ...
 ```
 
 
-See the following Set Cover example.
+See the following Set Cover example. All other problems can be used in a similar way.
 
 ```python
 from qubovert import SetCover
@@ -76,6 +93,16 @@ print(solution) # will print {0, 2}
 print(problem.is_solution_valid(solution)) # will print True, since V[0] + V[2] covers all of U
 print(obj == len(solution)) # will print True
 ```
+
+
+To see problem specifics, run 
+```python
+help(qubovert.SetCover)
+help(qubovert.VertexCover)
+# etc
+```
+
+I have very descriptive doc strings that should explain everything you need to know to use each problem class.
 
 
 # Technical details on the conversions

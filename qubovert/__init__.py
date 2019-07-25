@@ -15,6 +15,6 @@ from .problems import *
 
 from .problems import __all__ as __all_problems__
 
-# if someone does `from qubovert import *`, import all of the problem, but
+# if someone does `from qubovert import *`, import all of the problems, but
 # not utils.
 __all__ = __all_problems__

@@ -2,7 +2,7 @@ from qubovert import VertexCover
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
     
 
-edges = {("a", "b"), ("a", "c"), ("c", "d"), ("a", "d")}
+edges = {("a", "b"), ("a", "c"), ("c", "d"), ("a", "d"), ("c", "e")}
 problem = VertexCover(edges)
 
 
