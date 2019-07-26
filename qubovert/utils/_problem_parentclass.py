@@ -18,7 +18,7 @@ the problem classes.
 """
 
 from qubovert import __name__ as MODULE_NAME
-from ._conversions import qubo_to_ising, ising_to_qubo
+from . import qubo_to_ising, ising_to_qubo
 
 
 class Problem:
@@ -139,7 +139,8 @@ class Problem:
 
         Parameters
         ----------
-        Defined in the child class.
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the QUBO.
 
         Returns
         -------
@@ -165,7 +166,8 @@ class Problem:
 
         Parameters
         ----------
-        Defined in the child class.
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the Ising model.
 
         Returns
         ------

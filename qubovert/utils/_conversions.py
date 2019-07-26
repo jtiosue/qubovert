@@ -17,7 +17,7 @@ This file contains methods to convert to and from QUBO/Ising problems and
 variables.
 """
 
-from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
+from . import QUBOMatrix, IsingCoupling, IsingField
 
 
 def qubo_to_ising(Q, offset=0):

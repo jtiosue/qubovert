@@ -17,7 +17,7 @@ This file contains bruteforce solvers for QUBO and Ising, as well as QUBO and
 Ising objective function evaluators.
 """
 
-from ._conversions import binary_to_spin
+from . import binary_to_spin
 
 
 def qubo_value(x, Q, offset=0):
