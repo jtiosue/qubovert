@@ -25,4 +25,4 @@ __all__ = (
     "NumberPartitioning",
 )
 
-__str__ = "partitioning"
+name = "partitioning"

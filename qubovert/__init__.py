@@ -31,4 +31,4 @@ from .problems import __all__ as __all_problems__
 # not utils.
 __all__ = __all_problems__
 
-name = __str__ = "qubovert"
+name = "qubovert"

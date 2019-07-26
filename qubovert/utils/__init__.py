@@ -42,4 +42,4 @@ __all__ = (
 )
 
 
-__str__ = "utils"
+name = "utils"

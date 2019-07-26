@@ -22,4 +22,4 @@ value for all the problems imported.
 __all__ = ()
 
 
-__str__ = "benchmarking"
+name = "benchmarking"

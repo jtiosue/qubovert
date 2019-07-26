@@ -21,4 +21,4 @@ linear programming probems. The conversions are based on
 
 __all__ = ()
 
-__str__ = "bilp"
+name = "bilp"

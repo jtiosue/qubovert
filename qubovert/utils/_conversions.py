@@ -25,22 +25,35 @@ def qubo_to_ising(Q, offset=0):
     Convert the specified QUBO problem into an Ising problem. Note that
     QUBO {0, 1} values go to Ising {-1, 1} values in that order!
 
-    Q: dictionary mapping binary variables indices to the Q value. Q can also
-        be a qubovert.utils.QUBOMatrix object.
-    offset: an optional float, the part of the objective function that does
-        not depend on the variables.
+    Parameters
+    ----------
+    Q : dictionary or qubovert.utils.QUBOMatrix object.
+        Maps tuples of binary variables indices to the Q value.
+    offset : float (optional, defaults to 0).
+             The part of the objective function that does not depend on the
+             variables.
 
-    returns the tuple (h, J, offset).
-        h represents the field of each spin in the Ising formulation.
+    Returns
+    ------
+    result : tuple (h, J, offset).
+        h : qubovert.utils.IsingField object.
+            The field of each spin in the Ising formulation.
             h is a IsingField object. For most practical purposes, you can
             use IsingField in he same way as an ordinary dictionary. For
-            more information, see help(QUBOConver.utils.IsingField).
-        J is the upper triangular coupling matrix, a IsingCoupling object.
+            more information, see ``help(qubovert.utils.IsingField)``.
+        J : qubovert.utils.IsingCoupling object.
+            The upper triangular coupling matrix, an IsingCoupling object.
             For most practical purposes, you can use IsingCoupling in the
             same way as an ordinary dictionary. For more information,
-            see help(qubovert.utils.IsingCoupling).
-        offset is a float. It is the sum of the terms in the formulation in
+            see ``help(qubovert.utils.IsingCoupling)``.
+        offset : float.
+            It is the sum of the terms in the formulation in
             the cited paper that don't involve any variables.
+
+    Example
+    -------
+    >>> Q = {(0, 0): 1, (0, 1): -1, (1, 1): 3}
+    >>> h, J, offset = qubo_to_ising(Q)
     """
     # IsingCoupling deals with keeping J upper triangular, so we don't have to
     # worry about it!
@@ -64,21 +77,35 @@ def ising_to_qubo(h, J, offset=0):
     Convert the specified Ising problem into an upper triangular QUBO problem.
     Note that Ising {-1, 1} values go to QUBO {0, 1} values in that order!
 
-    h: dictionary mapping spins indices to the field value. h can also be a
-        qubovert.utils.IsingField object.
-    J: dictionary mapping tuples of spin indices to the coupling value. Note
+    Parameters
+    ----------
+    h : dictionary or qubovert.utils.IsingField object.
+        Maps spin indices to the field value.
+    J : dictionary or qubovert.utils.IsingCoupling object.
+        Maps tuples of spin indices to the coupling value. Note
         that J cannot have a key that has a repeated index, ie (1, 1) is an
-        invalid key. J can also be a qubovert.utils.IsingCoupling object.
-    offset: an optional float, the part of the objective function that does
-        not depend on the variables.
+        invalid key.
+    offset : float (optional, defaults to 0).
+        The part of the objective function that does not depend on the
+        variables.
 
-    returns the tuple (Q, offset).
-        Q is the upper triangular QUBO matrix, a QUBOMatrix object.
+    Returns
+    -------
+    result : tuple (Q, offset).
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
             same way as an ordinary dictionary. For more information,
-            see help(qubovert.utils.QUBOMatrix).
-        offset is a float. It is the sum of the terms in the formulation in
-            the cited paper that don't involve any variables.
+            see ``help(qubovert.utils.QUBOMatrix)``.
+        offset : float.
+            The sum of the terms in the formulation that don't involve any
+            variables.
+
+    Example
+    -------
+    >>> h = {0: 1, 1: -1}
+    >>> J = {(0, 1): -1}
+    >>> Q, offset = ising_to_qubo(h, J)
     """
     # QUBOMarix deals with keeping ! upper triangular, so we don't have to
     # worry about it!
@@ -103,36 +130,56 @@ def ising_to_qubo(h, J, offset=0):
 def binary_to_spin(x):
     """
     Convert a binary number in {0, 1} to a spin in {-1, 1}, in that order.
-    For example,
-        >>> print(binary_to_spin(0))  # will print -1
-        >>> print(binary_to_spin(1))  # will print 1
-        >>> print(binary_to_spin([0, 1, 1]))  # will print [-1, 1, 1]
 
-    x: integer or iterable of integers, where each integer is either 0 or 1.
+    Parameters
+    ----------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
 
-    returns: integer or iterable of integers, where each integer is either -1
-        or 1.
+    Returns
+    -------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either -1 or 1.
+
+    Example
+    -------
+    >>> binary_to_spin(0)  # will print -1
+    >>> binary_to_spin(1)  # will print 1
+    >>> binary_to_spin([0, 1, 1])  # will print [-1, 1, 1]
+    >>> binary_to_spin({"a": 0, "b": 1})  # will print {"a": -1, "b": 1}
     """
     convert = {0: -1, 1: 1}
     if isinstance(x, (int, float)) and x in convert:
         return convert[x]
+    elif isinstance(x, dict):
+        return {k: convert[v] for k, v in x.items()}
     return type(x)(convert[i] for i in x)
 
 
 def spin_to_binary(z):
     """
-    Convert a spin in {-1, 1} to a binary number in {-1, 1}, in that order.
-    For example,
-        >>> print(spin_to_binary(-1))  # will print 0
-        >>> print(spin_to_binary(1))  # will print 1
-        >>> print(spin_to_binary([-, 1, 1]))  # will print [0, 1, 1]
+    Convert a spin in {-1, 1} to a binary variable in {0, 1}, in that order.
 
-    z: integer or iterable of integers, where each integer is either -1 or 1.
+    Parameters
+    ----------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either -1 or 1.
 
-    returns: integer or iterable of integers, where each integer is either 0 or
-        1.
+    Returns
+    -------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
+
+    Example
+    -------
+    >>> spin_to_binary(-1)  # will print 0
+    >>> spin_to_binary(1)  # will print 1
+    >>> spin_to_binary([-1, 1, 1])  # will print [0, 1, 1]
+    >>> spin_to_binary({"a": -1, "b": 1})  # will print {"a": 0, "b": 1}
     """
     convert = {-1: 0, 1: 1}
     if isinstance(z, (int, float)) and z in convert:
         return convert[z]
+    elif isinstance(z, dict):
+        return {k: convert[v] for k, v in z.items()}
     return type(z)(convert[i] for i in z)

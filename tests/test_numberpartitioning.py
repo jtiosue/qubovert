@@ -59,13 +59,13 @@ def test_numberpartitioning_qubo_numvars():
     Q, _ = problem_withsoln.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem_withsoln.num_binary_variables()
+        problem_withsoln.num_binary_variables
     )
 
     Q, offset = problem_withoutsoln.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem_withoutsoln.num_binary_variables()
+        problem_withoutsoln.num_binary_variables
     )
 
 # ising
@@ -95,11 +95,11 @@ def test_numberpartitioning_ising_numvars():
     h, J, _ = problem_withsoln.to_ising()
     assert (
         len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem_withsoln.num_binary_variables()
+        problem_withsoln.num_binary_variables
     )
 
     h, J, _ = problem_withoutsoln.to_ising()
     assert (
         len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem_withoutsoln.num_binary_variables()
+        problem_withoutsoln.num_binary_variables
     )

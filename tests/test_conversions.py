@@ -16,7 +16,27 @@
 Contains tests for the QUBO to Ising and Ising to QUBO functions.
 """
 
-from qubovert.utils import qubo_to_ising, ising_to_qubo
+from qubovert.utils import (
+    qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary
+)
+
+
+def test_binary_to_spin():
+
+    assert binary_to_spin(0) == -1
+    assert binary_to_spin(1) == 1
+    assert binary_to_spin((0, 1)) == (-1, 1)
+    assert binary_to_spin([0, 1]) == [-1, 1]
+    assert binary_to_spin({"a": 0, "b": 1}) == {"a": -1, "b": 1}
+
+
+def test_spin_to_binary():
+
+    assert spin_to_binary(-1) == 0
+    assert spin_to_binary(1) == 1
+    assert spin_to_binary((-1, 1)) == (0, 1)
+    assert spin_to_binary([-1, 1]) == [0, 1]
+    assert spin_to_binary({"a": -1, "b": 1}) == {"a": 0, "b": 1}
 
 
 def test_qubo_to_ising_to_qubo():

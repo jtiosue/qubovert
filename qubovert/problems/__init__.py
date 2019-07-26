@@ -28,4 +28,4 @@ __all__ = (
     __all_np__ + __all_benchmarking__
 )
 
-__str__ = "problems"
+name = "problems"

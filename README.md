@@ -6,7 +6,7 @@
 
 So far we have just implemented some of the formulations from [Lucas]. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
 
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run `python -m pytest` and `python -m pytest --codestyle` before committing anything (yes, even the `tests` need to pass codestyle checks) to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the `qubovert.utils.Problem` class!
+To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run `python -m pytest` and `python -m pytest --codestyle` before committing anything (yes, even the `tests` need to pass codestyle checks) to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the `qubovert.utils.Problem` class! Make sure all your docstrings follow the Numpydoc standard format.
 
 
 Use Python's `help` function! I have very descriptive doc strings on all the functions and classes. To install from source:

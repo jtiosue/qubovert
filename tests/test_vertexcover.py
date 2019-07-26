@@ -47,7 +47,7 @@ def test_vertexcover_qubo_numvars():
     Q, offset = problem.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem.num_binary_variables()
+        problem.num_binary_variables
     )
 
 
@@ -69,5 +69,5 @@ def test_vertexcover_ising_numvars():
     h, J, _ = problem.to_ising()
     assert (
         len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem.num_binary_variables()
+        problem.num_binary_variables
     )

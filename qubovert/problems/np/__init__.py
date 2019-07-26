@@ -39,4 +39,4 @@ __all__ = (
     __all_packing__ + __all_partitioning__ + __all_tree__
 )
 
-__str__ = "np"
+name = "np"

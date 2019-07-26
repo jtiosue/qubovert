@@ -21,4 +21,4 @@ The conversions are based on
 
 __all__ = ()
 
-__str__ = "coloring"
+name = "coloring"

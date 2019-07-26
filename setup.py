@@ -18,7 +18,7 @@ by source.
 """
 
 import setuptools
-from qubovert import __version__
+from qubovert import __version__, __name__
 
 
 with open('README.md') as f:
@@ -32,11 +32,11 @@ with open("requirements.txt") as f:
 
 
 setuptools.setup(
-    name="qubovert",
+    name=__name__,
     version=__version__,
-    author="Joseph Iosue",
+    author="Joseph T. Iosue",
     author_email="joe.iosue@yahoo.com",
-    description="A package for converting common problems to QUBO form",
+    description="A package for converting common problems to QUBO/Ising form",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/jiosue/qubovert",
@@ -46,7 +46,7 @@ setuptools.setup(
     install_requires=REQUIREMENTS,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
 )

@@ -27,4 +27,4 @@ __all__ = (
     "VertexCover",
 )
 
-__str__ = "covering"
+name = "covering"

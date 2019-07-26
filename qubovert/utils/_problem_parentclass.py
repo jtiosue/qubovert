@@ -17,7 +17,7 @@ This file contains the class Problem, which is the parent class to all
 the problem classes.
 """
 
-from qubovert import __str__ as MODULE_NAME
+from qubovert import __name__ as MODULE_NAME
 from ._conversions import qubo_to_ising, ising_to_qubo
 
 
@@ -25,16 +25,17 @@ class Problem:
 
     """
     This acts a parent class to all the QUBO and Ising conversion problem
-    classes. The __new__ method keeps track of the problem args. The repr
-    method uses those input args, such that eval(repr(cls)) == cls. Finally, we
-    define a __eq__ method to determine if two problems are the same. The rest
-    of the methods are to be implemented in child classes.
+    classes. The ``__new__`` method keeps track of the problem args. The
+    ``repr`` method uses those input args, such that
+    ``eval(repr(cls)) == cls``. Finally, we define a ``__eq__`` method to
+    determine if two problems are the same. The rest of the methods are to be
+    implemented in child classes.
 
-    Additionally, his class defines the to_qubo and to_ising methods. to_qubo
-    calls to_ising and then converts from ising to qubo. to_ising calls
-    to_qubo and then converts from qubo to ising. Thus, the child classes
-    MUST define either to_qubo or to_ising. In this way, by only defining
-    one of those, both are implemented.
+    Additionally, his class defines the ``to_qubo`` and ``to_ising`` methods.
+    ``to_qubo`` calls ``to_ising`` and then converts from ising to qubo.
+    ``to_ising`` calls ``to_qubo`` and then converts from qubo to ising. Thus,
+    the child classes MUST define either ``to_qubo`` or ``to_ising``. In this
+    way, by only defining one of those, both are implemented.
     """
 
     def __new__(cls, *args, **kwargs):
@@ -46,18 +47,45 @@ class Problem:
         implementations don't have to worry about it. Ie child classes
         don't have to call `super().__init__(*args, **kwargs)` in their
         __init__ method.
+
+        Parameters
+        ---------
+        Defined in child classes.
+
+        Returns
+        -------
+        obj : instance of the child class.
         """
         # obj = object.__new__(cls)
         obj = super().__new__(cls)
         obj._problem_args, obj._problem_kwargs = args, kwargs.copy()
         return obj
 
+    @property
+    def num_binary_variables(self):
+        """
+        The number of binary variables that the QUBO/Ising uses. Should be
+        implemented in the child class.
+
+        Returns
+        -------
+        num : int.
+            The number of variables in the QUBO/Ising formulation.
+        """
+        raise NotImplementedError("Method to be implemented in child classes")
+
     def __repr__(self):
         """
         Defined such that the following is true (assuming you have imported
         qubovert as qubovert).
-            >>> s = Class_derivedfrom_Problem(*args)
-            >>> eval(repr(s)) == s
+
+        >>> s = Class_derivedfrom_Problem(*args)
+        >>> eval(repr(s)) == s
+        True
+
+        Returns
+        -------
+        s : str.
         """
         return MODULE_NAME + "." + str(self)
 
@@ -65,8 +93,14 @@ class Problem:
         """
         Defined such that the following is true (assuming you have imported
         * from qubovert).
-            >>> s = Class_derivedfrom_Problem(*args)
-            >>> eval(str(s)) == s
+
+        >>> s = Class_derived_from_Problem(*args)
+        >>> eval(str(s)) == s
+        True
+
+        Returns
+        -------
+        s : str.
         """
         s = self.__class__.__name__ + "("
         for a in self._problem_args:
@@ -79,11 +113,16 @@ class Problem:
 
     def __eq__(self, other):
         """
-        Find if self and other define the same problem.
+        Determine if ``self`` and ``other`` define the same problem.
 
-        other: must be a class derived from Problem.
+        Parameters
+        ----------
+        other : an object derived from the ``Problem`` class.
 
-        returns a boolean.
+        Returns
+        -------
+        eq : boolean.
+            If ``self`` and ``other`` represent the same problem.
         """
         return (
             isinstance(other, type(self)) and
@@ -98,13 +137,21 @@ class Problem:
         implemented in the child class, then it simply calls to_ising and
         converts the ising formulation to a QUBO formulation.
 
-        returns the tuple (Q, offset).
-            Q is the upper triangular QUBO matrix, a QUBOMatrix object.
+        Parameters
+        ----------
+        Defined in the child class.
+
+        Returns
+        -------
+        result : tuple (Q, offset).
+            Q : qubovert.utils.QUBOMatrix object.
+                The upper triangular QUBO matrix, a QUBOMatrix object.
                 For most practical purposes, you can use QUBOMatrix in the
                 same way as an ordinary dictionary. For more information,
-                see help(qubovert.utils.QUBOMatrix).
-            offset is a float. It is the sum of the terms in the formulation in
-                the cited paper that don't involve any variables.
+                see ``help(qubovert.utils.QUBOMatrix)``.
+            offset : float.
+                The sum of the terms in the formulation that don't involve any
+                variables.
         """
         return ising_to_qubo(*self.to_ising(*args, **kwargs))
 
@@ -116,16 +163,25 @@ class Problem:
         implemented in the child class, then it simply calls to_qubo and
         converts the QUBO formulation to an Ising formulation.
 
-        returns the tuple (h, J, offset).
-            h represents the field of each spin in the Ising formulation.
+        Parameters
+        ----------
+        Defined in the child class.
+
+        Returns
+        ------
+        result : tuple (h, J, offset).
+            h : qubovert.utils.IsingField object.
+                The field of each spin in the Ising formulation.
                 h is a IsingField object. For most practical purposes, you can
                 use IsingField in he same way as an ordinary dictionary. For
-                more information, see help(QUBOConver.utils.IsingField).
-            J is the upper triangular coupling matrix, a IsingCoupling object.
+                more information, see ``help(qubovert.utils.IsingField)``.
+            J : qubovert.utils.IsingCoupling object.
+                The upper triangular coupling matrix, an IsingCoupling object.
                 For most practical purposes, you can use IsingCoupling in the
                 same way as an ordinary dictionary. For more information,
-                see help(qubovert.utils.IsingCoupling).
-            offset is a float. It is the sum of the terms in the formulation in
+                see ``help(qubovert.utils.IsingCoupling)``.
+            offset : float.
+                It is the sum of the terms in the formulation in
                 the cited paper that don't involve any variables.
         """
         return qubo_to_ising(*self.to_qubo(*args, **kwargs))
@@ -137,13 +193,18 @@ class Problem:
         child class, then this function will by default return the same
         solution as what inputted.
 
-        solution is the QUBO or Ising solution output. The QUBO solution output
-            is either a list/tuple where indices specify the label of the
-            binary variable and the element specifies whether it's 0 or 1, or
-            it can be a dictionary that maps the label of the binary variable
-            to whether it is a 0 or 1. The Ising solution output is the same,
-            but with -1 corresponding to the QUBO 0, and 1 corresponding to the
-            QUBO 1.
+        Parameters
+        ----------
+        solution : iterable or dict.
+            The QUBO or Ising solution output. The QUBO solution output
+            is either a list or tuple where indices specify the label of the
+            variable and the element specifies whether it's 0 or 1 for QUBO
+            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            label of the variable to is value.
+
+        Returns
+        -------
+        Implemented in the child class.
         """
         return solution
 
@@ -153,24 +214,19 @@ class Problem:
         implemented in child classes. If it is not implemented in the child
         class, then this function will by default return True.
 
-        solution can either be the output of convert_solution or it
-            can be the actual QUBO or Ising solution output. The QUBO solution
-            output is either a list where indices specify the label of the
-            binary variable and the element specifies whether it's 0 or 1, or
-            it can be a dictionary that maps the label of the binary variable
-            to whether it is a 0 or 1. The Ising solution output is the same,
-            but with -1 corresponding to the QUBO 0, and 1 corresponding to the
-            QUBO 1.
+        Parameters
+        ----------
+        solution : iterable or dict.
+            solution can be the output of NumberPartitioning.convert_solution,
+            or the  QUBO or Ising solver output. The QUBO solution output
+            is either a list or tuple where indices specify the label of the
+            variable and the element specifies whether it's 0 or 1 for QUBO
+            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            label of the variable to is value.
 
-        returns a boolean, True if the proposed solution is valid, else False.
+        Returns
+        -------
+        valid : boolean.
+            True if the proposed solution is valid, else False.
         """
         return True
-
-    def num_binary_variables(self, *args, **kwargs):
-        """
-        Find the number of binary variables that the QUBO uses. Should be
-        implemented in the child class.
-
-        returns an integer, the number of variables in the QUBO formulation.
-        """
-        raise NotImplementedError("Method to be implemented in child classes")
