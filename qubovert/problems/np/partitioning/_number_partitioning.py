@@ -192,7 +192,7 @@ class NumberPartitioning(Problem):
         >>> Q, offset = problem.to_qubo()
         >>> value, solution = solve_qubo(Q, offset)
         >>> print(solution)
-        [-1, 1, 1, -1]
+        [0, 1, 1, 0]
         # ie 1 and 4 are in one partition, and 2 and 3 are in the other
 
         >>> print(problem.convert_solution(solution))

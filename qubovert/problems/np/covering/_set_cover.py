@@ -16,20 +16,23 @@
 Contains the SetCover class. See `help(qubovert.SetCover)`.
 """
 
-from numpy import log2
+from numpy import log2, allclose
 from qubovert.utils import Problem, QUBOMatrix
 
 
 class SetCover(Problem):
 
     """
-    Class to manage converting Set Cover to and from its QUBO and
+    Class to manage converting (Weighted) Set Cover to and from its QUBO and
     Ising formluations. Based on the paper hereforth designated [Lucas]:
     [Andrew Lucas. Ising formulations of many np problems. Frontiers in
     Physics, 2:5, 2014.]
 
     The goal of the SetCover problem is to find the smallest number of subsets
-    of U in V such that union over the elements equals U.
+    of U in V such that union over the elements equals U. The goal of the
+    Weghted SetCover problem is to find the smallest weight of subsets of U
+    in V such that union over the elements equals U, where each element in V
+    has an associated weight.
 
     This class inherits some methods and attributes from the
     ``qubovert.utils.Problem`` class
@@ -56,11 +59,14 @@ class SetCover(Problem):
     True
     """
 
-    def __init__(self, U, V, log_trick=True, M=None):
+    def __init__(self, U, V, weights=None, log_trick=True, M=None):
         """
         The goal of the SetCover problem is to find the smallest number of
-        elements in V such that union over the elements equals U. All naming
-        conventions follow the names in the paper [Lucas].
+        elements in V such that the union over the elements equals U. Weighted
+        Set Cover is the task of finding the smallest weight of elements in V
+        such that the union over the elements equals U, where each element in V
+        has an associated weight. All naming conventions follow the names in
+        the paper [Lucas].
 
         Parameters
         ----------
@@ -68,6 +74,12 @@ class SetCover(Problem):
             The set of all elements to cover.
         V : iterable of sets.
             Each set is one of the subsets.
+        weights : iterable of numbers (optional, defaults to None).
+            Important: weights must be normalized such that
+            `max(weights) == 1`; similarly, `len(weights) == len(V)`. These are
+            the weights for the weighted Set Cover problem. If `weights` is
+            left to `None`, then the problem will default to the unweighted Set
+            Cover problem (ie all the weights equal to 1).
         log_trick : boolean (optional, defaults to True).
             Indicates whether or not to use the log trick discussed in [Lucas].
         M : int (optional, defaults to None). We recommend not adjusting this.
@@ -81,6 +93,16 @@ class SetCover(Problem):
         self._U = U.copy()
         self._V = type(V)(x.copy() for x in V)
         self._N, self._n = len(self.V), len(self.U)
+
+        if weights is None:
+            self._weights = type(V)(1 for _ in V)
+        else:
+            if len(weights) != len(V):
+                raise ValueError("`weights` must be the same length as `V`")
+            elif not allclose(max(weights), 1):
+                raise ValueError("`weights` must be normalized such that "
+                                 "`max(weights) == 1`")
+            self._weights = type(weights)(weights)  # copy weights
 
         if M is not None:
             self._M = M
@@ -122,6 +144,18 @@ class SetCover(Problem):
         return type(self._V)(x.copy() for x in self._V)
 
     @property
+    def weights(self):
+        """
+        A copy of the weights list/tuple. Updating the copy will not update the
+        instance weights.
+
+        Returns
+        -------
+        weights : iterable of numbers, where `max(weights) == 1`.
+        """
+        return type(self._weights)(self._weights)
+
+    @property
     def M(self):
         """
         A copy of the value for the M variable. See [Lucas].
@@ -157,6 +191,32 @@ class SetCover(Problem):
         if self._log_trick:
             return self._N + self._n*(self._log_M+1)
         return self._N + self._n*self._M
+
+    def is_coverable(self):
+        """
+        Returns whether or not there exists a valid solution. Ie if there
+        exists a combination of subsets in V that cover U.
+
+        Returns
+        -------
+        coverable : bool.
+            True if it is possible to construct a valid solution from V and U,
+            False otherwise.
+
+        Examples
+        --------
+        >>> U = {0, 1, 2}
+        >>> V = [{0}, {0, 1}]
+        >>> SetCover(U, V).is_coverable()
+        False
+
+        >>> U = {0, 1, 2}
+        >>> V = [{0, 2}, {0, 1}]
+        >>> SetCover(U, V).is_coverable()
+        True
+        """
+        # assuming every subset is chosen, does this cover U?
+        return self.is_solution_valid([1]*self._N)
 
     def _filtered_range(self, alpha, start=0):
         """
@@ -222,7 +282,9 @@ class SetCover(Problem):
                 The sum of the terms in the formulation that don't involve any
                 variables. It is formatted such that if all the constraints are
                 satisfied, then sum_{i <= j} x[i] x[j] Q[(i, j)] + offset will
-                be equal to the total number of sets in the cover.
+                be equal to the total number of sets in the cover (or for the
+                weighted Set Cover problem, it will equal the total weight
+                of included sets in the cover).
         """
         # all naming conventions follow the paper listed in the docstring
 
@@ -232,7 +294,7 @@ class SetCover(Problem):
 
         # encode H_B (equation 46)
         for i in range(self._N):
-            Q[(i, i)] += B
+            Q[(i, i)] += self._weights[i] * B
 
         # encode H_A
 

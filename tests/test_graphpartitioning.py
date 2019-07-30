@@ -13,39 +13,44 @@
 #   limitations under the License.
 
 """
-Contains tests for the VertexCover class.
+Contains tests for the GraphPartitioning class.
 """
 
-from qubovert import VertexCover
+from qubovert import GraphPartitioning
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 
 
-edges = {("a", "b"), ("a", "c"), ("c", "d"), ("a", "d"), ("c", "e")}
-problem = VertexCover(edges)
+edges = {("a", "b"), ("a", "c"), ("c", "d"),
+         ("b", "c"), ("e", "f"), ("d", "e")}
+problem = GraphPartitioning(edges)
+solutions = (
+    ({"a", "b", "c"}, {"d", "e", "f"}),
+    ({"d", "e", "f"}, {"a", "b", "c"})
+)
 
 
-def test_vertexcover_str():
+def test_graphpartitioning_str():
 
     assert eval(str(problem)) == problem
 
 
 # QUBO
 
-def test_vertexcover_qubo_solve():
+def test_graphpartitioning_qubo_solve():
 
     Q, offset = problem.to_qubo()
     e, sol = solve_qubo_bruteforce(Q, offset)
     solution = problem.convert_solution(sol)
 
-    assert solution == {"a", "c"}
+    assert solution in solutions
     assert problem.is_solution_valid(solution)
-    assert allclose(e, 2)
+    assert allclose(e, 1)
 
 
-def test_vertexcover_qubo_numvars():
+def test_graphpartitioning_qubo_numvars():
 
-    Q, offset = problem.to_qubo()
+    Q, _ = problem.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
         problem.num_binary_variables
@@ -54,18 +59,18 @@ def test_vertexcover_qubo_numvars():
 
 # ising
 
-def test_vertexcover_ising_solve():
+def test_graphpartitioning_ising_solve():
 
     h, J, offset = problem.to_ising()
     e, sol = solve_ising_bruteforce(h, J, offset)
     solution = problem.convert_solution(sol)
 
-    assert solution == {"a", "c"}
+    assert solution in solutions
     assert problem.is_solution_valid(solution)
-    assert allclose(e, 2)
+    assert allclose(e, 1)
 
 
-def test_vertexcover_ising_numvars():
+def test_graphpartitioning_ising_numvars():
 
     h, J, _ = problem.to_ising()
     assert (

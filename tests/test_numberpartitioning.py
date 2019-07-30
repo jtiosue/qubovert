@@ -18,6 +18,7 @@ Contains tests for the NumberPartitioning class.
 
 from qubovert import NumberPartitioning
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from numpy import allclose
 
 
 S_withsoln = 1, 2, 3, 4
@@ -43,7 +44,7 @@ def test_numberpartitioning_qubo_solve():
 
     assert solution == ((1, 4), (2, 3)) or solution == ((2, 3), (1, 4))
     assert problem_withsoln.is_solution_valid(solution)
-    assert e == 0
+    assert allclose(e, 0)
 
     Q, offset = problem_withoutsoln.to_qubo()
     e, sol = solve_qubo_bruteforce(Q, offset)
@@ -79,7 +80,7 @@ def test_numberpartitioning_ising_solve():
 
     assert solution == ((1, 4), (2, 3)) or solution == ((2, 3), (1, 4))
     assert problem_withsoln.is_solution_valid(solution)
-    assert e == 0
+    assert allclose(e, 0)
 
     h, J, offset = problem_withoutsoln.to_ising()
     e, sol = solve_ising_bruteforce(h, J, offset)

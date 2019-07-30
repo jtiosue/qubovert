@@ -18,18 +18,27 @@ Contains tests for the SetCover class.
 
 from qubovert import SetCover
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from numpy import allclose
 
 
 U = {"a", "b", "c", "d"}
 V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
 problem_log = SetCover(U, V)
-problem = SetCover(U, V, False)
+problem = SetCover(U, V, log_trick=False)
+problem_weighted = SetCover(U, V, weights=(.1, .2, 1))
 
 
 def test_setcover_str():
 
     assert eval(str(problem)) == problem
     assert eval(str(problem_log)) == problem_log
+    assert eval(str(problem_weighted)) == problem_weighted
+
+
+def test_coverable():
+
+    assert problem.is_coverable()
+    assert not SetCover(U, V[:-1]).is_coverable()
 
 
 # QUBO
@@ -41,7 +50,7 @@ def test_setcover_qubo_logtrick_solve():
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert solution == {0, 2}
-    assert e == len(solution)
+    assert allclose(e, len(solution))
 
 
 def test_setcover_qubo_solve():
@@ -51,7 +60,7 @@ def test_setcover_qubo_solve():
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert solution == {0, 2}
-    assert e == len(solution)
+    assert allclose(e, len(solution))
 
 
 def test_setcover_qubo_logtrick_numvars():
@@ -74,6 +83,16 @@ def test_setcover_qubo_numvars():
     )
 
 
+def test_weighted_setcover():
+
+    Q, offset = problem_weighted.to_qubo()
+    e, sol = solve_qubo_bruteforce(Q, offset)
+    solution = problem_weighted.convert_solution(sol)
+    assert problem_weighted.is_solution_valid(solution)
+    assert solution == {0, 2}
+    assert allclose(e, 1.1)
+
+
 # ising
 
 def test_setcover_ising_logtrick_solve():
@@ -83,7 +102,7 @@ def test_setcover_ising_logtrick_solve():
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert solution == {0, 2}
-    assert e == len(solution)
+    assert allclose(e, len(solution))
 
 
 def test_setcover_ising_solve():
@@ -93,7 +112,7 @@ def test_setcover_ising_solve():
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert solution == {0, 2}
-    assert e == len(solution)
+    assert allclose(e, len(solution))
 
 
 def test_setcover_ising_logtrick_numvars():

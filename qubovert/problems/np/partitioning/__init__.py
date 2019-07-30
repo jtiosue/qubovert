@@ -20,9 +20,11 @@ The conversions are based on
 """
 
 from ._number_partitioning import NumberPartitioning
+from ._graph_partitioning import GraphPartitioning
 
 __all__ = (
     "NumberPartitioning",
+    "GraphPartitioning",
 )
 
 name = "partitioning"
