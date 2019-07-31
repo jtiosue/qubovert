@@ -213,7 +213,7 @@ class VertexCover(Problem):
         Parameters
         ----------
         solution : iterable or dict.
-            solution can be the output of NumberPartitioning.convert_solution,
+            solution can be the output of VertexCover.convert_solution,
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO

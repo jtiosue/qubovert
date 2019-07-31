@@ -18,8 +18,11 @@ into categories. But we import them globally for user use. See the `__all__`
 value for all the problems imported.
 """
 
+from ._alternating_sector_chain import AlternatingSectorChain
 
-__all__ = ()
+__all__ = (
+    "AlternatingSectorChain",
+)
 
 
 name = "benchmarking"
