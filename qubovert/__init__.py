@@ -17,8 +17,8 @@
 QUBO stands for Quadratic Unconstrained Binary Optimization. QUBO problems
 have a one-to-one mapping to classical Ising problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
-See `qubovert.__all__` for all the problems defined, and
-`qubovert.utils.__all__` for some utilities used.
+See ``qubovert.__all__`` for all the problems defined, and
+``qubovert.utils.__all__`` for some utilities used.
 """
 
 from ._version import __version__

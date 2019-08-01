@@ -2,3 +2,4 @@ numpy
 pydocstyle
 pytest
 pytest-codestyle
+sphinx

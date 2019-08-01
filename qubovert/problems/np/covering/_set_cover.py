@@ -35,7 +35,7 @@ class SetCover(Problem):
     has an associated weight.
 
     This class inherits some methods and attributes from the
-    ``qubovert.utils.Problem`` class
+    ``qubovert.utils.Problem`` class.
 
     Example
     -------

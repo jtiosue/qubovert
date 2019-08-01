@@ -25,7 +25,7 @@ class VertexCover(Problem):
     """VertexCover.
 
     Class to manage converting Vertex Cover to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas].
+    Ising formluations. Based on the paper hereforth designated [Lucas]_.
 
     The goal of the VertexCover problem is to find the smallest number of
     verticies that can be coloredsuch that every edge of the graph is
