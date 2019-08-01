@@ -21,7 +21,7 @@ import setuptools
 from qubovert import __version__, __name__
 
 
-with open('README.md') as f:
+with open('README.rst') as f:
     README = f.read()
 
 with open('LICENSE') as f:

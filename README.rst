@@ -113,7 +113,7 @@ I have very descriptive doc strings that should explain everything you need to k
 
 Technical details on the conversions
 ------------------------------------
-For the log trick he mentions, we usually need a constraint like :math:\\sum_{i} x_i \\geq 1`.
+For the log trick he mentions, we usually need a constraint like :math:`\\sum_{i} x_i \\geq 1`.
 
 In order to enforce this constraint, we add a penalty to the QUBO of the form :math:`1 - \\sum_i x_i + \\sum_{i < j} x_i x_j` (the idea comes from [Glover]_).
 
