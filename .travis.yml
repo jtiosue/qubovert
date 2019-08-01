@@ -10,6 +10,6 @@ install:
 
 script:
   - pydocstyle convention=numpy qubovert
-  - pytest --codestyle
+  - pytest --codestyle --ignore=docs
   # I think pytest --codestyle also runs all the tests, but just in case ...
   - pytest

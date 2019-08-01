@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""utils contains many utilities and helpers.
+"""``utils`` contains many utilities and helpers.
 
-See `__all__` for a list of the utilities.
+See ``__all__`` for a list of the utilities.
 
 """
 
@@ -30,7 +30,6 @@ from ._problem_parentclass import Problem
 
 
 __all__ = (
-    "Problem",
     "QUBOMatrix",
     "IsingCoupling",
     "IsingField",
@@ -42,6 +41,7 @@ __all__ = (
     "solve_ising_bruteforce",
     "qubo_value",
     "ising_value",
+    "Problem",
 )
 
 

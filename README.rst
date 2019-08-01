@@ -1,16 +1,20 @@
-.. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
-    :target: https://travis-ci.com/jiosue/QUBOVert
-
 ========
 QUBOVert
 ========
+.. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
+    :target: https://travis-ci.com/jiosue/QUBOVert
+    :alt: Travis-CI
+.. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
+    :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
 
 Convert common problems to QUBO form.
 -------------------------------------
 
 So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
 
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run ``python -m pytest``, ``python -m pytest --codestyle`` before committing anything (yes, even the `tests` need to pass codestyle checks), and ``python -m pydocstyle convention=numpy qubovert`` to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
+To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run ``python -m pytest``, ``python -m pytest --codestyle --ignore=docs`` before committing anything (yes, even the `tests` need to pass codestyle checks), and ``python -m pydocstyle convention=numpy qubovert`` to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
 
 
 Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. To install from source:
@@ -113,9 +117,7 @@ I have very descriptive doc strings that should explain everything you need to k
 
 Technical details on the conversions
 ------------------------------------
-For the log trick he mentions, we usually need a constraint like :math:`\\sum_{i} x_i \\geq 1`.
-
-In order to enforce this constraint, we add a penalty to the QUBO of the form :math:`1 - \\sum_i x_i + \\sum_{i < j} x_i x_j` (the idea comes from [Glover]_).
+For the log trick he mentions, we usually need a constraint like :math:`\sum_{i} x_i \geq 1`. In order to enforce this constraint, we add a penalty to the QUBO of the form :math:`1 - \sum_i x_i + \sum_{i < j} x_i x_j` (the idea comes from [Glover]_).
 
 
 
