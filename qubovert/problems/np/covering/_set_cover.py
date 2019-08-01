@@ -12,8 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Contains the SetCover class. See `help(qubovert.SetCover)`.
+"""_set_cover.py.
+
+Contains the SetCover class. See ``help(qubovert.SetCover)``.
+
 """
 
 from numpy import log2, allclose
@@ -21,12 +23,10 @@ from qubovert.utils import Problem, QUBOMatrix
 
 
 class SetCover(Problem):
+    """SetCover.
 
-    """
     Class to manage converting (Weighted) Set Cover to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas]:
-    [Andrew Lucas. Ising formulations of many np problems. Frontiers in
-    Physics, 2:5, 2014.]
+    Ising formluations. Based on the paper hereforth designated [Lucas].
 
     The goal of the SetCover problem is to find the smallest number of subsets
     of U in V such that union over the elements equals U. The goal of the
@@ -57,10 +57,17 @@ class SetCover(Problem):
     True  # since V[0] + V[2] covers all of U
     >>> print(obj == len(solution))
     True
+
+    References
+    ----------
+    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
+    in Physics, 2:5, 2014.
+
     """
 
     def __init__(self, U, V, weights=None, log_trick=True, M=None):
-        """
+        """__init__.
+
         The goal of the SetCover problem is to find the smallest number of
         elements in V such that the union over the elements equals U. Weighted
         Set Cover is the task of finding the smallest weight of elements in V
@@ -88,6 +95,7 @@ class SetCover(Problem):
             accuracy of the model. To possibly sacrifice accuracy but decrease
             the number of variables in the model, you can set M to something
             smaller.
+
         """
         self._log_trick = log_trick
         self._U = U.copy()
@@ -119,85 +127,98 @@ class SetCover(Problem):
 
     @property
     def U(self):
-        """
+        """U.
+
         A copy of the U set. Updating the copy will not update the
         instance U.
 
-        Returns
+        Return
         -------
         U : set.
             A copy of the set of all elements.
+
         """
         return self._U.copy()
 
     @property
     def V(self):
-        """
+        """V.
+
         A copy of the V list/tuple. Updating the copy will not update the
         instance V.
 
-        Returns
+        Return
         -------
         V : iterable of sets.
             A copy of the subsets.
+
         """
         return type(self._V)(x.copy() for x in self._V)
 
     @property
     def weights(self):
-        """
+        """weights.
+
         A copy of the weights list/tuple. Updating the copy will not update the
         instance weights.
 
-        Returns
+        Return
         -------
-        weights : iterable of numbers, where `max(weights) == 1`.
+        weights : iterable of numbers, where ``max(weights) == 1``.
+
         """
         return type(self._weights)(self._weights)
 
     @property
     def M(self):
-        """
+        """M.
+
         A copy of the value for the M variable. See [Lucas].
 
         Returns
         -------
         M : int.
+
         """
         return self._M
 
     @property
     def log_trick(self):
-        """
+        """log_trick.
+
         A copy of the value for log_trick, indicating whether or not to use
         the log trick. See [Lucas].
 
-        Returns
+        Return
         -------
         log_trick : bool.
+
         """
         return self._log_trick
 
     @property
     def num_binary_variables(self):
-        """
+        """num_binary_variables.
+
         The number of binary variables that the QUBO and Ising use.
 
-        Returns
+        Return
         -------
         num :  int.
             The number of variables in the QUBO/Ising formulation.
+
         """
         if self._log_trick:
             return self._N + self._n*(self._log_M+1)
         return self._N + self._n*self._M
 
     def is_coverable(self):
-        """
+        """is_coverable.
+
         Returns whether or not there exists a valid solution. Ie if there
         exists a combination of subsets in V that cover U.
 
-        Returns
+        Return
         -------
         coverable : bool.
             True if it is possible to construct a valid solution from V and U,
@@ -214,53 +235,59 @@ class SetCover(Problem):
         >>> V = [{0, 2}, {0, 1}]
         >>> SetCover(U, V).is_coverable()
         True
+
         """
         # assuming every subset is chosen, does this cover U?
         return self.is_solution_valid([1]*self._N)
 
     def _filtered_range(self, alpha, start=0):
-        """
+        """_filtered_range.
+
         Find each set in self.V[start:] that contains alpha.
 
         Parameters
         ----------
         alpha : element in self.U.
         start : int (optional, defaults to 0)
-            Must be less than len(self.V). Indicates at which subset to start
-            looking at,
+            Must be less than ``len(self.V)``. Indicates at which subset to
+            start looking at.
 
-        Returns
+        Return
         -------
         f : filter object.
             The indices of V corresponding to subsets that contain alpha.
+
         """
         return filter(lambda k: alpha in self._V[k], range(start, self._N))
 
     def _x(self, alpha, m):
-        """
+        r"""_x.
+
         Return a unique index for each of the ancilla variables.
 
         Parameters
         ----------
         alpha : element in self.U.
         m : int.
-            Index of the ancilla binary variables x_{alpha, m} (see the Set
-            Cover section in [Lucas]).
+            Index of the ancilla binary variables :math:`x_{\alpha, m}` (see
+            the Set Cover section in [Lucas]).
 
-        Returns
+        Return
         -------
         i : int.
             Unique index of the ancilla variable.
+
         """
         mm = m if self._log_trick else m-1
         return self._N + self._alpha_to_index[alpha] + self._n*mm
 
     def to_qubo(self, A=2, B=1):
-        """
+        r"""to_qubo.
+
         Create and return the set cover problem in QUBO form following section
         5.1 of [Lucas]. The Q matrix for the QUBO
         will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing sum_{i <= j} x[i] x[j] Q[(i, j)]. A and B are
+        becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. A and B are
         parameters to enforce constraints.
 
         Parameters
@@ -270,7 +297,7 @@ class SetCover(Problem):
         B: positive float that is less than A (optional, defaults to 1).
             See section 5.1 of [Lucas].
 
-        Returns
+        Return
         -------
         res : tuple (Q, offset).
             Q : qubovert.utils.QUBOMatrix object.
@@ -281,10 +308,11 @@ class SetCover(Problem):
             offset : float.
                 The sum of the terms in the formulation that don't involve any
                 variables. It is formatted such that if all the constraints are
-                satisfied, then sum_{i <= j} x[i] x[j] Q[(i, j)] + offset will
-                be equal to the total number of sets in the cover (or for the
-                weighted Set Cover problem, it will equal the total weight
+                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
+                will be equal to the total number of sets in the cover (or for
+                the weighted Set Cover problem, it will equal the total weight
                 of included sets in the cover).
+
         """
         # all naming conventions follow the paper listed in the docstring
 
@@ -350,7 +378,8 @@ class SetCover(Problem):
         return Q, offset
 
     def convert_solution(self, solution):
-        """
+        """convert_solution.
+
         Convert the solution to the QUBO or Ising to the solution to the Set
         Cover problem.
 
@@ -367,13 +396,15 @@ class SetCover(Problem):
         -------
         res : set.
             A set of which sets are included in the set cover. So if this
-            function returns {0, 2, 3}, then the set cover is the sets
-            V[0], V[2], and V[3].
+            function returns ``{0, 2, 3}``, then the set cover is the sets
+            ``V[0]``, ``V[2]``, and ``V[3]``.
+
         """
         return set(i for i in range(self._N) if solution[i] == 1)
 
     def is_solution_valid(self, solution):
-        """
+        """is_solution_valid.
+
         Returns whether or not the proposed solution covers all the elements in
         U.
 
@@ -387,10 +418,11 @@ class SetCover(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         valid : boolean.
             True if the proposed solution is valid, else False.
+
         """
         if not isinstance(solution, set):
             solution = self.convert_solution(solution)
