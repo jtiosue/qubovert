@@ -14,6 +14,9 @@ Indices and tables
 * :ref:`search`
 
 
+README
+======
+
 .. include:: ../README.rst
 
 
