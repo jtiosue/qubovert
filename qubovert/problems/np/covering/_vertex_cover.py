@@ -12,20 +12,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Contains the VertexCover class. See `help(qubovert.VertexCover)`.
+"""_vertex_cover.py.
+
+Contains the VertexCover class. See ``help(qubovert.VertexCover)``.
+
 """
 
 from qubovert.utils import Problem, QUBOMatrix
 
 
 class VertexCover(Problem):
+    """VertexCover.
 
-    """
     Class to manage converting Vertex Cover to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas]:
-    [Andrew Lucas. Ising formulations of many np problems. Frontiers in
-    Physics, 2:5, 2014.]
+    Ising formluations. Based on the paper hereforth designated [Lucas].
 
     The goal of the VertexCover problem is to find the smallest number of
     verticies that can be coloredsuch that every edge of the graph is
@@ -55,10 +55,17 @@ class VertexCover(Problem):
 
     >>> print(obj == len(solution))
     True
+
+    References
+    ----------
+    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
+    in Physics, 2:5, 2014.
+
     """
 
     def __init__(self, edges):
-        """
+        """__init__.
+
         The goal of the VertexCover problem is to find the smallest number of
         verticies that can be coloredsuch that every edge of the graph is
         incident to a colored vertex.  All naming conventions follow the names
@@ -76,6 +83,7 @@ class VertexCover(Problem):
 
         >>> edges = {(0, 1), (0, 2)}
         >>> problem = VertexCover(edges)
+
         """
         self._edges = edges.copy()
         self._vertices = {y for x in edges for y in x}
@@ -86,50 +94,57 @@ class VertexCover(Problem):
 
     @property
     def E(self):
-        """
+        """E.
+
         A copy of the set of edges of the graph. Updating the copy will not
         update the instance set.
 
-        Returns
+        Return
         -------
         E : set of two element tuples.
             A copy of the edge set defining the Vertex Cover problem.
+
         """
         return self._edges.copy()
 
     @property
     def V(self):
-        """
+        """V.
+
         A copy of the vertex set of the graph. Updating the copy will not
         update the instance set.
 
-        Returns
+        Return
         -------
         V : set.
             A copy of the set of vertices corresponding to the edge set for the
             Vertex Cover problem.
+
         """
         return self._vertices.copy()
 
     @property
     def num_binary_variables(self):
-        """
+        """num_binary_variables.
+
         The number of binary variables that the QUBO and Ising use.
 
-        Returns
+        Return
         -------
         num : integer.
             The number of variables in the QUBO/Ising formulation.
+
         """
         return self._N
 
     def to_qubo(self, A=2, B=1):
-        """
+        r"""to_qubo.
+
         Create and return the vertex cover problem in QUBO form following
         section 4.3 of [Lucas]. The Q matrix for the QUBO
         will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing sum_{i <= j} x[i] x[j] Q[(i, j)]. A and B are
-        parameters to enforce constraints.
+        becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. ``A`` and
+        ``B`` are parameters to enforce constraints.
 
         Parameters
         ----------
@@ -138,7 +153,7 @@ class VertexCover(Problem):
         B: positive float that is less than A (optional, defaults to 1).
             See section 4.3 of [Lucas].
 
-        Returns
+        Return
         -------
         res : tuple (Q, offset).
             Q : qubovert.utils.QUBOMatrix object.
@@ -149,13 +164,14 @@ class VertexCover(Problem):
             offset : float.
                 The sum of the terms in the formulation that don't involve any
                 variables. It is formatted such that if all the constraints are
-                satisfied, then sum_{i <= j} x[i] x[j] Q[(i, j)] + offset will
-                be equal to the total number of colored verticies.
+                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} _ offset`
+                will be equal to the total number of colored verticies.
 
         Example
         -------
         >>> problem = VertexCover({(0, 1), (0, 2)})
         >>> Q, offset = problem.to_qubo()
+
         """
         # all naming conventions follow the paper listed in the docstring
 
@@ -179,7 +195,8 @@ class VertexCover(Problem):
         return Q, offset
 
     def convert_solution(self, solution):
-        """
+        """convert_solution.
+
         Convert the solution to the QUBO or Ising to the solution to the Vertex
         Cover problem.
 
@@ -192,12 +209,13 @@ class VertexCover(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         res : set.
             A set of which verticies need to be colored. Thus, if this
             function returns {0, 2}, then this means that vertex 0 and 2
             should be colored.
+
         """
         if not isinstance(solution, dict):
             solution = dict(enumerate(solution))
@@ -206,7 +224,8 @@ class VertexCover(Problem):
         )
 
     def is_solution_valid(self, solution):
-        """
+        """is_solution_valid.
+
         Returns whether or not the proposed solution satisfies the constraint
         that every edge has at least one colored vertex.
 
@@ -220,10 +239,11 @@ class VertexCover(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         valid : boolean.
             True if the proposed solution is valid, else False.
+
         """
         if not isinstance(solution, set):
             solution = self.convert_solution(solution)

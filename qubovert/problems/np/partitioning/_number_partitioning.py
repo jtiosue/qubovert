@@ -12,20 +12,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Contains the NumberPartitioning class. See `help(qubovert.NumberPartitioning)`.
+"""_number_partitioning.py.
+
+Contains the NumberPartitioning class. See
+``help(qubovert.NumberPartitioning)``.
+
 """
 
 from qubovert.utils import Problem, IsingCoupling, IsingField
 
 
 class NumberPartitioning(Problem):
+    """NumberPartitioning.
 
-    """
     Class to manage converting the Number Partitioning problem to and from its
     QUBO and Ising formluations. Based on the paper hereforth designated as
-    [Lucas]: [Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.]
+    [Lucas].
 
     The goal of the NumberPartitioning problem is as follows (quoted from
     [Lucas]):
@@ -62,10 +64,17 @@ class NumberPartitioning(Problem):
 
     >>> print(obj == 0)
     True  # since the solution is valid.
+
+    References
+    ----------
+    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
+    in Physics, 2:5, 2014.
+
     """
 
     def __init__(self, S):
-        """
+        """__init__.
+
         The goal of the NumberPartitioning problem is as follows (quoted from
         [Lucas]):
 
@@ -88,6 +97,7 @@ class NumberPartitioning(Problem):
         Example
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
+
         """
         self._input_type = type(S)
         self._S = self._input_type(x for x in S)  # copy the input
@@ -95,43 +105,48 @@ class NumberPartitioning(Problem):
 
     @property
     def S(self):
-        """
+        """S.
+
         A copy of the S list. Updating the copy will not update the instance
         list.
 
-        Returns
+        Return
         -------
         S : tuple or list.
             A copy of the list of numbers defining the partitioning problem.
+
         """
         return self._input_type(x for x in self._S)
 
     @property
     def num_binary_variables(self):
-        """
+        """num_binary_variables.
+
         The number of binary variables that the QUBO and Ising use.
 
-        Returns
+        Return
         -------
         num : int.
             The number of variables in the QUBO/Ising formulation.
+
         """
         return self._N
 
     def to_ising(self, A=1):
-        """
+        r"""to_ising.
+
         Create and return the number partitioning problem in Ising form
         following section 2.1 of [Lucas]. The J coupling matrix for the Ising
         will be returned as an uppertriangular dictionary. Thus, the problem
         becomes minimizing
-            sum_{i <= j} z[i] z[j] J[(i, j)] + sum_{i} z[i] h[i] + offset.
+        :math:`\sum_{i \leq j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
 
         Parameters
         ----------
         A: positive float (optional, defaults to 1).
             Factor in front of objective function. See section 2.1 of [Lucas].
 
-        Returns
+        Return
         -------
         res : tuple (h, J, offset).
             h : qubovert.utils.IsingField object.
@@ -153,6 +168,7 @@ class NumberPartitioning(Problem):
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
         >>> h, J, offset = problem.to_ising()
+
         """
         h, J = IsingField(), IsingCoupling()
         offset = A * sum(pow(x, 2) for x in self._S)
@@ -164,7 +180,8 @@ class NumberPartitioning(Problem):
         return h, J, offset
 
     def convert_solution(self, solution):
-        """
+        """convert_solution.
+
         Convert the solution to the QUBO or Ising to the solution to the
         Number Partitioning problem.
 
@@ -177,7 +194,7 @@ class NumberPartitioning(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         res: tuple of iterables (partition1, partition2).
             partition1 : list, tuple, or iterable.
@@ -197,6 +214,7 @@ class NumberPartitioning(Problem):
 
         >>> print(problem.convert_solution(solution))
         ([1, 4], [2, 3])
+
         """
         if not isinstance(solution, dict):
             solution = dict(enumerate(solution))
@@ -209,7 +227,8 @@ class NumberPartitioning(Problem):
         return partition1, partition2
 
     def is_solution_valid(self, solution):
-        """
+        """is_solution_valid.
+
         Returns whether or not the proposed solution partitions S into two sets
         of equal sum.
 
@@ -223,10 +242,11 @@ class NumberPartitioning(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         valid : boolean.
             True if the proposed solution is valid, else False.
+
         """
         not_converted = (
             not isinstance(solution, tuple) or len(solution) != 2 or

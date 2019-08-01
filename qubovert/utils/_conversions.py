@@ -12,16 +12,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
+"""_conversions.py.
+
 This file contains methods to convert to and from QUBO/Ising problems and
 variables.
+
 """
 
 from . import QUBOMatrix, IsingCoupling, IsingField
 
 
 def qubo_to_ising(Q, offset=0):
-    """
+    """qubo_to_ising.
+
     Convert the specified QUBO problem into an Ising problem. Note that
     QUBO {0, 1} values go to Ising {-1, 1} values in that order!
 
@@ -54,6 +57,7 @@ def qubo_to_ising(Q, offset=0):
     -------
     >>> Q = {(0, 0): 1, (0, 1): -1, (1, 1): 3}
     >>> h, J, offset = qubo_to_ising(Q)
+
     """
     # IsingCoupling deals with keeping J upper triangular, so we don't have to
     # worry about it!
@@ -73,7 +77,8 @@ def qubo_to_ising(Q, offset=0):
 
 
 def ising_to_qubo(h, J, offset=0):
-    """
+    """ising_to_qubo.
+
     Convert the specified Ising problem into an upper triangular QUBO problem.
     Note that Ising {-1, 1} values go to QUBO {0, 1} values in that order!
 
@@ -106,6 +111,7 @@ def ising_to_qubo(h, J, offset=0):
     >>> h = {0: 1, 1: -1}
     >>> J = {(0, 1): -1}
     >>> Q, offset = ising_to_qubo(h, J)
+
     """
     # QUBOMarix deals with keeping ! upper triangular, so we don't have to
     # worry about it!
@@ -128,7 +134,8 @@ def ising_to_qubo(h, J, offset=0):
 
 
 def binary_to_spin(x):
-    """
+    """binary_to_spin.
+
     Convert a binary number in {0, 1} to a spin in {-1, 1}, in that order.
 
     Parameters
@@ -147,6 +154,7 @@ def binary_to_spin(x):
     >>> binary_to_spin(1)  # will print 1
     >>> binary_to_spin([0, 1, 1])  # will print [-1, 1, 1]
     >>> binary_to_spin({"a": 0, "b": 1})  # will print {"a": -1, "b": 1}
+
     """
     convert = {0: -1, 1: 1}
     if isinstance(x, (int, float)) and x in convert:
@@ -157,7 +165,8 @@ def binary_to_spin(x):
 
 
 def spin_to_binary(z):
-    """
+    """spin_to_binary.
+
     Convert a spin in {-1, 1} to a binary variable in {0, 1}, in that order.
 
     Parameters
@@ -176,6 +185,7 @@ def spin_to_binary(z):
     >>> spin_to_binary(1)  # will print 1
     >>> spin_to_binary([-1, 1, 1])  # will print [0, 1, 1]
     >>> spin_to_binary({"a": -1, "b": 1})  # will print {"a": 0, "b": 1}
+
     """
     convert = {-1: 0, 1: 1}
     if isinstance(z, (int, float)) and z in convert:

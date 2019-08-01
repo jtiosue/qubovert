@@ -12,17 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
+"""_alternating_sector_chain.py.
+
 Contains the AlternatingSectorChain class. See
-`help(qubovert.AlternatingSectorChain)`.
+``help(qubovert.AlternatingSectorChain)``.
 """
 
 from qubovert.utils import Problem, IsingCoupling, IsingField
 
 
 class AlternatingSectorChain(Problem):
+    """AlternatingSectorChain.
 
-    """
     Class to manage converting Alternating Sector Chain to and from its QUBO
     and Ising formluations.
 
@@ -51,11 +52,13 @@ class AlternatingSectorChain(Problem):
 
     >>> print(problem.is_solution_valid(solution))
     True  # since they are all the same.
+
     """
 
     def __init__(self, num_binary_variables,
                  chain_length=3, min_strength=1, max_strength=10):
-        """
+        """__init__.
+
         The Alternating Sector Chain problem has a solution for which
         all the binary variable or spins are equal. It is a trivial problem,
         but useful for benchmarking some solvers or solving techniques.
@@ -82,6 +85,7 @@ class AlternatingSectorChain(Problem):
         0
         >>> J
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1, (5, 0): 1}
+
         """
         self._N, self._chain_length = num_binary_variables, chain_length
         self._min_strength, self._max_strength = -min_strength, -max_strength
@@ -94,29 +98,32 @@ class AlternatingSectorChain(Problem):
 
     @property
     def num_binary_variables(self):
-        """
+        """num_binary_variables.
+
         The number of binary variables that the QUBO and Ising use.
 
-        Returns
+        Return
         -------
         num : integer.
             The number of variables in the QUBO/Ising formulation.
+
         """
         return self._N
 
     def to_ising(self, pbc=False):
-        """
+        r"""to_ising.
+
         Create and return the alternating sector chain problem in Ising form
         The J coupling matrix for the Ising will be returned as an
         uppertriangular dictionary. Thus, the problem becomes minimizing
-            sum_{i <= j} z[i] z[j] J[(i, j)] + sum_{i} z[i] h[i] + offset.
+        :math:`\sum_{i <= j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
 
         Parameters
         ----------
         pbc: bool (optional, defaults to False).
             Whether or not to use periodic boundary conditions.
 
-        Returns
+        Return
         -------
         res : tuple (h, J, offset).
             h : qubovert.utils.IsingField object.
@@ -151,6 +158,7 @@ class AlternatingSectorChain(Problem):
         0
         >>> J
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1}
+
         """
         h, J, offset = IsingField(), IsingCoupling(), 0
 
@@ -171,7 +179,8 @@ class AlternatingSectorChain(Problem):
         return h, J, offset
 
     def convert_solution(self, solution):
-        """
+        """convert_solution.
+
         Convert the solution to the QUBO or Ising to the solution to the
         Alternating Sector Chain problem.
 
@@ -184,7 +193,7 @@ class AlternatingSectorChain(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         res : tuple.
             Value of each spin, -1 or 1.
@@ -196,13 +205,15 @@ class AlternatingSectorChain(Problem):
         (-1, -1, 1, -1, 1)
         >>> problem.convert_solution([-1, -1, 1, -1, 1])
         (-1, -1, 1, -1, 1)
+
         """
         if isinstance(solution, dict):
             solution = tuple(v for k, v in sorted(solution.items()))
         return tuple(x if x else -1 for x in solution)
 
     def is_solution_valid(self, solution):
-        """
+        """is_solution_valid.
+
         Returns whether or not the proposed solution is the correct solution,
         ie that all the variables are equal.
 
@@ -217,10 +228,11 @@ class AlternatingSectorChain(Problem):
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
 
-        Returns
+        Return
         -------
         valid : boolean.
             True if the proposed solution is valid, else False.
+
         """
         if isinstance(solution, dict):
             solution = self.convert_solution(solution)

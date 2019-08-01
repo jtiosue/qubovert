@@ -12,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Defines the version number of qubovert.
-"""
+"""Defines the version number of qubovert."""
 
 __version__ = "0.0.1"

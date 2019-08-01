@@ -12,18 +12,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
+"""_solve_bruteforce.py.
+
 This file contains bruteforce solvers for QUBO and Ising, as well as QUBO and
 Ising objective function evaluators.
+
 """
 
 from . import binary_to_spin
 
 
 def qubo_value(x, Q, offset=0):
-    """
+    r"""qubo_value.
+
     Find the value of
-        sum_{ij} Q_{ij} x_{i} x_{j} + offset.
+    :math:`\sum_{i,j} Q_{ij} x_{i} x_{j} + offset.`
 
     Parameters
     ----------
@@ -36,11 +39,15 @@ def qubo_value(x, Q, offset=0):
         The part of the objective function that does not depend on the
         variables.
 
-    Returns
+    Return
     -------
     value : float.
-        The value of the QUBO with the given assignment ``x``. Ie
-        sum_{ij}Q[(i, j)] x[i] x[j] + offset.
+        The value of the QUBO with the given assignment `x`. Ie
+
+        >>> sum(
+                Q[(i, j)] * x[i] * x[j]
+                for i in range(n) for j in range(n)
+            ) + offset
 
     Example
     -------
@@ -48,14 +55,16 @@ def qubo_value(x, Q, offset=0):
     >>> x = {0: 1, 1: 0}
     >>> qubo_value(x, Q)
     1
+
     """
     return sum(v * x[i] * x[j] for (i, j), v in Q.items()) + offset
 
 
 def ising_value(z, h, J, offset=0):
-    """
+    r"""ising_value.
+
     Find the value of
-        sum_{ij} J_{ij} z_{i} z_{j} + sum_{i} h_{i} z_{i} + offset.
+        :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i} + offset`.
 
     Parameters
     ----------
@@ -70,11 +79,17 @@ def ising_value(z, h, J, offset=0):
         The part of the objective function that does not depend on the
         variables.
 
-    Returns
+    Return
     -------
     value : float.
-        The value of the Ising with the given assignment ``z``. Ie
-        sum_{ij} J[(i, j)] z[i] z[j] + sum_{i} h[i] z[i] +  offset.
+        The value of the Ising with the given assignment `z`. Ie
+
+        >>> sum(
+                J[(i, j)] * z[i] * z[j]
+                for i in range(n) for j in range(n)
+            ) + sum(
+                h[i] * z[i] for i in range(n)
+            ) + offset
 
     Example
     -------
@@ -83,6 +98,7 @@ def ising_value(z, h, J, offset=0):
     >>> z = {0: -1, 1: 1}
     >>> qubo_value(z, h, J)
     0
+
     """
     return sum(
         v * z[i] * z[j] for (i, j), v in J.items()
@@ -92,7 +108,8 @@ def ising_value(z, h, J, offset=0):
 
 
 def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
-    """
+    """solve_qubo_bruteforce.
+
     Iterate through all the possible solutions to a QUBO formulated problem
     and find the best one (the one that gives the minimum objective value). Do
     not use for large problem sizes! This is meant only for testing very small
@@ -111,7 +128,7 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
         very big, then it is best if ``all_solutions`` is False, otherwise this
         function will use a lot of memory.
 
-    Returns
+    Return
     -------
     res : tuple (objective, solution).
 
@@ -125,8 +142,8 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
         if all_solutions is True:
             objective : float.
                 The best value of the QUBO. Equal to
-                sum(Q[(i, j)] * solution[x][i] * solution[x][j]) + offset
-                where solution[x] is one of the solutions to the QUBO.
+                ``sum(Q[(i, j)] * solution[x][i] * solution[x][j]) + offset``
+                where `solution[x]` is one of the solutions to the QUBO.
             solution : list of dicts.
                 Each dictionary maps the label to the value of each binary
                 variable. Ie each ``s`` in ``solution`` is a solution that
@@ -135,7 +152,7 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
     Example
     -------
     To find the minimum of the problem
-    obj = x_0*x_1 + x_1*x_2 - x_1 - 2*x_2,
+    :math:`obj = x_0x_1 + x_1x_2 - x_1 - 2x_2`,
     the Q dictionary is
 
     >>> Q = {(0, 1): 1, (1, 2): 1, (1, 1): -1, (2, 2): -2}
@@ -149,9 +166,11 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
     {0: 0, 1: 0, 2: 1}
 
     ``obj_val`` will be the smallest value of ``obj``.
-    ``solution`` will be a dictionary that indicates what each of x_0, x_1, and
-    x_2 are for the solution. In this case, ``x = {0: 0, 1: 0, 2: 1}``,
-    indicating that x_0 is 0, x_1 is 0, x_2 is 1.
+    ``solution`` will be a dictionary that indicates what each of :math:`x_0`,
+    :math:`x_1`, and :math:`x_2` are for the solution. In this case,
+    ``x = {0: 0, 1: 0, 2: 1}``, indicating that :math:`x_0` is 0, :math:`x_1`
+    is 0, :math:`x_2` is 1.
+
     """
     if not Q:
         return offset, []
@@ -182,7 +201,8 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
 
 
 def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
-    """
+    """solve_ising_bruteforce.
+
     Iterate through all the possible solutions to an Ising formulated problem
     and find the best one (the one that gives the minimum objective value). Do
     not use for large problem sizes! This is meant only for testing very small
@@ -203,25 +223,25 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
         very big, then it is best if ``all_solutions`` is False, otherwise this
         function will use a lot of memory.
 
-    Returns
+    Return
     -------
     res : tuple (objective, solution).
 
-        if all_solutions is False:
+        if ``all_solutions`` is False:
             objective : float.
                 The best value of the Ising. Equal to
-                sum(J[(i, j)] * solution[i] * solution[j]) +
+                ``sum(J[(i, j)] * solution[i] * solution[j]) +
                 sum(h[i] * solution[i]) +
-                offset
+                offset``.
             solution : dict.
                 Maps the variable label to its solution value, {-1, 1}.
 
-        if all_solutions is True:
+        if ``all_solutions`` is True:
             objective : float.
                 The best value of the Ising. Equal to
-                sum(J[(i, j)] * solution[x][i] * solution[x][j]) +
+                ``sum(J[(i, j)] * solution[x][i] * solution[x][j]) +
                 sum(h[i] * solution[x][i]) +
-                offset
+                offset``
                 where solution[x] is one of the solutions to the Ising.
             solution : list of dicts.
                 Each dictionary maps the label to the value of each variable.
@@ -231,7 +251,7 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
     Example
     -------
     To find the minimum of the problem
-    obj = z_0*z_1 + z_1*z_2 - z_1 - 2*z_2,
+    :math:`obj = z_0z_1 + z_1z_2 - z_1 - 2z_2`,
     we have
 
     >>> J = {(0, 1): 1, (1, 2): 1}
@@ -246,9 +266,11 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
     {0: 1, 1: -1, 2: 1}
 
     ``obj_val`` will be the smallest value of ``obj``.
-    ``solution`` will be a dictionary that indicates what each of z_0, z_1, and
-    z_2 are for the solution. In this case, ``z = {0: 1, 1: -1, 2: 1}``,
-    indicating that z_0 is 1, z_1 is -1, z_2 is 1.
+    ``solution`` will be a dictionary that indicates what each of
+    :math:`z_0, z_1`, and :math:`z_2` are for the solution. In this case,
+    ``z = {0: 1, 1: -1, 2: 1}``, indicating that :math:`z_0` is 1, :math:`z_1`
+    is -1, :math:`z_2` is 1.
+
     """
     if not h and not J:
         return offset, []

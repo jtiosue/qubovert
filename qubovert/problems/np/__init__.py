@@ -12,10 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
+"""np contains many NP problems.
+
 This module contains many NP problems. We organize all the problems into
 categories. But we import them globally for user use. See the `__all__` value
-for all the problems imported.
+for all the problems imported. Most conversions to QUBO/Ising form are based
+on [Lucas].
+
+References
+----------
+.. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in
+Physics, 2:5, 2014.
+
 """
 
 from .bilp import *

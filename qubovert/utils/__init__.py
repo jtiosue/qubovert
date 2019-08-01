@@ -12,8 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Helper module. Contains necessary or convenient methods.
+"""utils contains many utilities and helpers.
+
+See `__all__` for a list of the utilities.
+
 """
 
 # import order here is important!
