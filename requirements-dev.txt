@@ -1,3 +1,4 @@
 numpy
+pydocstyle
 pytest
 pytest-codestyle
