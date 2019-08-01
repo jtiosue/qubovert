@@ -38,12 +38,12 @@ setuptools.setup(
     author_email="joe.iosue@yahoo.com",
     description="A package for converting common problems to QUBO/Ising form",
     long_description=README,
-    long_description_content_type="text/markdown",
     url="https://github.com/jiosue/qubovert",
     license=LICENSE,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     test_suite="tests",
     install_requires=REQUIREMENTS,
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
