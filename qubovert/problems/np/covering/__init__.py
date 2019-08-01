@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""covering contains many NP covering problems.
+"""``covering`` contains many NP covering problems.
 
 Here we have the QUBO/Ising conversions for common covering problems.
 The conversions are based on [Lucas].

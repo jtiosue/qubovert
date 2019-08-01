@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""tree contains many NP tree problems.
+"""``tree`` contains many NP tree problems.
 
 Here we have the QUBO/Ising conversions for common tree probems,
 The conversions are based on [Lucas].

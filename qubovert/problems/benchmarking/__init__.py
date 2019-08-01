@@ -12,10 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""benchmarking contains many benchmarking example problems.
+"""``benchmarking`` contains many benchmarking example problems.
 
 This module contains many benchmarking problems. We import all the problems
-globally for user use. See the `__all__` value for all the problems imported.
+globally for user use. See the ``__all__`` value for all the problems imported.
 
 """
 

@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""cycles contains many NP cycles problems.
+"""``cycles`` contains many NP cycles problems.
 
 Here we have the QUBO/Ising conversions for common cycle probems,
 The conversions are based on [Lucas].

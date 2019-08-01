@@ -34,6 +34,8 @@ class QUBOMatrix(dict):
     >>> d[(0, 0)] += 1
     >>> print(d) # will print {(0, 0): 1}
 
+    Compared to an ordinary dictionary.
+
     >>> g = dict()
     >>> print(g[(0, 0)]) # will raise KeyError
     >>> g[(0, 0)] += 1 # will raise KeyError, since (0, 0) was never set
@@ -526,8 +528,8 @@ class IsingCoupling(QUBOMatrix):
     It is the same thing as a dictionary with some methods modified. Note that
     each key must be a tuple of two integers >= 0. Note that this is almost
     exactly the same as QUBOMatrix, except that the keys cannot be tuples of
-    the same index. For example, QUBOMatrix({(0, 0): 1}) is valid but
-    IsingCoupling({(0, 0): 1}) is invalid.
+    the same index. For example, ``QUBOMatrix({(0, 0): 1})`` is valid but
+    ``IsingCoupling({(0, 0): 1})`` is invalid.
 
     One method is that values will always default to 0. Consider the following
     example:
@@ -537,7 +539,8 @@ class IsingCoupling(QUBOMatrix):
     >>> d[(0, 1)] += 1
     >>> print(d) # will print {(0, 1): 1}
 
-    # compared to an ordinary dict
+    Compared to an ordinary dictionary.
+
     >>> g = dict()
     >>> print(g[(0, 1)]) # will raise KeyError
     >>> g[(0, 1)] += 1 # will raise KeyError, since (0, 0) was never set
@@ -548,7 +551,7 @@ class IsingCoupling(QUBOMatrix):
     >>> d = IsingCoupling()
     >>> d[(1, 0)] += 2
     >>> print(d)
-    >>> # will print {(0, 1): 2}
+    {(0, 1): 2}
 
     One method is that if we set an item to 0, it will be removed. Consider
     the following example:
@@ -635,7 +638,8 @@ class IsingField(QUBOMatrix):
     >>> d[0] += 1
     >>> print(d) # will print {0: 1}
 
-    # compared to an ordinary dict
+    Compared to an ordinary dict.
+
     >>> g = dict()
     >>> print(g[0]) # will raise KeyError
     >>> g[0] += 1 # will raise KeyError, since (0, 0) was never set
@@ -682,7 +686,7 @@ class IsingField(QUBOMatrix):
         the key will be removed from the dictionary. Thus no elements in the
         IsingCoupling dictionary will ever have zero value. Additionally, this
         method will keep the coupling upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value). Finally,
+        then we will call ``__setitem__((key[1], key[0]), value)``. Finally,
         key[0] cannot equal key[1], if so a KeyError will be raised.
 
         Parameters

@@ -164,7 +164,7 @@ class VertexCover(Problem):
             offset : float.
                 The sum of the terms in the formulation that don't involve any
                 variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} _ offset`
+                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
                 will be equal to the total number of colored verticies.
 
         Example

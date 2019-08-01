@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""partitioning contains many NP partitioning problems.
+"""``partitioning`` contains many NP partitioning problems.
 
 Here we have the QUBO/Ising conversions for common partitioning probems,
 The conversions are based on [Lucas].

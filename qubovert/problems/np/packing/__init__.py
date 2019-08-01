@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""packing contains many NP packing problems.
+"""``packing`` contains many NP packing problems.
 
 Here we have the QUBO/Ising conversions for common packing probems,
 The conversions are based on [Lucas].

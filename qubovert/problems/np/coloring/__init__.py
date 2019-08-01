@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""coloring contains many NP coloring problems.
+"""``coloring`` contains many NP coloring problems.
 
 Here we have the QUBO/Ising conversions for common coloring probems,
 The conversions are based on [Lucas].
