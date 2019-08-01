@@ -9,7 +9,7 @@ install:
   - pip install -e .
 
 script:
-  - pydocstyle convention=numpy qubovert
+  - python -m pydocstyle convention=numpy qubovert
   - pytest --codestyle
   # I think pytest --codestyle also runs all the tests, but just in case ...
   - pytest
