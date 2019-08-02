@@ -21,8 +21,8 @@ import setuptools
 from qubovert import __version__, __name__
 
 
-with open('README.rst', encoding='utf-8') as f:
-    README = f.read()
+# with open('README.rst', encoding='utf-8') as f:
+#    README = f.read()
 
 with open('LICENSE') as f:
     LICENSE = f.read()
@@ -37,7 +37,7 @@ setuptools.setup(
     author="Joseph T. Iosue",
     author_email="joe.iosue@yahoo.com",
     description="A package for converting common problems to QUBO/Ising form",
-    long_description=README,
+    # long_description=README,
     url="https://github.com/jiosue/qubovert",
     license=LICENSE,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
