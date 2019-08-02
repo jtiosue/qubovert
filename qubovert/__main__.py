@@ -19,6 +19,10 @@ import qubovert
 
 
 if __name__ == "__main__":
-    print("\n``qubovert`` is a package by Joseph Iosue, joe.iosue@yahoo.com.")
+    print(
+      "\n``qubovert`` version",
+      str(qubovert.__version__),
+      "is a package by Joseph Iosue, joe.iosue@yahoo.com."
+    )
     if input("Display package details? [y or n] ") == "y":
         help(qubovert)
