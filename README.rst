@@ -7,6 +7,7 @@ QUBOVert
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
 Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
 
 Convert common problems to QUBO form.
@@ -117,8 +118,8 @@ I have very descriptive doc strings that should explain everything you need to k
 
 Technical details on the conversions
 ------------------------------------
-For the log trick he mentions, we usually need a constraint like :math:`\sum_{i} x_i \geq 1`. In order to enforce this constraint, we add a penalty to the QUBO of the form :math:`1 - \sum_i x_i + \sum_{i < j} x_i x_j` (the idea comes from [Glover]_).
-
+For the log trick he mentions, we usually need a constraint like ``sum(x) >= 1``. In order to enforce this constraint, we add a penalty to the QUBO of the form ``1 - sum(x) + sum(x[i] x[j] for i in range(len(x)) for j in range(i+1, len(x)))`` (the idea comes from [Glover]_).
+:math:`\sum`
 
 
 References
