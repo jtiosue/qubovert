@@ -119,7 +119,6 @@ I have very descriptive doc strings that should explain everything you need to k
 Technical details on the conversions
 ------------------------------------
 For the log trick he mentions, we usually need a constraint like ``sum(x) >= 1``. In order to enforce this constraint, we add a penalty to the QUBO of the form ``1 - sum(x) + sum(x[i] x[j] for i in range(len(x)) for j in range(i+1, len(x)))`` (the idea comes from [Glover]_).
-:math:`\sum`
 
 
 References
