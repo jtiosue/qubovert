@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""qubovert is a module for converting common problems into QUBO/Ising form.
+"""``qubovert`` is a module for converting problems into QUBO/Ising form.
 
 QUBO stands for Quadratic Unconstrained Binary Optimization. QUBO problems
 have a one-to-one mapping to classical Ising problems, and most optimization
