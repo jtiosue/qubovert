@@ -21,7 +21,7 @@ import setuptools
 from qubovert import __version__, __name__
 
 
-with open('README.rst') as f:
+with open('README.rst', encoding='utf-8') as f:
     README = f.read()
 
 with open('LICENSE') as f:
@@ -49,4 +49,8 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
+    project_urls={
+        "Source": "https://github.com/jiosue/qubovert",
+        "Docs": "https://qubovert.readthedocs.io"
+    }
 )
