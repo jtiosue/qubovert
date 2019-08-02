@@ -18,7 +18,16 @@ So far we have just implemented some of the formulations from [Lucas]_. The goal
 To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run ``python -m pytest``, ``python -m pytest --codestyle --ignore=docs`` before committing anything (yes, even the `tests` need to pass codestyle checks), and ``python -m pydocstyle convention=numpy qubovert`` to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
 
 
-Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. To install from source:
+Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
+
+Installation
+------------
+.. code:: shell
+
+  pip install qubovert
+
+
+To install from source:
 
 .. code:: shell
 
