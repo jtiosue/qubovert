@@ -4,3 +4,6 @@ pytest
 pytest-codestyle
 sphinx
 sphinx_rtd_theme
+setuptools
+wheel
+twine
