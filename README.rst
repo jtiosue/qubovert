@@ -1,12 +1,29 @@
 ========
 QUBOVert
 ========
+`master branch`
 .. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
     :target: https://travis-ci.com/jiosue/QUBOVert
     :alt: Travis-CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+`dev branch`
+.. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=dev
+    :target: https://travis-ci.com/jiosue/QUBOVert
+    :alt: Travis-CI
+.. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
+    :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
+    :alt: Documentation Status
+
+`pypi distribution`
+.. image:: https://badge.fury.io/py/qubovert.svg
+    :target: https://badge.fury.io/py/qubovert
+    :alt: pypi dist
+.. image:: https://pepy.tech/badge/qubovert.svg
+    :target: https://pepy.tech/project/qubovert
+    :alt: pypi dist downloads
 
 Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
 
