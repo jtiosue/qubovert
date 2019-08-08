@@ -1,7 +1,7 @@
 ========
 QUBOVert
 ========
-`master branch`
+*master branch*
 
 .. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
     :target: https://travis-ci.com/jiosue/QUBOVert
@@ -10,7 +10,7 @@ QUBOVert
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-`dev branch`
+*dev branch*
 
 .. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=dev
     :target: https://travis-ci.com/jiosue/QUBOVert
@@ -19,7 +19,7 @@ QUBOVert
     :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
     :alt: Documentation Status
 
-`pypi distribution`
+*pypi distribution*
 
 .. image:: https://badge.fury.io/py/qubovert.svg
     :target: https://badge.fury.io/py/qubovert
@@ -52,7 +52,7 @@ To install from source:
 .. code:: shell
 
   git clone https://github.com/jiosue/qubovert.git
-  cd QUBOVert
+  cd qubovert
   pip install -e .
 
 
