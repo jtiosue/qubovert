@@ -29,6 +29,12 @@ solutions = (
     ({"d", "e", "f"}, {"a", "b", "c"})
 )
 
+problem_weighted = GraphPartitioning({(0, 1): 1, (1, 2): 3, (0, 3): 1})
+solutions_weighted = (
+    ({0, 3}, {1, 2}),
+    ({1, 2}, {0, 3})
+)
+
 
 def test_graphpartitioning_str():
 
@@ -44,6 +50,14 @@ def test_graphpartitioning_qubo_solve():
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
+    assert problem.is_solution_valid(solution)
+    assert allclose(e, 1)
+
+    Q, offset = problem_weighted.to_qubo()
+    e, sol = solve_qubo_bruteforce(Q, offset)
+    solution = problem_weighted.convert_solution(sol)
+
+    assert solution in solutions_weighted
     assert problem.is_solution_valid(solution)
     assert allclose(e, 1)
 
@@ -66,6 +80,14 @@ def test_graphpartitioning_ising_solve():
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
+    assert problem.is_solution_valid(solution)
+    assert allclose(e, 1)
+
+    h, J, offset = problem_weighted.to_ising()
+    e, sol = solve_ising_bruteforce(h, J, offset)
+    solution = problem_weighted.convert_solution(sol)
+
+    assert solution in solutions_weighted
     assert problem.is_solution_valid(solution)
     assert allclose(e, 1)
 

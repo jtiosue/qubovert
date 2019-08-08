@@ -24,12 +24,13 @@ from qubovert.utils import Problem, IsingCoupling, IsingField
 class GraphPartitioning(Problem):
     """GraphPartitioning.
 
-    Class to manage converting Graph Partitioning to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas].
+    Class to manage converting (Weighted) Graph Partitioning to and from its
+    QUBO and Ising formluations. Based on the paper hereforth designated
+    [Lucas].
 
     The goal of the Graph Partitioning problem is to partition the verticies
-    of a graph into two equal subsets such that the number of edges connecting
-    the two subsets is minimized. There must be an even number of vertices.
+    of a graph into two equal subsets such that the number of edges (or the
+    total weight of the edges) connecting the two subsets is minimized.
 
     GraphPartitioning inherits some methods and attributes from the Problem
     class. See ``help(qubovert.utils.Problem)``.
@@ -72,16 +73,24 @@ class GraphPartitioning(Problem):
     def __init__(self, edges):
         """__init__.
 
-        The goal of the Graph Partitioning problem is to partition the vertices
-        of a graph into two equal subsets such that the number of edges
-        connecting the two subsets is minimized. All naming conventions follow
-        the names in the paper [Lucas].
+        The goal of the (Weighted) Graph Partitioning problem is to partition
+        the vertices of a graph into two equal subsets such that the number of
+        edges (or the total weight of the edges) connecting the two subsets is
+        minimized. All naming conventions follow the names in the paper
+        [Lucas].
 
         Parameters
         ----------
-        edges : set of two element tuples.
-            Describes edges of the graph. Important: the graph must have an
-            even number of vertices!
+        edges : set or dict (or ``qubovert.utils.IsingCoupling`` object).
+            If edges is a set, then it must be a set of two element tuples
+            describing the edges of the graph. Ie each tuple is a connection
+            between two vertices. If a tuple has a repeated label (for example,
+            (2, 2)), it will be ignored.
+
+            If edges is a dict (or IsingCoupling object) then the keys must be
+            two element tuples and the values are the weights associated with
+            that edge. If a key has a repeated label (for example, (2, 2)), it
+            will be ignored.
 
         Examples
         -------
@@ -91,15 +100,20 @@ class GraphPartitioning(Problem):
         >>> edges = {(0, 1), (0, 2)}
         >>> problem = GraphPartitioning(edges)
 
+        >>> edges = {(0, 1): 2, (1, 2): -1}
+        >>> problem = GraphPartitioning(edges)
+
         """
-        self._edges = edges.copy()
+        if isinstance(edges, set):
+            self._edges = {k: 1 for k in edges if k[0] != k[1]}
+        else:
+            self._edges = {k: v for k, v in edges.items() if k[0] != k[1]}
+
         self._vertices = {y for x in edges for y in x}
         self._vertex_to_index = {x: i for i, x in enumerate(self._vertices)}
         self._index_to_vertex = {i: x for x, i in
                                  self._vertex_to_index.items()}
-        self._N, self._n = len(self._vertices), len(self._edges)
-        if self._N % 2:
-            raise ValueError("The graph must have an even number of vertices")
+        self._N = len(self._vertices)
 
         all_degs = {}
         for e in edges:
@@ -120,7 +134,7 @@ class GraphPartitioning(Problem):
             A copy of the edge set defining the Graph Partitioning problem.
 
         """
-        return self._edges.copy()
+        return set(self._edges.keys())
 
     @property
     def V(self):
@@ -137,6 +151,21 @@ class GraphPartitioning(Problem):
 
         """
         return self._vertices.copy()
+
+    @property
+    def weights(self):
+        """weights.
+
+        Returns a dictionary mapping the edges of the graph to their associated
+        weights.
+
+        Return
+        -------
+        weights : dict.
+            Keys are two element tuples, values are numbers.
+
+        """
+        return self._edges.copy()
 
     @property
     def degree(self):
@@ -205,7 +234,8 @@ class GraphPartitioning(Problem):
                 The part of the Ising function independent of variables. It is
                 the value such that the solution to the Ising formulation is
                 equal to the the total number of edges connecting the two
-                partitions.
+                partitions (or the total weight if we are solving weighted
+                partitioning).
 
         Example
         --------
@@ -218,7 +248,7 @@ class GraphPartitioning(Problem):
             A = min(2*self._degree, self._N) * B / 8
 
         h, J = IsingField(), IsingCoupling()
-        offset = A * self._N + B * self._n / 2
+        offset = A * self._N + B * sum(self._edges.values()) / 2
 
         # encode H_A (equation 8)
         for i in range(self._N):
@@ -226,8 +256,9 @@ class GraphPartitioning(Problem):
                 J[(i, j)] += 2 * A
 
         # encode H_B (equation 9)
-        for u, v in self._edges:
-            J[(self._vertex_to_index[u], self._vertex_to_index[v])] -= B / 2
+        for (u, v), w in self._edges.items():
+            J[(self._vertex_to_index[u],
+               self._vertex_to_index[v])] -= w * B / 2
 
         return h, J, offset
 
@@ -281,7 +312,8 @@ class GraphPartitioning(Problem):
         """is_solution_valid.
 
         Returns whether or not the proposed solution has an equal number of
-        vertices in each partition.
+        vertices in each partition. NOTE: this is impossible if the number of
+        edges is odd!
 
         Parameters
         ----------
