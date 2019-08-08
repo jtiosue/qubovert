@@ -2,6 +2,7 @@
 QUBOVert
 ========
 `master branch`
+
 .. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
     :target: https://travis-ci.com/jiosue/QUBOVert
     :alt: Travis-CI
@@ -10,6 +11,7 @@ QUBOVert
     :alt: Documentation Status
 
 `dev branch`
+
 .. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=dev
     :target: https://travis-ci.com/jiosue/QUBOVert
     :alt: Travis-CI
@@ -18,10 +20,11 @@ QUBOVert
     :alt: Documentation Status
 
 `pypi distribution`
+
 .. image:: https://badge.fury.io/py/qubovert.svg
     :target: https://badge.fury.io/py/qubovert
     :alt: pypi dist
-.. image:: https://pepy.tech/badge/qubovert.svg
+.. image:: https://pepy.tech/badge/qubovert
     :target: https://pepy.tech/project/qubovert
     :alt: pypi dist downloads
 
