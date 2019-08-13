@@ -17,7 +17,8 @@ Contains tests for the QUBO to Ising and Ising to QUBO functions.
 """
 
 from qubovert.utils import (
-    qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary
+    qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary,
+    decimal_to_binary, decimal_to_spin
 )
 
 
@@ -51,3 +52,15 @@ def test_ising_to_qubo_to_ising():
     ising_args = {0: 1, 2: -2}, {(0, 1): -4, (0, 2): 3}, -2
 
     assert ising_args == qubo_to_ising(*ising_to_qubo(*ising_args))
+
+
+def test_decimal_to_spin():
+
+    assert decimal_to_binary(10, 7) == (0, 0, 0, 1, 0, 1, 0)
+    assert decimal_to_binary(10) == (1, 0, 1, 0)
+
+
+def test_decimal_to_spin():
+
+    assert decimal_to_spin(10, 7) == (-1, -1, -1, 1, -1, 1, -1)
+    assert decimal_to_spin(10) == (1, -1, 1, -1)

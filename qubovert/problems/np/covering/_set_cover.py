@@ -19,7 +19,7 @@ Contains the SetCover class. See ``help(qubovert.SetCover)``.
 """
 
 from numpy import log2, allclose
-from qubovert.utils import Problem, QUBOMatrix
+from qubovert.utils import Problem, QUBOMatrix, decimal_to_binary
 
 
 class SetCover(Problem):
@@ -429,3 +429,59 @@ class SetCover(Problem):
 
         covered = set(x for i in solution for x in self._V[i])
         return covered == self._U
+
+    def solve_bruteforce(self, all_solutions=False):
+        """solve_bruteforce.
+
+        Solves the Set Cover problem exactly with a brute force method. THIS
+        SHOULD NOT BE USED FOR LARGE PROBLEMS! The advantage over this method
+        as opposed to using a brute force QUBO solver is that the QUBO
+        formulation has many slack variables.
+
+        Parameters
+        ----------
+        all_solutions : boolean (optional, defaults to False).
+            If ``all_solutions`` is set to True, all the best solutions to the
+            problem will be returned rather than just one of the best. If the
+            problem is very big, then it is best if ``all_solutions == False``,
+            otherwise this function will use a lot of memory.
+
+        Returns
+        -------
+        res : set or list of sets.
+            A set of which sets are included in the set cover. So if this
+            function returns ``{0, 2, 3}``, then the set cover is the sets
+            ``V[0]``, ``V[2]``, and ``V[3]``. If ``all_solutions == True``,
+            then ``res`` will be a list of sets, where each element of the list
+            is one of the optimal solutions.
+
+        Examples
+        --------
+        >>> from qubovert import SetCover
+        >>> U = {"a", "b", "c", "d"}
+        >>> V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
+        >>> problem = SetCover(U, V)
+        >>> print(problem.solve_bruteforce())
+        {0, 2}
+
+        """
+        best = None
+        all_sols = {}
+        for x in range(1 << self._N):
+            sol = decimal_to_binary(x, self._N)
+            cover = self.convert_solution(sol)
+            if self.is_solution_valid(cover):
+                if not all_solutions and (best is None or
+                                          len(cover) < len(best)):
+                    best = cover
+                elif all_solutions and (best is None or
+                                        len(cover) <= len(best)):
+                    best = cover
+                    all_sols.setdefault(len(cover), []).append(cover)
+
+        if best is None:
+            raise ValueError("Problem is not solvable. See "
+                             "``SetCover.is_coverable()``")
+        if all_solutions:
+            return all_sols[len(best)]
+        return best

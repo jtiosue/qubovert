@@ -19,7 +19,7 @@ Ising objective function evaluators.
 
 """
 
-from . import binary_to_spin
+from . import decimal_to_binary, decimal_to_spin
 
 
 def qubo_value(x, Q, offset=0):
@@ -185,8 +185,8 @@ def solve_qubo_bruteforce(Q, offset=0, all_solutions=False):
     all_sols = {}
 
     for n in range(1 << N):
-        test_sol = ("{0:0%db}" % N).format(n)
-        x = {mapping[i]: int(v) for i, v in enumerate(test_sol)}
+        test_sol = decimal_to_binary(n, N)
+        x = {mapping[i]: v for i, v in enumerate(test_sol)}
         v = qubo_value(x, Q, offset)
         if all_solutions and (best[0] is None or v <= best[0]):
             best = v, x
@@ -286,10 +286,8 @@ def solve_ising_bruteforce(h, J, offset=0, all_solutions=False):
     all_sols = {}
 
     for n in range(1 << N):
-        test_sol = ("{0:0%db}" % N).format(n)
-        z = {
-            mapping[i]: binary_to_spin(int(v)) for i, v in enumerate(test_sol)
-        }
+        test_sol = decimal_to_spin(n, N)
+        z = {mapping[i]: v for i, v in enumerate(test_sol)}
         v = ising_value(z, h, J, offset)
         if all_solutions and (best[0] is None or v <= best[0]):
             best = v, z

@@ -193,3 +193,72 @@ def spin_to_binary(z):
     elif isinstance(z, dict):
         return {k: convert[v] for k, v in z.items()}
     return type(z)(convert[i] for i in z)
+
+
+def decimal_to_binary(d, num_bits=None):
+    """decimal_to_binary.
+
+    Convert the integer ``d`` to its binary representation.
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_bits : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_bits is None``, then
+        the minimum number of bits required will be used.
+
+    Return
+    ------
+    b : tuple of length ``num_bits``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_binary(10, 7)
+    (0, 0, 0, 1, 0, 1, 0)
+
+    >>> decimal_to_binary(10)
+    (1, 0, 1, 0)
+
+    """
+    if int(d) != d or d < 0:
+        raise ValueError("``d`` must be an integer >- 0.")
+    b = bin(d)[2:]
+    lb = len(b)
+    if num_bits is None:
+        num_bits = lb
+    elif num_bits < lb:
+        raise ValueError("Not enough bits to represent the number.")
+    return (0,) * (num_bits - lb) + tuple(int(x) for x in b)
+
+
+def decimal_to_spin(d, num_spins=None):
+    """decimal_to_spin.
+
+    Convert the integer ``d`` to its spin representation (ie its binary
+    representation, but with -1 and 1 instead of 0 and 1).
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_spins : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_spins is None``, then
+        the minimum number of bits required will be used.
+
+    Return
+    ------
+    b : tuple of length ``num_spins``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_spin(10, 7)
+    (-1, -1, -1, 1, -1, 1, -1)
+
+    >>> decimal_to_spin(10)
+    (1, -1, 1, -1)
+
+    """
+    return binary_to_spin(decimal_to_binary(d, num_spins))

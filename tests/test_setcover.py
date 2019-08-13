@@ -41,6 +41,11 @@ def test_coverable():
     assert not SetCover(U, V[:-1]).is_coverable()
 
 
+def test_setcover_bruteforce():
+
+    assert problem.solve_bruteforce() == {0, 2}
+
+
 # QUBO
 
 def test_setcover_qubo_logtrick_solve():

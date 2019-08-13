@@ -24,6 +24,10 @@ Physics, 2:5, 2014.
 
 """
 
-__all__ = ()
+from ._job_sequencing import JobSequencing
+
+__all__ = (
+    "JobSequencing",
+)
 
 name = "coloring"
