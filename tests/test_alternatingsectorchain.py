@@ -29,6 +29,15 @@ def test_AlternatingSectorChain_str():
     assert eval(str(problem)) == problem
 
 
+def test_AlternatingSectorChain_bruteforce():
+
+    assert problem.solve_bruteforce() in ((-1,)*12, (1,)*12)
+    assert (
+        problem.solve_bruteforce(all_solutions=True) in
+        ([(-1,)*12, (1,)*12], [(1,)*12, (-1,)*12])
+    )
+
+
 # QUBO
 
 def test_AlternatingSectorChain_qubo_solve():

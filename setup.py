@@ -12,9 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Set up details for `pip install qubovert` or `pip install -e .` if installing
-by source.
+"""setup.py.
+
+Set up details for ``pip install qubovert`` or ``pip install -e .`` if
+installing by source.
+
 """
 
 import setuptools

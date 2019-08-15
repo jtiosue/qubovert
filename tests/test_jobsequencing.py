@@ -40,6 +40,15 @@ def test_jobsequencing_str():
     assert eval(str(problem_log)) == problem_log
 
 
+def test_jobsequencing_bruteforce():
+
+    assert problem.solve_bruteforce() in solutions
+    assert (
+        problem.solve_bruteforce(all_solutions=True) in
+        (list(solutions), list(reversed(solutions)))
+    )
+
+
 def test_jobsequencing_bruteforce_solve():
 
     assert problem.solve_bruteforce() in solutions

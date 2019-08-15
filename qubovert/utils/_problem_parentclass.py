@@ -20,7 +20,7 @@ the problem classes.
 """
 
 from qubovert import __name__ as MODULE_NAME
-from . import qubo_to_ising, ising_to_qubo
+from . import qubo_to_ising, ising_to_qubo, solve_qubo_bruteforce
 
 
 class Problem:
@@ -252,3 +252,42 @@ class Problem:
 
         """
         return True
+
+    def solve_bruteforce(self, *args, **kwargs):
+        """solve_bruteforce.
+
+        Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
+        PROBLEMS! This is implemented in the parent ``qubovert.utils.Problem``
+        class. Some problems use a lot of slack binary variables for their
+        QUBO/Ising formulations. If this is the case, then the child class
+        for this problem should override this method with a better bruteforce
+        solver. But, for problems that do not use slack variables, this
+        method will suffice. It converts the problem to QUBO, solves it with
+        ``qubovert.utils.solve_qubo_bruteforce``, and then calls and returns
+        ``convert_solution``.
+
+        Parameters
+        ----------
+        *args and **kwargs : arguments and keyword arguments.
+            Contains args and kwargs for the ``to_qubo`` method. Also contains
+            a ``all_solutions`` boolean flag, which indicates whether or not
+            to return all the solutions, or just the best one found.
+            ``all_solutions`` defaults to False.
+
+        Return
+        ------
+        res : the output or outputs of the ``convert_solution`` method.
+            If ``all_solutions`` is False, then ``res`` is just the output
+            of the ``convert_solution`` method.
+            If ``all_solutions`` is True, then ``res`` is a list of outputs
+            of the ``convert_solution`` method, e.g. a converted solution
+            for each solution that the bruteforce solver returns.
+
+        """
+        kwargs = kwargs.copy()
+        all_solutions = kwargs.pop("all_solutions", False)
+        qubo = self.to_qubo(*args, **kwargs)
+        _, sol = solve_qubo_bruteforce(*qubo, all_solutions=all_solutions)
+        if all_solutions:
+            return [self.convert_solution(x) for x in sol]
+        return self.convert_solution(sol)

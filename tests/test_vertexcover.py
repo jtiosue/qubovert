@@ -30,6 +30,11 @@ def test_vertexcover_str():
     assert eval(str(problem)) == problem
 
 
+def test_vertexcover_bruteforce():
+
+    assert problem.solve_bruteforce() == {"a", "c"}
+
+
 # QUBO
 
 def test_vertexcover_qubo_solve():

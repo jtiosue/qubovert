@@ -41,6 +41,15 @@ def test_graphpartitioning_str():
     assert eval(str(problem)) == problem
 
 
+def test_graphpartitioning_bruteforce():
+
+    assert problem.solve_bruteforce() in solutions
+    assert (
+        problem.solve_bruteforce(all_solutions=True) in
+        (list(solutions), list(reversed(solutions)))
+    )
+
+
 # QUBO
 
 def test_graphpartitioning_qubo_solve():
