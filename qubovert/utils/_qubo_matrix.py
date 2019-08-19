@@ -18,6 +18,8 @@ This file contains QUBOMatrix, IsingCoupling, and IsingField objects, which
 are used for QUBO matrices Q, Ising coupling matrices J, and Ising fields h.
 """
 
+import numpy as np
+
 
 class QUBOMatrix(dict):
     """QUBOMatrix.
@@ -110,6 +112,43 @@ class QUBOMatrix(dict):
         for key, value in items:
             self[key] += value
 
+    @property
+    def num_binary_variables(self):
+        """num_binary_variables.
+
+        Return the number of binary variables in the problem..
+
+        Return
+        ------
+        n : int.
+            Number of binary variables in the problem.
+
+        """
+        if not self:
+            return 0
+
+        return len(set(y for x in self for y in x))
+
+    @property
+    def max_index(self):
+        """max_index.
+
+        Returns the maximum label index of the problem. If the problem is
+        labeled with integers from 0 to ``n-1``, then ``max_index`` will give
+        the same result as ``num_binary_variables - 1``.
+
+        Return
+        ------
+        n : int or None.
+            Max label index of the problem dictionary. If the dict is empty,
+            then this returns None.
+
+        """
+        if not self:
+            return
+
+        return max(set(y for x in self for y in x))
+
     def __getitem__(self, key):
         """__getitem__.
 
@@ -199,6 +238,49 @@ class QUBOMatrix(dict):
         """
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
+
+    def to_matrix(self, symmetric=False, array=True):
+        r"""to_matrix.
+
+        Convert a QUBO/IsingCoupling dictionary to its matrix form. The indices
+        of the dictionary should be integers from 0 to ``n-1``,
+        where there are ``n`` binary variables in the problem.
+
+        Parameters
+        ----------
+        symmetric : bool (optional, defaults to False).
+            Whether the returned matrix should be symmetric or
+            upper-triangular. If ``symmetric`` is True, then the matrix will be
+            symmetric, ie ``matrix[i][j] == matrix[j][i]``. Otherwise, it will
+            be upper-triangular, ie ``marix[i][j] == 0`` if ``i > j``.
+        array : bool (optional, defaults to True).
+            Whether the returned matrix should be a numpy array or list of
+            lists. If ``array`` is True, then it will be a numpy array,
+            otherwise, it will be a list of lists.
+
+        Return
+        ------
+        matrix : numpy array or list of lists.
+            The matrix representing the problem. See the arguments
+            ``symmetric`` and ``array`` for info on the return type of
+            ``matrix``.
+
+        """
+        n = self.max_index + 1
+
+        matrix = np.zeros((n, n))
+        for (i, j), v in self.items():
+            if i == j:
+                matrix[i][j] = v
+            elif symmetric:
+                matrix[i][j] = v / 2
+                matrix[j][i] = v / 2
+            else:
+                matrix[i][j] = v
+
+        if not array:
+            return matrix.tolist()
+        return matrix
 
     def __add__(self, other):
         """__add__.
@@ -705,3 +787,80 @@ class IsingField(QUBOMatrix):
             dict.__setitem__(self, key, value)
         else:
             self.pop(key, 0)
+
+    @property
+    def num_binary_variables(self):
+        """num_binary_variables.
+
+        Return the number of binary variables in the problem.
+
+        Return
+        ------
+        n : int.
+            Number of binary variables in the problem.
+
+        """
+        if not self:
+            return 0
+
+        return len(set(self.keys()))
+
+    @property
+    def max_index(self):
+        """max_index.
+
+        Returns the maximum label index of the problem. If the problem is
+        labeled with integers from 0 to ``n-1``, then ``max_index`` will give
+        the same result as ``num_binary_variables - 1``.
+
+        Return
+        ------
+        n : int or None.
+            Max label index of the problem dictionary. If the dict is empty,
+            then this returns None.
+
+        """
+        if not self:
+            return
+
+        return max(set(self.keys()))
+
+    def to_matrix(self, vector=False, array=True):
+        r"""to_matrix.
+
+        Convert a IsingField dictionary to its matrix form. The indices of the
+        dictionary should be integers from 0 to ``n-1``, where there are ``n``
+        binary variables in the problem.
+
+        Parameters
+        ----------
+        vector : bool (optional, default to False).
+            Whether to return a vector or a matrix. A vector will be one-
+            dimensional, whereas a matrix will be two-dimensional. Ie
+            ``vector[i] == matrix[i][0]``.
+        array : bool (optional, defaults to True).
+            Whether the returned matrix should be a numpy array or list of
+            lists. If ``array`` is True, then it will be a numpy array,
+            otherwise, it will be a list of lists.
+
+        Return
+        ------
+        matrix : numpy array or list of lists.
+            The matrix representing the Field. See the arguments ``vector``
+            and ``array`` for info on the return type of the matrix.
+
+        """
+        n = self.max_index
+        if n is None:
+            raise ValueError("IsingField is empty")
+        matrix = np.zeros(n + 1)
+        for i, v in self.items():
+            matrix[i] = v
+
+        if not vector:
+            matrix = np.transpose([matrix])
+
+        if not array:
+            matrix = matrix.tolist()
+
+        return matrix

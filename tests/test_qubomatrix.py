@@ -50,6 +50,23 @@ def test_qubo_update():
     assert d == {(0, 1): 1, (1, 1): -1}
 
 
+def test_qubo_num_binary_variables():
+
+    d = QUBOMatrix({(0, 0): 1, (0, 3): 2})
+    assert d.num_binary_variables == 2
+
+
+def test_qubo_max_index():
+
+    d = QUBOMatrix({(0, 0): 1, (0, 3): 2})
+    assert d.max_index == 3
+
+
+def test_qubo_to_matrix():
+    d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    assert d.to_matrix(array=False) == [[1, 2], [0, 0]]
+
+
 def test_qubo_addition():
 
     temp = QUBOMatrix({(0, 0): 1, (0, 1): 2})
@@ -186,6 +203,34 @@ def test_ising_update():
     d = IsingField({0: 1, 2: -2})
     d.update({0: 0, 1: 1})
     assert d == {1: 1, 2: -2}
+
+
+def test_ising_num_binary_variables():
+
+    d = IsingCoupling({(0, 1): 1, (0, 4): 2})
+    assert d.num_binary_variables == 3
+
+    d = IsingField({0: 1, 3: -2})
+    assert d.num_binary_variables == 2
+
+
+def test_ising_max_index():
+
+    d = IsingCoupling({(0, 1): 1, (0, 4): 2})
+    assert d.max_index == 4
+
+    d = IsingField({0: 1, 3: -2})
+    assert d.max_index == 3
+
+
+def test_ising_to_matrix():
+
+    d = IsingCoupling({(0, 1): 1, (1, 2): 2, (0, 2): -1})
+    assert d.to_matrix(array=False) == [[0, 1, -1], [0, 0, 2], [0, 0, 0]]
+
+    d = IsingField({0: -1, 1: 3})
+    assert d.to_matrix(array=False) == [[-1], [3]]
+    assert d.to_matrix(vector=True, array=False) == [-1, 3]
 
 
 def test_ising_addition():

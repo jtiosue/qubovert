@@ -21,7 +21,9 @@ See ``__all__`` for a list of the utilities.
 # import order here is important!
 from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
 from ._conversions import (
-    qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary,
+    qubo_to_ising, ising_to_qubo,
+    matrix_to_qubo, qubo_to_matrix,
+    binary_to_spin, spin_to_binary,
     decimal_to_binary, decimal_to_spin
 )
 from ._solve_bruteforce import (
@@ -36,6 +38,8 @@ __all__ = (
     "IsingField",
     "qubo_to_ising",
     "ising_to_qubo",
+    "matrix_to_qubo",
+    "qubo_to_matrix",
     "binary_to_spin",
     "spin_to_binary",
     "decimal_to_binary",

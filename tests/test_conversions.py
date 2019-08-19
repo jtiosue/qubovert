@@ -18,8 +18,9 @@ Contains tests for the QUBO to Ising and Ising to QUBO functions.
 
 from qubovert.utils import (
     qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary,
-    decimal_to_binary, decimal_to_spin
+    decimal_to_binary, decimal_to_spin, qubo_to_matrix, matrix_to_qubo
 )
+import numpy as np
 
 
 def test_binary_to_spin():
@@ -54,7 +55,7 @@ def test_ising_to_qubo_to_ising():
     assert ising_args == qubo_to_ising(*ising_to_qubo(*ising_args))
 
 
-def test_decimal_to_spin():
+def test_decimal_to_binary():
 
     assert decimal_to_binary(10, 7) == (0, 0, 0, 1, 0, 1, 0)
     assert decimal_to_binary(10) == (1, 0, 1, 0)
@@ -64,3 +65,20 @@ def test_decimal_to_spin():
 
     assert decimal_to_spin(10, 7) == (-1, -1, -1, 1, -1, 1, -1)
     assert decimal_to_spin(10) == (1, -1, 1, -1)
+
+
+def test_matrix_to_qubo():
+
+    matrix, qubo = [[-3, 1], [-1, 2]], {(0, 0): -3, (1, 1): 2}
+    assert matrix_to_qubo(matrix) == qubo
+
+
+def test_qubo_to_matrix():
+
+    matrix, qubo = [[-3, 1], [0, 2]], {(0, 0): -3, (0, 1): 1, (1, 1): 2}
+    assert matrix == qubo_to_matrix(qubo, array=False)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
+
+    matrix = [[-3, .5], [.5, 2]]
+    assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))

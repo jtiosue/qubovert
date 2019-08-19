@@ -20,6 +20,7 @@ variables.
 """
 
 from . import QUBOMatrix, IsingCoupling, IsingField
+import numpy as np
 
 
 def qubo_to_ising(Q, offset=0):
@@ -131,6 +132,73 @@ def ising_to_qubo(h, J, offset=0):
         offset -= v
 
     return Q, offset
+
+
+def matrix_to_qubo(matrix):
+    r"""matrix_to_qubo.
+
+    Convert a matrix to a QUBO dictionary.
+
+    Parameters
+    ----------
+    matrix : list of lists or 2-dimensional numpy array.
+        ``matrix[i][j]`` is equal to :math:`Q_{ij}`.
+
+    Return
+    ------
+    Q : qubovert.utils.QUBOMatrix object.
+       The upper triangular QUBO dictionary. See
+       ``help(qubovert.utils.QUBOMatrix)``.
+
+    """
+    if not isinstance(matrix, np.ndarray):
+        matrix = np.array(matrix)
+
+    if len(matrix.shape) != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("Input matrix must be square and two-dimensional")
+
+    Q = QUBOMatrix()
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            Q[(i, j)] += matrix[i][j]
+
+    return Q
+
+
+def qubo_to_matrix(Q, symmetric=False, array=True):
+    r"""qubo_to_matrix.
+
+    Convert a QUBO dictionary to its matrix form. The indices of the ``Q``
+    dictionary should be integers from 0 to ``n-1``, where there are ``n``
+    binary variables in the QUBO problem.
+
+    Parameters
+    ----------
+    Q : dict or qubovert.utils.QUBOMatrix object.
+        Input QUBO dictionary, where ``Q[(i, j)]`` corresponds to
+        :math:`Q_{ij}`.
+    symmetric : bool (optional, defaults to False).
+        Whether the returned matrix should be symmetric or upper-triangular.
+        If ``symmetric`` is True, then the matrix will be symmetric, ie
+        ``matrix[i][j] == matrix[j][i]``. Otherwise, it will be
+        upper-triangular, ie ``marix[i][j] == 0`` if ``i > j``.
+    array : bool (optional, defaults to True).
+        Whether the returned matrix should be a numpy array or list of lists.
+        If ``array`` is True, then it will be a numpy array, otherwise, it
+        will be a list of lists.
+
+    Return
+    ------
+    matrix : numpy array or list of lists.
+        The matrix representing the QUBO. See the arguments ``symmetric`` and
+        ``array`` for info on the return type of ``matrix``.
+
+    """
+    if not Q:
+        raise ValueError("QUBO dictionary is empty")
+    elif not isinstance(Q, QUBOMatrix):
+        Q = QUBOMatrix(Q)
+    return Q.to_matrix(symmetric, array)
 
 
 def binary_to_spin(x):

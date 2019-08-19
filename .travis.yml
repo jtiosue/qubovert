@@ -11,7 +11,5 @@ install:
 script:
   - pydocstyle convention=numpy qubovert
   - pytest --codestyle
-  # I think pytest --codestyle also runs all the tests, but just in case ...
-  - pytest
   - python setup.py sdist bdist_wheel
   - twine check dist/*
