@@ -28,6 +28,4 @@ test:
 	$(python_cmd) -m twine check dist/*
 
 run_tests:
-	install_dev
-	test
-	clean
+	install_dev test clean
