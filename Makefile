@@ -1,5 +1,5 @@
-python_cmd = python
-virtualenv_cmd := $(python_cmd) -m virtualenv
+python_cmd := python
+virtualenv_cmd := $(python_cmd) -m venv
 pip_cmd := $(python_cmd) -m pip
 
 clean:
