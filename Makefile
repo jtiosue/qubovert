@@ -26,6 +26,3 @@ test:
 	$(python_cmd) -m pytest --codestyle
 	$(python_cmd) setup.py sdist bdist_wheel
 	$(python_cmd) -m twine check dist/*
-
-run_tests:
-	install_dev test clean

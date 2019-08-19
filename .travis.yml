@@ -24,5 +24,11 @@ language: python
 #  - rm -rf build
 #  - rm -rf qubovert.egg-info
 
+install:
+  - make install_dev
+
 script:
-  - make run_tests
+  - make test
+
+after_script:
+  - make clean
