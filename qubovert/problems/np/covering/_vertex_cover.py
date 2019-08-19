@@ -59,7 +59,7 @@ class VertexCover(Problem):
     References
     ----------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.
+        in Physics, 2:5, 2014.
 
     """
 

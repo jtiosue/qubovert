@@ -20,7 +20,7 @@ The conversions are based on [Lucas].
 References
 ----------
 .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in
-Physics, 2:5, 2014.
+    Physics, 2:5, 2014.
 
 """
 
