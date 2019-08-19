@@ -28,7 +28,7 @@ install:
   - make install_dev
 
 script:
-  - make test
+  - make test_dev
 
 after_script:
   - make clean

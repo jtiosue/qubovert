@@ -12,17 +12,17 @@ clean:
 install_dev:
 	$(virtualenv_cmd) venv-dev
 	source venv-dev/bin/activate
-	$(pip_cmd) install -r requirements-dev.txt
-	$(pip_cmd) install -e .
+	. venv-dev/bin/activate && $(pip_cmd) install -r requirements-dev.txt
+	. venv-dev/bin/activate && $(pip_cmd) install -e .
 
 install:
 	$(virtualenv_cmd) venv
 	source venv/bin/activate
-	$(pip_cmd) install -r requirements.txt
-	$(pip_cmd) install -e .
+	. venv-dev/bin/activate && $(pip_cmd) install -r requirements.txt
+	. venv-dev/bin/activate && $(pip_cmd) install -e .
+
+test_dev:
+	env -i bash -c "source venv-dev/bin/activate && python -m pydocstyle convention=numpy qubovert && python -m pytest --codestyle && python setup.py sdist bdist_wheel && python -m twine check dist/*"
 
 test:
-	$(python_cmd) -m pydocstyle convention=numpy qubovert
-	$(python_cmd) -m pytest --codestyle
-	$(python_cmd) setup.py sdist bdist_wheel
-	$(python_cmd) -m twine check dist/*
+	env -i bash -c "source venv/bin/activate && python -m pydocstyle convention=numpy qubovert && python -m pytest --codestyle && python setup.py sdist bdist_wheel && python -m twine check dist/*"
