@@ -3,13 +3,26 @@ language: python
 #python:
 #  - 3.6
 
-install:
-  # - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
-  - pip install -e .
+#install:
+#  - python -m pip install virtualenv
+#  - python -m virtualenv venv
+#  - source venv/bin/activate
+#  - python -m pip install -r requirements-dev.txt
+#  - python -m pip install -e .
+#
+#script:
+#  - python -m pydocstyle convention=numpy qubovert
+#  - python -m pytest --codestyle
+#  - python setup.py sdist bdist_wheel
+#  - python -m twine check dist/*
+#
+#after_script:
+#  - deactivate
+#  - rm -rf venv
+#  - rm -rf venv-dev
+#  - rm -rf dist
+#  - rm -rf build
+#  - rm -rf qubovert.egg-info
 
 script:
-  - pydocstyle convention=numpy qubovert
-  - pytest --codestyle
-  - python setup.py sdist bdist_wheel
-  - twine check dist/*
+  - make run_tests
