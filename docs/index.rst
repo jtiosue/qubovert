@@ -25,7 +25,8 @@ Binary Optimization models
 
 .. automodule:: qubovert
     :members:
-    :show-inheritance:
+    :special-members:
+    :inherited-members:
 
 
 Problems defined
@@ -45,7 +46,8 @@ For example, you can use the ``SetCover`` class with any of the following.
 
 .. automodule:: qubovert.problems
     :members:
-    :show-inheritance:
+    :special-members:
+    :inherited-members:
 
 
 Utility methods
@@ -56,7 +58,8 @@ Note that the ``utils`` modules will not be imported with ``from qubovert import
 
 .. automodule:: qubovert.utils
     :members:
-    :show-inheritance:
+    :special-members:
+    :inherited-members:
 
 
 Copyright

@@ -30,6 +30,12 @@ QUBOVert
 
 Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
 
+
+Managing QUBO, Ising, PUBO, and HOBO formulations
+-------------------------------------------------
+See the docstrings for ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HOBO``.
+
+
 Convert common problems to QUBO form.
 -------------------------------------
 
