@@ -13,7 +13,7 @@ install:
 	. venv-dev/bin/activate && pip install -e .
 
 test:
-   	. venv-dev/bin/activate && python -m pydocstyle convention=numpy qubovert
+	. venv-dev/bin/activate && python -m pydocstyle convention=numpy qubovert
 	. venv-dev/bin/activate && python -m pytest --codestyle
 	. venv-dev/bin/activate && python setup.py sdist bdist_wheel
 	. venv-dev/bin/activate && python -m twine check dist/*
