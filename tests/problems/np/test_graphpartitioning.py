@@ -16,7 +16,7 @@
 Contains tests for the GraphPartitioning class.
 """
 
-from qubovert import GraphPartitioning
+from qubovert.problems import GraphPartitioning
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 

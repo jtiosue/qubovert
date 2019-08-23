@@ -14,7 +14,7 @@
 
 """_set_cover.py.
 
-Contains the SetCover class. See ``help(qubovert.SetCover)``.
+Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 
 """
 

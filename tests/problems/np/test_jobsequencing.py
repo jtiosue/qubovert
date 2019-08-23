@@ -16,7 +16,7 @@
 Contains tests for the JobSequencing class.
 """
 
-from qubovert import JobSequencing
+from qubovert.problems import JobSequencing
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 

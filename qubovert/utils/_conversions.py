@@ -32,7 +32,8 @@ def qubo_to_ising(Q, offset=0):
     Parameters
     ----------
     Q : dictionary or qubovert.utils.QUBOMatrix object.
-        Maps tuples of binary variables indices to the Q value.
+        Maps tuples of binary variables indices to the Q value. Indicies
+        must be integers >= 0.
     offset : float (optional, defaults to 0).
              The part of the objective function that does not depend on the
              variables.
@@ -86,11 +87,11 @@ def ising_to_qubo(h, J, offset=0):
     Parameters
     ----------
     h : dictionary or qubovert.utils.IsingField object.
-        Maps spin indices to the field value.
+        Maps spin indices to the field value. Indicies must be integers >= 1.
     J : dictionary or qubovert.utils.IsingCoupling object.
         Maps tuples of spin indices to the coupling value. Note
         that J cannot have a key that has a repeated index, ie (1, 1) is an
-        invalid key.
+        invalid key. Indicies must be integers >= 1.
     offset : float (optional, defaults to 0).
         The part of the objective function that does not depend on the
         variables.

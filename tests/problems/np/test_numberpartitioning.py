@@ -16,7 +16,7 @@
 Contains tests for the NumberPartitioning class.
 """
 
-from qubovert import NumberPartitioning
+from qubovert.problems import NumberPartitioning
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 

@@ -20,15 +20,24 @@ README
 .. include:: ../README.rst
 
 
+Binary Optimization models
+==========================
+
+.. automodule:: qubovert
+    :members:
+    :show-inheritance:
+
+
 Problems defined
 ================
 
-Note that these are all imported to use globally. For example, you can use the ``SetCover`` class with any of the following.
+Note that the ``problems`` modules will not be imported with ``from qubovert import *``. You must import ``qubovert.problems`` explicitly.
+
+For example, you can use the ``SetCover`` class with any of the following.
 
 .. code:: python
 
     import qubovert
-    qubovert.SetCover(...)
     qubovert.problems.SetCover(...)
     qubovert.problems.np.SetCover(...)
     qubovert.problems.np.covering.SetCover(...)
@@ -36,6 +45,7 @@ Note that these are all imported to use globally. For example, you can use the `
 
 .. automodule:: qubovert.problems
     :members:
+    :show-inheritance:
 
 
 Utility methods
@@ -46,6 +56,7 @@ Note that the ``utils`` modules will not be imported with ``from qubovert import
 
 .. automodule:: qubovert.utils
     :members:
+    :show-inheritance:
 
 
 Copyright

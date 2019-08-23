@@ -35,13 +35,14 @@ Convert common problems to QUBO form.
 
 So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
 
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. Make sure you run ``python -m pytest``, ``python -m pytest --codestyle`` before committing anything (yes, even the `tests` need to pass codestyle checks), and ``python -m pydocstyle convention=numpy qubovert`` to ensure that the build passes. When you push changes to the master branch, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
+To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install_dev``, ``make test_dev``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
 
 
 Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 
 Installation
 ------------
+`For the old, stable release`.
 .. code:: shell
 
   pip install qubovert
@@ -65,9 +66,10 @@ Then you can use it in Python with
     # get info
     help(qubovert)
 
-    # see all the problems specified
+    # see the main functionality
     print(qubovert.__all__)
-    # or equivalently
+
+    # see all the probles defined
     print(qubovert.problems.__all__)
 
     # see the utilities defined
@@ -89,7 +91,7 @@ See the following Set Cover example. All other problems can be used in a similar
 
 .. code:: python
 
-    from qubovert import SetCover
+    from qubovert.problems import SetCover
     from any_module import qubo_solver
     # or you can use my bruteforce solver...
     # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
@@ -113,7 +115,7 @@ To use the Ising formulation instead:
 
 .. code:: python
 
-    from qubovert import SetCover
+    from qubovert.problems import SetCover
     from any_module import ising_solver
     # or you can use my bruteforce solver...
     # from qubovert.utils import solve_ising_bruteforce as ising_solver
@@ -138,8 +140,8 @@ To see problem specifics, run
 
 .. code:: python
 
-    help(qubovert.SetCover)
-    help(qubovert.VertexCover)
+    help(qubovert.problems.SetCover)
+    help(qubovert.problems.VertexCover)
     # etc
 
 I have very descriptive doc strings that should explain everything you need to know to use each problem class.

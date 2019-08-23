@@ -16,7 +16,7 @@
 Contains tests for the VertexCover class.
 """
 
-from qubovert import VertexCover
+from qubovert.problems import VertexCover
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 

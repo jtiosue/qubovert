@@ -14,7 +14,8 @@
 
 """_graph_partitioning.py.
 
-Contains the GraphPartitioning class. See ``help(qubovert.GraphPartitioning)``.
+Contains the GraphPartitioning class.
+See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 

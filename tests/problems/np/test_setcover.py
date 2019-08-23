@@ -16,7 +16,7 @@
 Contains tests for the SetCover class.
 """
 
-from qubovert import SetCover
+from qubovert.problems import SetCover
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 

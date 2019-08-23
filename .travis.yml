@@ -4,10 +4,10 @@ language: python
 #  - 3.6
 
 install:
-  - make install_dev
+  - make install
 
 script:
-  - make test_dev
+  - make test
 
 after_script:
   - make clean

@@ -15,7 +15,7 @@
 """_number_partitioning.py.
 
 Contains the NumberPartitioning class. See
-``help(qubovert.NumberPartitioning)``.
+``help(qubovert.problems.NumberPartitioning)``.
 
 """
 

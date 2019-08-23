@@ -14,7 +14,7 @@
 
 """_vertex_cover.py.
 
-Contains the VertexCover class. See ``help(qubovert.VertexCover)``.
+Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 

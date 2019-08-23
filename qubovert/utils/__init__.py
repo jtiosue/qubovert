@@ -19,6 +19,7 @@ See ``__all__`` for a list of the utilities.
 """
 
 # import order here is important!
+from ._dict_arithmetic import DictArithmetic
 from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
 from ._conversions import (
     qubo_to_ising, ising_to_qubo,
@@ -30,6 +31,7 @@ from ._solve_bruteforce import (
     solve_qubo_bruteforce, solve_ising_bruteforce, qubo_value, ising_value
 )
 from ._problem_parentclass import Problem
+from ._bo_parentclass import BO
 
 
 __all__ = (
@@ -49,6 +51,8 @@ __all__ = (
     "qubo_value",
     "ising_value",
     "Problem",
+    "DictArithmetic",
+    "BO",
 )
 
 

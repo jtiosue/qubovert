@@ -18,11 +18,15 @@ This file contains QUBOMatrix, IsingCoupling, and IsingField objects, which
 are used for QUBO matrices Q, Ising coupling matrices J, and Ising fields h.
 """
 
+from . import DictArithmetic
 import numpy as np
 
 
-class QUBOMatrix(dict):
+class QUBOMatrix(DictArithmetic):
     """QUBOMatrix.
+
+    ``QUBOMatrix`` inherits some methods from ``DictArithmetic``, see
+    ``help(qubovert.utils.DictArithmetic)``.
 
     A class to handle QUBO matrices. It is the same thing as a dictionary
     with some methods modified. Note that each key must be a tuple of two
@@ -92,31 +96,11 @@ class QUBOMatrix(dict):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        """__init__.
-
-        Initialize a QUBOMatrix object. If you supply args and kwargs that
-        represent a dictionary, they will be reinitialized to ensure that
-        the QUBOMatrix is upper triangular and contains no zero values.
-
-        Parameters
-        ---------
-        *args and **kwargs : see the docstring for dict.
-
-        """
-        super().__init__(*args, **kwargs)
-
-        # reset to make sure everything is in the proper form
-        items = tuple(self.items())
-        self.clear()
-        for key, value in items:
-            self[key] += value
-
     @property
     def num_binary_variables(self):
         """num_binary_variables.
 
-        Return the number of binary variables in the problem..
+        Return the number of binary variables in the problem.
 
         Return
         ------
@@ -174,7 +158,7 @@ class QUBOMatrix(dict):
         except TypeError:
             k = key
 
-        return self.get(k, 0)
+        return super().__getitem__(k)
 
     def __setitem__(self, key, value):
         """__setitem__.
@@ -204,40 +188,7 @@ class QUBOMatrix(dict):
                 "Key formatted incorrectly, must be tuple of two integers")
 
         k = tuple(sorted(key))
-        if value:
-            super().__setitem__(k, value)
-        else:
-            self.pop(k, 0)
-
-    def copy(self, *args, **kwargs):
-        """copy.
-
-        Same as dict.copy, but we adjust the method so that it returns a
-        QUBOMatrix object, or an IsingField or IsingCoupling object in those
-        subclasses.
-
-        Parameters
-        ----------
-        *args and **kwargs : see dict.copy.
-
-        """
-        return type(self)(super().copy(*args, **kwargs))
-
-    def update(self, *args, **kwargs):
-        """update.
-
-        Update the dictionary but following all the conventions of this class.
-
-        Parameters
-        ----------
-        *args and **kwargs : defines a dictionary.
-            Ie ``d = dict(*args, **kwargs)``.
-            Each element in d will be added in place to this instance following
-            all the required convensions.
-
-        """
-        for k, v in dict(*args, **kwargs).items():
-            self[k] = v
+        super().__setitem__(k, value)
 
     def to_matrix(self, symmetric=False, array=True):
         r"""to_matrix.
@@ -281,326 +232,6 @@ class QUBOMatrix(dict):
         if not array:
             return matrix.tolist()
         return matrix
-
-    def __add__(self, other):
-        """__add__.
-
-        Add two QUBOMatrices or dicts, return the sum.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Return
-        ------
-        Q : a QUBOMatrix object, self + other.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> print(d + g)
-        {(0, 0): 3}
-
-        """
-        d = self.copy()
-        d += other
-        return d
-
-    def __radd__(self, other):
-        """__radd__.
-
-        Add two QUBO Matrices. This will be called if the left one is just a
-        dict object. This is the same as the __add__ method, but is included
-        in case we are adding a dict and a QUBOMatrix object, instead of two
-        QUBOMatrix objects.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self + other.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> print(g + d)
-        {(0, 0): 3}
-
-        """
-        return self + other
-
-    def __iadd__(self, other):
-        """__iadd__.
-
-        Same as the __add__ method, but done in place.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> d += g
-        >>> print(d)
-        {(0, 0): 3}
-
-        """
-        for k, v in other.items():
-            self[k] += v
-        return self
-
-    def __sub__(self, other):
-        """__sub__.
-
-        Subtract two QUBOMatrices or dicts, return the difference.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self - other.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> print(d - g)  # will print {(0, 0): -1}
-
-        """
-        d = self.copy()
-        d -= other
-        return d
-
-    def __rsub__(self, other):
-        """__rsub__.
-
-        Subtract two QUBO Matrices. This will be called if the left one is just
-        a dict object. This is the same as the __sub__ method, but is included
-        in case we are adding a dict and a QUBOMatrix object, instead of two
-        QUBOMatrix objects.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, other - self.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> print(g - d)  # will print {(0, 0): 1}
-
-        """
-        return -1*self + other
-
-    def __isub__(self, other):
-        """__isub__.
-
-        Same as the __sub__ method, but done in place.
-
-        Parameters
-        ----------
-        other : a QUBOMatrix or dict object.
-
-        Returns
-        -------
-        Q : a QUBOMatrix object, self.
-
-        Examples
-        --------
-        >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
-        >>> g = {(0, 0): 2, (1, 0): 1}
-        >>> d -= g
-        >>> print(d)  # will print {(0, 0): -1}
-
-        """
-        for k, v in other.items():
-            self[k] -= v
-        return self
-
-    def __mul__(self, other):
-        """__mul__.
-
-        Multiplying a QUBOMatrix by a scalar.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
-        >>> print(d * 2)
-        {(0, 0): 2, (0, 1): -1}
-
-        """
-        d = self.copy()
-        d *= other
-        return d
-
-    def __rmul__(self, other):
-        """__rmul__.
-
-        Same as __mul__, but for different ordering.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
-        >>> print(2 * d)
-        {(0, 0): 2, (0, 1): -1}
-
-        """
-        return self * other
-
-    def __imul__(self, other):
-        """__imul__.
-
-        Same as __mul__, but done in place.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
-        >>> d *= 2
-        >>> print(d)
-        {(0, 0): 2, (0, 1): -1}
-
-        """
-        for k in tuple(self.keys()):
-            self[k] *= other
-        return self
-
-    def __truediv__(self, other):
-        """__truediv__.
-
-        Dividing a QUBOMatrix by a scalar.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
-        >>> print(d / 2)
-        {(0, 0): .5, (0, 1): -.5}
-
-        """
-        d = self.copy()
-        d /= other
-        return d
-
-    def __itruediv__(self, other):
-        """__itruediv__.
-
-        Same as __truediv__, but done in place.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-1)
-        >>> d /= 2
-        >>> print(d)
-        {(0, 0): .5, (0, 1): -.5}
-
-        """
-        for k in tuple(self.keys()):
-            self[k] /= other
-        return self
-
-    def __floordiv__(self, other):
-        """__floordiv__.
-
-        Floor dividing a QUBOMatrix by a scalar.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=2, (0, 1)=-1)
-        >>> print(d // 2)
-        {(0, 0): 1, (0, 1): 0}
-
-        """
-        d = self.copy()
-        d //= other
-        return d
-
-    def __ifloordiv__(self, other):
-        """__ifloordiv__.
-
-        Same as __floordiv__, but done in place.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        Q : a QUBOMatrix object, self.
-
-        Example
-        -------
-        >>> d = QUBOMatrix((0, 0)=2, (0, 1)=-1)
-        >>> d //= 2
-        >>> print(d)
-        {(0, 0): 1, (0, 1): 0}
-
-        """
-        for k in tuple(self.keys()):
-            self[k] //= other
-        return self
 
 
 class IsingCoupling(QUBOMatrix):

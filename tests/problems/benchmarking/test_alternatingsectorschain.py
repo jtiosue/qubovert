@@ -13,23 +13,23 @@
 #   limitations under the License.
 
 """
-Contains tests for the AlternatingSectorChain class.
+Contains tests for the AlternatingSectorsChain class.
 """
 
-from qubovert import AlternatingSectorChain
+from qubovert.problems import AlternatingSectorsChain
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 
 
-problem = AlternatingSectorChain(12)
+problem = AlternatingSectorsChain(12)
 
 
-def test_AlternatingSectorChain_str():
+def test_AlternatingSectorsChain_str():
 
     assert eval(str(problem)) == problem
 
 
-def test_AlternatingSectorChain_bruteforce():
+def test_AlternatingSectorsChain_bruteforce():
 
     assert problem.solve_bruteforce() in ((-1,)*12, (1,)*12)
     assert (
@@ -40,7 +40,7 @@ def test_AlternatingSectorChain_bruteforce():
 
 # QUBO
 
-def test_AlternatingSectorChain_qubo_solve():
+def test_AlternatingSectorsChain_qubo_solve():
 
     Q, offset = problem.to_qubo(True)
     e, sol = solve_qubo_bruteforce(Q, offset)
@@ -61,7 +61,7 @@ def test_AlternatingSectorChain_qubo_solve():
     assert allclose(e, -65)
 
 
-def test_AlternatingSectorChain_qubo_numvars():
+def test_AlternatingSectorsChain_qubo_numvars():
 
     Q, offset = problem.to_qubo()
     assert (
@@ -72,7 +72,7 @@ def test_AlternatingSectorChain_qubo_numvars():
 
 # ising
 
-def test_AlternatingSectorChain_ising_solve():
+def test_AlternatingSectorsChain_ising_solve():
 
     args = problem.to_ising(True)
     e, sol = solve_ising_bruteforce(*args)
@@ -93,7 +93,7 @@ def test_AlternatingSectorChain_ising_solve():
     assert allclose(e, -65)
 
 
-def test_AlternatingSectorChain_ising_numvars():
+def test_AlternatingSectorsChain_ising_numvars():
 
     h, J, _ = problem.to_ising()
     assert (

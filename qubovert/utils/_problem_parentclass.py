@@ -19,7 +19,6 @@ the problem classes.
 
 """
 
-from qubovert import __name__ as MODULE_NAME
 from . import qubo_to_ising, ising_to_qubo, solve_qubo_bruteforce
 
 
@@ -83,25 +82,23 @@ class Problem:
     def __repr__(self):
         """__repr__.
 
-        Defined such that the following is true (assuming you have imported
-        qubovert as qubovert).
-
-        >>> s = Class_derivedfrom_Problem(*args)
-        >>> eval(repr(s)) == s
-        True
+        Same as __str__, but will give a truncted output.
 
         Return
         -------
         s : str.
 
         """
-        return MODULE_NAME + "." + str(self)
+        s = str(self)
+        if len(s) < 37:
+            return s
+        return s[:37] + " ..."
 
     def __str__(self):
         """__str__.
 
         Defined such that the following is true (assuming you have imported
-        * from qubovert).
+        * from qubovert.problems).
 
         >>> s = Class_derived_from_Problem(*args)
         >>> eval(str(s)) == s
@@ -113,6 +110,8 @@ class Problem:
 
         """
         s = self.__class__.__name__ + "("
+        if not self._problem_args and not self._problem_kwargs:
+            return s + ")"
         for a in self._problem_args:
             val = str(a) if not isinstance(a, str) else "'%s'" % a
             s += val + ", "
@@ -198,8 +197,8 @@ class Problem:
                 same way as an ordinary dictionary. For more information,
                 see ``help(qubovert.utils.IsingCoupling)``.
             offset : float.
-                It is the sum of the terms in the formulation in
-                the cited paper that don't involve any variables.
+                It is the sum of the terms in the formulation that don't
+                involve any variables.
 
         """
         return qubo_to_ising(*self.to_qubo(*args, **kwargs))
@@ -238,7 +237,7 @@ class Problem:
         Parameters
         ----------
         solution : iterable or dict.
-            solution can be the output of NumberPartitioning.convert_solution,
+            solution can be the output of ``convert_solution``,
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO

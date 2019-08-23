@@ -14,7 +14,8 @@
 
 """_job_sequencing.py.
 
-Contains the JobSequencing class. See ``help(qubovert.JobSequencing)``.
+Contains the JobSequencing class.
+See ``help(qubovert.problems.JobSequencing)``.
 
 """
 
