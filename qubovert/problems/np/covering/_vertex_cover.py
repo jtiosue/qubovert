@@ -21,6 +21,9 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 from qubovert.utils import Problem, QUBOMatrix
 
 
+__all__ = 'VertexCover,'
+
+
 class VertexCover(Problem):
     """VertexCover.
 
@@ -42,9 +45,8 @@ class VertexCover(Problem):
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> edges = {("a", "b"), ("a", "c"), ("c", "d"), ("a", "d")}
     >>> problem = VertexCover(edges)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q  = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -146,6 +148,10 @@ class VertexCover(Problem):
         becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. ``A`` and
         ``B`` are parameters to enforce constraints.
 
+        It is formatted such that if all the constraints are satisfied, then
+        the objective function will be equal to the total number of colored
+        verticies.
+
         Parameters
         ----------
         A: positive float (optional, defaults to 2).
@@ -155,29 +161,23 @@ class VertexCover(Problem):
 
         Return
         -------
-        res : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see help(qubovert.utils.QUBOMatrix).
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
-                will be equal to the total number of colored verticies.
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see help(qubovert.utils.QUBOMatrix).
 
         Example
         -------
         >>> problem = VertexCover({(0, 1), (0, 2)})
-        >>> Q, offset = problem.to_qubo()
+        >>> Q = problem.to_qubo()
 
         """
         # all naming conventions follow the paper listed in the docstring
 
         Q = QUBOMatrix()
 
-        offset = self._n * A  # comes from the constraint
+        Q += self._n * A  # constant comes from the constraint
 
         # encode H_B (equation 34)
         for i in range(self._N):
@@ -192,7 +192,7 @@ class VertexCover(Problem):
             Q[(iu, iu)] -= A
             Q[(iv, iv)] -= A
 
-        return Q, offset
+        return Q
 
     def convert_solution(self, solution):
         """convert_solution.

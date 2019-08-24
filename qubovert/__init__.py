@@ -26,12 +26,15 @@ from ._version import __version__
 from . import utils
 from . import problems
 
-from ._qubo import QUBO
-from ._ising import Ising
+from ._qubo import *
+from ._ising import *
+
+from ._qubo import __all__ as __all_qubo__
+from ._ising import __all__ as __all_ising__
 
 __all__ = (
-    "QUBO",
-    "Ising",
+    __all_qubo__ +
+    __all_ising__
 )
 
 name = "qubovert"

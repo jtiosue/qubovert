@@ -19,40 +19,28 @@ See ``__all__`` for a list of the utilities.
 """
 
 # import order here is important!
-from ._dict_arithmetic import DictArithmetic
-from ._qubo_matrix import QUBOMatrix, IsingCoupling, IsingField
-from ._conversions import (
-    qubo_to_ising, ising_to_qubo,
-    matrix_to_qubo, qubo_to_matrix,
-    binary_to_spin, spin_to_binary,
-    decimal_to_binary, decimal_to_spin
-)
-from ._solve_bruteforce import (
-    solve_qubo_bruteforce, solve_ising_bruteforce, qubo_value, ising_value
-)
-from ._problem_parentclass import Problem
-from ._bo_parentclass import BO
+from ._dict_arithmetic import *
+from ._qubo_matrix import *
+from ._conversions import *
+from ._solve_bruteforce import *
+from ._problem_parentclass import *
+from ._bo_parentclass import *
+
+from _dict_arithmetic import __all__ as __all_dict_arithmetic__
+from ._qubo_matrix import __all__ as __all_qubo_matrix__
+from ._conversions import __all__ as __all_conversions__
+from ._solve_bruteforce import __all__ as __all_solve_bruteforce__
+from ._problem_parentclass import __all__ as __all_problem_parentclass__
+from _bo_parentclass import __all__ as __all_bo__
 
 
 __all__ = (
-    "QUBOMatrix",
-    "IsingCoupling",
-    "IsingField",
-    "qubo_to_ising",
-    "ising_to_qubo",
-    "matrix_to_qubo",
-    "qubo_to_matrix",
-    "binary_to_spin",
-    "spin_to_binary",
-    "decimal_to_binary",
-    "decimal_to_spin",
-    "solve_qubo_bruteforce",
-    "solve_ising_bruteforce",
-    "qubo_value",
-    "ising_value",
-    "Problem",
-    "DictArithmetic",
-    "BO",
+    __all_dict_arithmetic__ +
+    __all_qubo_matrix__ +
+    __all_conversions__ +
+    __all_solve_bruteforce__ +
+    __all_problem_parentclass__ +
+    __all_bo__
 )
 
 

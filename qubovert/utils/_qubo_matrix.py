@@ -14,42 +14,50 @@
 
 """_qubo_matrix.py.
 
-This file contains QUBOMatrix, IsingCoupling, and IsingField objects, which
-are used for QUBO matrices Q, Ising coupling matrices J, and Ising fields h.
+This file contains QUBOMatrix, IsingMatrix, PUBOMatrix, and HIsingMatrix
+objects.
 """
 
 from . import DictArithmetic
-import numpy as np
 
 
-class QUBOMatrix(DictArithmetic):
-    """QUBOMatrix.
+__all__ = (
+    'PUBOMatrix', 'HIsingMatrix', 'QUBOMatrix', 'IsingMatrix'
+)
 
-    ``QUBOMatrix`` inherits some methods from ``DictArithmetic``, see
+
+class PUBOMatrix(DictArithmetic):
+    """PUBOMatrix.
+
+    ``PUBOMatrix`` inherits some methods from ``DictArithmetic``, see
     ``help(qubovert.utils.DictArithmetic)``.
 
-    A class to handle QUBO matrices. It is the same thing as a dictionary
-    with some methods modified. Note that each key must be a tuple of two
-    integers >= 0.
+    A class to handle PUBO matrices. It is the same thing as a dictionary
+    with some methods modified. Note that each key must be a tuple of integers
+    >= 0.
+
+    Note that below we only consider keys that are of length 1 or 2, but they
+    can in general be arbitrarily long! See ``qubovert.utils.QUBOMatrix``
+    for an object that restricts the length to <= 2.
 
     One method is that values will always default to 0. Consider the following
     example:
 
-    >>> d = QUBOMatrix()
-    >>> print(d[(0, 0)]) # will print 0
-    >>> d[(0, 0)] += 1
-    >>> print(d) # will print {(0, 0): 1}
+    >>> d = PUBOMatrix()
+    >>> print(d[(0,)]) # will print 0
+    >>> d[(0,)] += 1
+    >>> print(d) # will print {(0,): 1}
 
     Compared to an ordinary dictionary.
 
     >>> g = dict()
-    >>> print(g[(0, 0)]) # will raise KeyError
-    >>> g[(0, 0)] += 1 # will raise KeyError, since (0, 0) was never set
+    >>> print(g[(0,)]) # will raise KeyError
+    >>> g[(0,)] += 1 # will raise KeyError, since (0,) was never set
 
-    One method of QUBOMatrix is that it will always keep the QUBO
+    One method of PUBOMatrix is that it will always keep the PUBO
     upper triangular! Consider the following example:
 
-    >>> d = QUBOMatrix()
+    >>> d = PUBOMatrix()
     >>> d[(1, 0)] += 2
     >>> print(d)
     >>> # will print {(0, 1): 2}
@@ -57,40 +65,48 @@ class QUBOMatrix(DictArithmetic):
     One method is that if we set an item to 0, it will be removed. Consider
     the following example:
 
-    >>> d = QUBOMatrix()
-    >>> d[(0, 0)] += 1
-    >>> d[(0, 0)] -= 1
+    >>> d = PUBOMatrix()
+    >>> d[(0,)] += 1
+    >>> d[(0,)] -= 1
     >>> print(d) # will print {}
 
-    One method is that if we initialize QUBOMatrix with a previous dictionary
-    it will be reinitialized to ensure that the QUBOMatrix is upper
+    One method is that if we initialize PUBOMatrix with a previous dictionary
+    it will be reinitialized to ensure that the PUBOMatrix is upper
     triangular and contains no zero values. Consider the following example:
 
-    >>> d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0})
-    >>> print(d) # will print {(0, 0): 1, (0, 1): 2}
+    >>> d = PUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (2, 0, 1): 1})
+    >>> print(d) # will print {(0,): 1, (0, 1): 2, (0, 1, 2): 1}
 
     We also change the update method so that it follows all the conventions.
 
-    >>> d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
-    >>> d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
-    >>> print(d)  # will print {(0, 1): 1, (1, 1): -1}
+    >>> d = PUBOMatrix({(0, 0): 1, (0, 1): 2})
+    >>> d.update({(0,): 0, (1, 0): 1, (1, 2): -1})
+    >>> print(d)  # will print {(0, 1): 1, (1, 2): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
     scalar multiplication, and all those in place. For example,
 
-    >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-2)
-    >>> g = d + {(0, 0): -1}
+    >>> d = PUBOMatrix((0, 0)=1, (0, 1)=-2)
+    >>> g = d + {(0,): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4
     >>> print(g) # will print {(0, 1): -8}
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
+    Adding or subtracting constants will update the () element of the
+    dict.
+
+    >>> d = PUBOMatrix()
+    >>> d += 5
+    >>> print(d)
+    {(): 5}
+
     Finally, if you try to access a key out of order, it will sort the key. Be
     careful with this, it can cause unexpected behavior if you don't know it.
     For example,
 
-    >>> d = QUBOMatrix()
+    >>> d = PUBOMatrix()
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
@@ -111,7 +127,10 @@ class QUBOMatrix(DictArithmetic):
         if not self:
             return 0
 
-        return len(set(y for x in self for y in x))
+        s = set()
+        for x in self:
+            s.update(set(x))
+        return len(s)
 
     @property
     def max_index(self):
@@ -131,7 +150,7 @@ class QUBOMatrix(DictArithmetic):
         if not self:
             return
 
-        return max(set(y for x in self for y in x))
+        return max(max(x) for x in self)
 
     def __getitem__(self, key):
         """__getitem__.
@@ -143,7 +162,7 @@ class QUBOMatrix(DictArithmetic):
 
         Parameters
         ---------
-        key : tuple of two integers.
+        key : tuple of integers.
             Element of the dictionary.
 
         Return
@@ -154,11 +173,245 @@ class QUBOMatrix(DictArithmetic):
 
         """
         try:
-            k = tuple(sorted(key))
+            k = tuple(sorted(set(key)))  # get rid of duplicates and sort
         except TypeError:
             k = key
 
         return super().__getitem__(k)
+
+    def __setitem__(self, key, value):
+        """__setitem__.
+
+        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
+        the key will be removed from the dictionary. Thus no elements in the
+        PUBOMatrix dictionary will ever have zero value. Additionally, this
+        method will keep the PUBO upper triangular, so if key[0] > key[1],
+        then we will call __setitem__((key[1], key[0]), value). Finally, any
+        repeated indices will reduced. For example. a key such as
+        ``(0, 0, 1, 2, 2)`` will be reduced to ``(0, 1, 2)``.
+
+        Parameters
+        ---------
+        key : tuple of integers.
+            Element of the dictionary.
+        value : numeric.
+            Value corresponding to the key.
+
+        """
+        incorrect_format = (
+            not isinstance(key, tuple) or
+            any(not isinstance(k, int) or k < 0 for k in key)
+        )
+
+        if incorrect_format:
+            raise KeyError(
+                "Key formatted incorrectly, must be tuple of pos integers")
+
+        k = tuple(sorted(set(key)))  # get rid of duplicates and sort
+        super().__setitem__(k, value)
+
+
+class HIsingMatrix(PUBOMatrix):
+    """HIsingMatrix.
+
+    ``HIsingMatrix`` inherits some methods from ``DictArithmetic``, see
+    ``help(qubovert.utils.DictArithmetic)``.
+
+    A class to handle HIsing matrices. It is the same thing as a dictionary
+    with some methods modified. Note that each key must be a tuple of integers
+    >= 0.
+
+    Note that below we only consider keys that are of length 1 or 2, but they
+    can in general be arbitrarily long! See ``qubovert.utils.IsingMatrix``
+    for an object that restricts the length to <= 2.
+
+    One method is that values will always default to 0. Consider the following
+    example:
+
+    >>> d = HIsingMatrix()
+    >>> print(d[(0,)]) # will print 0
+    >>> d[(0,)] += 1
+    >>> print(d) # will print {(0,): 1}
+
+    One method of HIsingMatrix is that it will always keep the HIsing
+    upper triangular! Consider the following example:
+
+    >>> d = HIsingMatrix()
+    >>> d[(1, 0)] += 2
+    >>> print(d)
+    >>> # will print {(0, 1): 2}
+
+    One method is that if we set an item to 0, it will be removed. Consider
+    the following example:
+
+    >>> d = HIsingMatrix()
+    >>> d[(0,)] += 1
+    >>> d[(0,)] -= 1
+    >>> print(d) # will print {}
+
+    One method is that if we initialize HIsingMatrix with a previous dictionary
+    it will be reinitialized to ensure that the HIsingMatrix is upper
+    triangular and contains no zero values. Consider the following example:
+
+    >>> d = HIsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (2, 0, 1): 1})
+    >>> print(d) # will print {(0,): 1, (0, 1): 2, (0, 1, 2): 1}
+
+    We also change the update method so that it follows all the conventions.
+
+    >>> d = HIsingMatrix({(0,): 1, (0, 1): 2})
+    >>> d.update({(0,): 0, (1, 0): 1, (1, 2): -1})
+    >>> print(d)  # will print {(0, 1): 1, (1, 2): -1}
+
+    We also include arithmetic, addition, subtraction, scalar division,
+    scalar multiplication, and all those in place. For example,
+
+    >>> d = HIsingMatrix((0,)=1, (0, 1)=-2)
+    >>> g = d + {(0,): -1}
+    >>> print(g) # will print {(0, 1): -2}
+    >>> g *= 4
+    >>> print(g) # will print {(0, 1): -8}
+    >>> g -= {(0, 1): -8}
+    >>> print(g) # will print {}
+
+    If we try to set a key with duplicated indices, this will raise a KeyError.
+    For example, the following will raise a KeyError.
+
+    >>> d = HIsingMatrix()
+    >>> d[(0, 0)] += 1
+
+    Adding or subtracting constants will update the () element of the
+    dict.
+
+    >>> d = HIsingMatrix()
+    >>> d += 5
+    >>> print(d)
+    {(): 5}
+
+    Finally, if you try to access a key out of order, it will sort the key. Be
+    careful with this, it can cause unexpected behavior if you don't know it.
+    For example,
+
+    >>> d = HIsingMatrix()
+    >>> d[(0, 1)] += 2
+    >>> print(d[(1, 0)])  # will print 2
+
+    """
+
+    def __setitem__(self, key, value):
+        """__setitem__.
+
+        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
+        the key will be removed from the dictionary. Thus no elements in the
+        HIsingMatrix dictionary will ever have zero value. Additionally, this
+        method will keep the HIsing upper triangular, so if key[0] > key[1],
+        then we will call __setitem__((key[1], key[0]), value). Finally, any
+        repeated indices will cause a KeyError. For example. a key such as
+        ``(0, 0, 1, 2, 2)`` will raise a KeyError.
+
+        Parameters
+        ---------
+        key : tuple of integers.
+            Element of the dictionary.
+        value : numeric.
+            Value corresponding to the key.
+
+        """
+        k = tuple(sorted(set(key)))
+        incorrect_format = (
+            not isinstance(key, tuple) or
+            any(not isinstance(k, int) or k < 0 for k in key) or
+            k != tuple(sorted(key))
+        )
+
+        if incorrect_format:
+            raise KeyError(
+                "Key formatted incorrectly, must be tuple of unique pos "
+                "integers")
+
+        dict.__setitem__(k, value)
+
+
+class QUBOMatrix(PUBOMatrix):
+    """QUBOMatrix.
+
+    ``QUBOMatrix`` inherits some methods from ``PUBOMatrix``, see
+    ``help(qubovert.utils.PUBOMattrix)``.
+
+    A class to handle QUBO matrices. It is the same thing as a dictionary
+    with some methods modified. Note that each key must be a tuple of two
+    integers >= 0.
+
+    One method is that values will always default to 0. Consider the following
+    example:
+
+    >>> d = QUBOMatrix()
+    >>> print(d[(0,)]) # will print 0
+    >>> d[(0,)] += 1
+    >>> print(d) # will print {(0,): 1}
+
+    Compared to an ordinary dictionary.
+
+    >>> g = dict()
+    >>> print(g[(0,)]) # will raise KeyError
+    >>> g[(0,)] += 1 # will raise KeyError, since (0,) was never set
+
+    One method of QUBOMatrix is that it will always keep the QUBO
+    upper triangular! Consider the following example:
+
+    >>> d = QUBOMatrix()
+    >>> d[(1, 0)] += 2
+    >>> print(d)
+    >>> # will print {(0, 1): 2}
+
+    One method is that if we set an item to 0, it will be removed. Consider
+    the following example:
+
+    >>> d = QUBOMatrix()
+    >>> d[(0,)] += 1
+    >>> d[(0,)] -= 1
+    >>> print(d) # will print {}
+
+    One method is that if we initialize QUBOMatrix with a previous dictionary
+    it will be reinitialized to ensure that the QUBOMatrix is upper
+    triangular and contains no zero values. Consider the following example:
+
+    >>> d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0})
+    >>> print(d) # will print {(0, 0): 1, (0, 1): 2}
+
+    We also change the update method so that it follows all the conventions.
+
+    >>> d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    >>> d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
+    >>> print(d)  # will print {(0, 1): 1, (1,): -1}
+
+    We also include arithmetic, addition, subtraction, scalar division,
+    scalar multiplication, and all those in place. For example,
+
+    >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-2)
+    >>> g = d + {(0, 0): -1}
+    >>> print(g) # will print {(0, 1): -2}
+    >>> g *= 4
+    >>> print(g) # will print {(0, 1): -8}
+    >>> g -= {(0, 1): -8}
+    >>> print(g) # will print {}
+
+    Adding or subtracting constants will update the () element of the
+    dict.
+
+    >>> d = QUBOMatrix()
+    >>> d += 5
+    >>> print(d)
+    {(): 5}
+
+    Finally, if you try to access a key out of order, it will sort the key. Be
+    careful with this, it can cause unexpected behavior if you don't know it.
+    For example,
+
+    >>> d = QUBOMatrix()
+    >>> d[(0, 1)] += 2
+    >>> print(d[(1, 0)])  # will print 2
+
+    """
 
     def __setitem__(self, key, value):
         """__setitem__.
@@ -177,133 +430,90 @@ class QUBOMatrix(DictArithmetic):
             Value corresponding to the key.
 
         """
-        incorrect_format = (
-            not isinstance(key, tuple) or not len(key) == 2 or
-            not isinstance(key[0], int) or not isinstance(key[1], int) or
-            key[0] < 0 or key[1] < 0
-        )
-
-        if incorrect_format:
+        if not isinstance(key, tuple) or len(key) > 2:
             raise KeyError(
-                "Key formatted incorrectly, must be tuple of two integers")
+                "Key formatted incorrectly, must be tuple of <= 2 integers")
 
-        k = tuple(sorted(key))
-        super().__setitem__(k, value)
-
-    def to_matrix(self, symmetric=False, array=True):
-        r"""to_matrix.
-
-        Convert a QUBO/IsingCoupling dictionary to its matrix form. The indices
-        of the dictionary should be integers from 0 to ``n-1``,
-        where there are ``n`` binary variables in the problem.
-
-        Parameters
-        ----------
-        symmetric : bool (optional, defaults to False).
-            Whether the returned matrix should be symmetric or
-            upper-triangular. If ``symmetric`` is True, then the matrix will be
-            symmetric, ie ``matrix[i][j] == matrix[j][i]``. Otherwise, it will
-            be upper-triangular, ie ``marix[i][j] == 0`` if ``i > j``.
-        array : bool (optional, defaults to True).
-            Whether the returned matrix should be a numpy array or list of
-            lists. If ``array`` is True, then it will be a numpy array,
-            otherwise, it will be a list of lists.
-
-        Return
-        ------
-        matrix : numpy array or list of lists.
-            The matrix representing the problem. See the arguments
-            ``symmetric`` and ``array`` for info on the return type of
-            ``matrix``.
-
-        """
-        n = self.max_index + 1
-
-        matrix = np.zeros((n, n))
-        for (i, j), v in self.items():
-            if i == j:
-                matrix[i][j] = v
-            elif symmetric:
-                matrix[i][j] = v / 2
-                matrix[j][i] = v / 2
-            else:
-                matrix[i][j] = v
-
-        if not array:
-            return matrix.tolist()
-        return matrix
+        super().__setitem__(key, value)
 
 
-class IsingCoupling(QUBOMatrix):
-    """IsingCoupling.
+class IsingMatrix(HIsingMatrix):
+    """IsingMatrix.
 
-    A class to handle the J coupling Ising matrices, inherits from QUBOMatrix.
-    It is the same thing as a dictionary with some methods modified. Note that
-    each key must be a tuple of two integers >= 0. Note that this is almost
-    exactly the same as QUBOMatrix, except that the keys cannot be tuples of
-    the same index. For example, ``QUBOMatrix({(0, 0): 1})`` is valid but
-    ``IsingCoupling({(0, 0): 1})`` is invalid.
+    ``IsingMatrix`` inherits some methods from ``HIsingMatrix``, see
+    ``help(qubovert.utils.HIsingMatrix)``.
+
+    A class to handle Ising matrices. It is the same thing as a dictionary
+    with some methods modified. Note that each key must be a tuple integers
+    >= 0.
 
     One method is that values will always default to 0. Consider the following
     example:
 
-    >>> d = IsingCoupling()
-    >>> print(d[(0, 1)]) # will print 0
-    >>> d[(0, 1)] += 1
-    >>> print(d) # will print {(0, 1): 1}
+    >>> d = IsingMatrix()
+    >>> print(d[(0,)]) # will print 0
+    >>> d[(0,)] += 1
+    >>> print(d) # will print {(0,): 1}
 
-    Compared to an ordinary dictionary.
-
-    >>> g = dict()
-    >>> print(g[(0, 1)]) # will raise KeyError
-    >>> g[(0, 1)] += 1 # will raise KeyError, since (0, 0) was never set
-
-    One method of IsingCoupling is that it will always keep the coupling
+    One method of IsingMatrix is that it will always keep the Ising
     upper triangular! Consider the following example:
 
-    >>> d = IsingCoupling()
+    >>> d = IsingMatrix()
     >>> d[(1, 0)] += 2
     >>> print(d)
-    {(0, 1): 2}
+    >>> # will print {(0, 1): 2}
 
     One method is that if we set an item to 0, it will be removed. Consider
     the following example:
 
-    >>> d = IsingCoupling()
+    >>> d = IsingMatrix()
     >>> d[(0, 1)] += 1
     >>> d[(0, 1)] -= 1
     >>> print(d) # will print {}
 
-    One method is that if we initialize IsingCoupling with a previous
-    dictionary, it will be reinitialized to ensure that the IsingCoupling is
-    upper triangular and contains no zero values. Consider the following
-    example:
+    One method is that if we initialize IsingMatrix with a previous dictionary
+    it will be reinitialized to ensure that the IsingMatrix is upper
+    triangular and contains no zero values. Consider the following example:
 
-    >>> d = IsingCoupling({(0, 1): 1, (1, 0): 2, (2, 0): 0})
-    >>> print(d) # will print {(0, 1): 3}
+    >>> d = IsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0})
+    >>> print(d) # will print {(0,): 1, (0, 1): 2}
 
-    We also change the update method so that it follows all the conventions
-    .
-    >>> d = IsingCoupling({(0, 1): 1, (0, 2): 2})
-    >>> d.update({(1, 0): 0, (2, 1): 1})
-    >>> print(d)  # will print {(1, 2): 1, (0, 2): 2}
+    We also change the update method so that it follows all the conventions.
+
+    >>> d = Isingatrix({(0,): 1, (0, 1): 2})
+    >>> d.update({(0,): 0, (1, 0): 1, (1,): -1})
+    >>> print(d)  # will print {(0, 1): 1, (1,): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
     scalar multiplication, and all those in place. For example,
 
-    >>> d = IsingCoupling((0, 2)=1, (0, 1)=-2)
-    >>> g = d + {(0, 2): -1}
+    >>> d = IsingMatrix((0,)=1, (0, 1)=-2)
+    >>> g = d + {(0,): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4
     >>> print(g) # will print {(0, 1): -8}
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
+    If we try to set a key with duplicated labels, it will raise a KeyError.
+    For example, the following will raise a KeyError.
+
+    >>> d = IsingMatrix()
+    >>> d[(0, 0)] += 2
+
+    Adding or subtracting constants will update the () element of the
+    dict.
+
+    >>> d = IsingMatrix()
+    >>> d += 5
+    >>> print(d)
+    {(): 5}
+
     Finally, if you try to access a key out of order, it will sort the key. Be
-    careful with this, it can unexpected behavior if you don't know it.
+    careful with this, it can cause unexpected behavior if you don't know it.
     For example,
 
-    >>> d = IsingCoupling()
+    >>> d = IsingMatrix()
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
@@ -327,171 +537,9 @@ class IsingCoupling(QUBOMatrix):
             Value corresponding to the key.
 
         """
-        if not isinstance(key, tuple) or key[0] == key[1]:
+        if not isinstance(key, tuple) or len(key) > 2:
             raise KeyError(
                 "Key formatted incorrectly, "
-                "must be tuple of two different integers")
+                "must be tuple of <= 2 different integers")
 
         super().__setitem__(key, value)
-
-
-class IsingField(QUBOMatrix):
-    """IsingField.
-
-    A class to handle the h field Ising matrices, inherits from QUBOMatrix.
-    It is the same thing as a dictionary with some methods modified. Note that
-    each key must be an an integer >= 0. Note that this is almost exactly the
-    same as QUBOMatrix, except that the keys are integers instead of tuples.
-
-    One method is that values will always default to 0. Consider the following
-    example:
-
-    >>> d = IsingField()
-    >>> print(d[0]) # will print 0
-    >>> d[0] += 1
-    >>> print(d) # will print {0: 1}
-
-    Compared to an ordinary dict.
-
-    >>> g = dict()
-    >>> print(g[0]) # will raise KeyError
-    >>> g[0] += 1 # will raise KeyError, since (0, 0) was never set
-
-    One method is that if we set an item to 0, it will be removed. Consider
-    the following example:
-
-    >>> d = IsingField()
-    >>> d[1] += 1
-    >>> d[1] -= 1
-    >>> print(d) # will print {}
-
-    One method is that if we initialize IsingField with a previous
-    dictionary, it will be reinitialized to ensure that the IsingField is
-    contains no zero values and is all valid. Consider the following
-    example:
-
-    >>> d = IsingField({0: 1, 1: 2, 2: 0})
-    >>> print(d) # will print {0: 1, 1: 2}
-
-    We also change the update method so that it follows all the conventions.
-
-    >>> d = IsingField({0: 1, 2: -2})
-    >>> d.update({0: 0, 1: 1})
-    >>> print(d)  # will print {1: 1, 2: -2}
-
-    We also include arithmetic, addition, subtraction, scalar division,
-    scalar multiplication, and all those in place. For example,
-
-    >>> d = IsingField(0=1, 1=-2)
-    >>> g = d + {0: -1}
-    >>> print(g) # will print {1: -2}
-    >>> g *= 4
-    >>> print(g) # will print {1: -8}
-    >>> g -= {1: -8}
-    >>> print(g) # will print {}
-
-    """
-
-    def __setitem__(self, key, value):
-        """__setitem__.
-
-        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
-        the key will be removed from the dictionary. Thus no elements in the
-        IsingCoupling dictionary will ever have zero value. Additionally, this
-        method will keep the coupling upper triangular, so if key[0] > key[1],
-        then we will call ``__setitem__((key[1], key[0]), value)``. Finally,
-        key[0] cannot equal key[1], if so a KeyError will be raised.
-
-        Parameters
-        ----------
-        key: int.
-            Element of the dictionary.
-        value: numeric.
-            Value corresponding to the key.
-
-        """
-        if not isinstance(key, int) or key < 0:
-            raise KeyError(
-                "Key formatted incorrectly, must be a positive integer")
-
-        if value:
-            dict.__setitem__(self, key, value)
-        else:
-            self.pop(key, 0)
-
-    @property
-    def num_binary_variables(self):
-        """num_binary_variables.
-
-        Return the number of binary variables in the problem.
-
-        Return
-        ------
-        n : int.
-            Number of binary variables in the problem.
-
-        """
-        if not self:
-            return 0
-
-        return len(set(self.keys()))
-
-    @property
-    def max_index(self):
-        """max_index.
-
-        Returns the maximum label index of the problem. If the problem is
-        labeled with integers from 0 to ``n-1``, then ``max_index`` will give
-        the same result as ``num_binary_variables - 1``.
-
-        Return
-        ------
-        n : int or None.
-            Max label index of the problem dictionary. If the dict is empty,
-            then this returns None.
-
-        """
-        if not self:
-            return
-
-        return max(set(self.keys()))
-
-    def to_matrix(self, vector=False, array=True):
-        r"""to_matrix.
-
-        Convert a IsingField dictionary to its matrix form. The indices of the
-        dictionary should be integers from 0 to ``n-1``, where there are ``n``
-        binary variables in the problem.
-
-        Parameters
-        ----------
-        vector : bool (optional, default to False).
-            Whether to return a vector or a matrix. A vector will be one-
-            dimensional, whereas a matrix will be two-dimensional. Ie
-            ``vector[i] == matrix[i][0]``.
-        array : bool (optional, defaults to True).
-            Whether the returned matrix should be a numpy array or list of
-            lists. If ``array`` is True, then it will be a numpy array,
-            otherwise, it will be a list of lists.
-
-        Return
-        ------
-        matrix : numpy array or list of lists.
-            The matrix representing the Field. See the arguments ``vector``
-            and ``array`` for info on the return type of the matrix.
-
-        """
-        n = self.max_index
-        if n is None:
-            raise ValueError("IsingField is empty")
-        matrix = np.zeros(n + 1)
-        for i, v in self.items():
-            matrix[i] = v
-
-        if not vector:
-            matrix = np.transpose([matrix])
-
-        if not array:
-            matrix = matrix.tolist()
-
-        return matrix

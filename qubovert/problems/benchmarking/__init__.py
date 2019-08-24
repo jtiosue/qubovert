@@ -19,10 +19,12 @@ globally for user use. See the ``__all__`` value for all the problems imported.
 
 """
 
-from ._alternating_sectors_chain import AlternatingSectorsChain
+from ._alternating_sectors_chain import *
+
+from ._alternating_sectors_chain import __all__ as __all_asc__
 
 __all__ = (
-    "AlternatingSectorsChain",
+    __all_asc__
 )
 
 name = "benchmarking"

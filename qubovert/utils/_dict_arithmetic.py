@@ -20,6 +20,8 @@ other classes, such as ``qubovert.utils.QUBOMatrix`` and ``qubovert.utils.BO``.
 
 """
 
+__all__ = 'DictArithmetic',
+
 
 class DictArithmetic(dict):
     """DictArithmetic.
@@ -72,6 +74,14 @@ class DictArithmetic(dict):
     >>> print(g) # will print {(0, 1): -8}
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
+
+    Finally, adding or subtracting constants will update the () element of the
+    dict.
+
+    >>> d = DictArithmetic()
+    >>> d += 5
+    >>> print(d)
+    {(): 5}
 
     """
 
@@ -200,7 +210,7 @@ class DictArithmetic(dict):
 
         Parameters
         ----------
-        other : a DictArithmetic or dict object.
+        other : a DictArithmetic or dict object, or number.
 
         Return
         -------
@@ -215,8 +225,11 @@ class DictArithmetic(dict):
         {(0, 0): 3}
 
         """
-        for k, v in other.items():
-            self[k] += v
+        if isinstance(other, dict):
+            for k, v in other.items():
+                self[k] += v
+        else:
+            self[()] += other
         return self
 
     def __sub__(self, other):
@@ -286,8 +299,11 @@ class DictArithmetic(dict):
         >>> print(d)  # will print {(0, 0): -1}
 
         """
-        for k, v in other.items():
-            self[k] -= v
+        if isinstance(other, dict):
+            for k, v in other.items():
+                self[k] -= v
+        else:
+            self[()] -= v
         return self
 
     def __mul__(self, other):

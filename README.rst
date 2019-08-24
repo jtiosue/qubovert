@@ -49,6 +49,7 @@ Use Python's ``help`` function! I have very descriptive doc strings on all the f
 Installation
 ------------
 `For the old, stable release`.
+
 .. code:: shell
 
   pip install qubovert

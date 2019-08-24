@@ -19,11 +19,18 @@ variables.
 
 """
 
-from . import QUBOMatrix, IsingCoupling, IsingField
+from . import QUBOMatrix, IsingMatrix, PUBOMatrix, HIsingMatrix
 import numpy as np
 
 
-def qubo_to_ising(Q, offset=0):
+__all__ = (
+    'qubo_to_ising', 'ising_to_qubo', 'pubo_to_hising', 'hising_to_pubo',
+    'matrix_to_qubo', 'qubo_to_matrix', 'binary_to_spin', 'spin_to_binary',
+    'decimal_to_binary', 'decimal_to_spin'
+)
+
+
+def qubo_to_ising(Q):
     """qubo_to_ising.
 
     Convert the specified QUBO problem into an Ising problem. Note that
@@ -34,51 +41,44 @@ def qubo_to_ising(Q, offset=0):
     Q : dictionary or qubovert.utils.QUBOMatrix object.
         Maps tuples of binary variables indices to the Q value. Indicies
         must be integers >= 0.
-    offset : float (optional, defaults to 0).
-             The part of the objective function that does not depend on the
-             variables.
 
     Returns
     ------
-    result : tuple (h, J, offset).
-        h : qubovert.utils.IsingField object.
-            The field of each spin in the Ising formulation.
-            h is a IsingField object. For most practical purposes, you can
-            use IsingField in he same way as an ordinary dictionary. For
-            more information, see ``help(qubovert.utils.IsingField)``.
-        J : qubovert.utils.IsingCoupling object.
-            The upper triangular coupling matrix, an IsingCoupling object.
-            For most practical purposes, you can use IsingCoupling in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.IsingCoupling)``.
-        offset : float.
-            It is the sum of the terms in the formulation in
-            the cited paper that don't involve any variables.
+    I : qubovert.utils.IsingMatrix object.
+        tuple of spin labels map to Ising values.
+        For most practical purposes, you can use IsingMatrix in the
+        same way as an ordinary dictionary. For more information,
+        see ``help(qubovert.utils.IsingMatrix)``.
 
     Example
     -------
-    >>> Q = {(0, 0): 1, (0, 1): -1, (1, 1): 3}
-    >>> h, J, offset = qubo_to_ising(Q)
+    >>> Q = {(0,): 1, (0, 1): -1, (1,): 3}
+    >>> I = qubo_to_ising(Q)
 
     """
-    # IsingCoupling deals with keeping J upper triangular, so we don't have to
+    # IsingMatrix deals with keeping J upper triangular, so we don't have to
     # worry about it!
-    h, J = IsingField(), IsingCoupling()
+    I = IsingMatrix()
 
-    for (i, j), v in Q.items():
-        if i != j:
-            J[(i, j)] += v / 4
-            h[i] += v / 4
-            h[j] += v / 4
-            offset += v / 4
+    for k, v in Q.items():
+        if not k:
+            I[k] += v
+        elif len(k) == 1:
+            I[k] += v / 2
+            I[()] += v / 2
+        elif len(k) == 2:
+            i, j = k
+            I[k] += v / 4
+            I[(i,)] += v / 4
+            I[(j,)] += v / 4
+            I[()] += v / 4
         else:
-            h[i] += v / 2
-            offset += v / 2
+            raise KeyError("Invalid QUBO key")
 
-    return h, J, offset
+    return I
 
 
-def ising_to_qubo(h, J, offset=0):
+def ising_to_qubo(I):
     """ising_to_qubo.
 
     Convert the specified Ising problem into an upper triangular QUBO problem.
@@ -86,53 +86,117 @@ def ising_to_qubo(h, J, offset=0):
 
     Parameters
     ----------
-    h : dictionary or qubovert.utils.IsingField object.
-        Maps spin indices to the field value. Indicies must be integers >= 1.
-    J : dictionary or qubovert.utils.IsingCoupling object.
-        Maps tuples of spin indices to the coupling value. Note
-        that J cannot have a key that has a repeated index, ie (1, 1) is an
-        invalid key. Indicies must be integers >= 1.
-    offset : float (optional, defaults to 0).
-        The part of the objective function that does not depend on the
-        variables.
+    I : dictionary or qubovert.utils.IsingMatrix object.
+        Tuple of spin labels map to Ising values. Labels must be integers
+        >= 0.
 
     Returns
     -------
-    result : tuple (Q, offset).
-        Q : qubovert.utils.QUBOMatrix object.
-            The upper triangular QUBO matrix, a QUBOMatrix object.
-            For most practical purposes, you can use QUBOMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.QUBOMatrix)``.
-        offset : float.
-            The sum of the terms in the formulation that don't involve any
-            variables.
+    Q : qubovert.utils.QUBOMatrix object.
+        The upper triangular QUBO matrix, a QUBOMatrix object.
+        For most practical purposes, you can use QUBOMatrix in the
+        same way as an ordinary dictionary. For more information,
+        see ``help(qubovert.utils.QUBOMatrix)``.
 
     Example
     -------
-    >>> h = {0: 1, 1: -1}
-    >>> J = {(0, 1): -1}
-    >>> Q, offset = ising_to_qubo(h, J)
+    >>> I = {(0,): 1, (1,): -1, (0, 1): -1}
+    >>> Q = ising_to_qubo(I)
 
     """
     # QUBOMarix deals with keeping ! upper triangular, so we don't have to
     # worry about it!
     Q = QUBOMatrix()
 
-    for (i, j), v in J.items():
-        if i == j:
-            raise KeyError("J formatted incorrectly, key cannot "
-                           "have repeated indices")
-        Q[(i, j)] += 4 * v
-        Q[(i, i)] -= 2 * v
-        Q[(j, j)] -= 2 * v
-        offset += v
+    for k, v in I.items():
+        if not k:
+            I[k] += v
+        elif len(k) == 1:
+            Q[k] += 2 * v
+            Q[()] -= v
+        elif len(k) == 2:
+            i, j = k
+            if i == j:
+                raise KeyError("J formatted incorrectly, key cannot "
+                               "have repeated indices")
+            Q[k] += 4 * v
+            Q[(i,)] -= 2 * v
+            Q[(j,)] -= 2 * v
+            Q[()] += v
 
-    for i, v in h.items():
-        Q[(i, i)] += 2 * v
-        offset -= v
+    return Q
 
-    return Q, offset
+
+def pubo_to_hising(P):
+    """pubo_to_hising.
+
+    Convert the specified PUBO problem into an HIsing problem. Note that
+    PUBO {0, 1} values go to HIsing {-1, 1} values in that order!
+
+    Parameters
+    ----------
+    P : dictionary or qubovert.utils.PUBOMatrix object.
+        Maps tuples of binary variables indices to the P value. Indicies
+        must be integers >= 0.
+
+    Returns
+    ------
+    H : qubovert.utils.HIsingMatrix object.
+        tuple of spin labels map to HIsing values.
+        For most practical purposes, you can use HIsingMatrix in the
+        same way as an ordinary dictionary. For more information,
+        see ``help(qubovert.utils.HIsingMatrix)``.
+
+    Example
+    -------
+    >>> P = {(0,): 1, (0, 1): -1, (1,): 3}
+    >>> H = pubo_to_hising(P)
+
+    """
+    H = HIsingMatrix()
+    for k, v in P.items():
+        if not k:
+            H[k] += v
+        else:
+            pass
+
+    return H
+
+
+def hising_to_pubo(H):
+    """hising_to_pubo.
+
+    Convert the specified HIsing problem into an upper triangular PUBO problem.
+    Note that HIsing {-1, 1} values go to PUBO {0, 1} values in that order!
+
+    Parameters
+    ----------
+    H : dictionary or qubovert.utils.HIsingMatrix object.
+        Tuple of spin labels map to HIsing values. Labels must be integers
+        >= 0.
+
+    Returns
+    -------
+    P : qubovert.utils.PUBOMatrix object.
+        The upper triangular PUBO matrix, a PUBOMatrix object.
+        For most practical purposes, you can use PUBOMatrix in the
+        same way as an ordinary dictionary. For more information,
+        see ``help(qubovert.utils.PUBOMatrix)``.
+
+    Example
+    -------
+    >>> H = {(0,): 1, (1,): -1, (0, 1): -1}
+    >>> P = hising_to_pubo(H)
+
+    """
+    P = PUBOMatrix()
+    for k, v in H.items():
+        if not k:
+            P[k] += v
+        else:
+            pass
+
+    return P
 
 
 def matrix_to_qubo(matrix):
@@ -199,7 +263,20 @@ def qubo_to_matrix(Q, symmetric=False, array=True):
         raise ValueError("QUBO dictionary is empty")
     elif not isinstance(Q, QUBOMatrix):
         Q = QUBOMatrix(Q)
-    return Q.to_matrix(symmetric, array)
+
+    matrix = np.zeros((Q.max_index+1,)*2)
+    for (i, j), v in Q.items():
+        if i == j:
+            matrix[i][j] = v
+        elif symmetric:
+            matrix[i][j] = v / 2
+            matrix[j][i] = v / 2
+        else:
+            matrix[i][j] = v
+
+    if not array:
+        return matrix.tolist()
+    return matrix
 
 
 def binary_to_spin(x):

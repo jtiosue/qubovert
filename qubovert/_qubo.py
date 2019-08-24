@@ -21,6 +21,9 @@ Contains the QUBO class. See ``help(qubovert.QUBO)``.
 from .utils import BO, QUBOMatrix
 
 
+__all__ = 'QUBO',
+
+
 def _convert_key(key):
     """_convert_key.
 
@@ -49,8 +52,8 @@ def _convert_key(key):
     (0, 0)
 
     """
-    if not isinstance(key, (tuple, list)):
-        k = key, key
+    if not isinstance(key, tuple):
+        raise KeyError("QUBO key must be a tuple")
     elif len(key) == 1:
         k = key * 2
     elif len(key) == 2:
@@ -78,7 +81,7 @@ class QUBO(BO):
     Example usage
     -------------
     >>> qubo = QUBO()
-    >>> qubo['a'] += 5
+    >>> qubo[('a',)] += 5
     >>> qubo[(0, 'a')] -= 2
     >>> qubo -= 1.5
     >>> qubo
@@ -183,15 +186,15 @@ class QUBO(BO):
         Examples
         -------
         >>> qubo = QUBO()
-        >>> qubo['a'] += 5
+        >>> qubo[('a',)] += 5
         >>> qubo[(0, 'a')] -= 2
         >>> qubo -= 1.5
         >>> qubo
-        {('a' 'a'): 5, (0, 'a'): -2} - 1.5
+        {('a',): 5, (0, 'a'): -2} - 1.5
 
-        >>> qubo = QUBO({'a': 5, (0, 'a'): -2}, -1.5)
+        >>> qubo = QUBO({('a',): 5, (0, 'a'): -2}, -1.5)
         >>> qubo
-        {('a' 'a'): 5, (0, 'a'): -2} - 1.5
+        {('a',): 5, (0, 'a'): -2} - 1.5
 
         """
         # we include this function just for the new docstring, since the

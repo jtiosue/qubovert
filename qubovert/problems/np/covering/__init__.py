@@ -24,12 +24,15 @@ References
 
 """
 
-from ._set_cover import SetCover
-from ._vertex_cover import VertexCover
+from ._set_cover import *
+from ._vertex_cover import *
+
+from ._set_cover import __all__ as __all_sc__
+from ._vertex_cover import __all__ as __all_vc__
 
 __all__ = (
-    "SetCover",
-    "VertexCover",
+    __all_sc__ +
+    __all_vc__
 )
 
 name = "covering"

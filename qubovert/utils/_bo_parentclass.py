@@ -23,6 +23,9 @@ class for some Binary Optimization classes, such as ``qubovert.QUBO``,
 from . import Problem, DictArithmetic
 
 
+__all__ = 'BO',
+
+
 class BO(DictArithmetic):
     """BO.
 
@@ -40,42 +43,41 @@ class BO(DictArithmetic):
 
     Example usage
     -------------
-    >>> d = DictArithmetic()
-    >>> d[0] += 2
+    >>> d = BO()
+    >>> d[(0,)] += 2
     >>> print(d)
-    {0: 2}
+    {(0,): 2}
     >>> d -= 3
     >>> print(d)
-    {0: 2} - 3
+    {(0,): 2, (): -3}
     >>> d * 4
     >>> print(d)
-    {0: 8} - 12
-    >>> d += {('a', 'b'): 3, 'c': -2, 0: -1}
+    {(0,): 8, (): -12}
+    >>> d += {('a', 'b'): 3, ('c', ): -2, (0,): -1}
     >>> print(d)
-    {('a', 'b'): 3, 'c': -2, 0: 7} - 12
+    {('a', 'b'): 3, ('c',): -2, (0,): 7, {}: -12}
 
     """
 
-    def __init__(self, d=None, offset=0):
+    def __init__(self, *args, **kwargs):
         """__init__.
 
         This class deals with Binary Optimization models. See child
         classes for info on inputs.
 
+        Initialize the object. If you supply args and kwargs that
+        represent a dictionary, they will be reinitialized to follow the
+        conventions set in ``__setitem__``.
+
         Parameters
-        ----------
-        d : dict (optional, defaults to None).
-            Dictionary.
-        offset: numeric (optional, defaults to 0).
+        ---------
+        *args and **kwargs : see the docstring for dict.
 
         """
-        self._offset = offset
         self._mapping = {}  # convert labels to ints
         self._reverse_mapping = {}  # convert ints to labels
         self._next_label = 0
-        if d is None:
-            d = {}
-
+        d = dict(*args, **kwargs)
         super().__init__()
         for k, v in d.items():
             self[k] = v
@@ -93,7 +95,7 @@ class BO(DictArithmetic):
             The part of the BO that does not depend on any variables.
 
         """
-        return self._offset
+        return self[()]
 
     @property
     def mapping(self):
@@ -140,55 +142,6 @@ class BO(DictArithmetic):
         """
         return self._next_label
 
-    def __repr__(self):
-        """__repr__.
-
-        Return the representation of the BO object.
-
-        Return
-        ------
-        r : str.
-            BO dictionary string with an offset if necessary.
-
-        Example
-        -------
-        >>> d = DictArithmetic({('a', 'b'): -1, ('b', 0): 2, 1: 3})
-        >>> repr(d)
-        '{('a', 'b'): -1, ('b', 0): 2, 1: 3}'
-
-        >>> d = Arithmetic({('a', 'b'): -1, ('b', 0): 2, 1: 3}, 2)
-        >>> repr(d)
-        '{('a', 'b'): -1, ('b', 0): 2, 1: 3} + 2'
-
-        """
-        s = super().__repr__()
-        if self._offset == 0:
-            return s
-        elif self._offset < 0:
-            s += " - "
-        else:
-            s += " + "
-        return s + str(abs(self._offset))
-
-    def __eq__(self, other):
-        """__eq__.
-
-        Finds whether or not two BOs are equal.
-
-        Parameters
-        ----------
-        other : BO object or dict.
-            Other BO to compare.
-
-        Returns
-        -------
-        res : bool.
-
-        """
-        if not isinstance(other, BO):
-            return self._offset == 0 and super().__eq__(other)
-        return super().__eq__(other) and self._offset == other.offset
-
     def is_solution_valid(self, solution):
         """is_solution_valid.
 
@@ -213,117 +166,7 @@ class BO(DictArithmetic):
         """
         return True
 
-    def copy(self, *args, **kwargs):
-        """copy.
-
-        Same as dict.copy, but we adjust the method so that it returns a
-        BO object.
-
-        Parameters
-        ----------
-        *args and **kwargs : see dict.copy.
-
-        """
-        x = super().copy(*args, **kwargs)
-        x += self._offset
-        return x
-
-    def update(self, other):
-        """update.
-
-        Update the QUBO with other. Same as dict.update, except ``other`` can
-        also be a BO type.
-
-        Parameters
-        ----------
-        other : dict or BO object.
-
-        """
-        if isinstance(other, BO):
-            self._offset = other.offset
-        for k, v in other.items():
-            self[k] = v
-
-    def __iadd__(self, other):
-        """__iadd__.
-
-        Same as the __add__ method, but done in place.
-
-        Parameters
-        ----------
-        other : a BO or dict object, or a numeric type.
-
-        Return
-        -------
-        Q : a BO object, self.
-
-        """
-        if not isinstance(other, (BO, dict)):
-            self._offset += other
-            return self
-        elif isinstance(other, BO):
-            self._offset += other.offset
-        return super().__iadd__(other)
-
-    def __isub__(self, other):
-        """__isub__.
-
-        Same as the __sub__ method, but done in place.
-
-        Parameters
-        ----------
-        other : a BO or dict object, or a numeric type.
-
-        Returns
-        -------
-        Q : a BO object, self.
-
-        """
-        if not isinstance(other, (BO, dict)):
-            self._offset -= other
-            return self
-        elif isinstance(other, BO):
-            self._offset -= other.offset
-        return super().__isub__(other)
-
-    def __imul__(self, other):
-        """__imul__.
-
-        Same as ``__mul__``, but done in place.
-
-        Parameters
-        ----------
-        other : numeric.
-
-        Return
-        -------
-        B : a BO object, self.
-
-        """
-        self._offset *= other
-        return super().__imul__(other)
-
-    def __itruediv__(self, other):
-        """__itruediv__.
-
-        Same as ``__truediv__``, but done in place. For parameters and return
-        type, see ``__truediv__``.
-
-        """
-        self._offset /= other
-        return super().__itruediv__(other)
-
-    def __ifloordiv__(self, other):
-        """__ifloordiv__.
-
-        Same as ``__floordiv__``, but done in place. For parameters and return
-        type, see ``__floordiv__``.
-
-        """
-        self._offset //= other
-        return super().__ifloordiv__(other)
-
-    # The three following methods just uses code written in the Problem class.
+    # The following methods just uses code written in the Problem class.
     # I want to avoid duplicate code as much as possible! So we use what we
     # have already written. But we don't make BO a subclass of Problem
     # for various reasons (some inconsistencies in code, convention, and
@@ -332,30 +175,23 @@ class BO(DictArithmetic):
     def to_ising(self, *args, **kwargs):
         """to_ising.
 
-        Create and return upper triangular J representing the coupling of the
-        Ising formulation of the problem and the h representing the field.
+        Create and return Ising model representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_qubo`` and
+        converts the QUBO formulation to an Ising formulation.
 
         Parameters
         ----------
-        args and kwargs are the same as the parameters defined in the
-        ``to_qubo`` method.
+        Same as the parameters defined in the ``to_qubo`` method.
 
         Return
         ------
-        result : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                The field of each spin in the Ising formulation.
-                h is a IsingField object. For most practical purposes, you can
-                use IsingField in he same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingCoupling object.
-                The upper triangular coupling matrix, an IsingCoupling object.
-                For most practical purposes, you can use IsingCoupling in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                It is the sum of the terms in the formulation that don't
-                involve any variables.
+        I : qubovert.utils.IsingMatrix object.
+            The upper triangular coupling matrix, where two element tuples
+            represent couplings and one element tuples represent fields.
+            For most practical purposes, you can use IsingCoupling in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.IsingMatrix)``.
 
         """
         return Problem.to_ising(self, *args, **kwargs)
@@ -373,25 +209,69 @@ class BO(DictArithmetic):
 
         Return
         -------
-        result : tuple (Q, offset).
-            Q : qubovert.utils.super() object.
-                The upper triangular QUBO matrix, a super() object.
-                For most practical purposes, you can use super() in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.super())``.
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables.
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
         return Problem.to_qubo(self, *args, **kwargs)
+
+    def to_hising(self, *args, **kwargs):
+        """to_hising.
+
+        Create and return HIsing model representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_pubo`` or
+        ``to_ising`` and converts to a HIsing formulation.
+
+        Parameters
+        ----------
+        Same as the parameters defined in the ``to_pubo`` or ``to_qubo``
+        methods.
+
+        Return
+        ------
+        H : qubovert.utils.HIsingMatrix object.
+            For most practical purposes, you can use HIsingMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.HIsingMatrix)``.
+
+        """
+        return Problem.to_hising(self, *args, **kwargs)
+
+    def to_pubo(self, *args, **kwargs):
+        """to_pubo.
+
+        Create and return upper triangular PUBO representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_hising`` or
+        ``to_qubo`` and converts the hising or QUBO formulations to a
+        PUBO formulation.
+
+        Parameters
+        ----------
+        Same as the parameters defined in the ``to_qubo`` or ``to_hising``
+        methods.
+
+        Return
+        -------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        return Problem.to_pubo(self, *args, **kwargs)
 
     def solve_bruteforce(self, *args, **kwargs):
         """solve_bruteforce.
 
         Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
-        PROBLEMS! This converts the problem to QUBO with integer labels, solves
-        it with ``qubovert.utils.solve_qubo_bruteforce``, and then calls and
+        PROBLEMS! This converts the problem to PUBO with integer labels, solves
+        it with ``qubovert.utils.solve_pubo_bruteforce``, and then calls and
         returns ``convert_solution``.
 
         Parameters

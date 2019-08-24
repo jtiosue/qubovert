@@ -22,6 +22,9 @@ from numpy import log2, allclose
 from qubovert.utils import Problem, QUBOMatrix, decimal_to_binary
 
 
+__all__ = 'SetCover',
+
+
 class SetCover(Problem):
     """SetCover.
 
@@ -46,9 +49,8 @@ class SetCover(Problem):
     >>> U = {"a", "b", "c", "d"}
     >>> V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
     >>> problem = SetCover(U, V)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -290,6 +292,11 @@ class SetCover(Problem):
         becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. A and B are
         parameters to enforce constraints.
 
+        If all the constraints are satisfied, then the objective function
+        will be equal to the total number of sets in the cover (or for
+        the weighted Set Cover problem, it will equal the total weight
+        of included sets in the cover).
+
         Parameters
         ----------
         A: positive float (optional, defaults to 2).
@@ -299,26 +306,18 @@ class SetCover(Problem):
 
         Return
         -------
-        res : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.QUBOMatrix)``.
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
-                will be equal to the total number of sets in the cover (or for
-                the weighted Set Cover problem, it will equal the total weight
-                of included sets in the cover).
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
         # all naming conventions follow the paper listed in the docstring
 
         Q = QUBOMatrix()
 
-        offset = self._n * A  # comes from the first constraint
+        Q += self._n * A  # constant comes from the first constraint
 
         # encode H_B (equation 46)
         for i in range(self._N):
@@ -375,7 +374,7 @@ class SetCover(Problem):
                 for j in self._filtered_range(alpha, i+1):
                     Q[(i, j)] += 2*A
 
-        return Q, offset
+        return Q
 
     def convert_solution(self, solution):
         """convert_solution.

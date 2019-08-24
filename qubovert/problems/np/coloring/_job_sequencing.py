@@ -23,6 +23,9 @@ from numpy import log2
 from qubovert.utils import Problem, QUBOMatrix, decimal_to_binary
 
 
+__all__ = 'JobSequencing',
+
+
 class JobSequencing(Problem):
     """JobSequencing.
 
@@ -47,9 +50,8 @@ class JobSequencing(Problem):
     >>> job_lengths = {"job1": 2, "job2": 3, "job3": 1}
     >>> num_workers = 2
     >>> problem = JobSequencing(job_lengths, num_workers)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -248,6 +250,9 @@ class JobSequencing(Problem):
         becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. A and B are
         parameters to enforce constraints.
 
+        If all the constraints are satisfied, then the objective function will
+        be equal to the total length of the scheduling.
+
         Parameters
         ----------
         A: positive float (optional, defaults to None).
@@ -262,17 +267,11 @@ class JobSequencing(Problem):
 
         Return
         -------
-        res : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.QUBOMatrix)``.
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
-                will be equal to the length of the longest job sequence.
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
         # all naming conventions follow the paper listed in the docstring
@@ -282,7 +281,7 @@ class JobSequencing(Problem):
 
         Q = QUBOMatrix()
 
-        offset = self._N * A  # comes from the first constraint
+        Q += self._N * A  # offset comes from the first constraint
 
         # encode H_B (equation 55)
         # minimize worker 0's length
@@ -333,7 +332,7 @@ class JobSequencing(Problem):
                     Q[(ind2, ind1p)] -= val
                     Q[(ind1, ind2p)] -= val
 
-        return Q, offset
+        return Q
 
     def convert_solution(self, solution):
         """convert_solution.

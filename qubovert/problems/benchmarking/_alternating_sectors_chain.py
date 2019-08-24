@@ -18,7 +18,10 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+from qubovert.utils import Problem, IsingMatrix
+
+
+__all__ = 'AlternatingSectorsChain',
 
 
 class AlternatingSectorsChain(Problem):
@@ -41,9 +44,8 @@ class AlternatingSectorsChain(Problem):
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> problem = AlternatingSectorsChain(10)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q  = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -125,58 +127,41 @@ class AlternatingSectorsChain(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables.
+        I : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
         >>> problem = AlternatingSectorsChain(*args)
-        >>> h, J, offset = problem.to_ising(pbc=True)
-        >>> h
-        {}
-        >>> offset
-        0
-        >>> J
+        >>> I, offset = problem.to_ising(pbc=True)
+        >>> I
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1, (5, 0): 1}
 
-        >>> h, J, offset = problem.to_ising(pbc=False)
-        >>> h
-        {}
-        >>> offset
-        0
-        >>> J
+        >>> I = problem.to_ising(pbc=False)
+        >>> I
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1}
 
         """
-        h, J, offset = IsingField(), IsingCoupling(), 0
+        I = IsingMatrix()
 
         for q in range(self._N-1):
-            J[(q, q+1)] = (
+            I[(q, q+1)] = (
                 self._min_strength
                 if (q // self._chain_length) % 2
                 else self._max_strength
             )
 
         if pbc:
-            J[(self._N-1, 0)] = (
+            I[(self._N-1, 0)] = (
                 self._min_strength
                 if ((self._N-1) // self._chain_length) % 2
                 else self._max_strength
             )
 
-        return h, J, offset
+        return I
 
     def convert_solution(self, solution):
         """convert_solution.

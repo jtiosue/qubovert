@@ -19,7 +19,13 @@ the problem classes.
 
 """
 
-from . import qubo_to_ising, ising_to_qubo, solve_qubo_bruteforce
+from . import (
+    qubo_to_ising, ising_to_qubo, solve_pubo_bruteforce,
+    PUBOMatrix, HIsingMatrix, hising_to_pubo, pubo_to_hising
+)
+
+
+__all__ = 'Problem',
 
 
 class Problem:
@@ -146,7 +152,7 @@ class Problem:
 
         Create and return upper triangular QUBO representing the problem.
         Should be implemented in child classes. If this method is not
-        implemented in the child class, then it simply calls to_ising and
+        implemented in the child class, then it simply calls ``to_ising`` and
         converts the ising formulation to a QUBO formulation.
 
         Parameters
@@ -156,26 +162,21 @@ class Problem:
 
         Return
         -------
-        result : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.QUBOMatrix)``.
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables.
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
-        return ising_to_qubo(*self.to_ising(*args, **kwargs))
+        return ising_to_qubo(self.to_ising(*args, **kwargs))
 
     def to_ising(self, *args, **kwargs):
         """to_ising.
 
-        Create and return upper triangular J representing the coupling of the
-        Ising formulation of the problem and the h representing the field.
+        Create and return Ising model representing the problem.
         Should be implemented in child classes. If this method is not
-        implemented in the child class, then it simply calls to_qubo and
+        implemented in the child class, then it simply calls ``to_qubo`` and
         converts the QUBO formulation to an Ising formulation.
 
         Parameters
@@ -185,23 +186,71 @@ class Problem:
 
         Return
         ------
-        result : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                The field of each spin in the Ising formulation.
-                h is a IsingField object. For most practical purposes, you can
-                use IsingField in he same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingCoupling object.
-                The upper triangular coupling matrix, an IsingCoupling object.
-                For most practical purposes, you can use IsingCoupling in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                It is the sum of the terms in the formulation that don't
-                involve any variables.
+        I : qubovert.utils.IsingMatrix object.
+            The upper triangular coupling matrix, where two element tuples
+            represent couplings and one element tuples represent fields.
+            For most practical purposes, you can use IsingCoupling in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.IsingMatrix)``.
 
         """
-        return qubo_to_ising(*self.to_qubo(*args, **kwargs))
+        return qubo_to_ising(self.to_qubo(*args, **kwargs))
+
+    def to_pubo(self, *args, **kwargs):
+        """to_pubo.
+
+        Create and return upper triangular PUBO representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_hising`` or
+        ``to_qubo`` and converts the hising or QUBO formulations to a
+        PUBO formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the QUBO.
+
+        Return
+        -------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        try:
+            return hising_to_pubo(self.to_hising(*args, **kwargs))
+        except RecursionError:
+            Q, offset = self.to_qubo(*args, **kwargs)
+            return PUBOMatrix(Q), offset
+
+    def to_hising(self, *args, **kwargs):
+        """to_hising.
+
+        Create and return HIsing model representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_pubo`` or
+        ``to_ising`` and converts to a HIsing formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the Ising model.
+
+        Return
+        ------
+        H : qubovert.utils.HIsingMatrix object.
+            For most practical purposes, you can use HIsingMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.HIsingMatrix)``.
+
+        """
+        try:
+            return pubo_to_hising(self.to_pubo(*args, **kwargs))
+        except RecursionError:
+            I, offset = self.to_ising(*args, **kwargs)
+            return HIsingMatrix(I), offset
 
     def convert_solution(self, solution, *args, **kwargs):
         """convert_solution.
@@ -261,8 +310,8 @@ class Problem:
         QUBO/Ising formulations. If this is the case, then the child class
         for this problem should override this method with a better bruteforce
         solver. But, for problems that do not use slack variables, this
-        method will suffice. It converts the problem to QUBO, solves it with
-        ``qubovert.utils.solve_qubo_bruteforce``, and then calls and returns
+        method will suffice. It converts the problem to PUBO, solves it with
+        ``qubovert.utils.solve_pubo_bruteforce``, and then calls and returns
         ``convert_solution``.
 
         Parameters
@@ -285,8 +334,8 @@ class Problem:
         """
         kwargs = kwargs.copy()
         all_solutions = kwargs.pop("all_solutions", False)
-        qubo = self.to_qubo(*args, **kwargs)
-        _, sol = solve_qubo_bruteforce(*qubo, all_solutions=all_solutions)
+        pubo = self.to_pubo(*args, **kwargs)
+        _, sol = solve_pubo_bruteforce(pubo, all_solutions=all_solutions)
         if all_solutions:
             return [self.convert_solution(x) for x in sol]
         return self.convert_solution(sol)

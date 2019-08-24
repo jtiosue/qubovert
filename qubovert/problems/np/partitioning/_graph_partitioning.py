@@ -19,7 +19,10 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+from qubovert.utils import Problem, IsingMatrix
+
+
+__all__ = 'GraphPartitioning',
 
 
 class GraphPartitioning(Problem):
@@ -45,9 +48,8 @@ class GraphPartitioning(Problem):
     >>> edges = {("a", "b"), ("a", "c"), ("c", "d"),
                  ("b", "c"), ("e", "f"), ("d", "e")}
     >>> problem = GraphPartitioning(edges)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -200,11 +202,13 @@ class GraphPartitioning(Problem):
         r"""to_ising.
 
         Create and return the graph partitioning problem in Ising form
-        following section 2.2 of [Lucas]. The J coupling matrix for the Ising
-        will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing
-        :math:`\sum_{i \leq j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
-        A and B are parameters to enforce constraints.
+        following section 2.2 of [Lucas]. A and B are parameters to enforce
+        constraints.
+
+        It is formatted such that the solution to the Ising formulation is
+        equal to the the total number of edges connecting the two
+        partitions (or the total weight if we are solving weighted
+        partitioning).
 
         Parameters
         ----------
@@ -220,48 +224,35 @@ class GraphPartitioning(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables. It is
-                the value such that the solution to the Ising formulation is
-                equal to the the total number of edges connecting the two
-                partitions (or the total weight if we are solving weighted
-                partitioning).
+        I : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         --------
         >>> problem = GraphPartitioning({(0, 1), (1, 2), (0, 3)})
-        >>> h, J, offset = problem.to_ising()
+        >>> I = problem.to_ising()
 
         """
         # all naming conventions follow the paper listed in the docstring
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-        h, J = IsingField(), IsingCoupling()
-        offset = A * self._N + B * sum(self._edges.values()) / 2
+        I = IsingMatrix()
+        I += A * self._N + B * sum(self._edges.values()) / 2
 
         # encode H_A (equation 8)
         for i in range(self._N):
             for j in range(i+1, self._N):
-                J[(i, j)] += 2 * A
+                I[(i, j)] += 2 * A
 
         # encode H_B (equation 9)
         for (u, v), w in self._edges.items():
-            J[(self._vertex_to_index[u],
+            I[(self._vertex_to_index[u],
                self._vertex_to_index[v])] -= w * B / 2
 
-        return h, J, offset
+        return I
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -291,9 +282,8 @@ class GraphPartitioning(Problem):
         >>> edges = {("a", "b"), ("a", "c"), ("c", "d"),
                      ("b", "c"), ("e", "f"), ("d", "e")}
         >>> problem = GraphPartitioning(edges)
-        >>> Q, offset = problem.to_qubo()
+        >>> Q = problem.to_qubo()
         >>> obj, sol = solve_qubo(Q)
-        >>> obj += offset
         >>> print(problem.convert_solution(sol))
         ({'a', 'b', 'c'}, {'d', 'e', 'f'})
 

@@ -19,7 +19,10 @@ Contains the NumberPartitioning class. See
 
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+from qubovert.utils import Problem, IsingMatrix
+
+
+__all__ = 'NumberPartitioning',
 
 
 class NumberPartitioning(Problem):
@@ -51,9 +54,8 @@ class NumberPartitioning(Problem):
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> S = [1, 2, 3, 4]
     >>> problem = NumberPartitioning(S)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -136,10 +138,9 @@ class NumberPartitioning(Problem):
         r"""to_ising.
 
         Create and return the number partitioning problem in Ising form
-        following section 2.1 of [Lucas]. The J coupling matrix for the Ising
-        will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing
-        :math:`\sum_{i \leq j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
+        following section 2.1 of [Lucas]. It is
+        the value such that the solution to the Ising formulation is 0
+        if a valid number partitioning exists.
 
         Parameters
         ----------
@@ -148,36 +149,24 @@ class NumberPartitioning(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables. It is
-                the value such that the solution to the Ising formulation is 0
-                if a valid number partitioning exists.
+        I : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> h, J, offset = problem.to_ising()
+        >>> I = problem.to_ising()
 
         """
-        h, J = IsingField(), IsingCoupling()
-        offset = A * sum(pow(x, 2) for x in self._S)
+        I = IsingMatrix(() = A * sum(pow(x, 2) for x in self._S))
 
         for i in range(self._N):
             for j in range(i+1, self._N):
-                J[(i, j)] += (2 * A * self._S[i] * self._S[j])
+                I[(i, j)] += (2 * A * self._S[i] * self._S[j])
 
-        return h, J, offset
+        return I
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -206,8 +195,8 @@ class NumberPartitioning(Problem):
         Example
         -------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> Q, offset = problem.to_qubo()
-        >>> value, solution = solve_qubo(Q, offset)
+        >>> Q = problem.to_qubo()
+        >>> value, solution = solve_qubo(Q)
         >>> print(solution)
         [0, 1, 1, 0]
         # ie 1 and 4 are in one partition, and 2 and 3 are in the other
