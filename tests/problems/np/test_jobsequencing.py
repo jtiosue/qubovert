@@ -25,10 +25,10 @@ job_lengths = {"job1": 2, "job2": 3, "job3": 1}
 num_workers = 2
 problem = JobSequencing(job_lengths, num_workers, log_trick=False)
 problem_log = JobSequencing(job_lengths, num_workers)
-Q, offset_Q = problem.to_qubo()
-Q_log, offset_Q_log = problem_log.to_qubo()
-h, J, offset_I = problem.to_ising()
-h_log, J_log, offset_I_log = problem_log.to_ising()
+Q = problem.to_qubo()
+Q_log = problem_log.to_qubo()
+L = problem.to_ising()
+L_log = problem_log.to_ising()
 
 solutions = ({'job1', 'job3'}, {'job2'}), ({'job2'}, {'job1', 'job3'})
 obj_val = 3
@@ -61,7 +61,7 @@ def test_jobsequencing_bruteforce_solve():
 
 def test_jobsequencing_qubo_logtrick_solve():
 
-    e, sol = solve_qubo_bruteforce(Q_log, offset_Q_log)
+    e, sol = solve_qubo_bruteforce(Q_log)
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert solution in solutions
@@ -70,7 +70,7 @@ def test_jobsequencing_qubo_logtrick_solve():
 
 def test_jobsequencing_qubo_solve():
 
-    e, sol = solve_qubo_bruteforce(Q, offset_Q)
+    e, sol = solve_qubo_bruteforce(Q)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert solution in solutions
@@ -80,19 +80,18 @@ def test_jobsequencing_qubo_solve():
 def test_jobsequencing_qubo_logtrick_numvars():
 
     assert (
-        len(set(y for x in Q_log for y in x))
-        ==
-        problem_log.num_binary_variables
+        len(set(y for x in Q_log for y in x)) ==
+        problem_log.num_binary_variables ==
+        Q_log.num_binary_variables
     )
 
 
 def test_jobsequencing_qubo_numvars():
 
-    Q_notlog, offset = problem.to_qubo()
     assert (
-        len(set(y for x in Q_notlog for y in x))
-        ==
-        problem.num_binary_variables
+        len(set(y for x in Q for y in x)) ==
+        problem.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 
@@ -100,7 +99,7 @@ def test_jobsequencing_qubo_numvars():
 
 def test_jobsequencing_ising_logtrick_solve():
 
-    e, sol = solve_ising_bruteforce(h_log, J_log, offset_I_log)
+    e, sol = solve_ising_bruteforce(L_log)
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert solution in solutions
@@ -109,7 +108,7 @@ def test_jobsequencing_ising_logtrick_solve():
 
 def test_jobsequencing_ising_solve():
 
-    e, sol = solve_ising_bruteforce(h, J, offset_I)
+    e, sol = solve_ising_bruteforce(L)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert solution in solutions
@@ -118,17 +117,9 @@ def test_jobsequencing_ising_solve():
 
 def test_jobsequencing_ising_logtrick_numvars():
 
-    assert (
-        len(set(y for x in J_log for y in x).union(set(h_log.keys())))
-        ==
-        problem_log.num_binary_variables
-    )
+    assert L_log.num_binary_variables == problem_log.num_binary_variables
 
 
 def test_jobsequencing_ising_numvars():
 
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys())))
-        ==
-        problem.num_binary_variables
-    )
+    assert L.num_binary_variables == problem.num_binary_variables

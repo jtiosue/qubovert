@@ -13,10 +13,11 @@
 #   limitations under the License.
 
 """
-Contains tests for the QUBOMatrix, IsingCoupling, and IsingField classes.
+Contains tests for the QUBOMatrix, IsingMatrix, PUBOMatrix, and HIsingMatrix
+classes.
 """
 
-from qubovert.utils import QUBOMatrix, IsingCoupling, IsingField
+from qubovert.utils import QUBOMatrix, IsingMatrix, PUBOMatrix, HIsingMatrix
 
 
 # QUBO
@@ -26,7 +27,7 @@ def test_qubo_default_valid():
     d = QUBOMatrix()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
-    assert d == {(0, 0): 1}
+    assert d == {(0,): 1}
 
 
 def test_qubo_remove_value_when_zero():
@@ -40,19 +41,19 @@ def test_qubo_remove_value_when_zero():
 def test_qubo_reinitialize_dictionary():
 
     d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
-    assert d == {(0, 0): 1, (0, 1): 3}
+    assert d == {(0,): 1, (0, 1): 3}
 
 
 def test_qubo_update():
 
     d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
-    d.update({(0, 0): 0, (1, 0): 1, (1, 1): -1})
-    assert d == {(0, 1): 1, (1, 1): -1}
+    d.update({(0,): 0, (1, 0): 1, (1, 1): -1})
+    assert d == {(0, 1): 1, (1,): -1}
 
 
 def test_qubo_num_binary_variables():
 
-    d = QUBOMatrix({(0, 0): 1, (0, 3): 2})
+    d = QUBOMatrix({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
 
 
@@ -62,17 +63,18 @@ def test_qubo_max_index():
     assert d.max_index == 3
 
 
-def test_qubo_to_matrix():
-    d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
-    assert d.to_matrix(array=False) == [[1, 2], [0, 0]]
-
-
 def test_qubo_addition():
 
     temp = QUBOMatrix({(0, 0): 1, (0, 1): 2})
-    temp1 = {(0, 0): -1, (1, 0): 3}
+    temp1 = {(0,): -1, (1, 0): 3}
     temp2 = {(0, 1): 5}
-    temp3 = {(0, 0): 2, (0, 1): -1}
+    temp3 = {(0,): 2, (0, 1): -1}
+
+    # add constant
+    d = temp.copy()
+    d += 5
+    d[()] -= 2
+    d == {(0,): 1, (0, 1): 2, (): 3}
 
     # __add__
     d = temp.copy()
@@ -108,11 +110,12 @@ def test_qubo_addition():
 def test_qubo_multiplication():
 
     temp = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    temp += 2
 
     # __mul__
     d = temp.copy()
     g = d * 3
-    assert g == {(0, 0): 3, (0, 1): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     g = d * 0
@@ -121,7 +124,7 @@ def test_qubo_multiplication():
     # __imul__
     d = temp.copy()
     d *= 3
-    assert d == {(0, 0): 3, (0, 1): 6}
+    assert d == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     d *= 0
@@ -130,7 +133,7 @@ def test_qubo_multiplication():
     # __rmul__
     d = temp.copy()
     g = 3 * d
-    assert g == {(0, 0): 3, (0, 1): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     g = 0 * d
@@ -139,107 +142,99 @@ def test_qubo_multiplication():
     # __truediv__
     d = temp.copy()
     g = d / 2
-    assert g == {(0, 0): .5, (0, 1): 1}
+    assert g == {(0,): .5, (0, 1): 1, (): 1}
 
     # __itruediv__
     d = temp.copy()
     d /= 2
-    assert d == {(0, 0): .5, (0, 1): 1}
+    assert d == {(0,): .5, (0, 1): 1, (): 1}
 
     # __floordiv__
     d = temp.copy()
     g = d // 2
-    assert g == {(0, 1): 1}
+    assert g == {(0, 1): 1, (): 1}
 
     # __ifloordiv__
     d = temp.copy()
     d //= 2
-    assert d == {(0, 1): 1}
+    assert d == {(0, 1): 1, (): 1}
+
+    # __mul__ but wiiht dict
+    d = temp.copy()
+    d *= {(1,): 2, (0,): -1}
+    assert d == {(0,): -3, (0, 1): 4, (1,): 4}
+
+    # __pow__
+    d = temp.copy()
+    d **= 2
+    assert d == {(0,): 5, (0, 1): 16, (): 4}
+
+    temp = d.copy()
+    assert d ** 3 == d * d * d
+
+    # should raise a KeyError since can't fit this into QUBO.
+    try:
+        QUBOMatrix({(0, 1): 1, (1, 2): -1})**2
+        assert False
+    except KeyError:
+        pass
 
 
 # Ising
 
 def test_ising_default_valid():
 
-    J = IsingCoupling()
-    assert J[(0, 1)] == 0
-    J[(0, 1)] += 1
-    assert J == {(0, 1): 1}
-
-    h = IsingField()
-    assert h[1] == 0
-    h[1] += 1
-    assert h == {1: 1}
+    d = IsingMatrix()
+    assert d[(0,)] == 0
+    d[(0,)] += 1
+    assert d == {(0,): 1}
 
 
 def test_ising_remove_value_when_zero():
 
-    J = IsingCoupling()
-    J[(1, 2)] += 1
-    J[(1, 2)] -= 1
-    assert J == {}
-
-    h = IsingField()
-    h[0] += 1
-    h[0] -= 1
-    assert h == {}
+    d = IsingMatrix()
+    d[(0,)] += 1
+    d[(0,)] -= 1
+    assert d == {}
 
 
 def test_ising_reinitialize_dictionary():
 
-    J = IsingCoupling({(0, 1): 1, (1, 0): 2, (2, 0): 0})
-    assert J == {(0, 1): 3}
-
-    h = IsingField({0: -2, 2: 0})
-    assert h == {0: -2}
+    d = IsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
+    assert d == {(0,): 1, (0, 1): 3}
 
 
 def test_ising_update():
 
-    d = IsingCoupling({(0, 1): 1, (0, 2): 2})
-    d.update({(1, 0): 0, (2, 1): 1})
-    assert d == {(1, 2): 1, (0, 2): 2}
-
-    d = IsingField({0: 1, 2: -2})
-    d.update({0: 0, 1: 1})
-    assert d == {1: 1, 2: -2}
+    d = IsingMatrix({(0,): 1, (0, 1): 2})
+    d.update({(0,): 0, (1, 0): 1, (1,): -1})
+    assert d == {(0, 1): 1, (1,): -1}
 
 
 def test_ising_num_binary_variables():
 
-    d = IsingCoupling({(0, 1): 1, (0, 4): 2})
-    assert d.num_binary_variables == 3
-
-    d = IsingField({0: 1, 3: -2})
+    d = IsingMatrix({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
 
 
 def test_ising_max_index():
 
-    d = IsingCoupling({(0, 1): 1, (0, 4): 2})
-    assert d.max_index == 4
-
-    d = IsingField({0: 1, 3: -2})
+    d = IsingMatrix({(0,): 1, (0, 3): 2})
     assert d.max_index == 3
-
-
-def test_ising_to_matrix():
-
-    d = IsingCoupling({(0, 1): 1, (1, 2): 2, (0, 2): -1})
-    assert d.to_matrix(array=False) == [[0, 1, -1], [0, 0, 2], [0, 0, 0]]
-
-    d = IsingField({0: -1, 1: 3})
-    assert d.to_matrix(array=False) == [[-1], [3]]
-    assert d.to_matrix(vector=True, array=False) == [-1, 3]
 
 
 def test_ising_addition():
 
-    # IsingCoupling
-    temp = IsingCoupling({(0, 2): 1, (0, 1): 2})
-    temp1 = {(0, 2): -1, (1, 0): 3}
+    temp = IsingMatrix({(0,): 1, (0, 1): 2})
+    temp1 = {(0,): -1, (1, 0): 3}
     temp2 = {(0, 1): 5}
-    temp3 = {(0, 2): 2, (0, 1): -1}
+    temp3 = {(0,): 2, (0, 1): -1}
+
+    # add constant
+    d = temp.copy()
+    d += 5
+    d[()] -= 2
+    d == {(0,): 1, (0, 1): 2, (): 3}
 
     # __add__
     d = temp.copy()
@@ -269,54 +264,18 @@ def test_ising_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == IsingCoupling(temp3)*-1
-
-    # IsingField
-    temp = IsingField({0: 1, 1: 2})
-    temp1 = {0: -1, 1: 3}
-    temp2 = {1: 5}
-    temp3 = {0: 2, 1: -1}
-
-    # __add__
-    d = temp.copy()
-    g = d + temp1
-    assert g == temp2
-
-    # __iadd__
-    d = temp.copy()
-    d += temp1
-    assert d == temp2
-
-    # __radd__
-    d = temp.copy()
-    g = temp1 + d
-    assert g == temp2
-
-    # __sub__
-    d = temp.copy()
-    g = d - temp1
-    assert g == temp3
-
-    # __isub__
-    d = temp.copy()
-    d -= temp1
-    assert d == temp3
-
-    # __rsub__
-    d = temp.copy()
-    g = temp1 - d
-    assert g == IsingField(temp3)*-1
+    assert g == IsingMatrix(temp3)*-1
 
 
 def test_ising_multiplication():
 
-    # IsingCoupling
-    temp = IsingCoupling({(0, 2): 1, (0, 1): 2})
+    temp = IsingMatrix({(0,): 1, (0, 1): 2})
+    temp += 2
 
     # __mul__
     d = temp.copy()
     g = d * 3
-    assert g == {(0, 2): 3, (0, 1): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     g = d * 0
@@ -325,7 +284,7 @@ def test_ising_multiplication():
     # __imul__
     d = temp.copy()
     d *= 3
-    assert d == {(0, 2): 3, (0, 1): 6}
+    assert d == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     d *= 0
@@ -334,7 +293,7 @@ def test_ising_multiplication():
     # __rmul__
     d = temp.copy()
     g = 3 * d
-    assert g == {(0, 2): 3, (0, 1): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6}
 
     d = temp.copy()
     g = 0 * d
@@ -343,30 +302,121 @@ def test_ising_multiplication():
     # __truediv__
     d = temp.copy()
     g = d / 2
-    assert g == {(0, 2): .5, (0, 1): 1}
+    assert g == {(0,): .5, (0, 1): 1, (): 1}
 
     # __itruediv__
     d = temp.copy()
     d /= 2
-    assert d == {(0, 2): .5, (0, 1): 1}
+    assert d == {(0,): .5, (0, 1): 1, (): 1}
 
     # __floordiv__
     d = temp.copy()
     g = d // 2
-    assert g == {(0, 1): 1}
+    assert g == {(0, 1): 1, (): 1}
 
     # __ifloordiv__
     d = temp.copy()
     d //= 2
-    assert d == {(0, 1): 1}
+    assert d == {(0, 1): 1, (): 1}
 
-    # IsingField
-    temp = IsingField({0: 1, 1: 2})
+
+# PUBO
+
+def test_pubo_default_valid():
+
+    d = PUBOMatrix()
+    assert d[(0, 0)] == 0
+    d[(0, 0)] += 1
+    assert d == {(0,): 1}
+
+
+def test_pubo_remove_value_when_zero():
+
+    d = PUBOMatrix()
+    d[(0, 0)] += 1
+    d[(0, 0)] -= 1
+    assert d == {}
+
+
+def test_pubo_reinitialize_dictionary():
+
+    d = PUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1, (2, 0, 1): -2})
+    assert d == {(0,): 1, (0, 1): 3, (0, 1, 2): -2}
+
+
+def test_pubo_update():
+
+    d = PUBOMatrix({(0, 0): 1, (0, 1): 2})
+    d.update({(0,): 0, (1, 0): 1, (1, 1): -1, (2, 1, 1, 0): -3})
+    assert d == {(0, 1): 1, (1,): -1, (0, 1, 2): -3}
+
+
+def test_pubo_num_binary_variables():
+
+    d = PUBOMatrix({(0,): 1, (0, 3): 2, (0, 3, 4): -1})
+    assert d.num_binary_variables == 3
+
+
+def test_pubo_max_index():
+
+    d = PUBOMatrix({(0,): 1, (0, 3): 2, (0, 3, 4): -1})
+    assert d.max_index == 4
+
+
+def test_pubo_addition():
+
+    temp = PUBOMatrix({(0, 0): 1, (0, 1): 2, (1, 0, 3): 2})
+    temp1 = {(0,): -1, (1, 0): 3}
+    temp2 = {(0, 1): 5, (0, 1, 3): 2}
+    temp3 = {(0,): 2, (0, 1): -1, (0, 1, 3): 2}
+
+    # add constant
+    d = temp.copy()
+    d += 5
+    d[()] -= 2
+    d == {(0,): 1, (0, 1): 2, (): 3}
+
+    # __add__
+    d = temp.copy()
+    g = d + temp1
+    assert g == temp2
+
+    # __iadd__
+    d = temp.copy()
+    d += temp1
+    assert d == temp2
+
+    # __radd__
+    d = temp.copy()
+    g = temp1 + d
+    assert g == temp2
+
+    # __sub__
+    d = temp.copy()
+    g = d - temp1
+    assert g == temp3
+
+    # __isub__
+    d = temp.copy()
+    d -= temp1
+    assert d == temp3
+
+    # __rsub__
+    d = temp.copy()
+    g = temp1 - d
+    assert g == PUBOMatrix(temp3)*-1
+
+
+def test_pubo_multiplication():
+
+    temp = PUBOMatrix({(0, 0): 1, (0, 1): 2})
+    temp[(2, 0, 1)] -= 4
+    temp += 2
 
     # __mul__
     d = temp.copy()
     g = d * 3
-    assert g == {0: 3, 1: 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 1, 2): -12}
 
     d = temp.copy()
     g = d * 0
@@ -375,7 +425,7 @@ def test_ising_multiplication():
     # __imul__
     d = temp.copy()
     d *= 3
-    assert d == {0: 3, 1: 6}
+    assert d == {(0,): 3, (0, 1): 6, (): 6, (0, 1, 2): -12}
 
     d = temp.copy()
     d *= 0
@@ -384,7 +434,7 @@ def test_ising_multiplication():
     # __rmul__
     d = temp.copy()
     g = 3 * d
-    assert g == {0: 3, 1: 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 1, 2): -12}
 
     d = temp.copy()
     g = 0 * d
@@ -393,19 +443,165 @@ def test_ising_multiplication():
     # __truediv__
     d = temp.copy()
     g = d / 2
-    assert g == {0: .5, 1: 1}
+    assert g == {(0,): .5, (0, 1): 1, (): 1, (0, 1, 2): -2}
 
     # __itruediv__
     d = temp.copy()
     d /= 2
-    assert d == {0: .5, 1: 1}
+    assert d == {(0,): .5, (0, 1): 1, (): 1, (0, 1, 2): -2}
 
     # __floordiv__
     d = temp.copy()
     g = d // 2
-    assert g == {1: 1}
+    assert g == {(0, 1): 1, (): 1, (0, 1, 2): -2}
 
     # __ifloordiv__
     d = temp.copy()
     d //= 2
-    assert d == {1: 1}
+    assert d == {(0, 1): 1, (): 1, (0, 1, 2): -2}
+
+    # todo: add __mul__ test with dicts
+
+    # __pow__
+    assert temp ** 2 == temp * temp
+    assert temp ** 3 == temp * temp * temp
+
+
+# HIsing
+
+def test_hising_default_valid():
+
+    d = HIsingMatrix()
+    assert d[(0,)] == 0
+    d[(0,)] += 1
+    assert d == {(0,): 1}
+
+
+def test_hising_remove_value_when_zero():
+
+    d = HIsingMatrix()
+    d[(0,)] += 1
+    d[(0,)] -= 1
+    assert d == {}
+
+
+def test_hising_reinitialize_dictionary():
+
+    d = HIsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1, (2, 0, 1): 1})
+    assert d == {(0,): 1, (0, 1): 3, (0, 1, 2): 1}
+
+
+def test_hising_update():
+
+    d = HIsingMatrix({(0,): 1, (0, 1): 2})
+    d.update({(0,): 0, (1, 0): 1, (1,): -1, (0, 2, 1): -1})
+    assert d == {(0, 1): 1, (1,): -1, (0, 1, 2): -1}
+
+
+def test_hising_num_binary_variables():
+
+    d = HIsingMatrix({(0,): 1, (0, 3): 2, (0, 4, 3): 3})
+    assert d.num_binary_variables == 3
+
+
+def test_hising_max_index():
+
+    d = HIsingMatrix({(0,): 1, (0, 3): 2, (0, 4, 3): 3})
+    assert d.max_index == 4
+
+
+def test_hising_addition():
+
+    temp = HIsingMatrix({(0,): 1, (0, 1): 2, (2, 1, 0): -1})
+    temp1 = {(0,): -1, (1, 0): 3}
+    temp2 = {(0, 1): 5, (0, 1, 2): -1}
+    temp3 = {(0,): 2, (0, 1): -1, (0, 1, 2): -1}
+
+    # add constant
+    d = temp.copy()
+    d += 5
+    d[()] -= 2
+    d == {(0,): 1, (0, 1): 2, (): 3, (0, 1, 2): -1}
+
+    # __add__
+    d = temp.copy()
+    g = d + temp1
+    assert g == temp2
+
+    # __iadd__
+    d = temp.copy()
+    d += temp1
+    assert d == temp2
+
+    # __radd__
+    d = temp.copy()
+    g = temp1 + d
+    assert g == temp2
+
+    # __sub__
+    d = temp.copy()
+    g = d - temp1
+    assert g == temp3
+
+    # __isub__
+    d = temp.copy()
+    d -= temp1
+    assert d == temp3
+
+    # __rsub__
+    d = temp.copy()
+    g = temp1 - d
+    assert g == HIsingMatrix(temp3)*-1
+
+
+def test_hising_multiplication():
+
+    temp = HIsingMatrix({(0,): 1, (0, 1): 2, (0, 2, 3): 4})
+    temp += 2
+
+    # __mul__
+    d = temp.copy()
+    g = d * 3
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
+
+    d = temp.copy()
+    g = d * 0
+    assert g == {}
+
+    # __imul__
+    d = temp.copy()
+    d *= 3
+    assert d == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
+
+    d = temp.copy()
+    d *= 0
+    assert d == {}
+
+    # __rmul__
+    d = temp.copy()
+    g = 3 * d
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
+
+    d = temp.copy()
+    g = 0 * d
+    assert g == {}
+
+    # __truediv__
+    d = temp.copy()
+    g = d / 2
+    assert g == {(0,): .5, (0, 1): 1, (): 1, (0, 2, 3): 2}
+
+    # __itruediv__
+    d = temp.copy()
+    d /= 2
+    assert d == {(0,): .5, (0, 1): 1, (): 1, (0, 2, 3): 2}
+
+    # __floordiv__
+    d = temp.copy()
+    g = d // 2
+    assert g == {(0, 1): 1, (): 1, (0, 2, 3): 2}
+
+    # __ifloordiv__
+    d = temp.copy()
+    d //= 2
+    assert d == {(0, 1): 1, (): 1, (0, 2, 3): 2}

@@ -90,6 +90,12 @@ def test_dictarithmetic_multiplication():
 
     temp = DictArithmetic({(0, 0): 1, (0, 1): 2})
 
+    # __pos__
+    assert temp == +temp
+
+    # __neg__
+    assert -temp == {(0, 0): -1, (0, 1): -2}
+
     # __mul__
     d = temp.copy()
     g = d * 3
@@ -136,3 +142,28 @@ def test_dictarithmetic_multiplication():
     d = temp.copy()
     d //= 2
     assert d == {(0, 1): 1}
+
+    # __mul__ with dicts
+    d = temp.copy()
+    d *= {1: 2, 3: 2, (0, 1): -1}
+    assert d == {(0, 0, 1): 2, (0, 0, 3): 2, (0, 0, 0, 1): -1,
+                 (0, 1, 1): 4, (0, 1, 3): 4, (0, 1, 0, 1): -2}
+
+    # __pow__
+    d = temp.copy()
+    d **= 2
+    assert d == {(0, 0, 0, 0): 1, (0, 0, 0, 1): 2,
+                 (0, 1, 0, 0): 2, (0, 1, 0, 1): 4}
+
+    temp = d.copy()
+    assert d ** 3 == d * d * d
+
+
+def test_dictarithmetic_round():
+
+    d = DictArithmetic(a=3.456, b=-1.53456)
+
+    assert round(d) == dict(a=3, b=-2)
+    assert round(d, 1) == dict(a=3.5, b=-1.5)
+    assert round(d, 2) == dict(a=3.46, b=-1.53)
+    assert round(d, 3) == dict(a=3.456, b=-1.535)

@@ -20,13 +20,13 @@ class for some Binary Optimization classes, such as ``qubovert.QUBO``,
 
 """
 
-from . import Problem, DictArithmetic
+from . import Problem, DictArithmetic, Conversions
 
 
 __all__ = 'BO',
 
 
-class BO(DictArithmetic):
+class BO(DictArithmetic, Conversions):
     """BO.
 
     Parent class for some Binary Optimization classes, such as
@@ -34,6 +34,9 @@ class BO(DictArithmetic):
 
     BO inherits some methods and attributes the ``DictArithmetic`` class.
     See ``help(qubovert.utils.DictArithmetic)``.
+
+    BO inherits some methods and attributes the ``Conversions`` class.
+    See ``help(qubovert.utils.Conversions)``.
 
     A child class of BO must define at least one of either a ``to_qubo`` or
     ``to_ising`` method.
@@ -166,105 +169,11 @@ class BO(DictArithmetic):
         """
         return True
 
-    # The following methods just uses code written in the Problem class.
+    # The following method just uses code written in the Problem class.
     # I want to avoid duplicate code as much as possible! So we use what we
     # have already written. But we don't make BO a subclass of Problem
     # for various reasons (some inconsistencies in code, convention, and
     # docstrings).
-
-    def to_ising(self, *args, **kwargs):
-        """to_ising.
-
-        Create and return Ising model representing the problem.
-        Should be implemented in child classes. If this method is not
-        implemented in the child class, then it simply calls ``to_qubo`` and
-        converts the QUBO formulation to an Ising formulation.
-
-        Parameters
-        ----------
-        Same as the parameters defined in the ``to_qubo`` method.
-
-        Return
-        ------
-        I : qubovert.utils.IsingMatrix object.
-            The upper triangular coupling matrix, where two element tuples
-            represent couplings and one element tuples represent fields.
-            For most practical purposes, you can use IsingCoupling in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.IsingMatrix)``.
-
-        """
-        return Problem.to_ising(self, *args, **kwargs)
-
-    def to_qubo(self, *args, **kwargs):
-        """to_qubo.
-
-        Create and return upper triangular QUBO representing the problem.
-        The labels will be integers from 0 to n-1.
-
-        Parameters
-        ----------
-        args and kwargs are the same as the parameters defined in the
-        ``to_ising`` method.
-
-        Return
-        -------
-        Q : qubovert.utils.QUBOMatrix object.
-            The upper triangular QUBO matrix, a QUBOMatrix object.
-            For most practical purposes, you can use QUBOMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.QUBOMatrix)``.
-
-        """
-        return Problem.to_qubo(self, *args, **kwargs)
-
-    def to_hising(self, *args, **kwargs):
-        """to_hising.
-
-        Create and return HIsing model representing the problem.
-        Should be implemented in child classes. If this method is not
-        implemented in the child class, then it simply calls ``to_pubo`` or
-        ``to_ising`` and converts to a HIsing formulation.
-
-        Parameters
-        ----------
-        Same as the parameters defined in the ``to_pubo`` or ``to_qubo``
-        methods.
-
-        Return
-        ------
-        H : qubovert.utils.HIsingMatrix object.
-            For most practical purposes, you can use HIsingMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.HIsingMatrix)``.
-
-        """
-        return Problem.to_hising(self, *args, **kwargs)
-
-    def to_pubo(self, *args, **kwargs):
-        """to_pubo.
-
-        Create and return upper triangular PUBO representing the problem.
-        Should be implemented in child classes. If this method is not
-        implemented in the child class, then it simply calls ``to_hising`` or
-        ``to_qubo`` and converts the hising or QUBO formulations to a
-        PUBO formulation.
-
-        Parameters
-        ----------
-        Same as the parameters defined in the ``to_qubo`` or ``to_hising``
-        methods.
-
-        Return
-        -------
-        P : qubovert.utils.PUBOMatrix object.
-            The upper triangular PUBO matrix, a PUBOMatrix object.
-            For most practical purposes, you can use PUBOMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.PUBOMatrix)``.
-
-        """
-        return Problem.to_pubo(self, *args, **kwargs)
 
     def solve_bruteforce(self, *args, **kwargs):
         """solve_bruteforce.

@@ -26,12 +26,12 @@ from ._solve_bruteforce import *
 from ._problem_parentclass import *
 from ._bo_parentclass import *
 
-from _dict_arithmetic import __all__ as __all_dict_arithmetic__
+from ._dict_arithmetic import __all__ as __all_dict_arithmetic__
 from ._qubo_matrix import __all__ as __all_qubo_matrix__
 from ._conversions import __all__ as __all_conversions__
 from ._solve_bruteforce import __all__ as __all_solve_bruteforce__
 from ._problem_parentclass import __all__ as __all_problem_parentclass__
-from _bo_parentclass import __all__ as __all_bo__
+from ._bo_parentclass import __all__ as __all_bo__
 
 
 __all__ = (

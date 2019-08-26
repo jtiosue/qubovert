@@ -26,7 +26,7 @@ import numpy as np
 __all__ = (
     'qubo_to_ising', 'ising_to_qubo', 'pubo_to_hising', 'hising_to_pubo',
     'matrix_to_qubo', 'qubo_to_matrix', 'binary_to_spin', 'spin_to_binary',
-    'decimal_to_binary', 'decimal_to_spin'
+    'decimal_to_binary', 'decimal_to_spin', 'Conversions'
 )
 
 
@@ -44,7 +44,7 @@ def qubo_to_ising(Q):
 
     Returns
     ------
-    I : qubovert.utils.IsingMatrix object.
+    L : qubovert.utils.IsingMatrix object.
         tuple of spin labels map to Ising values.
         For most practical purposes, you can use IsingMatrix in the
         same way as an ordinary dictionary. For more information,
@@ -53,32 +53,34 @@ def qubo_to_ising(Q):
     Example
     -------
     >>> Q = {(0,): 1, (0, 1): -1, (1,): 3}
-    >>> I = qubo_to_ising(Q)
+    >>> L = qubo_to_ising(Q)
 
     """
-    # IsingMatrix deals with keeping J upper triangular, so we don't have to
-    # worry about it!
-    I = IsingMatrix()
+    # could just use IsingMatrix(pubo_to_hising(Q)), but then we spend a lot of
+    # time converting from a HIsingMatrix to IsingMatrix, so instead we
+    # explictly write out the conversion.
+    L = IsingMatrix()
 
-    for k, v in Q.items():
+    for kp, v in Q.items():
+        k = tuple(set(kp))
         if not k:
-            I[k] += v
+            L[k] += v
         elif len(k) == 1:
-            I[k] += v / 2
-            I[()] += v / 2
+            L[k] += v / 2
+            L[()] += v / 2
         elif len(k) == 2:
             i, j = k
-            I[k] += v / 4
-            I[(i,)] += v / 4
-            I[(j,)] += v / 4
-            I[()] += v / 4
+            L[k] += v / 4
+            L[(i,)] += v / 4
+            L[(j,)] += v / 4
+            L[()] += v / 4
         else:
             raise KeyError("Invalid QUBO key")
 
-    return I
+    return L
 
 
-def ising_to_qubo(I):
+def ising_to_qubo(L):
     """ising_to_qubo.
 
     Convert the specified Ising problem into an upper triangular QUBO problem.
@@ -86,7 +88,7 @@ def ising_to_qubo(I):
 
     Parameters
     ----------
-    I : dictionary or qubovert.utils.IsingMatrix object.
+    L : dictionary or qubovert.utils.IsingMatrix object.
         Tuple of spin labels map to Ising values. Labels must be integers
         >= 0.
 
@@ -100,25 +102,23 @@ def ising_to_qubo(I):
 
     Example
     -------
-    >>> I = {(0,): 1, (1,): -1, (0, 1): -1}
-    >>> Q = ising_to_qubo(I)
+    >>> L = {(0,): 1, (1,): -1, (0, 1): -1}
+    >>> Q = ising_to_qubo(L)
 
     """
-    # QUBOMarix deals with keeping ! upper triangular, so we don't have to
-    # worry about it!
+    # could just use QUBOMatrix(hising_to_pubo(L)), but then we spend a lot of
+    # time converting from a PUBOMatrix to QUBOMatrix, so instead we explictly
+    # write out the conversion.
     Q = QUBOMatrix()
 
-    for k, v in I.items():
+    for k, v in L.items():
         if not k:
-            I[k] += v
+            Q[k] += v
         elif len(k) == 1:
             Q[k] += 2 * v
             Q[()] -= v
         elif len(k) == 2:
             i, j = k
-            if i == j:
-                raise KeyError("J formatted incorrectly, key cannot "
-                               "have repeated indices")
             Q[k] += 4 * v
             Q[(i,)] -= 2 * v
             Q[(j,)] -= 2 * v
@@ -153,12 +153,40 @@ def pubo_to_hising(P):
     >>> H = pubo_to_hising(P)
 
     """
+    def generate_new_key_value(k):
+        """generate_new_key_value.
+
+        Recursively generate the PUBO key, value pairs for converting the
+        product ``x[k[0]] * ... * x[k[-1]]``, where each ``x`` is a binary
+        variable in {0, 1}, to the product
+        ``(z[k[0]]+1)/2 * ... * (z[k[1]]+1)/2``., where each ``z`` is a spin
+        in {-1, 1}.
+
+        Parameters
+        ----------
+        k : tuple.
+            Each element of the tuple corresponds to a binary label.
+
+        Yields
+        ------
+        res : tuple (key, value)
+            key : tuple.
+                Each element of the tuple corresponds to a spin label.
+            value : float.
+                The value to multiply the value corresponding with ``k`` by.
+
+        """
+        if not k:
+            yield k, 1
+        else:
+            for key, value in generate_new_key_value(k[1:]):
+                yield (k[0],) + key, value / 2
+                yield key, value / 2
+
     H = HIsingMatrix()
     for k, v in P.items():
-        if not k:
-            H[k] += v
-        else:
-            pass
+        for key, value in generate_new_key_value(PUBOMatrix.squash_key(k)):
+            H[key] += value * v
 
     return H
 
@@ -189,12 +217,39 @@ def hising_to_pubo(H):
     >>> P = hising_to_pubo(H)
 
     """
+    def generate_new_key_value(k):
+        """generate_new_key_value.
+
+        Recursively generate the PUBO key, value pairs for converting the
+        product ``z[k[0]] * ... * z[k[-1]]``, where each ``z`` is a spin in
+        {-1, 1}, to the product ``(2*x[k[0]]-1) * ... * (2*x[k[1]]-1)``, where
+        each ``x`` is a binary variables in {0, 1}.
+
+        Parameters
+        ----------
+        k : tuple.
+            Each element of the tuple corresponds to a spin label.
+
+        Yields
+        ------
+        res : tuple (key, value)
+            key : tuple.
+                Each element of the tuple corresponds to a binary label.
+            value : float.
+                The value to multiply the value corresponding with ``k`` by.
+
+        """
+        if not k:
+            yield k, 1
+        else:
+            for key, value in generate_new_key_value(k[1:]):
+                yield (k[0],) + key, 2 * value
+                yield key, -value
+
     P = PUBOMatrix()
     for k, v in H.items():
-        if not k:
-            P[k] += v
-        else:
-            pass
+        for key, value in generate_new_key_value(HIsingMatrix.squash_key(k)):
+            P[key] += value * v
 
     return P
 
@@ -264,14 +319,20 @@ def qubo_to_matrix(Q, symmetric=False, array=True):
     elif not isinstance(Q, QUBOMatrix):
         Q = QUBOMatrix(Q)
 
+    if Q[()] != 0:
+        raise ValueError("QUBO cannot have a constant when converting "
+                         "to a matrix")
+
     matrix = np.zeros((Q.max_index+1,)*2)
-    for (i, j), v in Q.items():
-        if i == j:
-            matrix[i][j] = v
+    for k, v in Q.items():
+        if len(k) == 1:
+            matrix[k[0]][k[0]] = v
         elif symmetric:
+            i, j = k
             matrix[i][j] = v / 2
             matrix[j][i] = v / 2
         else:
+            i, j = k
             matrix[i][j] = v
 
     if not array:
@@ -408,3 +469,132 @@ def decimal_to_spin(d, num_spins=None):
 
     """
     return binary_to_spin(decimal_to_binary(d, num_spins))
+
+
+class Conversions:
+    """Conversions.
+
+    This is a parent class that defines the functions ``to_qubo``,
+    ``to_ising``, ``to_pubo``, and ``to_hising``. Any subclass that inherits
+    from ``Conversions`` `must` supply at least one of ``to_qubo`` or
+    ``to_ising``. And at least one of ``to_pubo`` or ``to_hising``.
+
+
+    """
+
+    def to_qubo(self, *args, **kwargs):
+        """to_qubo.
+
+        Create and return upper triangular QUBO representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_ising`` and
+        converts the ising formulation to a QUBO formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the QUBO.
+
+        Return
+        -------
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
+
+        Raises
+        -------
+        ``RecursionError`` if neither ``to_qubo`` nor ``to_ising`` are defined
+        in the subclass.
+
+        """
+        return ising_to_qubo(self.to_ising(*args, **kwargs))
+
+    def to_ising(self, *args, **kwargs):
+        """to_ising.
+
+        Create and return Ising model representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_qubo`` and
+        converts the QUBO formulation to an Ising formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the Ising model.
+
+        Return
+        ------
+        L : qubovert.utils.IsingMatrix object.
+            The upper triangular coupling matrix, where two element tuples
+            represent couplings and one element tuples represent fields.
+            For most practical purposes, you can use IsingCoupling in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.IsingMatrix)``.
+
+        Raises
+        -------
+        ``RecursionError`` if neither ``to_qubo`` nor ``to_ising`` are defined
+        in the subclass.
+
+        """
+        return qubo_to_ising(self.to_qubo(*args, **kwargs))
+
+    def to_pubo(self, *args, **kwargs):
+        """to_pubo.
+
+        Create and return upper triangular PUBO representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_hising`` or
+        ``to_qubo`` and converts the hising or QUBO formulations to a
+        PUBO formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the QUBO.
+
+        Return
+        -------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        Raises
+        -------
+        ``RecursionError`` if neither ``to_pubo`` nor ``to_hising`` are defined
+        in the subclass.
+
+        """
+        return hising_to_pubo(self.to_hising(*args, **kwargs))
+
+    def to_hising(self, *args, **kwargs):
+        """to_hising.
+
+        Create and return HIsing model representing the problem.
+        Should be implemented in child classes. If this method is not
+        implemented in the child class, then it simply calls ``to_pubo`` or
+        ``to_ising`` and converts to a HIsing formulation.
+
+        Parameters
+        ----------
+        Defined in the child class. They should be parameters that define
+        lagrange multipliers or factors in the Ising model.
+
+        Return
+        ------
+        H : qubovert.utils.HIsingMatrix object.
+            For most practical purposes, you can use HIsingMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.HIsingMatrix)``.
+
+        Raises
+        -------
+        ``RecursionError`` if neither ``to_pubo`` nor ``to_hising`` are defined
+        in the subclass.
+
+        """
+        return pubo_to_hising(self.to_pubo(*args, **kwargs))

@@ -23,6 +23,32 @@ other classes, such as ``qubovert.utils.QUBOMatrix`` and ``qubovert.utils.BO``.
 __all__ = 'DictArithmetic',
 
 
+def _generate_key_value_pairs(*args, **kwargs):
+    """_generate_key_value_pairs.
+
+    Generate the key, value pairs from the parameter inputs to a dictionary
+    without explicitly recreating the dictionary.
+
+    Parameters
+    ----------
+    args and kwargs define a dictionary. See ``help(dict)``.
+
+    Yields
+    ------
+    pairs : tuple (key, value).
+
+    """
+    if not kwargs and len(args) == 1:
+        a = args[0]
+        k_v_pairs = (x for x in (a.items() if isinstance(a, dict) else a))
+    elif not args and kwargs:
+        k_v_pairs = (x for x in kwargs.items())
+    else:
+        k_v_pairs = (x for x in dict(*args, **kwargs).items())
+
+    yield from k_v_pairs
+
+
 class DictArithmetic(dict):
     """DictArithmetic.
 
@@ -99,8 +125,8 @@ class DictArithmetic(dict):
         """
         super().__init__()
         # reset to make sure everything is in the proper form
-        d = dict(*args, **kwargs)
-        for key, value in d.items():
+
+        for key, value in _generate_key_value_pairs(*args, **kwargs):
             self[key] += value
 
     def __getitem__(self, key):
@@ -152,7 +178,7 @@ class DictArithmetic(dict):
             all the required convensions.
 
         """
-        for k, v in dict(*args, **kwargs).items():
+        for k, v in _generate_key_value_pairs(*args, **kwargs):
             self[k] = v
 
     def __add__(self, other):
@@ -309,11 +335,11 @@ class DictArithmetic(dict):
     def __mul__(self, other):
         """__mul__.
 
-        Multiplying a DictArithmetic by a scalar.
+        Multiplying a DictArithmetic by a scalar or another dict.
 
         Parameters
         ----------
-        other : numeric.
+        other : numeric or dict/DictArithmetic object.
 
         Return
         -------
@@ -321,9 +347,21 @@ class DictArithmetic(dict):
 
         Example
         -------
-        >>> d = DictArithmetic((0, 0)=1, (0, 1)=-1)
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
         >>> print(d * 2)
         {(0, 0): 2, (0, 1): -1}
+
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {(0,): -1, (0, 2): 1}
+        >>> print(d * g)
+        {(0, 0, 0): -1, (0, 0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 0, 2): -1}
+
+        Note that if the keys are not tuples, then they will be made tuples! Ie
+
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {0: -1, 2: 1}
+        >>> print(d * g)
+        {(0, 0, 0): -1, (0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 2): -1}
 
         """
         d = self.copy()
@@ -337,7 +375,7 @@ class DictArithmetic(dict):
 
         Parameters
         ----------
-        other : numeric.
+        other : numeric or dict/DictArithmetic object.
 
         Return
         -------
@@ -345,9 +383,21 @@ class DictArithmetic(dict):
 
         Example
         -------
-        >>> d = DictArithmetic((0, 0)=1, (0, 1)=-1)
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
         >>> print(2 * d)
         {(0, 0): 2, (0, 1): -1}
+
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {(0,): -1, (0, 2): 1}
+        >>> print(g * d)
+        {(0, 0, 0): -1, (0, 0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 0, 2): -1}
+
+        Note that if the keys are not tuples, then they will be made tuples! Ie
+
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {0: -1, 2: 1}
+        >>> print(g * d)
+        {(0, 0, 0): -1, (0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 2): -1}
 
         """
         return self * other
@@ -359,7 +409,7 @@ class DictArithmetic(dict):
 
         Parameters
         ----------
-        other : numeric.
+        other : numeric or dict/DictArithmetic object.
 
         Return
         -------
@@ -367,14 +417,87 @@ class DictArithmetic(dict):
 
         Example
         -------
-        >>> d = DictArithmetic((0, 0)=1, (0, 1)=-1)
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
         >>> d *= 2
         >>> print(d)
         {(0, 0): 2, (0, 1): -1}
 
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {(0,): -1, (0, 2): 1}
+        >>> d *= g
+        >>> print(d)
+        {(0, 0, 0): -1, (0, 0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 0, 2): -1}
+
+        Note that if the keys are not tuples, then they will be made tuples! Ie
+
+        >>> d = DictArithmetic({(0, 0): 1, (0, 1): -1})
+        >>> g = {0: -1, 2: 1}
+        >>> d *= g
+        >>> print(d)
+        {(0, 0, 0): -1, (0, 0, 2): 1, (0, 1, 0): 1, (0, 1, 2): -1}
+
         """
-        for k in tuple(self.keys()):
-            self[k] *= other
+        if isinstance(other, dict):
+            items, oitems = tuple(self.items()), tuple(other.items())
+            self.clear()
+            for k, v in items:
+                kp = k if isinstance(k, tuple) else (k,)
+                for ko, vo in oitems:
+                    kop = ko if isinstance(ko, tuple) else (ko,)
+                    self[kp + kop] += v * vo
+
+        else:
+            for k in tuple(self.keys()):
+                self[k] *= other
+
+        return self
+
+    def __pow__(self, exponent):
+        """__pow__.
+
+        Raise the object to an integer power. Note that for example
+        ``self ** 3 == self * self * self``.
+
+        Parameters
+        ----------
+        exponent : int.
+            Integer power to raise the DictArithmetic to.
+
+        Returns
+        ------
+        res : DictArithmetic.
+
+        """
+        d = self.copy()
+        d **= exponent
+        return d
+
+    def __ipow__(self, exponent):
+        """__ipow__.
+
+        Same as ``__pow__`` but in place.
+
+        Raise the object to an integer power. Note that for example
+        ``self ** 3 == self * self * self``.
+
+        Parameters
+        ----------
+        exponent : int.
+            Integer power to raise the DictArithmetic to.
+
+        Returns
+        ------
+        self : DictArithmetic.
+
+        """
+        if not isinstance(exponent, int) or exponent <= 0:
+            raise ValueError("Exponent must be a positive integer")
+
+        if exponent > 1:
+            old = self.copy()
+            for _ in range(exponent-1):
+                self *= old
+
         return self
 
     def __truediv__(self, other):
@@ -474,3 +597,52 @@ class DictArithmetic(dict):
         for k in tuple(self.keys()):
             self[k] //= other
         return self
+
+    def __pos__(self):
+        """__pos__.
+
+        Called when unary + is used. Returns copy of self.
+
+        Returns
+        -------
+        res : DictArithmetic object.
+            Copy of self.
+
+        """
+        return self.copy()
+
+    def __neg__(self):
+        """__neg__.
+
+        Called when unary - is used. Returns -1 * self.
+
+        Returns
+        -------
+        res : DictArithmetic object.
+            -1 * self.
+
+        """
+        return -1 * self
+
+    def __round__(self, ndigits=None):
+        """round.
+
+        Round values of the DictArithmetic object.
+
+        Parameters
+        ----------
+        ndigits : int.
+            Number of decimal digits to round to.
+
+        Returns
+        -------
+        res : DictArithmetic object.
+            Copy of self but with each value rounded to ``ndigits`` decimal
+            digits. Each value has a type according to the docstring
+            specifications of ``round``, see ``help(round)``.
+
+        """
+        d = self.__class__()
+        for k, v in self.items():
+            d[k] = round(v, ndigits)
+        return d

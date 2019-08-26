@@ -14,8 +14,8 @@
 
 """_solve_bruteforce.py.
 
-This file contains bruteforce solvers for QUBO and Ising, as well as QUBO and
-Ising objective function evaluators, and for PUBO and HIsings.
+This file contains bruteforce solvers for QUBO/PUBO and Ising/HIsing, as well
+as QUBO/PUBO and HIsing objective function evaluators.
 
 """
 
@@ -115,9 +115,9 @@ def hising_value(z, H):
 
     Example
     -------
-    >>> I = {(0, 1): -1, (0,): 1}
+    >>> H = {(0, 1): -1, (0,): 1}
     >>> z = {0: -1, 1: 1}
-    >>> hising_value(z, I)
+    >>> hising_value(z, H)
     0
 
     """
@@ -127,20 +127,20 @@ def hising_value(z, H):
     )
 
 
-def ising_value(z, I):
+def ising_value(z, L):
     r"""ising_value.
 
     Find the value of
         :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}t`.
-    The J's are encoded by keys with pairs of labels in I, and the h's are
-    encoded by keys with a single label in I.
+    The J's are encoded by keys with pairs of labels in L, and the h's are
+    encoded by keys with a single label in L.
 
     Parameters
     ----------
     z: dict or iterable.
         Maps variable labels to their values, -1 or 1. Ie z[i] must be the
         value of variable i.
-    I : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
+    L : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
         Maps spin labels to values.
 
     Return
@@ -150,15 +150,13 @@ def ising_value(z, I):
 
     Example
     -------
-    >>> I = {(0, 1): -1, (0,): 1}
+    >>> L = {(0, 1): -1, (0,): 1}
     >>> z = {0: -1, 1: 1}
-    >>> ising_value(z, I)
+    >>> ising_value(z, L)
     0
 
     """
-    return hising_value(z, I)
-
-
+    return hising_value(z, L)
 
 
 def _solve_bruteforce(D, all_solutions, spin=False):
@@ -410,7 +408,7 @@ def solve_hising_bruteforce(H, all_solutions=False):
 
     Then to solve this, run
 
-    >>> obj_val, solution = solve_hising_bruteforce(I)
+    >>> obj_val, solution = solve_hising_bruteforce(H)
     >>> obj_val
     -3
     >>> solution
@@ -426,7 +424,7 @@ def solve_hising_bruteforce(H, all_solutions=False):
     return _solve_bruteforce(H, all_solutions, spin=True)
 
 
-def solve_ising_bruteforce(I, all_solutions=False):
+def solve_ising_bruteforce(L, all_solutions=False):
     """solve_ising_bruteforce.
 
     Iterate through all the possible solutions to an Ising formulated problem
@@ -436,7 +434,7 @@ def solve_ising_bruteforce(I, all_solutions=False):
 
     Parameters
     ----------
-    I : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
+    L : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
         Maps spin labels to values.
     all_solutions : boolean (optional, defaults to False).
         If all_solutions is set to True, all the best solutions to the Ising
@@ -468,11 +466,11 @@ def solve_ising_bruteforce(I, all_solutions=False):
     :math:`obj = z_0z_1 + z_1z_2 - z_1 - 2z_2`,
     we have
 
-    >>> I = {(0, 1): 1, (1, 2): 1, (1,): -1, (2,): -2}
+    >>> L = {(0, 1): 1, (1, 2): 1, (1,): -1, (2,): -2}
 
     Then to solve this, run
 
-    >>> obj_val, solution = solve_ising_bruteforce(I)
+    >>> obj_val, solution = solve_ising_bruteforce(L)
     >>> obj_val
     -3
     >>> solution
@@ -485,4 +483,4 @@ def solve_ising_bruteforce(I, all_solutions=False):
     is -1, :math:`z_2` is 1.
 
     """
-    return solve_hising_bruteforce(I, all_solutions)
+    return solve_hising_bruteforce(L, all_solutions)

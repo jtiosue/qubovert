@@ -224,7 +224,7 @@ class GraphPartitioning(Problem):
 
         Return
         -------
-        I : qubovert.utils.IsingMatrix object.
+        L : qubovert.utils.IsingMatrix object.
             For most practical purposes, you can use IsingMatrix in the
             same way as an ordinary dictionary. For more information, see
             ``help(qubovert.utils.IsingMatrix)``.
@@ -232,27 +232,27 @@ class GraphPartitioning(Problem):
         Example
         --------
         >>> problem = GraphPartitioning({(0, 1), (1, 2), (0, 3)})
-        >>> I = problem.to_ising()
+        >>> L = problem.to_ising()
 
         """
         # all naming conventions follow the paper listed in the docstring
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-        I = IsingMatrix()
-        I += A * self._N + B * sum(self._edges.values()) / 2
+        L = IsingMatrix()
+        L += A * self._N + B * sum(self._edges.values()) / 2
 
         # encode H_A (equation 8)
         for i in range(self._N):
             for j in range(i+1, self._N):
-                I[(i, j)] += 2 * A
+                L[(i, j)] += 2 * A
 
         # encode H_B (equation 9)
         for (u, v), w in self._edges.items():
-            I[(self._vertex_to_index[u],
+            L[(self._vertex_to_index[u],
                self._vertex_to_index[v])] -= w * B / 2
 
-        return I
+        return L
 
     def convert_solution(self, solution):
         """convert_solution.

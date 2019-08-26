@@ -52,16 +52,14 @@ def test_numberpartitioning_bruteforce():
 
 def test_numberpartitioning_qubo_solve():
 
-    Q, offset = problem_withsoln.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem_withsoln.to_qubo())
     solution = problem_withsoln.convert_solution(sol)
 
     assert solution in solutions_withsoln
     assert problem_withsoln.is_solution_valid(solution)
     assert allclose(e, 0)
 
-    Q, offset = problem_withoutsoln.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem_withoutsoln.to_qubo())
     solution = problem_withoutsoln.convert_solution(sol)
 
     assert solution in solutions_withoutsoln
@@ -71,16 +69,18 @@ def test_numberpartitioning_qubo_solve():
 
 def test_numberpartitioning_qubo_numvars():
 
-    Q, _ = problem_withsoln.to_qubo()
+    Q = problem_withsoln.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem_withsoln.num_binary_variables
+        problem_withsoln.num_binary_variables ==
+        Q.num_binary_variables
     )
 
-    Q, offset = problem_withoutsoln.to_qubo()
+    Q = problem_withoutsoln.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem_withoutsoln.num_binary_variables
+        problem_withoutsoln.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 # ising
@@ -88,16 +88,14 @@ def test_numberpartitioning_qubo_numvars():
 
 def test_numberpartitioning_ising_solve():
 
-    h, J, offset = problem_withsoln.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem_withsoln.to_ising())
     solution = problem_withsoln.convert_solution(sol)
 
     assert solution in solutions_withsoln
     assert problem_withsoln.is_solution_valid(solution)
     assert allclose(e, 0)
 
-    h, J, offset = problem_withoutsoln.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem_withoutsoln.to_ising())
     solution = problem_withoutsoln.convert_solution(sol)
 
     assert solution in solutions_withoutsoln
@@ -107,14 +105,8 @@ def test_numberpartitioning_ising_solve():
 
 def test_numberpartitioning_ising_numvars():
 
-    h, J, _ = problem_withsoln.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem_withsoln.num_binary_variables
-    )
+    L = problem_withsoln.to_ising()
+    assert L.num_binary_variables == problem_withsoln.num_binary_variables
 
-    h, J, _ = problem_withoutsoln.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem_withoutsoln.num_binary_variables
-    )
+    L = problem_withoutsoln.to_ising()
+    assert L.num_binary_variables == problem_withoutsoln.num_binary_variables

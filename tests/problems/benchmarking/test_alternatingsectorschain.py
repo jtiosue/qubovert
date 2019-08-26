@@ -42,8 +42,7 @@ def test_AlternatingSectorsChain_bruteforce():
 
 def test_AlternatingSectorsChain_qubo_solve():
 
-    Q, offset = problem.to_qubo(True)
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem.to_qubo(True))
     solution = problem.convert_solution(sol)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -52,8 +51,7 @@ def test_AlternatingSectorsChain_qubo_solve():
 
     # not pbc
 
-    Q, offset = problem.to_qubo(False)
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem.to_qubo(False))
     solution = problem.convert_solution(sol)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -63,10 +61,11 @@ def test_AlternatingSectorsChain_qubo_solve():
 
 def test_AlternatingSectorsChain_qubo_numvars():
 
-    Q, offset = problem.to_qubo()
+    Q = problem.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem.num_binary_variables
+        problem.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 
@@ -74,8 +73,7 @@ def test_AlternatingSectorsChain_qubo_numvars():
 
 def test_AlternatingSectorsChain_ising_solve():
 
-    args = problem.to_ising(True)
-    e, sol = solve_ising_bruteforce(*args)
+    e, sol = solve_ising_bruteforce(problem.to_ising(True))
     solution = problem.convert_solution(sol)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -84,8 +82,7 @@ def test_AlternatingSectorsChain_ising_solve():
 
     # not pbc
 
-    args = problem.to_ising(False)
-    e, sol = solve_ising_bruteforce(*args)
+    e, sol = solve_ising_bruteforce(problem.to_ising(False))
     solution = problem.convert_solution(sol)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -95,8 +92,5 @@ def test_AlternatingSectorsChain_ising_solve():
 
 def test_AlternatingSectorsChain_ising_numvars():
 
-    h, J, _ = problem.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem.num_binary_variables
-    )
+    L = problem.to_ising()
+    assert L.num_binary_variables == problem.num_binary_variables

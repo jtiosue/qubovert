@@ -13,12 +13,13 @@
 #   limitations under the License.
 
 """
-Contains tests for the QUBO to Ising and Ising to QUBO functions.
+Contains tests for the QUBO/PUBO to/from Ising/HIsing functions.
 """
 
 from qubovert.utils import (
-    qubo_to_ising, ising_to_qubo, binary_to_spin, spin_to_binary,
-    decimal_to_binary, decimal_to_spin, qubo_to_matrix, matrix_to_qubo
+    qubo_to_ising, ising_to_qubo, pubo_to_hising, hising_to_pubo,
+    binary_to_spin, spin_to_binary, decimal_to_binary, decimal_to_spin,
+    qubo_to_matrix, matrix_to_qubo
 )
 import numpy as np
 
@@ -43,16 +44,50 @@ def test_spin_to_binary():
 
 def test_qubo_to_ising_to_qubo():
 
-    qubo_args = {(0, 0): 1, (0, 1): 1, (1, 1): -1, (1, 2): .2}, 3
+    qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
 
-    assert qubo_args == ising_to_qubo(*qubo_to_ising(*qubo_args))
+    assert qubo == ising_to_qubo(qubo_to_ising(qubo))
 
 
 def test_ising_to_qubo_to_ising():
 
-    ising_args = {0: 1, 2: -2}, {(0, 1): -4, (0, 2): 3}, -2
+    ising = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
 
-    assert ising_args == qubo_to_ising(*ising_to_qubo(*ising_args))
+    assert ising == qubo_to_ising(ising_to_qubo(ising))
+
+
+def test_pubo_to_hising_to_pubo():
+
+    pubo = {
+        (0,): 1, (0, 1): 1, (1,): -1, (1, 2): .5, (): -2, (2,): 1,
+        (0, 2, 3): -3, (0, 1, 2): -2
+    }
+
+    assert pubo == hising_to_pubo(pubo_to_hising(pubo))
+
+
+def test_hising_to_pubo_to_hising():
+
+    hising = {
+        (0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2,
+        (0, 1, 2): 3, (0, 2, 3): -1
+    }
+
+    assert hising == pubo_to_hising(hising_to_pubo(hising))
+
+
+def test_qubo_to_ising_eq_pubo_to_hising():
+
+    qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
+
+    assert qubo_to_ising(qubo) == pubo_to_hising(qubo)
+
+
+def test_ising_to_qubo_eq_hising_to_pubo():
+
+    ising = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
+
+    assert ising_to_qubo(ising) == hising_to_pubo(ising)
 
 
 def test_decimal_to_binary():
@@ -69,7 +104,7 @@ def test_decimal_to_spin():
 
 def test_matrix_to_qubo():
 
-    matrix, qubo = [[-3, 1], [-1, 2]], {(0, 0): -3, (1, 1): 2}
+    matrix, qubo = [[-3, 1], [-1, 2]], {(0,): -3, (1,): 2}
     assert matrix_to_qubo(matrix) == qubo
 
 

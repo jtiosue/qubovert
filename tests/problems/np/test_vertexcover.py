@@ -39,8 +39,7 @@ def test_vertexcover_bruteforce():
 
 def test_vertexcover_qubo_solve():
 
-    Q, offset = problem.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem.to_qubo())
     solution = problem.convert_solution(sol)
 
     assert solution == {"a", "c"}
@@ -50,10 +49,11 @@ def test_vertexcover_qubo_solve():
 
 def test_vertexcover_qubo_numvars():
 
-    Q, offset = problem.to_qubo()
+    Q = problem.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem.num_binary_variables
+        problem.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 
@@ -61,8 +61,7 @@ def test_vertexcover_qubo_numvars():
 
 def test_vertexcover_ising_solve():
 
-    h, J, offset = problem.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem.to_ising())
     solution = problem.convert_solution(sol)
 
     assert solution == {"a", "c"}
@@ -72,8 +71,5 @@ def test_vertexcover_ising_solve():
 
 def test_vertexcover_ising_numvars():
 
-    h, J, _ = problem.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem.num_binary_variables
-    )
+    L = problem.to_ising()
+    assert L.num_binary_variables == problem.num_binary_variables

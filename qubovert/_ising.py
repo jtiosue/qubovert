@@ -18,7 +18,7 @@ Contains the Ising class. See ``help(qubovert.Ising)``.
 
 """
 
-from .utils import BO, IsingField, IsingCoupling
+from .utils import BO  # , IsingField, IsingCoupling
 
 
 __all__ = 'Ising',

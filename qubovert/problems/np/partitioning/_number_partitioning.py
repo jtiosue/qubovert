@@ -149,7 +149,7 @@ class NumberPartitioning(Problem):
 
         Return
         -------
-        I : qubovert.utils.IsingMatrix object.
+        L : qubovert.utils.IsingMatrix object.
             For most practical purposes, you can use IsingMatrix in the
             same way as an ordinary dictionary. For more information, see
             ``help(qubovert.utils.IsingMatrix)``.
@@ -157,16 +157,17 @@ class NumberPartitioning(Problem):
         Example
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> I = problem.to_ising()
+        >>> L = problem.to_ising()
 
         """
-        I = IsingMatrix(() = A * sum(pow(x, 2) for x in self._S))
+        L = IsingMatrix()
+        L += A * sum(pow(x, 2) for x in self._S)
 
         for i in range(self._N):
             for j in range(i+1, self._N):
-                I[(i, j)] += (2 * A * self._S[i] * self._S[j])
+                L[(i, j)] += (2 * A * self._S[i] * self._S[j])
 
-        return I
+        return L
 
     def convert_solution(self, solution):
         """convert_solution.

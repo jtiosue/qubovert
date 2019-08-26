@@ -21,7 +21,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 from qubovert.utils import Problem, QUBOMatrix
 
 
-__all__ = 'VertexCover,'
+__all__ = 'VertexCover',
 
 
 class VertexCover(Problem):

@@ -127,7 +127,7 @@ class AlternatingSectorsChain(Problem):
 
         Return
         -------
-        I : qubovert.utils.IsingMatrix object.
+        L : qubovert.utils.IsingMatrix object.
             For most practical purposes, you can use IsingMatrix in the
             same way as an ordinary dictionary. For more information, see
             ``help(qubovert.utils.IsingMatrix)``.
@@ -136,32 +136,32 @@ class AlternatingSectorsChain(Problem):
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
         >>> problem = AlternatingSectorsChain(*args)
-        >>> I, offset = problem.to_ising(pbc=True)
-        >>> I
+        >>> L = problem.to_ising(pbc=True)
+        >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1, (5, 0): 1}
 
-        >>> I = problem.to_ising(pbc=False)
-        >>> I
+        >>> L = problem.to_ising(pbc=False)
+        >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1}
 
         """
-        I = IsingMatrix()
+        L = IsingMatrix()
 
         for q in range(self._N-1):
-            I[(q, q+1)] = (
+            L[(q, q+1)] = (
                 self._min_strength
                 if (q // self._chain_length) % 2
                 else self._max_strength
             )
 
         if pbc:
-            I[(self._N-1, 0)] = (
+            L[(self._N-1, 0)] = (
                 self._min_strength
                 if ((self._N-1) // self._chain_length) % 2
                 else self._max_strength
             )
 
-        return I
+        return L
 
     def convert_solution(self, solution):
         """convert_solution.

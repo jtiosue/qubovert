@@ -54,16 +54,14 @@ def test_graphpartitioning_bruteforce():
 
 def test_graphpartitioning_qubo_solve():
 
-    Q, offset = problem.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem.to_qubo())
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
     assert problem.is_solution_valid(solution)
     assert allclose(e, 1)
 
-    Q, offset = problem_weighted.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem_weighted.to_qubo())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted
@@ -73,10 +71,11 @@ def test_graphpartitioning_qubo_solve():
 
 def test_graphpartitioning_qubo_numvars():
 
-    Q, _ = problem.to_qubo()
+    Q = problem.to_qubo()
     assert (
         len(set(y for x in Q for y in x)) ==
-        problem.num_binary_variables
+        problem.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 
@@ -84,16 +83,14 @@ def test_graphpartitioning_qubo_numvars():
 
 def test_graphpartitioning_ising_solve():
 
-    h, J, offset = problem.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem.to_ising())
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
     assert problem.is_solution_valid(solution)
     assert allclose(e, 1)
 
-    h, J, offset = problem_weighted.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem_weighted.to_ising())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted
@@ -103,8 +100,5 @@ def test_graphpartitioning_ising_solve():
 
 def test_graphpartitioning_ising_numvars():
 
-    h, J, _ = problem.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys()))) ==
-        problem.num_binary_variables
-    )
+    L = problem.to_ising()
+    assert L.num_binary_variables == problem.num_binary_variables

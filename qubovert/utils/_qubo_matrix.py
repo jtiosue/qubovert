@@ -152,6 +152,15 @@ class PUBOMatrix(DictArithmetic):
 
         return max(max(x) for x in self)
 
+    @staticmethod
+    def squash_key(key):
+        """squash_key.
+
+        FINISH. Squash the key.
+
+        """
+        return tuple(sorted(set(key)))
+
     def __getitem__(self, key):
         """__getitem__.
 
@@ -172,12 +181,7 @@ class PUBOMatrix(DictArithmetic):
             otherwise returns 0.
 
         """
-        try:
-            k = tuple(sorted(set(key)))  # get rid of duplicates and sort
-        except TypeError:
-            k = key
-
-        return super().__getitem__(k)
+        return super().__getitem__(self.__class__.squash_key(key))
 
     def __setitem__(self, key, value):
         """__setitem__.
@@ -186,9 +190,8 @@ class PUBOMatrix(DictArithmetic):
         the key will be removed from the dictionary. Thus no elements in the
         PUBOMatrix dictionary will ever have zero value. Additionally, this
         method will keep the PUBO upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value). Finally, any
-        repeated indices will reduced. For example. a key such as
-        ``(0, 0, 1, 2, 2)`` will be reduced to ``(0, 1, 2)``.
+        then we will call __setitem__((key[1], key[0]), value). Finally, keys
+        will be squashed, see ``squash_keys``.
 
         Parameters
         ---------
@@ -207,8 +210,7 @@ class PUBOMatrix(DictArithmetic):
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of pos integers")
 
-        k = tuple(sorted(set(key)))  # get rid of duplicates and sort
-        super().__setitem__(k, value)
+        super().__setitem__(self.__class__.squash_key(key), value)
 
 
 class HIsingMatrix(PUBOMatrix):
@@ -216,6 +218,9 @@ class HIsingMatrix(PUBOMatrix):
 
     ``HIsingMatrix`` inherits some methods from ``DictArithmetic``, see
     ``help(qubovert.utils.DictArithmetic)``.
+
+    ``HIsingMatrix`` inherits some methods from ``PUBOMatrix``, see
+    ``help(qubovert.utils.PUBOMatrix)``.
 
     A class to handle HIsing matrices. It is the same thing as a dictionary
     with some methods modified. Note that each key must be a tuple of integers
@@ -297,38 +302,14 @@ class HIsingMatrix(PUBOMatrix):
 
     """
 
-    def __setitem__(self, key, value):
-        """__setitem__.
+    @staticmethod
+    def squash_key(key):
+        """squash_key.
 
-        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
-        the key will be removed from the dictionary. Thus no elements in the
-        HIsingMatrix dictionary will ever have zero value. Additionally, this
-        method will keep the HIsing upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value). Finally, any
-        repeated indices will cause a KeyError. For example. a key such as
-        ``(0, 0, 1, 2, 2)`` will raise a KeyError.
-
-        Parameters
-        ---------
-        key : tuple of integers.
-            Element of the dictionary.
-        value : numeric.
-            Value corresponding to the key.
+        FINISH. Squash the key.
 
         """
-        k = tuple(sorted(set(key)))
-        incorrect_format = (
-            not isinstance(key, tuple) or
-            any(not isinstance(k, int) or k < 0 for k in key) or
-            k != tuple(sorted(key))
-        )
-
-        if incorrect_format:
-            raise KeyError(
-                "Key formatted incorrectly, must be tuple of unique pos "
-                "integers")
-
-        dict.__setitem__(k, value)
+        return tuple(sorted(x for x in set(key) if key.count(x) % 2))
 
 
 class QUBOMatrix(PUBOMatrix):
@@ -430,9 +411,14 @@ class QUBOMatrix(PUBOMatrix):
             Value corresponding to the key.
 
         """
-        if not isinstance(key, tuple) or len(key) > 2:
+        invalid = (
+            not isinstance(key, tuple) or
+            len(self.__class__.squash_key(key)) > 2
+        )
+        if invalid:
             raise KeyError(
-                "Key formatted incorrectly, must be tuple of <= 2 integers")
+                "Key formatted incorrectly, must be tuple of <= 2 integers "
+                "See PUBOMatrix instead.")
 
         super().__setitem__(key, value)
 
@@ -537,9 +523,14 @@ class IsingMatrix(HIsingMatrix):
             Value corresponding to the key.
 
         """
-        if not isinstance(key, tuple) or len(key) > 2:
+        invalid = (
+            not isinstance(key, tuple) or
+            len(self.__class__.squash_key(key)) > 2
+        )
+
+        if invalid:
             raise KeyError(
-                "Key formatted incorrectly, "
-                "must be tuple of <= 2 different integers")
+                "Key formatted incorrectly, must be tuple of <= 2 integers. "
+                "See HIsingMatrix instead.")
 
         super().__setitem__(key, value)
