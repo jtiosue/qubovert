@@ -64,7 +64,6 @@ class Problem(Conversions):
         obj : instance of the child class.
 
         """
-        # obj = object.__new__(cls)
         obj = super().__new__(cls)
         obj._problem_args, obj._problem_kwargs = args, kwargs.copy()
         return obj
@@ -205,7 +204,7 @@ class Problem(Conversions):
         for this problem should override this method with a better bruteforce
         solver. But, for problems that do not use slack variables, this
         method will suffice. It converts the problem to QUBO, solves it with
-        ``qubovert.utils.solve_pubo_bruteforce``, and then calls and returns
+        ``qubovert.utils.solve_qubo_bruteforce``, and then calls and returns
         ``convert_solution``.
 
         Parameters

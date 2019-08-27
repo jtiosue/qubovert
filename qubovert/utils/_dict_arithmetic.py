@@ -329,7 +329,7 @@ class DictArithmetic(dict):
             for k, v in other.items():
                 self[k] -= v
         else:
-            self[()] -= v
+            self[()] -= other
         return self
 
     def __mul__(self, other):

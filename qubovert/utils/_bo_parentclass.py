@@ -20,13 +20,13 @@ class for some Binary Optimization classes, such as ``qubovert.QUBO``,
 
 """
 
-from . import Problem, DictArithmetic, Conversions
+from . import Problem, Conversions
 
 
 __all__ = 'BO',
 
 
-class BO(DictArithmetic, Conversions):
+class BO(Conversions):
     """BO.
 
     Parent class for some Binary Optimization classes, such as
@@ -38,67 +38,26 @@ class BO(DictArithmetic, Conversions):
     BO inherits some methods and attributes the ``Conversions`` class.
     See ``help(qubovert.utils.Conversions)``.
 
-    A child class of BO must define at least one of either a ``to_qubo`` or
-    ``to_ising`` method.
-
-    BO defines a lot of arithmetic and conventions for Binary Optimization
-    models.
-
-    Example usage
-    -------------
-    >>> d = BO()
-    >>> d[(0,)] += 2
-    >>> print(d)
-    {(0,): 2}
-    >>> d -= 3
-    >>> print(d)
-    {(0,): 2, (): -3}
-    >>> d * 4
-    >>> print(d)
-    {(0,): 8, (): -12}
-    >>> d += {('a', 'b'): 3, ('c', ): -2, (0,): -1}
-    >>> print(d)
-    {('a', 'b'): 3, ('c',): -2, (0,): 7, {}: -12}
-
     """
 
-    def __init__(self, *args, **kwargs):
-        """__init__.
+    def __new__(cls, *args, **kwargs):
+        """__new__.
 
         This class deals with Binary Optimization models. See child
         classes for info on inputs.
 
-        Initialize the object. If you supply args and kwargs that
-        represent a dictionary, they will be reinitialized to follow the
-        conventions set in ``__setitem__``.
-
         Parameters
         ---------
-        *args and **kwargs : see the docstring for dict.
-
-        """
-        self._mapping = {}  # convert labels to ints
-        self._reverse_mapping = {}  # convert ints to labels
-        self._next_label = 0
-        d = dict(*args, **kwargs)
-        super().__init__()
-        for k, v in d.items():
-            self[k] = v
-
-    @property
-    def offset(self):
-        """offset.
-
-        Return the offset of the BO problem, ie the part of the BO that
-        does not depend on any variables.
+        Defined in child classes.
 
         Return
-        ------
-        offset : float.
-            The part of the BO that does not depend on any variables.
+        -------
+        obj : instance of the child class.
 
         """
-        return self[()]
+        obj = super().__new__(cls)
+        obj._mapping, obj._reverse_mapping, obj._next_label = {}, {}, 0
+        return obj
 
     @property
     def mapping(self):
@@ -145,6 +104,19 @@ class BO(DictArithmetic, Conversions):
         """
         return self._next_label
 
+    @property
+    def max_index(self):
+        """max_index.
+
+        Return the maximum label of the integer labeled version of the problem.
+
+        Return
+        ------
+        m : int.
+
+        """
+        return self.num_binary_variables - 1
+
     def is_solution_valid(self, solution):
         """is_solution_valid.
 
@@ -168,6 +140,29 @@ class BO(DictArithmetic, Conversions):
 
         """
         return True
+
+    def __setitem__(self, key, value):
+        """__setitem__.
+
+        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
+        the key will be removed from the dictionary. Thus no elements in the
+        Ising dictionary will ever have zero value.
+
+        Parameters
+        ---------
+        key : tuple.
+            Element of the dictionary that follows convensions of the class.
+        value : numeric.
+            Value corresponding to the key.
+
+        """
+        super().__setitem__(key, value)
+
+        for i in key:
+            if i not in self._mapping:
+                self._mapping[i] = self._next_label
+                self._reverse_mapping[self._next_label] = i
+                self._next_label += 1
 
     # The following method just uses code written in the Problem class.
     # I want to avoid duplicate code as much as possible! So we use what we

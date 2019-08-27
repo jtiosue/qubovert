@@ -28,13 +28,19 @@ from . import problems
 
 from ._qubo import *
 from ._ising import *
+from ._pubo import *
+from ._hising import *
 
 from ._qubo import __all__ as __all_qubo__
 from ._ising import __all__ as __all_ising__
+from ._pubo import __all__ as __all_pubo__
+from ._hising import __all__ as __all_hising__
 
 __all__ = (
     __all_qubo__ +
-    __all_ising__
+    __all_ising__ +
+    __all_pubo__ +
+    __all_hising__
 )
 
 name = "qubovert"

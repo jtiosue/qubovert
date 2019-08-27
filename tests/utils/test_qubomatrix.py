@@ -159,7 +159,7 @@ def test_qubo_multiplication():
     d //= 2
     assert d == {(0, 1): 1, (): 1}
 
-    # __mul__ but wiiht dict
+    # __mul__ but with dict
     d = temp.copy()
     d *= {(1,): 2, (0,): -1}
     assert d == {(0,): -3, (0, 1): 4, (1,): 4}
@@ -318,6 +318,26 @@ def test_ising_multiplication():
     d = temp.copy()
     d //= 2
     assert d == {(0, 1): 1, (): 1}
+
+    # __mul__ but with dict
+    d = temp.copy()
+    d *= {(1,): 2, (0,): -1}
+    assert d == {(): -1, (0,): 2, (1,): 2, (0, 1): 2}
+
+    # __pow__
+    d = temp.copy()
+    d **= 2
+    assert d == {(): 9, (0,): 4, (1,): 4, (0, 1): 8}
+
+    temp = d.copy()
+    assert d ** 3 == d * d * d
+
+    # should raise a KeyError since can't fit this into Ising.
+    try:
+        IsingMatrix({(0, 1): 1, (2, 3): -1})**2
+        assert False
+    except KeyError:
+        pass
 
 
 # PUBO
@@ -605,3 +625,21 @@ def test_hising_multiplication():
     d = temp.copy()
     d //= 2
     assert d == {(0, 1): 1, (): 1, (0, 2, 3): 2}
+
+    # __mul__ but with dict
+    d = temp.copy()
+    d *= {(1,): 2, (0,): -1}
+    assert d == {(0, 1): 2, (): -1, (0,): 2, (1,): 2,
+                 (0, 1, 2, 3): 8, (2, 3): -4}
+
+    # __pow__
+    d = temp.copy()
+    d **= 2
+    assert d == {(): 25, (1,): 4, (2, 3): 8, (0,): 4,
+                 (1, 2, 3): 16, (0, 1): 8, (0, 2, 3): 16}
+
+    temp = d.copy()
+    assert d ** 3 == d * d * d
+
+    temp = d.copy()
+    assert d ** 4 == d * d * d * d

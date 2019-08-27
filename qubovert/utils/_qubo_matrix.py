@@ -26,6 +26,27 @@ __all__ = (
 )
 
 
+def _hash(x):
+    """_hash.
+
+    Internal function to return (usually) unique hashes for ``x`` such
+    that multiple ``x``s can be ordered. Note that the hash is not consistent
+    across Python sessions (except for when ``x`` is an integer)!
+
+    Parameters
+    ----------
+    x : hashable object.
+
+    Returns
+    -------
+    res : int.
+        If ``x`` is an integer, then ``res == x``. Otherwise,
+        ``res == hash(x)``.
+
+    """
+    return x if isinstance(x, int) else hash(x)
+
+
 class PUBOMatrix(DictArithmetic):
     """PUBOMatrix.
 
@@ -84,15 +105,25 @@ class PUBOMatrix(DictArithmetic):
     >>> print(d)  # will print {(0, 1): 1, (1, 2): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
-    scalar multiplication, and all those in place. For example,
+    multiplication, and all those in place. For example,
 
-    >>> d = PUBOMatrix((0, 0)=1, (0, 1)=-2)
+    >>> d = PUBOMatrix({(0, 0): 1, (0, 1): -2})
     >>> g = d + {(0,): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4
     >>> print(g) # will print {(0, 1): -8}
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
+
+    >>> d = PUBOMatrix({(0, 0): 1, (0, 1): -1})
+    >>> g = {(0,): -1, (2,): 1}
+    >>> d *= g
+    >>> print(d)
+    {(0,): -1, (0, 2): 1, (0, 1): 1, (0, 1, 2): -1}
+
+    >>> d = PUBOMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d ** 2 == d * d)
+    True
 
     Adding or subtracting constants will update the () element of the
     dict.
@@ -110,7 +141,30 @@ class PUBOMatrix(DictArithmetic):
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
+    >>> d = PUBOMatrix()
+    >>> d[(0, 0)] += 2
+    >>> print(d[(0,)])  # will print 2
+
+    >>> d = PUBOMatrix()
+    >>> d[(0, 0, 3, 2, 2)] += 2
+    >>> print(d)  # will print {(0, 2, 3): 2}
+    >>> print(d[(0, 3, 2)])  # will print 2
+
     """
+
+    @property
+    def offset(self):
+        """offset.
+
+        Get the part that does not depend on any variables. Ie the value
+        corresponding to the () key.
+
+        Returns
+        -------
+        offset : float.
+
+        """
+        return self[()]
 
     @property
     def num_binary_variables(self):
@@ -152,22 +206,76 @@ class PUBOMatrix(DictArithmetic):
 
         return max(max(x) for x in self)
 
-    @staticmethod
-    def squash_key(key):
+    @classmethod
+    def squash_key(cls, key):
         """squash_key.
 
-        FINISH. Squash the key.
+        Will convert the input key into the standard form for PUBOMatrix /
+        QUBOMatrix. It will get rid of duplicates and sort. This method
+        will check to see if the input key is valid.
+
+        Parameters
+        ----------
+        key : tuple of integers.
+
+        Return
+        ------
+        k : tuple of integers.
+            A sorted and squashed version of ``key``.
+
+        Raises
+        ------
+        KeyError if the key is invalid.
+
+        Example
+        -------
+        >>> squash_key((0, 4, 0, 3, 3, 2))
+        >>> (0, 2, 3, 4)
 
         """
-        return tuple(sorted(set(key)))
+        cls._check_key_valid(key)
+        # here we use hash because some other classes that are subclasses of
+        # this class will allow elements of the key to be strings! So we want
+        # to still have something consistent to sort by. But for this class,
+        # it doesn't make a difference, because _hash(i) == i when i is an int.
+        return tuple(sorted(set(key), key=lambda x: _hash(x)))
+
+    @staticmethod
+    def _check_key_valid(key):
+        """_check_key_valid.
+
+        Internal method to check if an input key to the dictionary is valid.
+        Checks to see if ``key`` is a tuple of non negative integers.
+
+        Parameters
+        ---------
+        key : anything, but must be a tuple to be valid.
+
+        Returns
+        -------
+        None.
+
+        Raises
+        ------
+        KeyError if the key is invalid.
+
+        """
+        incorrect_format = (
+            not isinstance(key, tuple) or
+            any(not isinstance(k, int) or k < 0 for k in key)
+        )
+
+        if incorrect_format:
+            raise KeyError(
+                "Key formatted incorrectly, must be tuple of non negative "
+                "integers")
 
     def __getitem__(self, key):
         """__getitem__.
 
         Overrides the dict.__getitem__ command so that a KeyError is not
-        thrown if `key` is not in the dictionary. Also sorts the key. So
-        if we you try to access the key (1, 0), it will return the value for
-        the key (0, 1).
+        thrown if `key` is not in the dictionary. The key will also be
+        reformatted according to ``squash_key`` before indexing.
 
         Parameters
         ---------
@@ -187,10 +295,10 @@ class PUBOMatrix(DictArithmetic):
         """__setitem__.
 
         Overrides the dict.__setitem__ command. If `value` is equal to 0, then
-        the key will be removed from the dictionary. Thus no elements in the
-        PUBOMatrix dictionary will ever have zero value. Additionally, this
-        method will keep the PUBO upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value). Finally, keys
+        the key will be removed from the dictionary. Thus no elements will ever
+        have zero value. Additionally, this method will keep self upper
+        triangular, so if key[0] > key[1], then we will call
+        ``__setitem__((key[1], key[0]), value)``. Finally, keys
         will be squashed, see ``squash_keys``.
 
         Parameters
@@ -201,15 +309,6 @@ class PUBOMatrix(DictArithmetic):
             Value corresponding to the key.
 
         """
-        incorrect_format = (
-            not isinstance(key, tuple) or
-            any(not isinstance(k, int) or k < 0 for k in key)
-        )
-
-        if incorrect_format:
-            raise KeyError(
-                "Key formatted incorrectly, must be tuple of pos integers")
-
         super().__setitem__(self.__class__.squash_key(key), value)
 
 
@@ -278,11 +377,27 @@ class HIsingMatrix(PUBOMatrix):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    If we try to set a key with duplicated indices, this will raise a KeyError.
-    For example, the following will raise a KeyError.
+    >>> d = HIsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d)
+    {(): 1, (0, 1): -1}
+    >>> g = {(0,): -1, (1,): 1}
+    >>> d *= g
+    >>> print(d)
+    {(0,): -2, (1,): 2}
+
+    >>> d = HIsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d ** 2 == d * d)
+    True
+
+    If we try to set a key with duplicated indices, it will squash the key
+    into its equivalent form. For example ``(0, 1, 1, 2, 2, 2)`` is equivalent
+    to ``(0, 2)``. Thus,
 
     >>> d = HIsingMatrix()
-    >>> d[(0, 0)] += 1
+    >>> d[(0, 1, 1, 2, 2, 2)] += 1
+    >>> d[(0, 2)] += 2
+    >>> print(d)
+    {(0, 2): 3}
 
     Adding or subtracting constants will update the () element of the
     dict.
@@ -302,14 +417,38 @@ class HIsingMatrix(PUBOMatrix):
 
     """
 
-    @staticmethod
-    def squash_key(key):
+    @classmethod
+    def squash_key(cls, key):
         """squash_key.
 
-        FINISH. Squash the key.
+        Will convert the input key into the standard form for HIsingMatrix /
+        IsingMatrix. It will get rid of pairs of duplicates and sort. This
+        method will check to see if the input key is valid.
+
+        Parameters
+        ----------
+        key : tuple of integers.
+
+        Return
+        ------
+        k : tuple of integers.
+            A sorted and squashed version of ``key``.
+
+        Example
+        -------
+        >>> squash_key((0, 4, 0, 3, 3, 2, 3))
+        >>> (2, 3, 4)
 
         """
-        return tuple(sorted(x for x in set(key) if key.count(x) % 2))
+        cls._check_key_valid(key)
+        # here we use hash because some other classes that are subclasses of
+        # this class will allow elements of the key to be strings! So we want
+        # to still have something consistent to sort by. But for this class,
+        # it doesn't make a difference, because _hash(i) == i when i is an int.
+        return tuple(sorted(
+            (x for x in set(key) if key.count(x) % 2),
+            key=lambda x: _hash(x)
+        ))
 
 
 class QUBOMatrix(PUBOMatrix):
@@ -366,7 +505,7 @@ class QUBOMatrix(PUBOMatrix):
     >>> print(d)  # will print {(0, 1): 1, (1,): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
-    scalar multiplication, and all those in place. For example,
+    multiplication, and all those in place. For example,
 
     >>> d = QUBOMatrix((0, 0)=1, (0, 1)=-2)
     >>> g = d + {(0, 0): -1}
@@ -376,6 +515,16 @@ class QUBOMatrix(PUBOMatrix):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
+    >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
+    >>> g = {(0,): -1, (1,): 1}
+    >>> d *= g
+    >>> print(d)
+    {(0,): -1, (0, 1): 1}
+
+    >>> d = QUBOMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d ** 2 == d * d)
+    True
+
     Adding or subtracting constants will update the () element of the
     dict.
 
@@ -384,43 +533,64 @@ class QUBOMatrix(PUBOMatrix):
     >>> print(d)
     {(): 5}
 
-    Finally, if you try to access a key out of order, it will sort the key. Be
-    careful with this, it can cause unexpected behavior if you don't know it.
-    For example,
+    Finally, if you try to access a key out of order, it will sort and squash
+    the key. Be careful with this, it can cause unexpected behavior if you
+    don't know it. For example,
 
     >>> d = QUBOMatrix()
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
+    >>> d = QUBOMatrix()
+    >>> d[(0, 0)] += 2
+    >>> print(d[(0,)])  # will print 2
+    >>> print(d[(0, 0)])  # will print 2
+    >>> print(d)  # will print {(0,): 2}
+
     """
 
-    def __setitem__(self, key, value):
-        """__setitem__.
+    @staticmethod
+    def _check_key_valid(key):
+        """_check_key_valid.
 
-        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
-        the key will be removed from the dictionary. Thus no elements in the
-        QUBOMatrix dictionary will ever have zero value. Additionally, this
-        method will keep the QUBO upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value).
+        Internal method to check if an input key to the dictionary is valid.
+        Checks to see if ``key`` is a tuple of non negative integers with <=
+        2 unique integers.
 
         Parameters
         ---------
-        key : tuple of two integers.
-            Element of the dictionary.
-        value : numeric.
-            Value corresponding to the key.
+        key : anything, but must be a tuple to be valid.
+
+        Returns
+        -------
+        None.
+
+        Raises
+        ------
+        KeyError if the key is invalid.
 
         """
-        invalid = (
-            not isinstance(key, tuple) or
-            len(self.__class__.squash_key(key)) > 2
-        )
-        if invalid:
+        if len(PUBOMatrix.squash_key(key)) > 2:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 integers "
                 "See PUBOMatrix instead.")
 
-        super().__setitem__(key, value)
+    @property
+    def Q(self):
+        """Q.
+
+        Return a plain dictionary representing the QUBO. Each key is a tuple
+        of two integers, ie (1, 1) corresponds to (1,). Note that the offset
+        in the QUBOMatrix is ignored (ie the value corresponding to the key
+        ()). See the ``offset`` property to access it.
+
+        Returns
+        -------
+        Q : dict.
+            Plain dictionary representing the QUBO in standard form.
+
+        """
+        return {k * (3 - len(k)): v for k, v in self.items() if k}
 
 
 class IsingMatrix(HIsingMatrix):
@@ -471,7 +641,7 @@ class IsingMatrix(HIsingMatrix):
     >>> print(d)  # will print {(0, 1): 1, (1,): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
-    scalar multiplication, and all those in place. For example,
+    multiplication, and all those in place. For example,
 
     >>> d = IsingMatrix((0,)=1, (0, 1)=-2)
     >>> g = d + {(0,): -1}
@@ -481,11 +651,17 @@ class IsingMatrix(HIsingMatrix):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    If we try to set a key with duplicated labels, it will raise a KeyError.
-    For example, the following will raise a KeyError.
+    >>> d = IsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d)
+    {(): 1, (0, 1): -1}
+    >>> g = {(0,): -1, (1,): 1}
+    >>> d *= g
+    >>> print(d)
+    {(0,): -2, (1,): 2}
 
-    >>> d = IsingMatrix()
-    >>> d[(0, 0)] += 2
+    >>> d = IsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> print(d ** 2 == d * d)
+    True
 
     Adding or subtracting constants will update the () element of the
     dict.
@@ -505,32 +681,58 @@ class IsingMatrix(HIsingMatrix):
 
     """
 
-    def __setitem__(self, key, value):
-        """__setitem__.
+    @staticmethod
+    def _check_key_valid(key):
+        """_check_key_valid.
 
-        Overrides the dict.__setitem__ command. If `value` is equal to 0, then
-        the key will be removed from the dictionary. Thus no elements in the
-        IsingCoupling dictionary will ever have zero value. Additionally, this
-        method will keep the coupling upper triangular, so if key[0] > key[1],
-        then we will call __setitem__((key[1], key[0]), value). Finally,
-        key[0] cannot equal key[1], if so a KeyError will be raised.
+        Internal method to check if an input key to the dictionary is valid.
+        Checks to see if ``key`` is a tuple of non negative integers with <=
+        2 unique integers after squashing.
 
         Parameters
-        ----------
-        key : tuple of two different integers.
-            Element of the dictionary.
-        value : numeric.
-            Value corresponding to the key.
+        ---------
+        key : anything, but must be a tuple to be valid.
+
+        Returns
+        -------
+        None.
+
+        Raises
+        ------
+        KeyError if the key is invalid.
 
         """
-        invalid = (
-            not isinstance(key, tuple) or
-            len(self.__class__.squash_key(key)) > 2
-        )
-
-        if invalid:
+        if len(HIsingMatrix.squash_key(key)) > 2:
             raise KeyError(
-                "Key formatted incorrectly, must be tuple of <= 2 integers. "
+                "Key formatted incorrectly, must be tuple of <= 2 integers "
                 "See HIsingMatrix instead.")
 
-        super().__setitem__(key, value)
+    @property
+    def h(self):
+        """h.
+
+        Return a plain dictionary representing the Ising field values. Each key
+        is an integer.
+
+        Returns
+        -------
+        h : dict.
+            Plain dictionary representing the Ising field values.
+
+        """
+        return {k[0]: v for k, v in self.items() if len(k) == 1}
+
+    @property
+    def J(self):
+        """J.
+
+        Return a plain dictionary representing the Ising coupling values. Each
+        key is an integer.
+
+        Returns
+        -------
+        J : dict.
+            Plain dictionary representing the Ising coupling values.
+
+        """
+        return {k: v for k, v in self.items() if len(k) == 2}

@@ -356,7 +356,7 @@ class SetCover(Problem):
                     Q[(i, i)] -= A
                     for mp in range(m+1, self._log_M+1):
                         ip = self._x(alpha, mp)
-                        Q[(i, ip)] += A
+                        Q[(i, ip)] += 2*A
 
                 # second constraint
                 for m in range(self._log_M+1):
