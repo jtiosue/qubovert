@@ -92,15 +92,15 @@ class Ising(BO, IsingMatrix):
     Examples
     --------
     >>> from qubovert import Ising
-    >>> H = Ising()
-    >>> H[('a',)] += 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> L = Ising()
+    >>> L[('a',)] += 1
+    >>> L, L.mapping, L.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
-    >>> H[('a',)] -= 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> L[('a',)] -= 1
+    >>> L, L.mapping, L.reverse_mapping
     {}, {'a': 0}, {0: 'a'}
-    >>> H.refresh()
-    >>> H, H.mapping, H.reverse_mapping
+    >>> L.refresh()
+    >>> L, L.mapping, L.reverse_mapping
     {}, {}, {}
 
     """

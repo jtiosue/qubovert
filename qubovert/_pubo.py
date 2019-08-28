@@ -137,15 +137,15 @@ class PUBO(BO, PUBOMatrix):
     Examples
     --------
     >>> from qubovert import PUBO
-    >>> H = PUBO()
-    >>> H[('a',)] += 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> P = PUBO()
+    >>> P[('a',)] += 1
+    >>> P, P.mapping, P.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
-    >>> H[('a',)] -= 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> P[('a',)] -= 1
+    >>> P, P.mapping, P.reverse_mapping
     {}, {'a': 0}, {0: 'a'}
-    >>> H.refresh()
-    >>> H, H.mapping, H.reverse_mapping
+    >>> P.refresh()
+    >>> P, P.mapping, P.reverse_mapping
     {}, {}, {}
 
     """
@@ -328,6 +328,18 @@ class PUBO(BO, PUBOMatrix):
             For most practical purposes, you can use PUBOMatrix in the
             same way as an ordinary dictionary. For more information,
             see ``help(qubovert.utils.PUBOMatrix)``.
+
+        Notes
+        -----
+        The penalty that we use to enforce the constraints that the ancilla
+        variable ``z`` is equal to the product of the two variables that it is
+        replacing, ``xy``, is:
+
+            ``0`` if ``z == xy``,
+            ``3*lam(v)`` if ``x == y == 0 and z == 1``, and
+            ``lam(v)`` else.
+
+        See https://arxiv.org/pdf/1307.8041.pdf equation 6.
 
         """
         P = PUBOMatrix()

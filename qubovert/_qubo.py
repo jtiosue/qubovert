@@ -92,15 +92,15 @@ class QUBO(BO, QUBOMatrix):
     Examples
     --------
     >>> from qubovert import QUBO
-    >>> H = HIsing()
-    >>> H[('a',)] += 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> Q = HIsing()
+    >>> Q[('a',)] += 1
+    >>> Q, Q.mapping, Q.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
-    >>> H[('a',)] -= 1
-    >>> H, H.mapping, H.reverse_mapping
+    >>> Q[('a',)] -= 1
+    >>> Q, Q.mapping, Q.reverse_mapping
     {}, {'a': 0}, {0: 'a'}
-    >>> H.refresh()
-    >>> H, H.mapping, H.reverse_mapping
+    >>> Q.refresh()
+    >>> Q, Q.mapping, Q.reverse_mapping
     {}, {}, {}
 
     """
