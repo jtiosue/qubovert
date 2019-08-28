@@ -31,21 +31,6 @@ QUBOVert
 Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
 
 
-Managing QUBO, Ising, PUBO, and HOBO formulations
--------------------------------------------------
-See the docstrings for ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HOBO``.
-
-
-Convert common problems to QUBO form.
--------------------------------------
-
-So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
-
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install``, ``make test``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
-
-
-Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
-
 Installation
 ------------
 `For the old, stable release`.
@@ -92,6 +77,47 @@ Then you can use it in Python with
     print(qubovert.problems.benchmarking.__all__)
 
     # etc ...
+
+
+Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
+---------------------------------------------------------------
+See the docstrings for ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
+
+Coming soon, ``qubovert.HOBO`` and ``qubovert.HOIO``.
+
+See the following PUBO example.
+
+.. code:: python
+
+    from qubovert import PUBO
+    from any_module import qubo_solver
+    # or you can use my bruteforce solver...
+    # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
+
+    pubo = PUBO()
+    pubo[('a', 'b', 'c', 'd')] -= 3
+    pubo[('a', 'b', 'c')] += 1
+    pubo[('c', 'd')] -= 2
+    pubo[('a',)] += 1
+    pubo -= 3  # equivalent to pubo[()] -= 3
+    pubo **= 4
+    pubo *= 2
+
+    Q = pubo.to_qubo()
+    obj, sol = qubo_solver(Q)
+    solution = pubo.convert_solution(sol)
+    print((obj, solution))  # will print (2, {'a': 1, 'b': 1, 'c': 1, 'd': 0})
+
+
+Convert common problems to QUBO form.
+-------------------------------------
+
+So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
+
+To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install``, ``make test``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
+
+
+Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 
 
 See the following Set Cover example. All other problems can be used in a similar way.

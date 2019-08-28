@@ -18,13 +18,13 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 
 """
 
-from .utils import BO, PUBOMatrix, QUBOMatrix, solve_pubo_bruteforce
+from .utils import BO, PUBOMatrix, QUBOMatrix
 
 
 __all__ = 'PUBO',
 
 
-def _constraint_xy_eq_z(x, y, z, lam=1):
+def _constraint_xy_eq_z(x, y, z, p=1):
     """_constraint_xy_eq_z.
 
     Find the penalty dictionary enforcing ``xy = z``.
@@ -32,25 +32,25 @@ def _constraint_xy_eq_z(x, y, z, lam=1):
     Parameters
     ----------
     x : hashable object.
-        Label of the ``x`` variable.
+        Label of the ``x`` binary variable.
     y : hashable object.
-        Label of the ``y`` variable.
+        Label of the ``y`` binary variable.
     z : hashable object.
-        Label of the ``z`` variable.
-    lam : float > 0 (optional, default to 1).
+        Label of the ``z`` binary variable.
+    p : float > 0 (optional, default to 1).
         The penalty factor, how much to penalize violations of ``xy = z``.
 
     Returns
     -------
     D : dict.
-        QUBO representing the constraint ``xy = z`` weighted by ``lam``.
+        QUBO representing the constraint ``xy = z`` weighted by ``p``.
 
     References
     ----------
     https://arxiv.org/pdf/1307.8041.pdf equation 6.
 
     """
-    return {(z,): 3 * lam, (x, y): lam, (x, z): -2 * lam, (y, z): -2 * lam}
+    return {(z,): 3 * p, (x, y): p, (x, z): -2 * p, (y, z): -2 * p}
 
 
 class PUBO(BO, PUBOMatrix):
@@ -99,14 +99,14 @@ class PUBO(BO, PUBOMatrix):
     >>> pubo = PUBO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
     >>> pubo.mapping
     {'a': 0, 0: 1, 1: 2}
-    >>> Q = pubo.to_qubo(3)
+    >>> Q = pubo.to_qubo()
     >>> Q
-    {(0,): 5, (0, 3): -2, (): -1.5, (1, 2): 3, (3,): 3, (1, 3): 3, (2, 3): 3}
+    {(0,): 5, (3,): 9, (0, 1): 3, (0, 3): -6, (1, 3): -6, (2, 3): -2, (): -1.5}
     >>> pubo.convert_solution({0: 1, 1: 0, 2: 1, 2: 0})
     {'a': 1, 0: 0, 1: 1}
 
-    Notes
-    -----
+    Note 1
+    ------
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -125,6 +125,28 @@ class PUBO(BO, PUBOMatrix):
     {('a', 0): 1, (1, 0): -1}
 
     Ie integers will always be correctly sorted.
+
+    Note 2
+    ------
+    For efficiency, many internal variables including mappings are computed as
+    the problemis being built. This can cause these
+    values to be wrong for some specific situations. Calling ``refresh``
+    will rebuild the dictionary, resetting all of the values. See
+    ``help(PUBO.refresh)``
+
+    Examples
+    --------
+    >>> from qubovert import PUBO
+    >>> H = PUBO()
+    >>> H[('a',)] += 1
+    >>> H, H.mapping, H.reverse_mapping
+    {('a',): 1}, {'a': 0}, {0: 'a'}
+    >>> H[('a',)] -= 1
+    >>> H, H.mapping, H.reverse_mapping
+    {}, {'a': 0}, {0: 'a'}
+    >>> H.refresh()
+    >>> H, H.mapping, H.reverse_mapping
+    {}, {}, {}
 
     """
 
@@ -155,32 +177,8 @@ class PUBO(BO, PUBOMatrix):
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        # Call PUBOMatrix.__init__.  We include a method here just so we can
-        # update the docstring.
-        super().__init__(*args, **kwargs)
-
-    def to_pubo(self):
-        """to_pubo.
-
-        Create and return upper triangular PUBO representing the problem.
-        The labels will be integers from 0 to n-1.
-
-        Return
-        -------
-        P : qubovert.utils.PUBOMatrix object.
-            The upper triangular PUBO matrix, a PUBOMatrix object.
-            For most practical purposes, you can use PUBOMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.PUBOMatrix)``.
-
-        """
-        P = PUBOMatrix()
-
-        for k, v in self.items():
-            key = tuple(self._mapping[i] for i in k)
-            P[key] += v
-
-        return P
+        BO.__init__(self, *args, **kwargs)
+        PUBOMatrix.__init__(self, *args, **kwargs)
 
     @staticmethod
     def default_lam(v):
@@ -201,6 +199,140 @@ class PUBO(BO, PUBOMatrix):
 
         """
         return 1 + abs(v)
+
+    def _reduce_degree(self, D, deg, lam):
+        """_reduce_degree.
+
+        Reduce the degree of the higher order model to a degree ``deg`` model.
+        This is a private used only internally and in ``qubovert.HIsing``. See
+        ``qubovert.PUBO.to_pubo``, ``qubovert.HIsing.to_hising``,
+        ``qubovert.PUBO.to_qubo``, and ``qubovert.HIsing.to_ising`` to see
+        an example of this function being used.
+
+        The labels will be integers from 0 to n-1. We introduce ancilla
+        variables in order to reduce the degree. The solution to the higher
+        order model can be read from the solution to the lower degree model by
+        using the ``self.convert_solution`` method.
+
+        Parameters
+        ----------
+        D : ``qubovert.utils.QUBOMatrix`` or ``qubovert.utils.IsingMatrix``.
+            The dictionary to fill. For reducing PUBOs to QUBOs, ``D`` should
+            be a ``qubovert.utils.QUBOMatrix`` object. For reducing HIsings
+            to Isings, ``D`` should be a ``qubovert.utils.IsingMatrix`` object.
+            ``D`` should be empty to start.
+        deg : int >= 2.
+            The degree of the model to reduce to. If``deg`` is None, then
+            the model's degree will not be reduced.
+        lam : function.
+            If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
+            ``lam`` is the penalty factor to introduce in order to enforce the
+            ancilla constraints. When we reduce the degree of the model, we add
+            penalties to the lower order model in order to enforce ancilla
+            variable constraints. These constraints will be multiplied by
+            ``lam(v)``, where ``v`` is the value associated with the term that
+            it is reducing. For example, a term ``(0, 1, 2): 3`` in the higher
+            order model may be reduced to a term ``(0, 3): 3`` for the lower
+            order model, and then the fact that ``3`` should be the product
+            of ``1`` and ``2`` will be enforced with a penalty weight
+            ``lam(3)``.
+
+        Return
+        -------
+        None. ``D`` will be updated in place!
+
+        """
+        if deg is not None and deg < 2:
+            raise ValueError("deg must be >= 2")
+        if lam is None:
+            lam = PUBO.default_lam
+        if deg is None:
+            deg = self.degree
+
+        # next available label
+        ancilla = self.num_binary_variables
+        reductions = {}
+
+        for kp, v in self.items():
+            key = tuple(sorted(self._mapping[i] for i in kp))
+            if key in reductions:
+                D[(reductions[key],)] += v
+            else:
+                # find a reduction if len(key) > deg
+                k = key
+                while len(k) > deg:
+
+                    # find a variable pair in k that has already been reduced.
+                    found = False
+                    for i, x in enumerate(k[:-1]):
+                        for y in k[i+1:]:
+                            if (x, y) in reductions:
+                                found = True
+                                break
+                        if found:
+                            break
+
+                    if found:
+                        # z is the ancilla variable for this reduction
+                        z = reductions[(x, y)]
+                    else:
+                        # found is False so we haven't already reduced the
+                        # variable pair (x, y), so just take the first two and
+                        # reduce them.
+                        # TODO: come up with a better way to choose x, y here.
+                        x, y, z = k[0], k[1], ancilla
+                        reductions[(x, y)] = z
+                        ancilla += 1
+
+                    # note we add the constraint even if we've already added
+                    # it before (if found is True). This is because if we use
+                    # the reduction multiple times, we need to enforce it
+                    # multiple times.
+                    D += _constraint_xy_eq_z(x, y, z, lam(v))
+                    k = tuple(sorted(
+                            tuple(i for i in k if i not in (x, y)) + (z,)
+                        ))
+                D[k] += v
+
+    def to_pubo(self, deg=None, lam=None):
+        """to_pubo.
+
+        Create and return upper triangular degree ``deg`` PUBO representing the
+        problem. The labels will be integers from 0 to n-1.
+
+        Parameters
+        ----------
+        deg : int >= 0 (optional, defaults to None).
+            The degree of the final PUBO. If ``deg`` is None, then the degree
+            of the output PUBO will be the same as the degree of ``self``,
+            ie see ``self.degree``.
+        lam : function (optional, defaults to None).
+            Note that if ``deg`` is None or ``deg >= self.degree``, then
+            ``lam`` is unneccessary and will not be used.
+            If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
+            ``lam`` is the penalty factor to introduce in order to enforce the
+            ancilla constraints. When we reduce the degree of the model, we add
+            penalties to the lower order model in order to enforce ancilla
+            variable constraints. These constraints will be multiplied by
+            ``lam(v)``, where ``v`` is the value associated with the term that
+            it is reducing. For example, a term ``(0, 1, 2): 3`` in the higher
+            order model may be reduced to a term ``(0, 3): 3`` for the lower
+            order model, and then the fact that ``3`` should be the product
+            of ``1`` and ``2`` will be enforced with a penalty weight
+            ``lam(3)``.
+
+        Return
+        -------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        P = PUBOMatrix()
+        self._reduce_degree(P, deg, lam)
+        return P
 
     def to_qubo(self, lam=None):
         """to_qubo.
@@ -234,58 +366,8 @@ class PUBO(BO, PUBOMatrix):
             see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
-        if lam is None:
-            lam = PUBO.default_lam
-
         Q = QUBOMatrix()
-
-        # next available label
-        ancilla = self.num_binary_variables
-        reductions = {}
-
-        # we could use self.pubo().items() so we don't have to explicitly make
-        # the key below, but this wastes a lot of time.
-        for kp, v in self.items():
-            key = tuple(sorted(self._mapping[i] for i in kp))
-            if key in reductions:
-                Q[reductions[key]] += v
-            else:
-                # find a reduction if len(key) > 2
-                k = key
-                while len(k) > 2:
-
-                    # find a variable pair in k that has already been reduced.
-                    found = False
-                    for i, x in enumerate(k[:-1]):
-                        for y in k[i+1:]:
-                            if (x, y) in reductions:
-                                found = True
-                                break
-                        if found:
-                            break
-
-                    if found:
-                        # z is the ancilla variable for this reduction
-                        z = reductions[(x, y)]
-                    else:
-                        # found is False so we haven't already reduced the
-                        # variable pair (x, y), so just take the first two and
-                        # reduce them.
-                        # TODO: come up with a better way to choose x, y here.
-                        x, y, z = k[0], k[1], ancilla
-                        reductions[(x, y)] = z
-                        ancilla += 1
-
-                    # note we add the constraint even if we've already added
-                    # it before (if found is True). This is because if we use
-                    # the reduction multiple times, we need to enforce it
-                    # multiple times.
-                    Q += _constraint_xy_eq_z(x, y, z, lam(v))
-                    k = tuple(sorted(
-                            tuple(i for i in k if i not in (x, y)) + (z,)
-                        ))
-                Q[k] += v
-
+        self._reduce_degree(Q, 2, lam)
         return Q
 
     def convert_solution(self, solution):
@@ -379,37 +461,3 @@ class PUBO(BO, PUBOMatrix):
         if not isinstance(key, tuple):
             raise KeyError(
                 "Key formatted incorrectly, must be tuple")
-
-    def solve_bruteforce(self, *args, **kwargs):
-        """solve_bruteforce.
-
-        Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
-        PROBLEMS! It converts the problem to PUBO, solves it with
-        ``qubovert.utils.solve_pubo_bruteforce``, and then calls and returns
-        ``convert_solution``.
-
-        Parameters
-        ----------
-        *args and **kwargs : arguments and keyword arguments.
-            Contains args and kwargs for the ``to_pubo`` method. Also contains
-            a ``all_solutions`` boolean flag, which indicates whether or not
-            to return all the solutions, or just the best one found.
-            ``all_solutions`` defaults to False.
-
-        Return
-        ------
-        res : the output or outputs of the ``convert_solution`` method.
-            If ``all_solutions`` is False, then ``res`` is just the output
-            of the ``convert_solution`` method.
-            If ``all_solutions`` is True, then ``res`` is a list of outputs
-            of the ``convert_solution`` method, e.g. a converted solution
-            for each solution that the bruteforce solver returns.
-
-        """
-        kwargs = kwargs.copy()
-        all_solutions = kwargs.pop("all_solutions", False)
-        pubo = self.to_pubo(*args, **kwargs)
-        _, sol = solve_pubo_bruteforce(pubo, all_solutions=all_solutions)
-        if all_solutions:
-            return [self.convert_solution(x) for x in sol]
-        return self.convert_solution(sol)

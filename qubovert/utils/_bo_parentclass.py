@@ -20,7 +20,7 @@ class for some Binary Optimization classes, such as ``qubovert.QUBO``,
 
 """
 
-from . import Problem, Conversions
+from . import Conversions
 
 
 __all__ = 'BO',
@@ -40,8 +40,8 @@ class BO(Conversions):
 
     """
 
-    def __new__(cls, *args, **kwargs):
-        """__new__.
+    def __init__(self, *args, **kwargs):
+        """__init__.
 
         This class deals with Binary Optimization models. See child
         classes for info on inputs.
@@ -50,14 +50,8 @@ class BO(Conversions):
         ---------
         Defined in child classes.
 
-        Return
-        -------
-        obj : instance of the child class.
-
         """
-        obj = super().__new__(cls)
-        obj._mapping, obj._reverse_mapping, obj._next_label = {}, {}, 0
-        return obj
+        self._mapping, self._reverse_mapping, self._next_label = {}, {}, 0
 
     @property
     def mapping(self):
@@ -163,37 +157,3 @@ class BO(Conversions):
                 self._mapping[i] = self._next_label
                 self._reverse_mapping[self._next_label] = i
                 self._next_label += 1
-
-    # The following method just uses code written in the Problem class.
-    # I want to avoid duplicate code as much as possible! So we use what we
-    # have already written. But we don't make BO a subclass of Problem
-    # for various reasons (some inconsistencies in code, convention, and
-    # docstrings).
-
-    def solve_bruteforce(self, *args, **kwargs):
-        """solve_bruteforce.
-
-        Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
-        PROBLEMS! This converts the problem to PUBO with integer labels, solves
-        it with ``qubovert.utils.solve_pubo_bruteforce``, and then calls and
-        returns ``convert_solution``.
-
-        Parameters
-        ----------
-        *args and **kwargs : arguments and keyword arguments.
-            Contains args and kwargs for the ``to_qubo`` method. Also contains
-            a ``all_solutions`` boolean flag, which indicates whether or not
-            to return all the solutions, or just the best one found.
-            ``all_solutions`` defaults to False.
-
-        Return
-        ------
-        res : the output or outputs of the ``convert_solution`` method.
-            If ``all_solutions`` is False, then ``res`` is just the output
-            of the ``convert_solution`` method.
-            If ``all_solutions`` is True, then ``res`` is a list of outputs
-            of the ``convert_solution`` method, e.g. a converted solution
-            for each solution that the bruteforce solver returns.
-
-        """
-        return Problem.solve_bruteforce(self, *args, **kwargs)

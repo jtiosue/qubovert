@@ -12,42 +12,88 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Contains tests for the HHIsing class.
-"""
+""" Contains tests for the HIsing class. """
 
 from qubovert import HIsing
-from qubovert.utils import solve_pubo_bruteforce, solve_hising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce,
+    hising_value
+)
 from numpy import allclose
 
 
-problem = HIsing({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
-                  (): -2, (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1})
-solution = {'c': -1, 'b': -1, 'a': -1, 0: -1, 1: -1, 2: -1}
-obj = -14
+class Problem:
+
+    def __init__(self, problem, solution, obj):
+
+        self.problem, self.solution, self.obj = problem, solution, obj
+
+    def is_valid(self, e, solution):
+
+        sol = self.problem.convert_solution(solution)
+        return all((
+            self.problem.is_solution_valid(sol),
+            sol == self.solution,
+            allclose(e, self.obj)
+        ))
+
+    def runtests(self):
+
+        assert self.problem.solve_bruteforce() == self.solution
+
+        e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
+        assert self.is_valid(e, sol)
+
+        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        assert self.is_valid(e, sol)
+
+        for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
+
+            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            assert self.is_valid(e, sol)
+
+            e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
+            assert self.is_valid(e, sol)
+
+        assert (
+            self.problem.value(self.solution) ==
+            hising_value(self.solution, self.problem) ==
+            e
+        )
 
 
-def test_hising_pubo_solve():
+def test_hising_on_ising():
 
-    e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
-    assert problem.is_solution_valid(sol)
-    assert sol == solution
-    assert allclose(e, obj)
+    problem = HIsing({('a',): -1, ('b',): 2,
+                      ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
+    solution = {'c': -1, 'b': -1, 'a': -1}
+    obj = -10
 
-
-def test_hising_hising_solve():
-
-    e, sol = solve_hising_bruteforce(problem.to_hising())
-    sol = problem.convert_solution(sol)
-    assert problem.is_solution_valid(sol)
-    assert sol == solution
-    assert allclose(e, obj)
+    Problem(problem, solution, obj).runtests()
 
 
-def test_hising_bruteforce_solve():
+def test_hising_on_deg_3_hising():
 
-    assert problem.solve_bruteforce() == solution
+    problem = HIsing({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
+                      (): -2, (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1})
+    solution = {'c': -1, 'b': -1, 'a': -1, 0: -1, 1: -1, 2: -1}
+    obj = -14
+
+    Problem(problem, solution, obj).runtests()
+
+
+def test_hising_on_deg_5_hising():
+
+    problem = HIsing({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
+        (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1
+    })
+    solution = {0: 1, 1: 1, 'c': -1, 2: -1, 4: -1, 3: -1, 'b': -1, 'a': -1}
+    obj = -26
+
+    Problem(problem, solution, obj).runtests()
 
 
 def test_ising_default_valid():
@@ -97,6 +143,22 @@ def test_ising_num_binary_variables():
     d = HIsing({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
+
+
+def test_hising_degree():
+
+    d = HIsing()
+    assert d.degree == 0
+    d[(0,)] += 2
+    assert d.degree == 1
+    d[(1,)] -= 3
+    assert d.degree == 1
+    d[(1, 2)] -= 2
+    assert d.degree == 2
+    d[(1, 2, 4)] -= 2
+    assert d.degree == 3
+    d[(1, 2, 4, 5, 6)] += 2
+    assert d.degree == 5
 
 
 def test_ising_addition():

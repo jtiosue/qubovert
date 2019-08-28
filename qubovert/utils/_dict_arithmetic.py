@@ -152,18 +152,19 @@ class DictArithmetic(dict):
         else:
             self.pop(key, 0)
 
-    def copy(self, *args, **kwargs):
+    def copy(self):
         """copy.
 
         Same as dict.copy, but we adjust the method so that it returns a
         DictArithmetic object, or whatever object is the subclass.
 
-        Parameters
-        ----------
-        *args and **kwargs : see dict.copy.
+        Returns
+        -------
+        d : DictArithmetic object, or subclass of.
+            Same as ``self.__class__``.
 
         """
-        return type(self)(super().copy(*args, **kwargs))
+        return self.__class__(self)
 
     def update(self, *args, **kwargs):
         """update.

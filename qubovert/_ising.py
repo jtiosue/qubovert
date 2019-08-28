@@ -60,8 +60,8 @@ class Ising(BO, IsingMatrix):
     >>> ising.convert_solution({0: 1, 1: 0})
     {'a': 1, 0: 0}
 
-    Notes
-    -----
+    Note 1
+    ------
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -80,6 +80,28 @@ class Ising(BO, IsingMatrix):
     {('a', 0): 1, (1, 0): -1}
 
     Ie integers will always be correctly sorted.
+
+    Note 2
+    ------
+    For efficiency, many internal variables including mappings are computed as
+    the problemis being built. This can cause these
+    values to be wrong for some specific situations. Calling ``refresh``
+    will rebuild the dictionary, resetting all of the values. See
+    ``help(Ising.refresh)``
+
+    Examples
+    --------
+    >>> from qubovert import Ising
+    >>> H = Ising()
+    >>> H[('a',)] += 1
+    >>> H, H.mapping, H.reverse_mapping
+    {('a',): 1}, {'a': 0}, {0: 'a'}
+    >>> H[('a',)] -= 1
+    >>> H, H.mapping, H.reverse_mapping
+    {}, {'a': 0}, {0: 'a'}
+    >>> H.refresh()
+    >>> H, H.mapping, H.reverse_mapping
+    {}, {}, {}
 
     """
 
@@ -111,9 +133,8 @@ class Ising(BO, IsingMatrix):
         {('a',): 5, ('a', 0): -2, (): -1.5}
 
         """
-        # Call IsingMatrix.__init__. We include a method here just so we can
-        # update the docstring.
-        super().__init__(*args, **kwargs)
+        BO.__init__(self, *args, **kwargs)
+        IsingMatrix.__init__(self, *args, **kwargs)
 
     def to_ising(self):
         """to_ising.

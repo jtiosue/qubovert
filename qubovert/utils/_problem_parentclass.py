@@ -19,7 +19,7 @@ the problem classes.
 
 """
 
-from . import solve_qubo_bruteforce, Conversions
+from . import Conversions
 
 
 __all__ = 'Problem',
@@ -228,7 +228,7 @@ class Problem(Conversions):
         kwargs = kwargs.copy()
         all_solutions = kwargs.pop("all_solutions", False)
         qubo = self.to_qubo(*args, **kwargs)
-        _, sol = solve_qubo_bruteforce(qubo, all_solutions=all_solutions)
+        sol = qubo.solve_bruteforce(all_solutions)
         if all_solutions:
             return [self.convert_solution(x) for x in sol]
         return self.convert_solution(sol)

@@ -17,7 +17,9 @@ Contains tests for the Ising class.
 """
 
 from qubovert import Ising
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce, ising_value
+)
 from numpy import allclose
 
 
@@ -42,6 +44,12 @@ def test_ising_ising_solve():
     assert problem.is_solution_valid(sol)
     assert sol == solution
     assert allclose(e, -10)
+
+    assert (
+        problem.value(sol) ==
+        ising_value(sol, problem) ==
+        e
+    )
 
 
 def test_ising_bruteforce_solve():
@@ -96,6 +104,18 @@ def test_ising_num_binary_variables():
     d = Ising({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
+
+
+def test_ising_degree():
+
+    d = Ising()
+    assert d.degree == 0
+    d[(0,)] += 2
+    assert d.degree == 1
+    d[(1,)] -= 3
+    assert d.degree == 1
+    d[(1, 2)] -= 2
+    assert d.degree == 2
 
 
 def test_ising_addition():

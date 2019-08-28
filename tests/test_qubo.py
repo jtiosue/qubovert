@@ -17,7 +17,9 @@ Contains tests for the QUBO class.
 """
 
 from qubovert import QUBO
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce, qubo_value
+)
 from numpy import allclose
 
 
@@ -33,6 +35,12 @@ def test_qubo_qubo_solve():
     assert problem.is_solution_valid(sol)
     assert sol == solution
     assert allclose(e, obj)
+
+    assert (
+        problem.value(sol) ==
+        qubo_value(sol, problem) ==
+        e
+    )
 
 
 def test_qubo_ising_solve():
@@ -90,6 +98,18 @@ def test_qubo_num_binary_variables():
     d = QUBO({(0, 0): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
+
+
+def test_qubo_degree():
+
+    d = QUBO()
+    assert d.degree == 0
+    d[(0,)] += 2
+    assert d.degree == 1
+    d[(1,)] -= 3
+    assert d.degree == 1
+    d[(1, 2)] -= 2
+    assert d.degree == 2
 
 
 def test_qubo_addition():

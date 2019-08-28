@@ -13,26 +13,26 @@
 #   limitations under the License.
 
 """
-Contains tests for the QUBOMatrix object.
+Contains tests for the IsingMatrix object.
 """
 
-from qubovert.utils import QUBOMatrix
+from qubovert.utils import IsingMatrix
 from numpy import allclose
 
 
-def test_qubo_default_valid():
+def test_ising_default_valid():
 
-    d = QUBOMatrix()
-    assert d[(0, 0)] == 0
-    d[(0, 0)] += 1
+    d = IsingMatrix()
+    assert d[(0,)] == 0
+    d[(0,)] += 1
     assert d == {(0,): 1}
 
 
-def test_qubo_remove_value_when_zero():
+def test_ising_remove_value_when_zero():
 
-    d = QUBOMatrix()
-    d[(0, 0)] += 1
-    d[(0, 0)] -= 1
+    d = IsingMatrix()
+    d[(0,)] += 1
+    d[(0,)] -= 1
     assert d == {}
 
     d.refresh()
@@ -41,34 +41,34 @@ def test_qubo_remove_value_when_zero():
     assert d.variables == set()
 
 
-def test_qubo_reinitialize_dictionary():
+def test_ising_reinitialize_dictionary():
 
-    d = QUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
+    d = IsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
     assert d == {(0,): 1, (0, 1): 3}
 
 
-def test_qubo_update():
+def test_ising_update():
 
-    d = QUBOMatrix({(0, 0): 1, (0, 1): 2})
-    d.update({(0,): 0, (1, 0): 1, (1, 1): -1})
+    d = IsingMatrix({(0,): 1, (0, 1): 2})
+    d.update({(0,): 0, (1, 0): 1, (1,): -1})
     assert d == {(0, 1): 1, (1,): -1}
 
 
-def test_qubo_num_binary_variables():
+def test_ising_num_binary_variables():
 
-    d = QUBOMatrix({(0,): 1, (0, 3): 2})
+    d = IsingMatrix({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
 
 
-def test_qubo_max_index():
+def test_ising_max_index():
 
-    d = QUBOMatrix({(0, 0): 1, (0, 3): 2})
+    d = IsingMatrix({(0,): 1, (0, 3): 2})
     assert d.max_index == 3
 
 
-def test_qubo_degree():
+def test_ising_degree():
 
-    d = QUBOMatrix()
+    d = IsingMatrix()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -78,9 +78,9 @@ def test_qubo_degree():
     assert d.degree == 2
 
 
-def test_qubo_addition():
+def test_ising_addition():
 
-    temp = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    temp = IsingMatrix({(0,): 1, (0, 1): 2})
     temp1 = {(0,): -1, (1, 0): 3}
     temp2 = {(0, 1): 5}
     temp3 = {(0,): 2, (0, 1): -1}
@@ -119,12 +119,12 @@ def test_qubo_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == QUBOMatrix(temp3)*-1
+    assert g == IsingMatrix(temp3)*-1
 
 
-def test_qubo_multiplication():
+def test_ising_multiplication():
 
-    temp = QUBOMatrix({(0, 0): 1, (0, 1): 2})
+    temp = IsingMatrix({(0,): 1, (0, 1): 2})
     temp += 2
 
     # __mul__
@@ -177,32 +177,32 @@ def test_qubo_multiplication():
     # __mul__ but with dict
     d = temp.copy()
     d *= {(1,): 2, (0,): -1}
-    assert d == {(0,): -3, (0, 1): 4, (1,): 4}
+    assert d == {(): -1, (0,): 2, (1,): 2, (0, 1): 2}
 
     # __pow__
     d = temp.copy()
     d **= 2
-    assert d == {(0,): 5, (0, 1): 16, (): 4}
+    assert d == {(): 9, (0,): 4, (1,): 4, (0, 1): 8}
 
     temp = d.copy()
     assert d ** 3 == d * d * d
 
-    # should raise a KeyError since can't fit this into QUBO.
+    # should raise a KeyError since can't fit this into Ising.
     try:
-        QUBOMatrix({(0, 1): 1, (1, 2): -1})**2
+        IsingMatrix({(0, 1): 1, (2, 3): -1})**2
         assert False
     except KeyError:
         pass
 
 
-def test_qubomatrix_solve_bruteforce():
+def test_isingmatrix_solve_bruteforce():
 
-    Q = QUBOMatrix({(0, 1): 1, (1, 2): 1, (1, 1): -1, (2,): -2})
-    sol = Q.solve_bruteforce()
-    assert sol == {0: 0, 1: 0, 2: 1}
-    assert Q.value(sol) == -2
+    L = IsingMatrix({(0, 1): 1, (1, 2): 1, (1,): -1, (2,): -2})
+    sol = L.solve_bruteforce()
+    assert sol in ({0: -1, 1: 1, 2: 1}, {0: 1, 1: -1, 2: 1})
+    assert allclose(L.value(sol), -3)
 
-    Q = QUBOMatrix({(0, 0): 1, (0, 1): -1, (): 1})
-    sols = Q.solve_bruteforce(True)
-    assert sols == [{0: 0, 1: 0}, {0: 0, 1: 1}, {0: 1, 1: 1}]
-    assert all(allclose(Q.value(s), 1) for s in sols)
+    L = IsingMatrix({(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25})
+    sols = L.solve_bruteforce(True)
+    assert sols == [{0: -1, 1: -1}, {0: -1, 1: 1}, {0: 1, 1: 1}]
+    assert all(allclose(L.value(s), 1) for s in sols)

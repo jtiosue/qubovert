@@ -19,106 +19,87 @@ Contains tests for the PUBO class.
 from qubovert import PUBO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_pubo_bruteforce, solve_hising_bruteforce,
+    pubo_value
 )
 from numpy import allclose
 
 
-# Testing PUBO on a QUBO
+class Problem:
 
-qubo_problem = PUBO({
-    ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
-})
-qubo_solution = {'c': 1, 'b': 1, 'a': 1}
-qubo_obj = -8
+    def __init__(self, problem, solution, obj):
 
+        self.problem, self.solution, self.obj = problem, solution, obj
 
-def _qubo_problem_is_valid(e, solution):
+    def is_valid(self, e, solution):
 
-    sol = qubo_problem.convert_solution(solution)
-    return all((
-        qubo_problem.is_solution_valid(sol),
-        sol == qubo_solution,
-        allclose(e, qubo_obj)
-    ))
+        sol = self.problem.convert_solution(solution)
+        return all((
+            self.problem.is_solution_valid(sol),
+            sol == self.solution,
+            allclose(e, self.obj)
+        ))
 
+    def runtests(self):
 
-def test_pubo_pubo_solve_qubo_problem():
+        assert self.problem.solve_bruteforce() == self.solution
 
-    e, sol = solve_pubo_bruteforce(qubo_problem.to_pubo())
-    assert _qubo_problem_is_valid(e, sol)
+        e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
+        assert self.is_valid(e, sol)
 
+        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        assert self.is_valid(e, sol)
 
-def test_pubo_hising_solve_qubo_problem():
+        for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
-    e, sol = solve_hising_bruteforce(qubo_problem.to_hising())
-    assert _qubo_problem_is_valid(e, sol)
+            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            assert self.is_valid(e, sol)
 
+            e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
+            assert self.is_valid(e, sol)
 
-def test_pubo_qubo_solve_qubo_problem():
-
-    e, sol = solve_qubo_bruteforce(qubo_problem.to_qubo())
-    assert _qubo_problem_is_valid(e, sol)
-
-
-def test_pubo_ising_solve_qubo_problem():
-
-    e, sol = solve_ising_bruteforce(qubo_problem.to_ising())
-    assert _qubo_problem_is_valid(e, sol)
+        assert (
+            self.problem.value(self.solution) ==
+            pubo_value(self.solution, self.problem) ==
+            e
+        )
 
 
-def test_pubo_bruteforce_solve_qubo_problem():
+def test_pubo_on_qubo():
 
-    assert qubo_problem.solve_bruteforce() == qubo_solution
+    problem = PUBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    solution = {'c': 1, 'b': 1, 'a': 1}
+    obj = -8
 
-
-# Testing PUBO on a PUBO
-
-pubo_problem = PUBO({
-    ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
-    (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1
-})
-pubo_solution = {'c': 1, 'b': 1, 'a': 1, 0: 1, 1: 1, 2: 0}
-pubo_obj = -11
+    Problem(problem, solution, obj).runtests()
 
 
-def _pubo_problem_is_valid(e, solution):
+def test_pubo_on_deg_3_pubo():
 
-    sol = pubo_problem.convert_solution(solution)
-    return all((
-        pubo_problem.is_solution_valid(sol),
-        sol == pubo_solution,
-        allclose(e, pubo_obj)
-    ))
+    problem = PUBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1
+    })
+    solution = {'c': 1, 'b': 1, 'a': 1, 0: 1, 1: 1, 2: 0}
+    obj = -11
 
-
-def test_pubo_pubo_solve_pubo_problem():
-
-    e, sol = solve_pubo_bruteforce(pubo_problem.to_pubo())
-    assert _pubo_problem_is_valid(e, sol)
+    Problem(problem, solution, obj).runtests()
 
 
-def test_pubo_hising_solve_pubo_problem():
+def test_pubo_on_deg_5_pubo():
 
-    e, sol = solve_hising_bruteforce(pubo_problem.to_hising())
-    assert _pubo_problem_is_valid(e, sol)
+    problem = PUBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
+        (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1,
+        (0, 1): -2
+    })
+    solution = {0: 1, 1: 1, 'c': 1, 2: 0, 4: 1, 3: 0, 'b': 1, 'a': 1}
+    obj = -12
 
-
-def test_pubo_qubo_solve_pubo_problem():
-
-    e, sol = solve_qubo_bruteforce(pubo_problem.to_qubo())
-    assert _pubo_problem_is_valid(e, sol)
-
-
-def test_pubo_ising_solve_pubo_problem():
-
-    e, sol = solve_ising_bruteforce(pubo_problem.to_ising())
-    assert _pubo_problem_is_valid(e, sol)
-
-
-def test_pubo_bruteforce_solve_pubo_problem():
-
-    assert pubo_problem.solve_bruteforce() == pubo_solution
+    Problem(problem, solution, obj).runtests()
 
 
 # testing methods
@@ -164,6 +145,22 @@ def test_pubo_num_binary_variables():
     d = PUBO({(0, 0): 1, (0, 1, 2, 3, 5): 2})
     assert d.num_binary_variables == 5
     assert d.max_index == 4
+
+
+def test_pubo_degree():
+
+    d = PUBO()
+    assert d.degree == 0
+    d[(0,)] += 2
+    assert d.degree == 1
+    d[(1,)] -= 3
+    assert d.degree == 1
+    d[(1, 2)] -= 2
+    assert d.degree == 2
+    d[(1, 2, 4)] -= 2
+    assert d.degree == 3
+    d[(1, 2, 4, 5, 6)] += 2
+    assert d.degree == 5
 
 
 def test_pubo_addition():
