@@ -17,40 +17,111 @@ Contains tests for the PUBO class.
 """
 
 from qubovert import PUBO
-from qubovert.utils import solve_pubo_bruteforce, solve_hising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce
+)
 from numpy import allclose
 
 
-problem = PUBO({
-    ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
-    (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1
+# Testing PUBO on a QUBO
+
+qubo_problem = PUBO({
+    ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
 })
-solution = {'c': 1, 'b': 1, 'a': 1, 0: 0, 1: 0, 2: 0}
-obj = -8
+qubo_solution = {'c': 1, 'b': 1, 'a': 1}
+qubo_obj = -8
 
 
-def test_pubo_pubo_solve():
+def _qubo_problem_is_valid(e, solution):
 
-    e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
-    assert problem.is_solution_valid(sol)
-    assert sol == solution
-    assert allclose(e, obj)
-
-
-def test_pubo_hising_solve():
-
-    e, sol = solve_hising_bruteforce(problem.to_hising())
-    sol = problem.convert_solution(sol)
-    assert problem.is_solution_valid(sol)
-    assert sol == solution
-    assert allclose(e, obj)
+    sol = qubo_problem.convert_solution(solution)
+    return all((
+        qubo_problem.is_solution_valid(sol),
+        sol == qubo_solution,
+        allclose(e, qubo_obj)
+    ))
 
 
-def test_pubo_bruteforce_solve():
+def test_pubo_pubo_solve_qubo_problem():
 
-    assert problem.solve_bruteforce() == solution
+    e, sol = solve_pubo_bruteforce(qubo_problem.to_pubo())
+    assert _qubo_problem_is_valid(e, sol)
 
+
+def test_pubo_hising_solve_qubo_problem():
+
+    e, sol = solve_hising_bruteforce(qubo_problem.to_hising())
+    assert _qubo_problem_is_valid(e, sol)
+
+
+def test_pubo_qubo_solve_qubo_problem():
+
+    e, sol = solve_qubo_bruteforce(qubo_problem.to_qubo())
+    assert _qubo_problem_is_valid(e, sol)
+
+
+def test_pubo_ising_solve_qubo_problem():
+
+    e, sol = solve_ising_bruteforce(qubo_problem.to_ising())
+    assert _qubo_problem_is_valid(e, sol)
+
+
+def test_pubo_bruteforce_solve_qubo_problem():
+
+    assert qubo_problem.solve_bruteforce() == qubo_solution
+
+
+# Testing PUBO on a PUBO
+
+pubo_problem = PUBO({
+    ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+    (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1
+})
+pubo_solution = {'c': 1, 'b': 1, 'a': 1, 0: 1, 1: 1, 2: 0}
+pubo_obj = -11
+
+
+def _pubo_problem_is_valid(e, solution):
+
+    sol = pubo_problem.convert_solution(solution)
+    return all((
+        pubo_problem.is_solution_valid(sol),
+        sol == pubo_solution,
+        allclose(e, pubo_obj)
+    ))
+
+
+def test_pubo_pubo_solve_pubo_problem():
+
+    e, sol = solve_pubo_bruteforce(pubo_problem.to_pubo())
+    assert _pubo_problem_is_valid(e, sol)
+
+
+def test_pubo_hising_solve_pubo_problem():
+
+    e, sol = solve_hising_bruteforce(pubo_problem.to_hising())
+    assert _pubo_problem_is_valid(e, sol)
+
+
+def test_pubo_qubo_solve_pubo_problem():
+
+    e, sol = solve_qubo_bruteforce(pubo_problem.to_qubo())
+    assert _pubo_problem_is_valid(e, sol)
+
+
+def test_pubo_ising_solve_pubo_problem():
+
+    e, sol = solve_ising_bruteforce(pubo_problem.to_ising())
+    assert _pubo_problem_is_valid(e, sol)
+
+
+def test_pubo_bruteforce_solve_pubo_problem():
+
+    assert pubo_problem.solve_bruteforce() == pubo_solution
+
+
+# testing methods
 
 def test_pubo_default_valid():
 

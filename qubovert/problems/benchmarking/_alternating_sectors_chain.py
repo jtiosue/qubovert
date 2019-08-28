@@ -39,7 +39,7 @@ class AlternatingSectorsChain(Problem):
 
     Example usage
     -------------
-    >>> from qubovert import AlternatingSectorsChain
+    >>> from qubovert.problems import AlternatingSectorsChain
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver

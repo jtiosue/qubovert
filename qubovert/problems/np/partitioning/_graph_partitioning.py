@@ -41,7 +41,7 @@ class GraphPartitioning(Problem):
 
     Example usage
     -------------
-    >>> from qubovert import GraphPartitioning
+    >>> from qubovert.problems import GraphPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver

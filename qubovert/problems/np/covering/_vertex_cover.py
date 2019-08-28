@@ -39,7 +39,7 @@ class VertexCover(Problem):
 
     Example usage
     -------------
-    >>> from qubovert import VertexCover
+    >>> from qubovert.problems import VertexCover
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
@@ -181,16 +181,15 @@ class VertexCover(Problem):
 
         # encode H_B (equation 34)
         for i in range(self._N):
-            Q[(i, i)] += B
+            Q[(i,)] += B
 
         # encode H_A
 
-        # Q keeps itself upper triangular, so we don't need to worry about it.
         for u, v in self._edges:
             iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
             Q[(iu, iv)] += A
-            Q[(iu, iu)] -= A
-            Q[(iv, iv)] -= A
+            Q[(iu,)] -= A
+            Q[(iv,)] -= A
 
         return Q
 

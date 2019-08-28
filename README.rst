@@ -41,7 +41,7 @@ Convert common problems to QUBO form.
 
 So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
 
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install_dev``, ``make test_dev``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
+To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install``, ``make test``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
 
 
 Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.

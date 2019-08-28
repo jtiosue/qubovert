@@ -23,6 +23,7 @@ from numpy import allclose
 
 problem = QUBO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
 solution = {'c': 1, 'b': 1, 'a': 1}
+obj = -8
 
 
 def test_qubo_qubo_solve():
@@ -31,7 +32,7 @@ def test_qubo_qubo_solve():
     sol = problem.convert_solution(sol)
     assert problem.is_solution_valid(sol)
     assert sol == solution
-    assert allclose(e, -8)
+    assert allclose(e, obj)
 
 
 def test_qubo_ising_solve():
@@ -40,7 +41,7 @@ def test_qubo_ising_solve():
     sol = problem.convert_solution(sol)
     assert problem.is_solution_valid(sol)
     assert sol == solution
-    assert allclose(e, -8)
+    assert allclose(e, obj)
 
 
 def test_qubo_bruteforce_solve():

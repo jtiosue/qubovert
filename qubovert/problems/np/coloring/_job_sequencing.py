@@ -42,7 +42,7 @@ class JobSequencing(Problem):
 
     Example
     -------
-    >>> from qubovert import JobSequencing
+    >>> from qubovert.problems import JobSequencing
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver

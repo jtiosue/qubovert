@@ -42,7 +42,7 @@ class SetCover(Problem):
 
     Example
     -------
-    >>> from qubovert import SetCover
+    >>> from qubovert.problems import SetCover
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
@@ -356,7 +356,7 @@ class SetCover(Problem):
                     Q[(i, i)] -= A
                     for mp in range(m+1, self._log_M+1):
                         ip = self._x(alpha, mp)
-                        Q[(i, ip)] += 2*A
+                        Q[(i, ip)] += A
 
                 # second constraint
                 for m in range(self._log_M+1):

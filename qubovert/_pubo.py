@@ -24,6 +24,35 @@ from .utils import BO, PUBOMatrix, QUBOMatrix, solve_pubo_bruteforce
 __all__ = 'PUBO',
 
 
+def _constraint_xy_eq_z(x, y, z, lam=1):
+    """_constraint_xy_eq_z.
+
+    Find the penalty dictionary enforcing ``xy = z``.
+
+    Parameters
+    ----------
+    x : hashable object.
+        Label of the ``x`` variable.
+    y : hashable object.
+        Label of the ``y`` variable.
+    z : hashable object.
+        Label of the ``z`` variable.
+    lam : float > 0 (optional, default to 1).
+        The penalty factor, how much to penalize violations of ``xy = z``.
+
+    Returns
+    -------
+    D : dict.
+        QUBO representing the constraint ``xy = z`` weighted by ``lam``.
+
+    References
+    ----------
+    https://arxiv.org/pdf/1307.8041.pdf equation 6.
+
+    """
+    return {(z,): 3 * lam, (x, y): lam, (x, z): -2 * lam, (y, z): -2 * lam}
+
+
 class PUBO(BO, PUBOMatrix):
     """PUBO.
 
@@ -40,8 +69,8 @@ class PUBO(BO, PUBOMatrix):
     more efficient to initialize an empty PUBO object and then build the
     PUBO, rather than initialize a PUBO object with an already built dict.
 
-    PUBO inherits some methods and attributes the ``PUBOMatrix`` class. See
-    ``help(qubovert.utils.PUBOMatrix)``.
+    PUBO inherits some methods and attributes from the ``PUBOMatrix`` class.
+    See ``help(qubovert.utils.PUBOMatrix)``.
 
     PUBO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
@@ -153,7 +182,27 @@ class PUBO(BO, PUBOMatrix):
 
         return P
 
-    def to_qubo(self, lam=1):
+    @staticmethod
+    def default_lam(v):
+        """default_lam.
+
+        This is the default function used in ``to_qubo``. It returns
+        ``1 + abs(v)``. It weights the penalties used to enforce the constraint
+        ``xy = z``. See the ``to_qubo`` method.
+
+        Parameters
+        ----------
+        v : float.
+
+        Return
+        ------
+        res : float.
+            Penalty weight.
+
+        """
+        return 1 + abs(v)
+
+    def to_qubo(self, lam=None):
         """to_qubo.
 
         Create and return upper triangular QUBO representing the problem.
@@ -164,11 +213,17 @@ class PUBO(BO, PUBOMatrix):
 
         Parameters
         ----------
-        lam : float (optional, defaults to 1).
-            The penalty factor to introduce in order to enforce the ancilla
-            constraints. When we reduce the degree of the PUBO to a QUBO, we
-            add penalties to the QUBO in order to enforce ancilla variable
-            constraints. These constraints will be multiplied by ``lam``.
+        lam : function (optional, defaults to None).
+            If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
+            ``lam`` is the penalty factor to introduce in order to enforce the
+            ancilla constraints. When we reduce the degree of the PUBO to a
+            QUBO, we add penalties to the QUBO in order to enforce ancilla
+            variable constraints. These constraints will be multiplied by
+            ``lam(v)``, where ``v`` is the value associated with the term that
+            it is reducing. For example, a term ``(0, 1, 2): 3`` in the PUBO
+            may be reduced to a term ``(0, 3): 3`` for the QUBO, and then the
+            fact that ``3`` should be the product of ``1`` and ``2`` will be
+            enforced with a penalty weight ``lam(3)``.
 
         Return
         -------
@@ -179,18 +234,59 @@ class PUBO(BO, PUBOMatrix):
             see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
-        try:
+        if lam is None:
+            lam = PUBO.default_lam
 
-            Q = QUBOMatrix()
+        Q = QUBOMatrix()
 
-            for k, v in self.items():
-                key = tuple(self._mapping[i] for i in k)
-                Q[key] += v
+        # next available label
+        ancilla = self.num_binary_variables
+        reductions = {}
 
-            return Q
+        # we could use self.pubo().items() so we don't have to explicitly make
+        # the key below, but this wastes a lot of time.
+        for kp, v in self.items():
+            key = tuple(sorted(self._mapping[i] for i in kp))
+            if key in reductions:
+                Q[reductions[key]] += v
+            else:
+                # find a reduction if len(key) > 2
+                k = key
+                while len(k) > 2:
 
-        except Exception:
-            raise NotImplementedError("``to_qubo`` not implemented yet!")
+                    # find a variable pair in k that has already been reduced.
+                    found = False
+                    for i, x in enumerate(k[:-1]):
+                        for y in k[i+1:]:
+                            if (x, y) in reductions:
+                                found = True
+                                break
+                        if found:
+                            break
+
+                    if found:
+                        # z is the ancilla variable for this reduction
+                        z = reductions[(x, y)]
+                    else:
+                        # found is False so we haven't already reduced the
+                        # variable pair (x, y), so just take the first two and
+                        # reduce them.
+                        # TODO: come up with a better way to choose x, y here.
+                        x, y, z = k[0], k[1], ancilla
+                        reductions[(x, y)] = z
+                        ancilla += 1
+
+                    # note we add the constraint even if we've already added
+                    # it before (if found is True). This is because if we use
+                    # the reduction multiple times, we need to enforce it
+                    # multiple times.
+                    Q += _constraint_xy_eq_z(x, y, z, lam(v))
+                    k = tuple(sorted(
+                            tuple(i for i in k if i not in (x, y)) + (z,)
+                        ))
+                Q[k] += v
+
+        return Q
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -238,15 +334,26 @@ class PUBO(BO, PUBOMatrix):
         >>> pubo.convert_solution({0: 1, 1: 0, 2: 1, 2: 0})
         {'a': 1, 0: 0, 1: 1}
 
+        Notes
+        -----
+        We take ignore the ancilla variable assignments when we convert the
+        solution. For example if the conversion from PUBO to QUBO introduced
+        an ancilla varable ``z = xy`` where ``x`` and ``y`` are variables of
+        the PUBO, then ``solution`` must have values for ``x``, ``y``, and
+        ``z``. If the QUBO solver found that ``x = 1``, ``y = 0``, and
+        ``z = 1``, then the constraint that ``z = xy`` is not satisfied (one
+        possible cause for this is if the ``lam`` argument in ``to_qubo`` is
+        too small). ``convert_solution`` will return that ``x = 1`` and
+        ``y = 0`` and ignore the value of ``z``.
+
         """
-        if len(solution) == self.num_binary_variables:
-            return {
-                self._reverse_mapping[i]: 1 if solution[i] == 1 else 0
-                for i in range(self.num_binary_variables)
-            }
-        else:
-            raise NotImplementedError("PUBO qubo and ising functionality not "
-                                      "done!")
+        # this works for converting a solution to the pubo, qubo, hising, or
+        # ising formulations, since in the to_qubo function all ancilla
+        # variables are labeled with integers >= self.num_binary_variables.
+        return {
+            self._reverse_mapping[i]: 1 if solution[i] == 1 else 0
+            for i in range(self.num_binary_variables)
+        }
 
     @staticmethod
     def _check_key_valid(key):

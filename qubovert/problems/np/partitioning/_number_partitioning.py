@@ -48,7 +48,7 @@ class NumberPartitioning(Problem):
 
     Example usage
     -------------
-    >>> from qubovert import NumberPartitioning
+    >>> from qubovert.problems import NumberPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
@@ -93,7 +93,7 @@ class NumberPartitioning(Problem):
         Parameters
         ----------
         S: tuple or list.
-            tuple or list of N positive numbers that we are attempting to
+            tuple or list of N nonzero numbers that we are attempting to
             partition into two partitions of equal sum.
 
         Example
@@ -101,6 +101,8 @@ class NumberPartitioning(Problem):
         >>> problem = NumberPartitioning([1, 2, 3, 4])
 
         """
+        if not all(S):
+            raise ValueError("Numbers must be nonzero")
         self._input_type = type(S)
         self._S = self._input_type(x for x in S)  # copy the input
         self._N = len(S)
@@ -165,7 +167,10 @@ class NumberPartitioning(Problem):
         for i in range(self._N):
             L[(i,)] += self._S[i]
 
-        return A * L**2
+        L **= 2
+        L *= A
+
+        return L
 
     def convert_solution(self, solution):
         """convert_solution.

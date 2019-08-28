@@ -27,6 +27,16 @@ Binary Optimization models
     :members:
 
 
+Utility methods
+===============
+
+Note that the ``utils`` modules will not be imported with ``from qubovert import *``. You must import ``qubovert.utils`` explicitly.
+
+
+.. automodule:: qubovert.utils
+    :members:
+
+
 Problems defined
 ================
 
@@ -43,16 +53,6 @@ For example, you can use the ``SetCover`` class with any of the following.
 
 
 .. automodule:: qubovert.problems
-    :members:
-
-
-Utility methods
-===============
-
-Note that the ``utils`` modules will not be imported with ``from qubovert import *``. You must import ``qubovert.utils`` explicitly.
-
-
-.. automodule:: qubovert.utils
     :members:
 
 
