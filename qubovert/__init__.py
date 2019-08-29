@@ -24,7 +24,6 @@ used.
 
 from ._version import __version__
 from . import utils
-from . import problems
 
 from ._qubo import *
 from ._ising import *
@@ -48,5 +47,7 @@ __all__ = (
     __all_hobo__ +
     __all_hoio__
 )
+
+from . import problems
 
 name = "qubovert"

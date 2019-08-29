@@ -60,7 +60,7 @@ def qubo_to_ising(Q):
     L = IsingMatrix()
 
     for kp, v in Q.items():
-        k = tuple(set(kp))
+        k = QUBOMatrix.squash_key(kp)
         if not k:
             L[k] += v
         elif len(k) == 1:
@@ -109,7 +109,8 @@ def ising_to_qubo(L):
     # write out the conversion.
     Q = QUBOMatrix()
 
-    for k, v in L.items():
+    for kp, v in L.items():
+        k = IsingMatrix.squash_key(kp)
         if not k:
             Q[k] += v
         elif len(k) == 1:

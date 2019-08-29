@@ -37,6 +37,7 @@ setuptools.setup(
     author_email="joe.iosue@yahoo.com",
     description="A package for converting common problems to QUBO/Ising form",
     long_description=README,
+    long_description_content_type='text/x-rst',
     url="https://github.com/jiosue/qubovert",
     license="Apache Software License 2.0",
     packages=setuptools.find_packages(exclude=("tests", "docs")),

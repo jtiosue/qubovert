@@ -285,7 +285,9 @@ class PUBOMatrix(DictArithmetic):
         >>> (0, 2, 3, 4)
 
         """
-        cls._check_key_valid(key)
+        f = cls._check_key_valid(key)
+        if f is not None:
+            return f
         # here we use hash because some other classes that are subclasses of
         # this class will allow elements of the key to be strings! So we want
         # to still have something consistent to sort by. But for this class,
@@ -363,10 +365,11 @@ class PUBOMatrix(DictArithmetic):
 
         """
         k = self.__class__.squash_key(key)
-        self._degree = max(self._degree, len(k))
-        for i in filter(lambda x: x not in self._vars, k):
-            self._vars.add(i)
-            self._num_binary_variables += 1
+        if value:
+            self._degree = max(self._degree, len(k))
+            for i in filter(lambda x: x not in self._vars, k):
+                self._vars.add(i)
+                self._num_binary_variables += 1
         super().__setitem__(k, value)
 
     def solve_bruteforce(self, all_solutions=False):

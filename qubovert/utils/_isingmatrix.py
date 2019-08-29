@@ -126,17 +126,20 @@ class IsingMatrix(HIsingMatrix):
 
         Returns
         -------
-        None.
+        k : tuple.
+            The squashed key.
 
         Raises
         ------
         KeyError if the key is invalid.
 
         """
-        if len(HIsingMatrix.squash_key(key)) > 2:
+        k = HIsingMatrix.squash_key(key)
+        if len(k) > 2:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 integers "
                 "See HIsingMatrix instead.")
+        return k
 
     @property
     def h(self):

@@ -26,7 +26,7 @@ def hash_function(x):
     """hash_function.
 
     Function to return (usually) unique hashes for ``x`` such
-    that multiple ``x``s can be ordered. Note that the hash is not consistent
+    that multiple ``x`` s can be ordered. Note that the hash is not consistent
     across Python sessions (except for when ``x`` is an integer)!
 
     Parameters
