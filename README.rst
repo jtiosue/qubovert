@@ -9,6 +9,9 @@ QUBOVert
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. image:: https://codecov.io/gh/jiosue/QUBOVert/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/jiosue/QUBOVert
+    :alt: Code Coverage
 
 *dev branch*
 
@@ -18,6 +21,9 @@ QUBOVert
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
     :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
     :alt: Documentation Status
+.. image:: https://codecov.io/gh/jiosue/QUBOVert/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/jiosue/QUBOVert
+    :alt: Code Coverage
 
 *pypi distribution*
 

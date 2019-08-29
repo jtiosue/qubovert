@@ -10,4 +10,5 @@ script:
   - make test
 
 after_script:
+  - make submitcoverage
   - make clean

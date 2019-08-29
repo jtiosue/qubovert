@@ -7,3 +7,4 @@ sphinx_rtd_theme
 setuptools
 wheel
 twine
+codecov
