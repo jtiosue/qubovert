@@ -21,13 +21,142 @@ as QUBO/PUBO and HIsing objective function evaluators.
 
 
 __all__ = (
+    'binary_to_spin', 'spin_to_binary', 'decimal_to_spin', 'decimal_to_binary',
     'pubo_value', 'qubo_value', 'hising_value', 'ising_value',
     'solve_pubo_bruteforce', 'solve_qubo_bruteforce',
     'solve_hising_bruteforce', 'solve_ising_bruteforce'
 )
 
-# from . import decimal_to_binary, decimal_to_spin causes a circular import
-import qubovert.utils as utils
+
+def binary_to_spin(x):
+    """binary_to_spin.
+
+    Convert a binary number in {0, 1} to a spin in {-1, 1}, in that order.
+
+    Parameters
+    ----------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
+
+    Returns
+    -------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either -1 or 1.
+
+    Example
+    -------
+    >>> binary_to_spin(0)  # will print -1
+    >>> binary_to_spin(1)  # will print 1
+    >>> binary_to_spin([0, 1, 1])  # will print [-1, 1, 1]
+    >>> binary_to_spin({"a": 0, "b": 1})  # will print {"a": -1, "b": 1}
+
+    """
+    convert = {0: -1, 1: 1}
+    if isinstance(x, (int, float)) and x in convert:
+        return convert[x]
+    elif isinstance(x, dict):
+        return {k: convert[v] for k, v in x.items()}
+    return type(x)(convert[i] for i in x)
+
+
+def spin_to_binary(z):
+    """spin_to_binary.
+
+    Convert a spin in {-1, 1} to a binary variable in {0, 1}, in that order.
+
+    Parameters
+    ----------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either -1 or 1.
+
+    Returns
+    -------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
+
+    Example
+    -------
+    >>> spin_to_binary(-1)  # will print 0
+    >>> spin_to_binary(1)  # will print 1
+    >>> spin_to_binary([-1, 1, 1])  # will print [0, 1, 1]
+    >>> spin_to_binary({"a": -1, "b": 1})  # will print {"a": 0, "b": 1}
+
+    """
+    convert = {-1: 0, 1: 1}
+    if isinstance(z, (int, float)) and z in convert:
+        return convert[z]
+    elif isinstance(z, dict):
+        return {k: convert[v] for k, v in z.items()}
+    return type(z)(convert[i] for i in z)
+
+
+def decimal_to_binary(d, num_bits=None):
+    """decimal_to_binary.
+
+    Convert the integer ``d`` to its binary representation.
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_bits : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_bits is None``, then
+        the minimum number of bits required will be used.
+
+    Return
+    ------
+    b : tuple of length ``num_bits``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_binary(10, 7)
+    (0, 0, 0, 1, 0, 1, 0)
+
+    >>> decimal_to_binary(10)
+    (1, 0, 1, 0)
+
+    """
+    if int(d) != d or d < 0:
+        raise ValueError("``d`` must be an integer >- 0.")
+    b = bin(d)[2:]
+    lb = len(b)
+    if num_bits is None:
+        num_bits = lb
+    elif num_bits < lb:
+        raise ValueError("Not enough bits to represent the number.")
+    return (0,) * (num_bits - lb) + tuple(int(x) for x in b)
+
+
+def decimal_to_spin(d, num_spins=None):
+    """decimal_to_spin.
+
+    Convert the integer ``d`` to its spin representation (ie its binary
+    representation, but with -1 and 1 instead of 0 and 1).
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_spins : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_spins is None``, then
+        the minimum number of bits required will be used.
+
+    Return
+    ------
+    b : tuple of length ``num_spins``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_spin(10, 7)
+    (-1, -1, -1, 1, -1, 1, -1)
+
+    >>> decimal_to_spin(10)
+    (1, -1, 1, -1)
+
+    """
+    return binary_to_spin(decimal_to_binary(d, num_spins))
 
 
 def pubo_value(x, P):
@@ -230,7 +359,7 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
 
     best = None, {}
     all_sols = {None: []}
-    convert = utils.decimal_to_spin if spin else utils.decimal_to_binary
+    convert = decimal_to_spin if spin else decimal_to_binary
 
     for n in range(1 << N):
         test_sol = convert(n, N)
