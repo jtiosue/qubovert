@@ -20,6 +20,7 @@ See ``__all__`` for a list of the utilities.
 
 # import order here is important!
 from ._hash import *
+from ._subgraph import *
 from ._solve_bruteforce import *
 from ._dict_arithmetic import *
 from ._pubomatrix import *
@@ -31,6 +32,7 @@ from ._problem_parentclass import *
 from ._bo_parentclass import *
 
 from ._hash import __all__ as __all_hash__
+from ._subgraph import __all__ as __all_subgraph__
 from ._solve_bruteforce import __all__ as __all_solve_bruteforce__
 from ._dict_arithmetic import __all__ as __all_dict_arithmetic__
 from ._pubomatrix import __all__ as __all_pubomatrix__
@@ -44,6 +46,7 @@ from ._bo_parentclass import __all__ as __all_bo__
 
 __all__ = (
     __all_hash__ +
+    __all_subgraph__ +
     __all_solve_bruteforce__ +
     __all_dict_arithmetic__ +
     __all_pubomatrix__ +
