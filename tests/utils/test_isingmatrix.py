@@ -18,6 +18,19 @@ Contains tests for the IsingMatrix object.
 
 from qubovert.utils import IsingMatrix
 from numpy import allclose
+from numpy.testing import assert_raises
+
+
+def test_qubo_checkkey():
+
+    with assert_raises(KeyError):
+        IsingMatrix({('a',): -1})
+
+    with assert_raises(KeyError):
+        IsingMatrix({0: -1})
+
+    with assert_raises(KeyError):
+        IsingMatrix({(0, 1, 2): -1})
 
 
 def test_ising_default_valid():

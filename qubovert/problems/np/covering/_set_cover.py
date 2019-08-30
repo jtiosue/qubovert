@@ -19,7 +19,7 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 """
 
 from numpy import log2, allclose
-from qubovert.utils import Problem, QUBOMatrix, decimal_to_binary
+from qubovert.utils import Problem, QUBOMatrix, solve_qubo_bruteforce
 
 
 __all__ = 'SetCover',
@@ -464,23 +464,38 @@ class SetCover(Problem):
         {0, 2}
 
         """
-        best = None
-        all_sols = {}
-        for x in range(1 << self._N):
-            sol = decimal_to_binary(x, self._N)
-            cover = self.convert_solution(sol)
-            if self.is_solution_valid(cover):
-                if not all_solutions and (best is None or
-                                          len(cover) < len(best)):
-                    best = cover
-                elif all_solutions and (best is None or
-                                        len(cover) <= len(best)):
-                    best = cover
-                    all_sols.setdefault(len(cover), []).append(cover)
+        # minimize the objective function
+        Q = {(i,): self._weights[i] for i in range(self._N)}
+        # subject to the constraint
+        valid = self.is_solution_valid
 
-        if best is None:
+        obj, sol = solve_qubo_bruteforce(Q, all_solutions, valid)
+
+        if obj is None:
             raise ValueError("Problem is not solvable. See "
                              "``SetCover.is_coverable()``")
+
         if all_solutions:
-            return all_sols[len(best)]
-        return best
+            return [self.convert_solution(s) for s in sol]
+        return self.convert_solution(sol)
+
+#        best = None
+#        all_sols = {}
+#        for x in range(1 << self._N):
+#            sol = decimal_to_binary(x, self._N)
+#            cover = self.convert_solution(sol)
+#            if self.is_solution_valid(cover):
+#                if not all_solutions and (best is None or
+#                                          len(cover) < len(best)):
+#                    best = cover
+#                elif all_solutions and (best is None or
+#                                        len(cover) <= len(best)):
+#                    best = cover
+#                    all_sols.setdefault(len(cover), []).append(cover)
+#
+#        if best is None:
+#            raise ValueError("Problem is not solvable. See "
+#                             "``SetCover.is_coverable()``")
+#        if all_solutions:
+#            return all_sols[len(best)]
+#        return best

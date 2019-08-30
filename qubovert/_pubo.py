@@ -19,6 +19,7 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 """
 
 from .utils import BO, PUBOMatrix, QUBOMatrix
+from . import QUBO
 
 
 __all__ = 'PUBO',
@@ -444,10 +445,7 @@ class PUBO(BO, PUBOMatrix):
         # this works for converting a solution to the pubo, qubo, hising, or
         # ising formulations, since in the to_qubo function all ancilla
         # variables are labeled with integers >= self.num_binary_variables.
-        return {
-            self._reverse_mapping[i]: 1 if solution[i] == 1 else 0
-            for i in range(self.num_binary_variables)
-        }
+        return QUBO.convert_solution(self, solution)
 
     @staticmethod
     def _check_key_valid(key):

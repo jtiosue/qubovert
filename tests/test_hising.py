@@ -21,6 +21,7 @@ from qubovert.utils import (
     hising_value
 )
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 class Problem:
@@ -94,6 +95,14 @@ def test_hising_on_deg_5_hising():
     obj = -26
 
     Problem(problem, solution, obj).runtests()
+
+
+# testing methods
+
+def test_hising_checkkey():
+
+    with assert_raises(KeyError):
+        HIsing({0: -1})
 
 
 def test_ising_default_valid():

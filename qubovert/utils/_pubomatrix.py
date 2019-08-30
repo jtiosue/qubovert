@@ -372,6 +372,24 @@ class PUBOMatrix(DictArithmetic):
                 self._num_binary_variables += 1
         super().__setitem__(k, value)
 
+    def is_solution_valid(self, solution):
+        """is_solution_valid.
+
+        Included for consistency with other problem classes. Always returns
+        True since this is an unconstrainted problem.
+
+        Parameters
+        ----------
+        solution : iterable or dict.
+
+        Return
+        ------
+        valid : bool.
+            Always returns True.
+
+        """
+        return True
+
     def solve_bruteforce(self, all_solutions=False):
         """solve_bruteforce.
 
@@ -391,7 +409,8 @@ class PUBOMatrix(DictArithmetic):
             ``qubovert.utils.solve_pubo_bruteforce``.
 
         """
-        return solve_pubo_bruteforce(self, all_solutions)[1]
+        return solve_pubo_bruteforce(self,
+                                     all_solutions, self.is_solution_valid)[1]
 
     def value(self, x):
         r"""value.

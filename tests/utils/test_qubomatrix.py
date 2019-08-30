@@ -18,6 +18,19 @@ Contains tests for the QUBOMatrix object.
 
 from qubovert.utils import QUBOMatrix
 from numpy import allclose
+from numpy.testing import assert_raises
+
+
+def test_qubo_checkkey():
+
+    with assert_raises(KeyError):
+        QUBOMatrix({('a',): -1})
+
+    with assert_raises(KeyError):
+        QUBOMatrix({0: -1})
+
+    with assert_raises(KeyError):
+        QUBOMatrix({(0, 1, 2): -1})
 
 
 def test_qubo_default_valid():
@@ -188,11 +201,8 @@ def test_qubo_multiplication():
     assert d ** 3 == d * d * d
 
     # should raise a KeyError since can't fit this into QUBO.
-    try:
+    with assert_raises(KeyError):
         QUBOMatrix({(0, 1): 1, (1, 2): -1})**2
-        assert False
-    except KeyError:
-        pass
 
 
 def test_qubomatrix_solve_bruteforce():
@@ -200,7 +210,7 @@ def test_qubomatrix_solve_bruteforce():
     Q = QUBOMatrix({(0, 1): 1, (1, 2): 1, (1, 1): -1, (2,): -2})
     sol = Q.solve_bruteforce()
     assert sol == {0: 0, 1: 0, 2: 1}
-    assert Q.value(sol) == -2
+    assert allclose(Q.value(sol), -2)
 
     Q = QUBOMatrix({(0, 0): 1, (0, 1): -1, (): 1})
     sols = Q.solve_bruteforce(True)

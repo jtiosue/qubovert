@@ -18,8 +18,8 @@ Contains the HIsing class. See ``help(qubovert.HIsing)``.
 
 """
 
-from . import PUBO
 from .utils import BO, HIsingMatrix, hising_to_pubo
+from . import Ising
 
 
 __all__ = 'HIsing',
@@ -186,7 +186,7 @@ class HIsing(BO, HIsingMatrix):
         P : qubovert.PUBO object.
 
         """
-        return PUBO(self.to_pubo())
+        return hising_to_pubo(self)
 
     def to_pubo(self, deg=None, lam=None):
         """to_pubo.
@@ -236,8 +236,6 @@ class HIsing(BO, HIsingMatrix):
         See https://arxiv.org/pdf/1307.8041.pdf equation 6.
 
         """
-        if deg is None or deg >= self.degree:
-            return hising_to_pubo(self._to_hising())
         return self._create_pubo().to_pubo(deg, lam)
 
     def to_hising(self, deg=None, lam=None):
@@ -285,40 +283,6 @@ class HIsing(BO, HIsingMatrix):
             return self._to_hising()
         return self._create_pubo().to_hising(deg, lam)
 
-    def to_ising(self, lam=None):
-        """to_ising.
-
-        Create and return upper triangular Ising representing the problem.
-        The labels will be integers from 0 to n-1. We introduce ancilla
-        variables in order to reduce the degree of the HIsing to a Ising. The
-        solution to the HIsing can be read from the solution to the Ising by
-        using the ``convert_solution`` method.
-
-        Parameters
-        ----------
-        lam : function (optional, defaults to None).
-            If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
-            ``lam`` is the penalty factor to introduce in order to enforce the
-            ancilla constraints. When we reduce the degree of the HIsing to a
-            Ising, we add penalties to the Ising in order to enforce ancilla
-            variable constraints. These constraints will be multiplied by
-            ``lam(v)``, where ``v`` is the value associated with the term that
-            it is reducing. For example, a term ``(0, 1, 2): 3`` in the Hising
-            may be reduced to a term ``(0, 3): 3`` for the Ising, and then the
-            fact that ``3`` should be the product of ``1`` and ``2`` will be
-            enforced with a penalty weight ``lam(3)``.
-
-        Return
-        -------
-        L : qubovert.utils.IsingMatrix object.
-            The upper triangular Ising matrix, an IsingMatrix object.
-            For most practical purposes, you can use IsingMatrix in the
-            same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.IsingMatrix)``.
-
-        """
-        return self._create_pubo().to_ising(lam)
-
     def to_qubo(self, lam=None):
         """to_qubo.
 
@@ -344,7 +308,7 @@ class HIsing(BO, HIsingMatrix):
 
         Return
         -------
-        L : qubovert.utils.QUBOMatrix object.
+        Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, an QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
             same way as an ordinary dictionary. For more information,
@@ -417,10 +381,7 @@ class HIsing(BO, HIsingMatrix):
         # this works for converting a solution to the pubo, qubo, hising, or
         # ising formulations, since in the to_ising function all ancilla
         # variables are labeled with integers >= self.num_binary_variables.
-        return {
-            self._reverse_mapping[i]: 1 if solution[i] == 1 else -1
-            for i in range(self.num_binary_variables)
-        }
+        return Ising.convert_solution(self, solution)
 
     @staticmethod
     def _check_key_valid(key):

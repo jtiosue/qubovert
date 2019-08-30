@@ -18,6 +18,16 @@ Contains tests for the HIsingMatrix class.
 
 from qubovert.utils import HIsingMatrix
 from numpy import allclose
+from numpy.testing import assert_raises
+
+
+def test_qubo_checkkey():
+
+    with assert_raises(KeyError):
+        HIsingMatrix({('a',): -1})
+
+    with assert_raises(KeyError):
+        HIsingMatrix({0: -1})
 
 
 def test_hising_default_valid():

@@ -17,6 +17,7 @@ Contains tests for the DictArithmetic class.
 """
 
 from qubovert.utils import DictArithmetic
+from numpy.testing import assert_raises
 
 
 def test_dictarithmetic_default_valid():
@@ -155,8 +156,13 @@ def test_dictarithmetic_multiplication():
     assert d == {(0, 0, 0, 0): 1, (0, 0, 0, 1): 2,
                  (0, 1, 0, 0): 2, (0, 1, 0, 1): 4}
 
-    temp = d.copy()
+    d = temp.copy()
     assert d ** 3 == d * d * d
+
+    # ___pow__to non integer power
+    d = temp.copy()
+    with assert_raises(ValueError):
+        d ** .5
 
 
 def test_dictarithmetic_round():

@@ -21,6 +21,7 @@ from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce, qubo_value
 )
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 problem = QUBO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
@@ -55,6 +56,15 @@ def test_qubo_ising_solve():
 def test_qubo_bruteforce_solve():
 
     assert problem.solve_bruteforce() == solution
+
+
+def test_qubo_checkkey():
+
+    with assert_raises(KeyError):
+        QUBO({0: -1})
+
+    with assert_raises(KeyError):
+        QUBO({(0, 1, 2): -1})
 
 
 def test_qubo_default_valid():

@@ -84,13 +84,13 @@ class GraphPartitioning(Problem):
 
         Parameters
         ----------
-        edges : set or dict (or ``qubovert.utils.IsingCoupling`` object).
+        edges : set or dict.
             If edges is a set, then it must be a set of two element tuples
             describing the edges of the graph. Ie each tuple is a connection
             between two vertices. If a tuple has a repeated label (for example,
             (2, 2)), it will be ignored.
 
-            If edges is a dict (or IsingCoupling object) then the keys must be
+            If edges is a dict then the keys must be
             two element tuples and the values are the weights associated with
             that edge. If a key has a repeated label (for example, (2, 2)), it
             will be ignored.

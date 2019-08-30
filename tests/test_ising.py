@@ -21,6 +21,7 @@ from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce, ising_value
 )
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 problem = Ising({('a',): -1, ('b',): 2,
@@ -55,6 +56,17 @@ def test_ising_ising_solve():
 def test_ising_bruteforce_solve():
 
     assert problem.solve_bruteforce() == solution
+
+
+# testing methods
+
+def test_ising_checkkey():
+
+    with assert_raises(KeyError):
+        Ising({0: -1})
+
+    with assert_raises(KeyError):
+        Ising({(0, 1, 2): -1})
 
 
 def test_ising_default_valid():

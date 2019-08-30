@@ -139,10 +139,9 @@ See the following Set Cover example. All other problems can be used in a similar
     V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
 
     problem = SetCover(U, V)
-    Q, offset = problem.to_qubo()
+    Q = problem.to_qubo()
 
     obj, sol = qubo_solver(Q)
-    obj += offset
 
     solution = problem.convert_solution(sol)
 
@@ -163,10 +162,9 @@ To use the Ising formulation instead:
     V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
 
     problem = SetCover(U, V)
-    h, J, offset = problem.to_ising()
+    L = problem.to_ising()
 
-    obj, sol = ising_solver(h, J)
-    obj += offset
+    obj, sol = ising_solver(L)
 
     solution = problem.convert_solution(sol)
 

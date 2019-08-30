@@ -192,7 +192,7 @@ class HIsingMatrix(PUBOMatrix):
 
         Find the value of
             :math:`\sum_{i,...,j} H_{i...j} z_{i} ... z_{j}`. Calling
-            ``self.value(z)` is the same as calling
+            ``self.value(z)`` is the same as calling
             ``qubovert.utils.hising_value(z, self)``.
 
         Parameters
@@ -209,7 +209,7 @@ class HIsingMatrix(PUBOMatrix):
         Example
         -------
         >>> from qubovert.utils import IsingMatrix, HIsingMatrix
-        >>> from qubovet import Ising, HIsing
+        >>> from qubovert import Ising, HIsing
 
         >>> H = HIsingMatrix({(0, 1): -1, (0,): 1})
         >>> z = {0: -1, 1: 1}

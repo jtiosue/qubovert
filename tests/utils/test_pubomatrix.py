@@ -18,6 +18,16 @@ Contains tests for the PUBOMatrix class.
 
 from qubovert.utils import PUBOMatrix
 from numpy import allclose
+from numpy.testing import assert_raises
+
+
+def test_pubo_checkkey():
+
+    with assert_raises(KeyError):
+        PUBOMatrix({('a',): -1})
+
+    with assert_raises(KeyError):
+        PUBOMatrix({0: -1})
 
 
 def test_pubo_default_valid():

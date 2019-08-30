@@ -111,30 +111,6 @@ class BO(Conversions):
         """
         return self.num_binary_variables - 1
 
-    def is_solution_valid(self, solution):
-        """is_solution_valid.
-
-        Included for consistency with other problem classes. Always returns
-        True.
-
-        Parameters
-        ----------
-        solution : iterable or dict.
-            The QUBO or Ising solution output, or the output of
-            ``convert_solution``. The QUBO solution output
-            is either a list or tuple where indices specify the label of the
-            variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
-            label of the variable to is value.
-
-        Return
-        ------
-        valid : bool.
-            Always returns True.
-
-        """
-        return True
-
     def __setitem__(self, key, value):
         """__setitem__.
 

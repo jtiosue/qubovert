@@ -23,6 +23,7 @@ from qubovert.utils import (
     pubo_value
 )
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 class Problem:
@@ -103,6 +104,12 @@ def test_pubo_on_deg_5_pubo():
 
 
 # testing methods
+
+def test_pubo_checkkey():
+
+    with assert_raises(KeyError):
+        PUBO({0: -1})
+
 
 def test_pubo_default_valid():
 

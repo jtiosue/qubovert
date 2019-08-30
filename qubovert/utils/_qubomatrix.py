@@ -19,10 +19,9 @@ This file contains the QUBOMatrix object.
 """
 
 from . import PUBOMatrix
-import numpy as np
 
 
-__all__ = 'QUBOMatrix', 'matrix_to_qubo', 'qubo_to_matrix'
+__all__ = 'QUBOMatrix',
 
 
 class QUBOMatrix(PUBOMatrix):
@@ -167,89 +166,3 @@ class QUBOMatrix(PUBOMatrix):
 
         """
         return {k * (3 - len(k)): v for k, v in self.items() if k}
-
-
-def matrix_to_qubo(matrix):
-    r"""matrix_to_qubo.
-
-    Convert a matrix to a QUBO dictionary.
-
-    Parameters
-    ----------
-    matrix : list of lists or 2-dimensional numpy array.
-        ``matrix[i][j]`` is equal to :math:`Q_{ij}`.
-
-    Return
-    ------
-    Q : qubovert.utils.QUBOMatrix object.
-       The upper triangular QUBO dictionary. See
-       ``help(qubovert.utils.QUBOMatrix)``.
-
-    """
-    if not isinstance(matrix, np.ndarray):
-        matrix = np.array(matrix)
-
-    if len(matrix.shape) != 2 or matrix.shape[0] != matrix.shape[1]:
-        raise ValueError("Input matrix must be square and two-dimensional")
-
-    Q = QUBOMatrix()
-    for i in range(matrix.shape[0]):
-        for j in range(matrix.shape[1]):
-            Q[(i, j)] += matrix[i][j]
-
-    return Q
-
-
-def qubo_to_matrix(Q, symmetric=False, array=True):
-    r"""qubo_to_matrix.
-
-    Convert a QUBO dictionary to its matrix form. The indices of the ``Q``
-    dictionary should be integers from 0 to ``n-1``, where there are ``n``
-    binary variables in the QUBO problem.
-
-    Parameters
-    ----------
-    Q : dict or qubovert.utils.QUBOMatrix object.
-        Input QUBO dictionary, where ``Q[(i, j)]`` corresponds to
-        :math:`Q_{ij}`.
-    symmetric : bool (optional, defaults to False).
-        Whether the returned matrix should be symmetric or upper-triangular.
-        If ``symmetric`` is True, then the matrix will be symmetric, ie
-        ``matrix[i][j] == matrix[j][i]``. Otherwise, it will be
-        upper-triangular, ie ``marix[i][j] == 0`` if ``i > j``.
-    array : bool (optional, defaults to True).
-        Whether the returned matrix should be a numpy array or list of lists.
-        If ``array`` is True, then it will be a numpy array, otherwise, it
-        will be a list of lists.
-
-    Return
-    ------
-    matrix : numpy array or list of lists.
-        The matrix representing the QUBO. See the arguments ``symmetric`` and
-        ``array`` for info on the return type of ``matrix``.
-
-    """
-    if not Q:
-        raise ValueError("QUBO dictionary is empty")
-    elif not isinstance(Q, QUBOMatrix):
-        Q = QUBOMatrix(Q)
-
-    if Q[()] != 0:
-        raise ValueError("QUBO cannot have a constant when converting "
-                         "to a matrix")
-
-    matrix = np.zeros((Q.max_index+1,)*2)
-    for k, v in Q.items():
-        if len(k) == 1:
-            matrix[k[0]][k[0]] = v
-        elif symmetric:
-            i, j = k
-            matrix[i][j] = v / 2
-            matrix[j][i] = v / 2
-        else:
-            i, j = k
-            matrix[i][j] = v
-
-    if not array:
-        return matrix.tolist()
-    return matrix
