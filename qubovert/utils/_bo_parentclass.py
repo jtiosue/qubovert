@@ -47,8 +47,8 @@ class BO(Conversions):
         classes for info on inputs.
 
         Parameters
-        ---------
-        Defined in child classes.
+        ----------
+        arg and kwargs : Defined in child classes.
 
         """
         self._mapping, self._reverse_mapping, self._next_label = {}, {}, 0

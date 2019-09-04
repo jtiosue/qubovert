@@ -13,10 +13,10 @@
 #   limitations under the License.
 
 """
-Contains tests for the PUBO class.
+Contains tests for the HOBO class.
 """
 
-from qubovert import PUBO
+from qubovert import HOBO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
@@ -24,6 +24,9 @@ from qubovert.utils import (
 )
 from numpy import allclose
 from numpy.testing import assert_raises
+
+
+""" TESTS FOR THE METHODS THAT HOBO INHERITS FROM PUBO """
 
 
 class Problem:
@@ -67,9 +70,9 @@ class Problem:
         )
 
 
-def test_pubo_on_qubo():
+def test_hobo_on_qubo():
 
-    problem = PUBO({
+    problem = HOBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     solution = {'c': 1, 'b': 1, 'a': 1}
@@ -78,9 +81,9 @@ def test_pubo_on_qubo():
     Problem(problem, solution, obj).runtests()
 
 
-def test_pubo_on_deg_3_pubo():
+def test_hobo_on_deg_3_pubo():
 
-    problem = PUBO({
+    problem = HOBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1
     })
@@ -90,9 +93,9 @@ def test_pubo_on_deg_3_pubo():
     Problem(problem, solution, obj).runtests()
 
 
-def test_pubo_on_deg_5_pubo():
+def test_hobo_on_deg_5_pubo():
 
-    problem = PUBO({
+    problem = HOBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
         (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1,
@@ -106,58 +109,58 @@ def test_pubo_on_deg_5_pubo():
 
 # testing methods
 
-def test_pubo_checkkey():
+def test_hobo_checkkey():
 
     with assert_raises(KeyError):
-        PUBO({0: -1})
+        HOBO({0: -1})
 
 
-def test_pubo_default_valid():
+def test_hobo_default_valid():
 
-    d = PUBO()
+    d = HOBO()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
     assert d == {(0,): 1}
 
 
-def test_pubo_remove_value_when_zero():
+def test_hobo_remove_value_when_zero():
 
-    d = PUBO()
+    d = HOBO()
     d[(0, 0, 1, 2)] += 1
     d[(0, 1, 2)] -= 1
     assert d == {}
 
 
-def test_pubo_reinitialize_dictionary():
+def test_hobo_reinitialize_dictionary():
 
-    d = PUBO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
+    d = HOBO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(0,): 1, ('1', 0): 3}, {(0,): 1, (0, '1'): 3})
 
 
-def test_pubo_update():
+def test_hobo_update():
 
-    d = PUBO({('0',): 1, ('0', 1): 2})
+    d = HOBO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
     assert d in ({(1, '0'): 1, (1,): -1}, {('0', 1): 1, (1,): -1})
 
-    d = PUBO({(0, 0): 1, (0, 1): 2})
-    d.update(PUBO({(1, 0): 1, (1, 1): -1}))
+    d = HOBO({(0, 0): 1, (0, 1): 2})
+    d.update(HOBO({(1, 0): 1, (1, 1): -1}))
     d -= 1
-    assert d == PUBO({(0,): 1, (0, 1): 1, (1,): -1, (): -1})
+    assert d == HOBO({(0,): 1, (0, 1): 1, (1,): -1, (): -1})
 
     assert d.offset == -1
 
 
-def test_pubo_num_binary_variables():
+def test_hobo_num_binary_variables():
 
-    d = PUBO({(0, 0): 1, (0, 1, 2, 3, 5): 2})
+    d = HOBO({(0, 0): 1, (0, 1, 2, 3, 5): 2})
     assert d.num_binary_variables == 5
     assert d.max_index == 4
 
 
-def test_pubo_degree():
+def test_hobo_degree():
 
-    d = PUBO()
+    d = HOBO()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -171,9 +174,9 @@ def test_pubo_degree():
     assert d.degree == 5
 
 
-def test_pubo_addition():
+def test_hobo_addition():
 
-    temp = PUBO({('0', '0'): 1, ('0', 1): 2})
+    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
     temp2 = {(1, '0'): 5}, {('0', 1): 5}
     temp3 = {('0',): 2, (1, '0'): -1}, {('0',): 2, ('0', 1): -1}
@@ -212,12 +215,12 @@ def test_pubo_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == PUBO(temp3[0])*-1
+    assert g == HOBO(temp3[0])*-1
 
 
-def test_pubo_multiplication():
+def test_hobo_multiplication():
 
-    temp = PUBO({('0', '0'): 1, ('0', 1): 2})
+    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): 3, (1, '0'): 6}, {('0',): 3, ('0', 1): 6}
     temp2 = {('0',): .5, (1, '0'): 1}, {('0',): .5, ('0', 1): 1}
 
@@ -292,7 +295,80 @@ def test_pubo_multiplication():
 
 def test_properties():
 
-    temp = PUBO({('0', '0'): 1, ('0', 1): 2})
+    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
     temp.offset
     temp.mapping
     temp.reverse_mapping
+
+
+""" TESTS FOR THE CONSTRAINT METHODS """
+
+
+def test_hobo_eq_constraint():
+
+    problem = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1, ('b', 'c'): -1})
+    problem.solve_bruteforce()
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    sol = problem.solve_bruteforce()
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sols = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sols)
+    assert all((
+        not problem.is_solution_valid(sol),
+        not problem.is_solution_valid(sols),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1, ('b', 'c'): -1}, 10)
+    problem.solve_bruteforce()
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    sol = problem.solve_bruteforce()
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sols = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sols)
+    assert all((
+        problem.is_solution_valid(sol),
+        problem.is_solution_valid(sols),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_logic():
+
+    H = HOBO().add_constraint_NAND('a', 'b', 'c').AND('a', 'b')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
+
+    H = HOBO().add_constraint_OR('a', 'b', 'c').NOR('a', 'b')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 0, 'c': 0}
+
+    H = HOBO().add_constraint_XOR('a', 'b', 'c').NXOR('a', 'b').ONE('a')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
+
+    H = HOBO().add_constraint_NOT('a', 'b').ONE('a')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
+
+    # TODO: more logic tests

@@ -44,6 +44,7 @@ def test_vertexcover_qubo_solve():
 
     assert solution == {"a", "c"}
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, 2)
 
 
@@ -66,6 +67,7 @@ def test_vertexcover_ising_solve():
 
     assert solution == {"a", "c"}
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, 2)
 
 

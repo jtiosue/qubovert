@@ -56,7 +56,7 @@ class Problem(Conversions):
 
         Parameters
         ---------
-        Defined in child classes.
+        args and kwargs : Defined in child classes.
 
         Return
         -------

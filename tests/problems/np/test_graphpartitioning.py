@@ -59,13 +59,15 @@ def test_graphpartitioning_qubo_solve():
 
     assert solution in solutions
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, 1)
 
     e, sol = solve_qubo_bruteforce(problem_weighted.to_qubo())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted
-    assert problem.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(sol)
     assert allclose(e, 1)
 
 
@@ -88,13 +90,15 @@ def test_graphpartitioning_ising_solve():
 
     assert solution in solutions
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, 1)
 
     e, sol = solve_ising_bruteforce(problem_weighted.to_ising())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted
-    assert problem.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(sol)
     assert allclose(e, 1)
 
 

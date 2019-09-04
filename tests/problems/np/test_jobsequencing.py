@@ -64,6 +64,7 @@ def test_jobsequencing_qubo_logtrick_solve():
     e, sol = solve_qubo_bruteforce(Q_log)
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution in solutions
     assert allclose(e, obj_val)
 
@@ -73,6 +74,7 @@ def test_jobsequencing_qubo_solve():
     e, sol = solve_qubo_bruteforce(Q)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution in solutions
     assert allclose(e, obj_val)
 
@@ -102,6 +104,7 @@ def test_jobsequencing_ising_logtrick_solve():
     e, sol = solve_ising_bruteforce(L_log)
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution in solutions
     assert allclose(e, obj_val)
 
@@ -111,6 +114,7 @@ def test_jobsequencing_ising_solve():
     e, sol = solve_ising_bruteforce(L)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution in solutions
     assert allclose(e, obj_val)
 

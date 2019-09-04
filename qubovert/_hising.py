@@ -133,8 +133,9 @@ class HIsing(BO, HIsingMatrix):
 
         Parameters
         ----------
-        args and kwargs define a dictionary. The dictionary will be initialized
-        to follow all the convensions of the class.
+        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+            The dictionary will be initialized to follow all the convensions of
+            the class.
 
         Examples
         -------

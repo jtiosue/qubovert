@@ -53,6 +53,7 @@ def test_setcover_qubo_logtrick_solve():
     e, sol = solve_qubo_bruteforce(problem_log.to_qubo())
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
@@ -62,6 +63,7 @@ def test_setcover_qubo_solve():
     e, sol = solve_qubo_bruteforce(problem.to_qubo())
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
@@ -91,6 +93,7 @@ def test_weighted_setcover():
     e, sol = solve_qubo_bruteforce(problem_weighted.to_qubo())
     solution = problem_weighted.convert_solution(sol)
     assert problem_weighted.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, 1.1)
 
@@ -102,6 +105,7 @@ def test_setcover_ising_logtrick_solve():
     e, sol = solve_ising_bruteforce(problem_log.to_ising())
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
@@ -111,6 +115,7 @@ def test_setcover_ising_solve():
     e, sol = solve_ising_bruteforce(problem.to_ising())
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 

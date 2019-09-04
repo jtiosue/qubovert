@@ -139,8 +139,9 @@ class PUBOMatrix(DictArithmetic):
         or ``qubovert.utils.DictArithmetic`` for details on the inputs.
 
         Parameters
-        ---------
-        Defined in child classes or in ``qubovert.utils.DictArithmetic``.
+        ----------
+        args and kwargs : parameters.
+            Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """
         self._degree, self._vars, self._num_binary_variables = 0, set(), 0

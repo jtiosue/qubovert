@@ -57,6 +57,7 @@ def test_numberpartitioning_qubo_solve():
 
     assert solution in solutions_withsoln
     assert problem_withsoln.is_solution_valid(solution)
+    assert problem_withsoln.is_solution_valid(sol)
     assert allclose(e, 0)
 
     e, sol = solve_qubo_bruteforce(problem_withoutsoln.to_qubo())
@@ -64,6 +65,7 @@ def test_numberpartitioning_qubo_solve():
 
     assert solution in solutions_withoutsoln
     assert not problem_withoutsoln.is_solution_valid(solution)
+    assert not problem_withoutsoln.is_solution_valid(sol)
     assert e != 0
 
 
@@ -93,6 +95,7 @@ def test_numberpartitioning_ising_solve():
 
     assert solution in solutions_withsoln
     assert problem_withsoln.is_solution_valid(solution)
+    assert problem_withsoln.is_solution_valid(sol)
     assert allclose(e, 0)
 
     e, sol = solve_ising_bruteforce(problem_withoutsoln.to_ising())
@@ -100,6 +103,7 @@ def test_numberpartitioning_ising_solve():
 
     assert solution in solutions_withoutsoln
     assert not problem_withoutsoln.is_solution_valid(solution)
+    assert not problem_withoutsoln.is_solution_valid(sol)
     assert e != 0
 
 

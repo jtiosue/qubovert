@@ -185,7 +185,8 @@ class HIsingMatrix(PUBOMatrix):
             ``qubovert.utils.solve_hising_bruteforce``.
 
         """
-        return solve_hising_bruteforce(self, all_solutions)[1]
+        return solve_hising_bruteforce(self, all_solutions,
+                                       self.is_solution_valid)[1]
 
     def value(self, x):
         r"""value.

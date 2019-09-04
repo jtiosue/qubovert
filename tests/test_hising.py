@@ -35,6 +35,7 @@ class Problem:
         sol = self.problem.convert_solution(solution)
         return all((
             self.problem.is_solution_valid(sol),
+            self.problem.is_solution_valid(solution),
             sol == self.solution,
             allclose(e, self.obj)
         ))

@@ -31,18 +31,20 @@ solution = {'c': -1, 'b': -1, 'a': -1}
 
 def test_ising_qubo_solve():
 
-    e, sol = solve_qubo_bruteforce(problem.to_qubo())
-    sol = problem.convert_solution(sol)
+    e, sols = solve_qubo_bruteforce(problem.to_qubo())
+    sol = problem.convert_solution(sols)
     assert problem.is_solution_valid(sol)
+    assert problem.is_solution_valid(sols)
     assert sol == solution
     assert allclose(e, -10)
 
 
 def test_ising_ising_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising())
-    sol = problem.convert_solution(sol)
+    e, sols = solve_ising_bruteforce(problem.to_ising())
+    sol = problem.convert_solution(sols)
     assert problem.is_solution_valid(sol)
+    assert problem.is_solution_valid(sols)
     assert sol == solution
     assert allclose(e, -10)
 

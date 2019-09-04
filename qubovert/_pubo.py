@@ -20,38 +20,13 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 
 from .utils import BO, PUBOMatrix, QUBOMatrix
 from . import QUBO
+# in PUBO._reduce_degree, we use HOBO.add_constraint_AND. But HOBO inherits
+# from PUBO, so can't say `from . import HOBO` here. Instead, just import
+# qubovert
+import qubovert
 
 
 __all__ = 'PUBO',
-
-
-def _constraint_xy_eq_z(x, y, z, p=1):
-    """_constraint_xy_eq_z.
-
-    Find the penalty dictionary enforcing ``xy = z``.
-
-    Parameters
-    ----------
-    x : hashable object.
-        Label of the ``x`` binary variable.
-    y : hashable object.
-        Label of the ``y`` binary variable.
-    z : hashable object.
-        Label of the ``z`` binary variable.
-    p : float > 0 (optional, default to 1).
-        The penalty factor, how much to penalize violations of ``xy = z``.
-
-    Returns
-    -------
-    D : dict.
-        QUBO representing the constraint ``xy = z`` weighted by ``p``.
-
-    References
-    ----------
-    https://arxiv.org/pdf/1307.8041.pdf equation 6.
-
-    """
-    return {(z,): 3 * p, (x, y): p, (x, z): -2 * p, (y, z): -2 * p}
 
 
 class PUBO(BO, PUBOMatrix):
@@ -161,8 +136,9 @@ class PUBO(BO, PUBOMatrix):
 
         Parameters
         ----------
-        args and kwargs define a dictionary. The dictionary will be initialized
-        to follow all the convensions of the class.
+        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+            The dictionary will be initialized to follow all the convensions of
+            the class.
 
         Examples
         -------
@@ -289,7 +265,7 @@ class PUBO(BO, PUBOMatrix):
                     # it before (if found is True). This is because if we use
                     # the reduction multiple times, we need to enforce it
                     # multiple times.
-                    D += _constraint_xy_eq_z(x, y, z, lam(v))
+                    D += qubovert.HOBO().add_constraint_AND(x, y, z, lam(v))
                     k = tuple(sorted(
                             tuple(i for i in k if i not in (x, y)) + (z,)
                         ))

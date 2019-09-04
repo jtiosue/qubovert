@@ -19,28 +19,10 @@ HIsings, etc.
 
 """
 
+import numpy as np
+
+
 __all__ = 'subgraph',
-
-
-def _product(args):
-    """_product.
-
-    Take the product of args.
-
-    Parameters
-    ----------
-    args : stuff
-
-    Return
-    ------
-    res : float.
-        The product of each element in args.
-
-    """
-    prod = 1
-    for a in args:
-        prod *= a
-    return prod
 
 
 def subgraph(G, nodes, connections=None):
@@ -104,7 +86,7 @@ def subgraph(G, nodes, connections=None):
             continue
         key = tuple(filter(lambda x: x in nodes, k))
         not_key = filter(lambda x: x not in nodes, k)
-        value = v * _product(connections.get(i, 0) for i in not_key)
+        value = v * np.prod([connections.get(i, 0) for i in not_key])
         value += D.get(key, 0)
         if value:
             D[key] = value

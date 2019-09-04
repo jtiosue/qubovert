@@ -120,7 +120,9 @@ class DictArithmetic(dict):
 
         Parameters
         ---------
-        *args and **kwargs : see the docstring for dict.
+        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+            The dictionary will be initialized to follow all the convensions of
+            the class.
 
         """
         super().__init__()

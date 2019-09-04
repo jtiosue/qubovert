@@ -47,6 +47,7 @@ def test_AlternatingSectorsChain_qubo_solve():
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, -66)
 
     # not pbc
@@ -56,6 +57,7 @@ def test_AlternatingSectorsChain_qubo_solve():
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, -65)
 
 
@@ -78,6 +80,7 @@ def test_AlternatingSectorsChain_ising_solve():
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, -66)
 
     # not pbc
@@ -87,6 +90,7 @@ def test_AlternatingSectorsChain_ising_solve():
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert allclose(e, -65)
 
 

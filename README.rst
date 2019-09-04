@@ -87,9 +87,51 @@ Then you can use it in Python with
 
 Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
 ---------------------------------------------------------------
-See the docstrings for ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
+See the docstrings for ``qubovert.HOBO``, ``qubovert.HOIO``, ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
 
-Coming soon, ``qubovert.HOBO`` and ``qubovert.HOIO``.
+See the following HOBO example.
+
+.. code:: python
+
+    from qubovert import HOBO
+    from any_module import qubo_solver
+    # or from qubovert.utils import solve_qubo_bruteforce as qubo_solver
+
+    H = HOBO()
+    H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
+    print(H)  # {('a', 1, 2): -4, (1, 2): 3, (): 1}
+    H -= 1
+    print(H) # {('a', 1, 2): -4, (1, 2): 3}
+
+    H = HOBO()
+    H.add_constraint_eq_zero(
+            {(0, 1): 1}
+        ).add_constraint_eq_zero(
+            {(1, 2): 1, (): -1}
+        )
+    print(H)  # {(0, 1): 1, (1, 2): -1, (): 1}
+
+    H = HOBO().add_constraint_AND('a', 'b', 'c')
+    print(H)  # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
+
+    H = HOBO()
+    # AND variables a and b, and variables b and c
+    H.AND('a', 'b').AND('b', 'c')
+
+    # OR variables b and c
+    H.OR('b', 'c')
+
+    # (a AND b) OR (c AND d)
+    H.OR(['a', 'b'], ['c', 'd'])
+
+    print(H)  # {('b', 'a'): -2, (): 4, ('b',): -1, ('c',): -1, ('c', 'd'): -1, ('c', 'd', 'b', 'a'): 1}
+    Q = H.to_qubo()
+    print(Q)  # {(): 4, (0,): -1, (2,): -1, (2, 3): 1, (4,): 6, (0, 4): -4, (1, 4): -4, (5,): 6, (2, 5): -4, (3, 5): -4, (4, 5): 1}
+    obj_value, sol = qubo_solver(Q)
+    print(sol) # {0: 1, 1: 1, 2: 1, 3: 0, 4: 1, 5: 0}
+    solution = H.convert_solution(sol)
+    print(solution) # {'b': 1, 'a': 1, 'c': 1, 'd': 0}
+
 
 See the following PUBO example.
 
@@ -118,12 +160,7 @@ See the following PUBO example.
 Convert common problems to QUBO form.
 -------------------------------------
 
-So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. I am hoping to have a lot of participation so that we can compile all these problems!
-
-To participate, fork the repository, add your contributions, and submit a pull request. Add tests for any functionality that you add. To ensure that your build passes, run ``make install``, ``make test``, and ``make clean``. When you push changes, Travis-CI will automatically check to see if all the tests pass. Note that all problems should be derived from the ``qubovert.utils.Problem`` class! Make sure all your docstrings follow the Numpydoc standard format.
-
-
-Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
+So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 
 
 See the following Set Cover example. All other problems can be used in a similar way.
@@ -184,13 +221,7 @@ To see problem specifics, run
 I have very descriptive doc strings that should explain everything you need to know to use each problem class.
 
 
-Technical details on the conversions
-------------------------------------
-For the log trick he mentions, we usually need a constraint like ``sum(x) >= 1``. In order to enforce this constraint, we add a penalty to the QUBO of the form ``1 - sum(x) + sum(x[i] x[j] for i in range(len(x)) for j in range(i+1, len(x)))`` (the idea comes from [Glover]_).
-
-
 References
 ----------
 
 .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in Physics, 2:5, 2014.
-.. [Glover] Fred Glover, Gary Kochenberger, and Yu Du. A tutorial on formulating and using qubo models. arXiv:1811.11538v5, 2019.
