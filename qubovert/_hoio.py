@@ -18,7 +18,7 @@ Contains the HOIO class. See ``help(qubovert.HOIO)``.
 
 """
 
-from . import HIsing
+from . import HIsing, HOBO
 from .utils import hising_value
 
 
@@ -100,7 +100,7 @@ class HOIO(HIsing):
         ----------
         args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
-            the class.
+            the class. Alternatively, ``args[0]`` can be a HOIO.
 
         Examples
         -------
@@ -119,9 +119,30 @@ class HOIO(HIsing):
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        self._ancilla = 0
-        self._constraints = {"eq": [], "lt": [], "le": [], "gt": [], "ge": []}
         super().__init__(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], HOIO):
+            self._constraints = args[0].constraints
+            self._ancilla = args[0].num_ancillas
+        else:
+            self._ancilla, self._constraints = 0, {}
+
+    def update(self, *args, **kwargs):
+        """update.
+
+        Update the HOIO but following all the conventions of this class.
+
+        Parameters
+        ----------
+        *args and **kwargs : defines a dictionary or HOIO.
+            Ie ``d = dict(*args, **kwargs)``.
+            Each element in d will be added in place to this instance following
+            all the required convensions.
+
+        """
+        super().update(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], HOIO):
+            for k, v in args[0]._constraints:
+                self._constraints.setdefault(k, []).extend(v)
 
     @property
     def constraints(self):
@@ -177,7 +198,7 @@ class HOIO(HIsing):
         Return
         -------
         res : dict.
-            Maps binary variable labels to their HOIO solutions values {0, 1}.
+            Maps binary variable labels to their HOIO solutions values {-1, 1}.
 
         """
         sol = super().convert_solution(solution)
@@ -206,24 +227,47 @@ class HOIO(HIsing):
             solution = self.convert_solution(solution)
 
         if any(hising_value(solution, v) != 0
-               for v in self._constraints["eq"]):
+               for v in self._constraints.get("eq", [])):
             return False
 
         if any(hising_value(solution, v) >= 0
-               for v in self._constraints["lt"]):
+               for v in self._constraints.get("lt", [])):
             return False
 
-        if any(hising_value(solution, v) > 0 for v in self._constraints["le"]):
+        if any(hising_value(solution, v) > 0
+               for v in self._constraints.get("le", [])):
             return False
 
         if any(hising_value(solution, v) <= 0
-               for v in self._constraints["gt"]):
+               for v in self._constraints.get("gt", [])):
             return False
 
-        if any(hising_value(solution, v) < 0 for v in self._constraints["ge"]):
+        if any(hising_value(solution, v) < 0
+               for v in self._constraints.get("ge", [])):
             return False
 
         return True
+
+    # override
+    def __round__(self, ndigits=None):
+        """round.
+
+        Round values of the HOIO object.
+
+        Parameters
+        ----------
+        ndigits : int.
+            Number of decimal digits to round to.
+
+        Returns
+        -------
+        res : HOIO object.
+            Copy of self but with each value rounded to ``ndigits`` decimal
+            digits. Each value has a type according to the docstring
+            specifications of ``round``, see ``help(round)``.
+
+        """
+        return HOBO.__round__(self, ndigits)
 
     def add_constraint_eq_zero(self, H, lam=1):
         r"""add_constraint_eq_zero.
@@ -247,12 +291,12 @@ class HOIO(HIsing):
 
         Examples
         --------
-        The following enforces that :math:`\sum_{i=0}^{3} z_i == 0`.
+        The following enforces that :math:`z_0 + z_1 - 2 == 0`.
 
         >>> H = HOIO()
-        >>> H.add_constraint_eq_zero({(0, 1, 2, 3): 1, (0, 1): 2})
+        >>> H.add_constraint_eq_zero({(0,): 1, (1,): 1, (): -2})
         >>> H
-        {(): 2, (2, 3): 2}
+        {(): 6, (0, 1): 2, (0,): -4, (1,): -4}
 
         The following enforces that :math:`\sum_{i=1}^{3} i z_i z_{i+1} == 0`.
 
@@ -275,7 +319,7 @@ class HOIO(HIsing):
         """
         H = HIsing(H)
         self += lam * H ** 2
-        self._constraints["eq"].append(H)
+        self._constraints.setdefault("eq", []).append(H)
         return self
 
     def add_constraint_lt_zero(self, H, lam=1):
@@ -309,7 +353,7 @@ class HOIO(HIsing):
         """
         H = HIsing(H)
         raise NotImplementedError("Coming soon!")
-        self._constraints["lt"].append(H)
+        self._constraints.setdefault("lt", []).append(H)
         return self
 
     def add_constraint_le_zero(self, H, lam=1):
@@ -343,7 +387,7 @@ class HOIO(HIsing):
         """
         H = HIsing(H)
         raise NotImplementedError("Coming soon!")
-        self._constraints["le"].append(H)
+        self._constraints.setdefault("le", []).append(H)
         return self
 
     def add_constraint_gt_zero(self, H, lam=1):
@@ -377,7 +421,7 @@ class HOIO(HIsing):
         """
         H = HIsing(H)
         raise NotImplementedError("Coming soon!")
-        self._constraints["gt"].append(H)
+        self._constraints.setdefault("gt", []).append(H)
         return self
 
     def add_constraint_ge_zero(self, H, lam=1):
@@ -411,5 +455,5 @@ class HOIO(HIsing):
         """
         H = HIsing(H)
         raise NotImplementedError("Coming soon!")
-        self._constraints["ge"].append(H)
+        self._constraints.setdefault("ge", []).append(H)
         return self

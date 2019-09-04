@@ -371,4 +371,19 @@ def test_hobo_logic():
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
 
+    H = HOBO().NAND('a', 'b').NOT('a').OR(
+        'a', 'b').add_constraint_ONE('a', 'c')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
+
+    H = HOBO().XOR('a', 'b').add_constraint_NOR(
+        'a', 'c', 'b').ONE('c').add_constraint_ONE('a', 'c')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
+
+    H = HOBO().add_constraint_AND(
+        'a', 'b', 'c').add_constraint_NXOR('a', 'b', 'c').ONE('c')
+    sols = H.solve_bruteforce(True)
+    assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}
+
     # TODO: more logic tests

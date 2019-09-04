@@ -358,7 +358,7 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
         mapping = dict(enumerate(var))
 
     best = None, {}
-    all_sols = {None: []}
+    all_sols = {None: [{}]}
     convert = decimal_to_spin if spin else decimal_to_binary
 
     for n in range(1 << N):

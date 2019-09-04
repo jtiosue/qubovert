@@ -165,7 +165,7 @@ class HOBO(PUBO):
         ----------
         args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
-            the class.
+            the class. Alternatively, ``args[0]`` can be a HOBO object.
 
         Examples
         -------
@@ -184,9 +184,30 @@ class HOBO(PUBO):
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        self._ancilla = 0
-        self._constraints = {"eq": [], "lt": [], "le": [], "gt": [], "ge": []}
         super().__init__(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], HOBO):
+            self._constraints = args[0].constraints
+            self._ancilla = args[0].num_ancillas
+        else:
+            self._ancilla, self._constraints = 0, {}
+
+    def update(self, *args, **kwargs):
+        """update.
+
+        Update the HOBO but following all the conventions of this class.
+
+        Parameters
+        ----------
+        *args and **kwargs : defines a dictionary or HOBO.
+            Ie ``d = dict(*args, **kwargs)``.
+            Each element in d will be added in place to this instance following
+            all the required convensions.
+
+        """
+        super().update(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], HOBO):
+            for k, v in args[0]._constraints:
+                self._constraints.setdefault(k, []).extend(v)
 
     @property
     def constraints(self):
@@ -197,8 +218,9 @@ class HOBO(PUBO):
         Return
         ------
         res : dict.
-            The keys of ``res`` are ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, and
-            ``'ge'``. The values are lists of ``qubovert.PUBO`` objects. For a
+            The keys of ``res`` are some or all of
+            ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, and ``'ge'``.
+            The values are lists of ``qubovert.PUBO`` objects. For a
             given key, value pair ``k, v``, the ``v[i]`` element represents
             the PUBO ``v[i]`` being == 0 if ``k == 'eq'``,
             < 0 if ``k == 'lt'``, <= 0 if ``k == 'le'``,
@@ -270,22 +292,52 @@ class HOBO(PUBO):
         if not isinstance(solution, dict) or solution.keys() != self._vars:
             solution = self.convert_solution(solution)
 
-        if any(pubo_value(solution, v) != 0 for v in self._constraints["eq"]):
+        if any(pubo_value(solution, v) != 0
+               for v in self._constraints.get('eq', [])):
             return False
 
-        if any(pubo_value(solution, v) >= 0 for v in self._constraints["lt"]):
+        if any(pubo_value(solution, v) >= 0
+               for v in self._constraints.get("lt", [])):
             return False
 
-        if any(pubo_value(solution, v) > 0 for v in self._constraints["le"]):
+        if any(pubo_value(solution, v) > 0
+               for v in self._constraints.get("le", [])):
             return False
 
-        if any(pubo_value(solution, v) <= 0 for v in self._constraints["gt"]):
+        if any(pubo_value(solution, v) <= 0
+               for v in self._constraints.get("gt", [])):
             return False
 
-        if any(pubo_value(solution, v) < 0 for v in self._constraints["ge"]):
+        if any(pubo_value(solution, v) < 0
+               for v in self._constraints.get("ge", [])):
             return False
 
         return True
+
+    # override
+    def __round__(self, ndigits=None):
+        """round.
+
+        Round values of the HOBO object.
+
+        Parameters
+        ----------
+        ndigits : int.
+            Number of decimal digits to round to.
+
+        Returns
+        -------
+        res : HOBO object.
+            Copy of self but with each value rounded to ``ndigits`` decimal
+            digits. Each value has a type according to the docstring
+            specifications of ``round``, see ``help(round)``.
+
+        """
+        d = super.__round__(ndigits)
+        d._constraints = self.constraints
+        return d
+
+    # constraints/logic
 
     def add_constraint_eq_zero(self, P, lam=1):
         r"""add_constraint_eq_zero.
@@ -309,7 +361,7 @@ class HOBO(PUBO):
 
         Examples
         --------
-        The following enforces that :math:`\sum_{i=0}^{3} x_i == 0`.
+        The following enforces that :math:`\prod_{i=0}^{3} x_i == 0`.
 
         >>> H = HOBO()
         >>> H.add_constraint_eq_zero({(0, 1, 2, 3): 1})
@@ -338,7 +390,7 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         self += lam * P ** 2
-        self._constraints["eq"].append(P)
+        self._constraints.setdefault("eq", []).append(P)
         return self
 
     def add_constraint_lt_zero(self, P, lam=1):
@@ -372,7 +424,7 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         raise NotImplementedError("Coming soon!")
-        self._constraints["lt"].append(P)
+        self._constraints.setdefault("lt", []).append(P)
         return self
 
     def add_constraint_le_zero(self, P, lam=1):
@@ -406,7 +458,7 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         raise NotImplementedError("Coming soon!")
-        self._constraints["le"].append(P)
+        self._constraints.setdefault("le", []).append(P)
         return self
 
     def add_constraint_gt_zero(self, P, lam=1):
@@ -440,7 +492,7 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         raise NotImplementedError("Coming soon!")
-        self._constraints["gt"].append(P)
+        self._constraints.setdefault("gt", []).append(P)
         return self
 
     def add_constraint_ge_zero(self, P, lam=1):
@@ -474,7 +526,7 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         raise NotImplementedError("Coming soon!")
-        self._constraints["ge"].append(P)
+        self._constraints.setdefault("ge", []).append(P)
         return self
 
     def AND(self, a, b, lam=1):
@@ -554,7 +606,7 @@ class HOBO(PUBO):
     def XOR(self, a, b, lam=1):
         r"""XOR.
 
-        Add a penalty to the HOBO that enforces that :math:`a \lxor b` with
+        Add a penalty to the HOBO that enforces that :math:`a \oplus b` with
         a penalty factor ``lam``.
 
         Parameters
@@ -687,7 +739,7 @@ class HOBO(PUBO):
     def NXOR(self, a, b, lam=1):
         r"""NXOR.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot(a \lxor b)`
+        Add a penalty to the HOBO that enforces that :math:`\lnot(a \oplus b)`
         with a penalty factor ``lam``.
 
         Parameters
@@ -797,7 +849,7 @@ class HOBO(PUBO):
         a, b, c = _create_tuple(a), _create_tuple(b), _create_tuple(c)
         P = PUBO({c: 3, a+b: 1, a+c: -2, b+c: -2})
         self += lam * P
-        self._constraints["eq"].append(P)
+        self._constraints.setdefault("eq", []).append(P)
         return self
 
     def add_constraint_OR(self, a, b, c, lam=1):
@@ -840,13 +892,13 @@ class HOBO(PUBO):
         a, b, c = _create_tuple(a), _create_tuple(b), _create_tuple(c)
         P = PUBO({a+b: 1, a+c: -2, b+c: -2, a: 1, b: 1, c: 1})
         self += lam * P
-        self._constraints["eq"].append(P)
+        self._constraints.setdefault("eq", []).append(P)
         return self
 
     def add_constraint_XOR(self, a, b, c, lam=1):
         r"""add_constraint_XOR.
 
-        Add a penalty to the HOBO that enforces that :math:`a \lxor b == c`
+        Add a penalty to the HOBO that enforces that :math:`a \oplus b == c`
         with a penalty factor ``lam``.
 
         Parameters
@@ -917,14 +969,14 @@ class HOBO(PUBO):
         >>> H.add_constraint_ONE(['a', 'b'], ['c', 'd'])
 
         """
-        a, b = {_create_tuple(a): 1}, {_create_tuple(b): 1}
+        a, b = PUBO({_create_tuple(a): 1}), PUBO({_create_tuple(b): 1})
         return self.add_constraint_eq_zero(a - b, lam)
 
     def add_constraint_NAND(self, a, b, c, lam=1):
         r"""add_constraint_NAND.
 
         Add a penalty to the HOBO that enforces that
-        :math:`\not(a \land b) == c` with a penalty factor ``lam``.
+        :math:`\lnot (a \land b) == c` with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -966,7 +1018,7 @@ class HOBO(PUBO):
         r"""add_constraint_NOR.
 
         Add a penalty to the HOBO that enforces that
-        :math:`\lnot(a \lor b) == c` with a penalty factor ``lam``.
+        :math:`\lnot (a \lor b) == c` with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -1008,7 +1060,7 @@ class HOBO(PUBO):
         r"""add_constraint_NXOR.
 
         Add a penalty to the HOBO that enforces that
-        :math:`\lnot(a \lxor b) == c` with a penalty factor ``lam``.
+        :math:`\lnot(a \oplus b) == c` with a penalty factor ``lam``.
 
         Parameters
         ----------
