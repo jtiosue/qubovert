@@ -186,8 +186,9 @@ class HOBO(PUBO):
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        super().__init__(*args, **kwargs)
-        if len(args) == 1 and isinstance(args[0], HOBO):
+        # use self.__class__ here because HOIO uses this code as well.
+        super(self.__class__, self).__init__(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], self.__class__):
             self._constraints = args[0].constraints
             self._ancilla = args[0].num_ancillas
         else:
@@ -206,8 +207,9 @@ class HOBO(PUBO):
             all the required convensions.
 
         """
-        super().update(*args, **kwargs)
-        if len(args) == 1 and isinstance(args[0], HOBO):
+        # use self.__class__ here because HOIO uses this code as well.
+        super(self.__class__, self).update(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], self.__class__):
             for k, v in args[0]._constraints:
                 self._constraints.setdefault(k, []).extend(v)
 
@@ -269,7 +271,8 @@ class HOBO(PUBO):
             Maps binary variable labels to their HOBO solutions values {0, 1}.
 
         """
-        sol = super().convert_solution(solution)
+        # use self.__class__ here because HOIO uses this code as well.
+        sol = super(self.__class__, self).convert_solution(solution)
         for a in range(self._ancilla):
             sol.pop("_a%d" % a, 0)
         return sol
@@ -335,8 +338,35 @@ class HOBO(PUBO):
             specifications of ``round``, see ``help(round)``.
 
         """
-        d = super.__round__(ndigits)
+        # use self.__class__ here because HOIO uses this code as well.
+        d = super(self.__class__, self).__round__(ndigits)
         d._constraints = self.constraints
+        return d
+
+    # override
+    def subs(self, *args, **kwargs):
+        """subs.
+
+        Replace any ``sympy`` symbols that are used in the dict with values.
+        Please see ``help(sympy.Symbol.subs)`` for more info.
+
+        Parameters
+        ----------
+        arguments : substitutions.
+            Same parameters as are inputted into ``sympy.Symbol.subs``.
+
+        Returns
+        -------
+        res : HOBO object.
+            Same as ``self`` but with all the symbols replaced with values.
+
+        """
+        # use self.__class__ here because HOIO uses this code as well.
+        d = super(self.__class__, self).subs(*args, **kwargs)
+        d._constraints = {
+            k: [P.subs(*args, **kwargs) for P in v]
+            for k, v in self._constraints.items()
+        }
         return d
 
     # constraints/logic

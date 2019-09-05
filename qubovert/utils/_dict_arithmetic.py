@@ -646,5 +646,35 @@ class DictArithmetic(dict):
         """
         d = self.__class__()
         for k, v in self.items():
-            d[k] = round(v, ndigits)
+            try:
+                d[k] = round(v, ndigits)
+            except TypeError:  # symbols don't have round methods
+                pass
+        return d
+
+    def subs(self, *args, **kwargs):
+        """subs.
+
+        Replace any ``sympy`` symbols that are used in the dict with values.
+        Please see ``help(sympy.Symbol.subs)`` for more info.
+
+        Parameters
+        ----------
+        arguments : substitutions.
+            Same parameters as are inputted into ``sympy.Symbol.subs``.
+
+        Returns
+        -------
+        res : DictArithmetic object.
+            Same as ``self`` but with all the symbols replaced with values.
+
+        """
+        d = self.__class__()
+        for k, v in self.items():
+            try:
+                val = v.subs(*args, **kwargs)
+            except AttributeError:
+                val = v
+            d[k] = val
+
         return d

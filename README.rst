@@ -157,6 +157,52 @@ See the following PUBO example.
     print((obj, solution))  # will print (2, {'a': 1, 'b': 1, 'c': 1, 'd': 0})
 
 
+Symbols can also be used, for example:
+
+.. code:: python
+
+    from qubovert import HOIO
+    from sympy import Symbol
+
+    a, b = Symbol('a'), Symbol('b')
+
+    # enforce that z_0 + b z_1 == 0 with penalty a
+    H = HOIO().add_constraint_eq_zero({(0,): 1, (1,): b}, lam=a)
+    print(H)  # will print {(): a*(b**2 + 1), (0, 1): 2*a*b}
+    H_subs = H.subs({b: 1})
+    print(H_subs)  # will print {(): 2*a, (0, 1): 2*a}
+    H_subs_p = H.subs({a: 2, b: 1})
+    print(H_subs_p)  # will print {(): 4, (0, 1): 4}
+
+
+The convension used is that ``()`` elements of every dictionary corresponds to offsets. Note that some QUBO solvers accept QUBOs where each key is a two element tuple (since for a QUBO ``{(0, 0): 1}`` is the same as ``{(0,): 1}``). To get this standard form from our ``QUBOMatrix`` object, just access the property ``Q``. Similar for the ``IsingMatrix``. For example:
+
+.. code:: python
+
+    from qubovert.utils import QUBOMatrix
+    Q = QUBOMatrix()
+    Q += 3
+    Q[(0,)] -= 1
+    Q[(0, 1)] += 2
+    Q[(1, 1)] -= 3
+    print(Q)  # will print {(): 3, (0,): -1, (0, 1): 2, (1,): -3}
+    print(Q.Q)  # will print {(0, 0): -1, (0, 1): 2, (1, 1): -3}
+    print(Q.offset)  # will print 3
+
+.. code:: python
+
+    from qubovert.utils import IsingMatrix
+    L = IsingMatrix()
+    L += 3
+    L[(0, 1, 1)] -= 1
+    L[(0, 1)] += 2
+    L[(1, 1)] -= 3
+    print(L)  # will print {(0,): -1, (0, 1): 2}
+    print(L.h)  # will print {0: -1}
+    print(L.J)  # will print {(0, 1): 2}
+    print(L.offset)  # will print 0
+
+
 Convert common problems to QUBO form.
 -------------------------------------
 

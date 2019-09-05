@@ -17,6 +17,7 @@ Contains tests for the IsingMatrix object.
 """
 
 from qubovert.utils import IsingMatrix
+from sympy import Symbol
 from numpy import allclose
 from numpy.testing import assert_raises
 
@@ -206,6 +207,29 @@ def test_ising_multiplication():
         assert False
     except KeyError:
         pass
+
+
+def test_round():
+
+    d = IsingMatrix({(0,): 3.456, (1,): -1.53456})
+
+    assert round(d) == {(0,): 3, (1,): -2}
+    assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
+    assert round(d, 2) == {(0,): 3.46, (1,): -1.53}
+    assert round(d, 3) == {(0,): 3.456, (1,): -1.535}
+
+
+def test_symbols():
+
+    a, b = Symbol('a'), Symbol('b')
+    d = IsingMatrix()
+    d[(0,)] -= a
+    d[(0, 1)] += 2
+    d[(1,)] += b
+    assert d == {(0,): -a, (0, 1): 2, (1,): b}
+    assert d.subs(a, 2) == {(0,): -2, (0, 1): 2, (1,): b}
+    assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
+    assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
 
 
 def test_isingmatrix_solve_bruteforce():

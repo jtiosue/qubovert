@@ -120,12 +120,7 @@ class HOIO(HIsing):
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        super().__init__(*args, **kwargs)
-        if len(args) == 1 and isinstance(args[0], HOIO):
-            self._constraints = args[0].constraints
-            self._ancilla = args[0].num_ancillas
-        else:
-            self._ancilla, self._constraints = 0, {}
+        HOBO.__init__(self, *args, **kwargs)
 
     def update(self, *args, **kwargs):
         """update.
@@ -140,10 +135,7 @@ class HOIO(HIsing):
             all the required convensions.
 
         """
-        super().update(*args, **kwargs)
-        if len(args) == 1 and isinstance(args[0], HOIO):
-            for k, v in args[0]._constraints:
-                self._constraints.setdefault(k, []).extend(v)
+        HOBO.update(self, *args, **kwargs)
 
     @property
     def constraints(self):
@@ -202,10 +194,7 @@ class HOIO(HIsing):
             Maps binary variable labels to their HOIO solutions values {-1, 1}.
 
         """
-        sol = super().convert_solution(solution)
-        for a in range(self._ancilla):
-            sol.pop("_a%d" % a, 0)
-        return sol
+        return HOBO.convert_solution(self, solution)
 
     def is_solution_valid(self, solution):
         """is_solution_valid.
@@ -269,6 +258,26 @@ class HOIO(HIsing):
 
         """
         return HOBO.__round__(self, ndigits)
+
+    # override
+    def subs(self, *args, **kwargs):
+        """subs.
+
+        Replace any ``sympy`` symbols that are used in the dict with values.
+        Please see ``help(sympy.Symbol.subs)`` for more info.
+
+        Parameters
+        ----------
+        arguments : substitutions.
+            Same parameters as are inputted into ``sympy.Symbol.subs``.
+
+        Returns
+        -------
+        res : a HOIO object.
+            Same as ``self`` but with all the symbols replaced with values.
+
+        """
+        return HOBO.subs(self, *args, **kwargs)
 
     def add_constraint_eq_zero(self, H, lam=1):
         r"""add_constraint_eq_zero.

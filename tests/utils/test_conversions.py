@@ -22,6 +22,7 @@ from qubovert.utils import (
     qubo_to_matrix, matrix_to_qubo
 )
 from qubovert import QUBO, Ising, PUBO, HIsing
+from sympy import Symbol
 import numpy as np
 
 
@@ -41,7 +42,7 @@ def test_ising_to_qubo_to_ising():
     assert ising == qubo_to_ising(ising_to_qubo(ising))
 
     ising = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2}
-    # need to reformatt ising so it is sorted with the same hash
+    # need to reformat ising so it is sorted with the same hash
     assert Ising(ising) == qubo_to_ising(ising_to_qubo(ising))
 
 
@@ -134,3 +135,14 @@ def test_qubo_to_matrix():
     matrix = [[-3, .5], [.5, 2]]
     assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
     assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))
+
+
+def test_symbols():
+
+    a, b = Symbol('a'), Symbol('b')
+    ising = {(0,): a, (0, 1): 1, (1,): -a, (1, 2): 1, (): -2*b, (2,): a}
+    assert ising == qubo_to_ising(ising_to_qubo(ising))
+
+    a, b = Symbol('a'), Symbol('b')
+    qubo = {(0,): a, (0, 1): 1, (1,): -a, (1, 2): 1, (): -2*b, (2,): a}
+    assert qubo == ising_to_qubo(qubo_to_ising(qubo))

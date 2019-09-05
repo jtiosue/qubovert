@@ -17,6 +17,7 @@ Contains tests for the DictArithmetic class.
 """
 
 from qubovert.utils import DictArithmetic
+from sympy import Symbol
 from numpy.testing import assert_raises
 
 
@@ -173,3 +174,16 @@ def test_dictarithmetic_round():
     assert round(d, 1) == dict(a=3.5, b=-1.5)
     assert round(d, 2) == dict(a=3.46, b=-1.53)
     assert round(d, 3) == dict(a=3.456, b=-1.535)
+
+
+def test_symbols():
+
+    a, b = Symbol('a'), Symbol('b')
+    d = DictArithmetic()
+    d[(0,)] -= a
+    d[(0, 1)] += 2
+    d[(1,)] += b
+    assert d == {(0,): -a, (0, 1): 2, (1,): b}
+    assert d.subs(a, 2) == {(0,): -2, (0, 1): 2, (1,): b}
+    assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
+    assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
