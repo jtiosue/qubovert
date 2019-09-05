@@ -19,7 +19,6 @@ Contains the HOBO class. See ``help(qubovert.HOBO)``.
 """
 
 from . import PUBO
-from .utils import pubo_value
 
 
 __all__ = 'HOBO',
@@ -40,17 +39,14 @@ def _create_tuple(x):
 
     Parameters
     ----------
-    x : object.
+    x : object or list.
 
     Return
     ------
     res : tuple.
 
     """
-    try:
-        return tuple(x)
-    except TypeError:
-        return x,
+    return tuple(x) if isinstance(x, list) else x,
 
 
 class HOBO(PUBO):
@@ -80,10 +76,10 @@ class HOBO(PUBO):
 
     We then implement logical operations:
 
-    - AND, NAND, add_constraint_AND, add_constraint_NAND,
-    - OR, NOR, add_constraint_OR, add_constraint_NOR,
-    - XOR, NXOR, add_constraint_XOR, add_constraint_NXOR,
-    - ONE, NOT, add_constraint_ONE, add_constraint_NOT.
+    - ``AND``, ``NAND``, ``add_constraint_AND``, ``add_constraint_NAND``,
+    - ``OR``, ``NOR```, ``add_constraint_OR``, ``add_constraint_NOR``,
+    - ``XOR``, ``NXOR``, ``add_constraint_XOR``, ``add_constraint_NXOR``,
+    - ``ONE``, ``NOT``, ``add_constraint_ONE``, ``add_constraint_NOT``.
 
     See each of their docstrings for important details on their implementation.
 
@@ -297,23 +293,23 @@ class HOBO(PUBO):
         if not isinstance(solution, dict) or solution.keys() != self._vars:
             solution = self.convert_solution(solution)
 
-        if any(pubo_value(solution, v) != 0
+        if any(v.value(solution) != 0
                for v in self._constraints.get('eq', [])):
             return False
 
-        if any(pubo_value(solution, v) >= 0
+        if any(v.value(solution) >= 0
                for v in self._constraints.get("lt", [])):
             return False
 
-        if any(pubo_value(solution, v) > 0
+        if any(v.value(solution) > 0
                for v in self._constraints.get("le", [])):
             return False
 
-        if any(pubo_value(solution, v) <= 0
+        if any(v.value(solution) <= 0
                for v in self._constraints.get("gt", [])):
             return False
 
-        if any(pubo_value(solution, v) < 0
+        if any(v.value(solution) < 0
                for v in self._constraints.get("ge", [])):
             return False
 
@@ -569,9 +565,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -605,9 +601,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -643,9 +639,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -677,7 +673,7 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -710,9 +706,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -742,9 +738,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -776,9 +772,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -810,7 +806,7 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -845,11 +841,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -892,11 +888,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -935,11 +931,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -975,9 +971,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -1012,11 +1008,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -1054,11 +1050,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -1096,11 +1092,11 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
-        c : any hashable object or an iterable of hashable objects.
+        c : any hashable object or a list of hashable objects.
             The label for binary variables ``c``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
@@ -1136,9 +1132,9 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or an iterable of hashable objects.
+        a : any hashable object or a list of hashable objects.
             The label for binary variables ``a``.
-        b : any hashable object or an iterable of hashable objects.
+        b : any hashable object or a list of hashable objects.
             The label for binary variables ``b``.
         lam : float > 0 (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.

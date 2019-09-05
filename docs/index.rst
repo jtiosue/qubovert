@@ -1,11 +1,20 @@
 Welcome to qubovert's documentation!
 ====================================
 
+Indices and tables
+-----------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
 .. include:: ../README.rst
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Binary/Ising Optimization:
+   :caption: Binary/Ising Optimization
 
    BO/HOBO
    BO/HOIO
@@ -17,7 +26,7 @@ Welcome to qubovert's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Utilities:
+   :caption: Utilities
 
    utils/methods
    utils/matrices
@@ -26,23 +35,14 @@ Welcome to qubovert's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Problems:
+   :caption: Problems
 
-   problems/np
-   problems/benchmarking
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   problems/np/index
+   problems/benchmarking/index
 
 
-Copyright
-=========
+.. toctree::
+   :maxdepth: 2
+   :caption: Copyright
 
-Joseph T. Iosue, joe.iosue@yahoo.com.
-
-.. include:: ../LICENSE
+   copyright

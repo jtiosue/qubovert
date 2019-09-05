@@ -13,5 +13,8 @@ For example, you can use the ``AlternatingSectorsChain`` class with any of the f
     qubovert.problems.benchmarking.AlternatingSectorsChain(...)
 
 
-.. automodule:: qubovert.problems.benchmarking
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+
+   alternatingsectorschain

@@ -672,7 +672,7 @@ class DictArithmetic(dict):
         d = self.__class__()
         for k, v in self.items():
             try:
-                val = v.subs(*args, **kwargs)
+                val = float(v.subs(*args, **kwargs))
             except AttributeError:
                 val = v
             d[k] = val

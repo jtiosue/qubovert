@@ -34,7 +34,7 @@ QUBOVert
     :target: https://pepy.tech/project/qubovert
     :alt: pypi dist downloads
 
-Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_.
+Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see `notebooks <https://github.com/jiosue/QUBOVert/tree/master/notebook_examples>`_
 
 
 Installation
@@ -55,7 +55,7 @@ To install from source:
   pip install -e .
 
 
-Then you can use it in Python with
+Then you can use it in Python versions 3.6 and above with
 
 .. code:: python
 
@@ -99,9 +99,11 @@ See the following HOBO example.
 
     H = HOBO()
     H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
-    print(H)  # {('a', 1, 2): -4, (1, 2): 3, (): 1}
+    print(H)
+    # {('a', 1, 2): -4, (1, 2): 3, (): 1}
     H -= 1
-    print(H) # {('a', 1, 2): -4, (1, 2): 3}
+    print(H)
+    # {('a', 1, 2): -4, (1, 2): 3}
 
     H = HOBO()
     H.add_constraint_eq_zero(
@@ -109,10 +111,12 @@ See the following HOBO example.
         ).add_constraint_eq_zero(
             {(1, 2): 1, (): -1}
         )
-    print(H)  # {(0, 1): 1, (1, 2): -1, (): 1}
+    print(H)
+    # {(0, 1): 1, (1, 2): -1, (): 1}
 
     H = HOBO().add_constraint_AND('a', 'b', 'c')
-    print(H)  # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
+    print(H)
+    # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
 
     H = HOBO()
     # AND variables a and b, and variables b and c
@@ -124,13 +128,19 @@ See the following HOBO example.
     # (a AND b) OR (c AND d)
     H.OR(['a', 'b'], ['c', 'd'])
 
-    print(H)  # {('b', 'a'): -2, (): 4, ('b',): -1, ('c',): -1, ('c', 'd'): -1, ('c', 'd', 'b', 'a'): 1}
+    print(H)
+    # {('b', 'a'): -2, (): 4, ('b',): -1, ('c',): -1, ('c', 'd'): -1,
+    #  ('c', 'd', 'b', 'a'): 1}
     Q = H.to_qubo()
-    print(Q)  # {(): 4, (0,): -1, (2,): -1, (2, 3): 1, (4,): 6, (0, 4): -4, (1, 4): -4, (5,): 6, (2, 5): -4, (3, 5): -4, (4, 5): 1}
+    print(Q)
+    # {(): 4, (0,): -1, (2,): -1, (2, 3): 1, (4,): 6, (0, 4): -4,
+    #  (1, 4): -4, (5,): 6, (2, 5): -4, (3, 5): -4, (4, 5): 1}
     obj_value, sol = qubo_solver(Q)
-    print(sol) # {0: 1, 1: 1, 2: 1, 3: 0, 4: 1, 5: 0}
+    print(sol)
+    # {0: 1, 1: 1, 2: 1, 3: 0, 4: 1, 5: 0}
     solution = H.convert_solution(sol)
-    print(solution) # {'b': 1, 'a': 1, 'c': 1, 'd': 0}
+    print(solution)
+    # {'b': 1, 'a': 1, 'c': 1, 'd': 0}
 
 
 See the following PUBO example.
@@ -154,7 +164,8 @@ See the following PUBO example.
     Q = pubo.to_qubo()
     obj, sol = qubo_solver(Q)
     solution = pubo.convert_solution(sol)
-    print((obj, solution))  # will print (2, {'a': 1, 'b': 1, 'c': 1, 'd': 0})
+    print((obj, solution))
+    # (2, {'a': 1, 'b': 1, 'c': 1, 'd': 0})
 
 
 Symbols can also be used, for example:
@@ -168,11 +179,14 @@ Symbols can also be used, for example:
 
     # enforce that z_0 + b z_1 == 0 with penalty a
     H = HOIO().add_constraint_eq_zero({(0,): 1, (1,): b}, lam=a)
-    print(H)  # will print {(): a*(b**2 + 1), (0, 1): 2*a*b}
+    print(H)
+    # {(): a*(b**2 + 1), (0, 1): 2*a*b}
     H_subs = H.subs({b: 1})
-    print(H_subs)  # will print {(): 2*a, (0, 1): 2*a}
+    print(H_subs)
+    # {(): 2*a, (0, 1): 2*a}
     H_subs_p = H.subs({a: 2, b: 1})
-    print(H_subs_p)  # will print {(): 4, (0, 1): 4}
+    print(H_subs_p)
+    # {(): 4, (0, 1): 4}
 
 
 The convension used is that ``()`` elements of every dictionary corresponds to offsets. Note that some QUBO solvers accept QUBOs where each key is a two element tuple (since for a QUBO ``{(0, 0): 1}`` is the same as ``{(0,): 1}``). To get this standard form from our ``QUBOMatrix`` object, just access the property ``Q``. Similar for the ``IsingMatrix``. For example:
@@ -185,9 +199,12 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     Q[(0,)] -= 1
     Q[(0, 1)] += 2
     Q[(1, 1)] -= 3
-    print(Q)  # will print {(): 3, (0,): -1, (0, 1): 2, (1,): -3}
-    print(Q.Q)  # will print {(0, 0): -1, (0, 1): 2, (1, 1): -3}
-    print(Q.offset)  # will print 3
+    print(Q)
+    # {(): 3, (0,): -1, (0, 1): 2, (1,): -3}
+    print(Q.Q)
+    # {(0, 0): -1, (0, 1): 2, (1, 1): -3}
+    print(Q.offset)
+    # 3
 
 .. code:: python
 
@@ -197,10 +214,14 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     L[(0, 1, 1)] -= 1
     L[(0, 1)] += 2
     L[(1, 1)] -= 3
-    print(L)  # will print {(0,): -1, (0, 1): 2}
-    print(L.h)  # will print {0: -1}
-    print(L.J)  # will print {(0, 1): 2}
-    print(L.offset)  # will print 0
+    print(L)
+    # {(0,): -1, (0, 1): 2}
+    print(L.h)
+    # {0: -1}
+    print(L.J)
+    # {(0, 1): 2}
+    print(L.offset)
+    # 0
 
 
 Convert common problems to QUBO form.
@@ -228,9 +249,12 @@ See the following Set Cover example. All other problems can be used in a similar
 
     solution = problem.convert_solution(sol)
 
-    print(solution) # will print {0, 2}
-    print(problem.is_solution_valid(solution)) # will print True, since V[0] + V[2] covers all of U
-    print(obj == len(solution)) # will print True
+    print(solution)
+    # {0, 2}
+    print(problem.is_solution_valid(solution))
+    # will print True, since V[0] + V[2] covers all of U
+    print(obj == len(solution))
+    # will print True
 
 To use the Ising formulation instead:
 
@@ -251,9 +275,12 @@ To use the Ising formulation instead:
 
     solution = problem.convert_solution(sol)
 
-    print(solution) # will print {0, 2}
-    print(problem.is_solution_valid(solution)) # will print True, since V[0] + V[2] covers all of U
-    print(obj == len(solution)) # will print True
+    print(solution)
+    # {0, 2}
+    print(problem.is_solution_valid(solution))
+    # will print True, since V[0] + V[2] covers all of U
+    print(obj == len(solution))
+    # will print True
 
 
 To see problem specifics, run

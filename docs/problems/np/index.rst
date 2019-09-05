@@ -14,5 +14,12 @@ For example, you can use the ``SetCover`` class with any of the following.
     qubovert.problems.np.covering.SetCover(...)
 
 
-.. automodule:: qubovert.problems.np
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+
+   setcover
+   vertexcover
+   jobsequencing
+   graphpartitioning
+   numberpartitioning

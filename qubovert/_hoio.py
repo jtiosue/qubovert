@@ -19,7 +19,6 @@ Contains the HOIO class. See ``help(qubovert.HOIO)``.
 """
 
 from . import HIsing, HOBO
-from .utils import hising_value
 
 
 __all__ = 'HOIO',
@@ -213,30 +212,7 @@ class HOIO(HIsing):
             Whether or not the given solution satisfies the constraints.
 
         """
-        if not isinstance(solution, dict) or solution.keys() != self._vars:
-            solution = self.convert_solution(solution)
-
-        if any(hising_value(solution, v) != 0
-               for v in self._constraints.get("eq", [])):
-            return False
-
-        if any(hising_value(solution, v) >= 0
-               for v in self._constraints.get("lt", [])):
-            return False
-
-        if any(hising_value(solution, v) > 0
-               for v in self._constraints.get("le", [])):
-            return False
-
-        if any(hising_value(solution, v) <= 0
-               for v in self._constraints.get("gt", [])):
-            return False
-
-        if any(hising_value(solution, v) < 0
-               for v in self._constraints.get("ge", [])):
-            return False
-
-        return True
+        return HOBO.is_solution_valid(self, solution)
 
     # override
     def __round__(self, ndigits=None):
