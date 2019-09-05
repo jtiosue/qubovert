@@ -333,7 +333,7 @@ def test_hobo_eq_constraint():
     ))
 
     problem = HOIO({('a',): -1, ('b',): -2, ('a', 'b'): -10, (): -2})
-    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1}, 10)
+    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1}, lam=10)
     solution = {'b': 1, 'a': -1}
     obj = 7
 

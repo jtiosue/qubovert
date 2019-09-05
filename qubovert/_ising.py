@@ -116,7 +116,7 @@ class Ising(BO, IsingMatrix):
 
         Parameters
         ----------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        argguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class.
 
@@ -236,4 +236,4 @@ class Ising(BO, IsingMatrix):
         if invalid:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 unique "
-                "elements")
+                "element. See HIsing for arbitrary number of unique elements.")

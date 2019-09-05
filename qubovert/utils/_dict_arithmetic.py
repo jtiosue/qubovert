@@ -120,7 +120,7 @@ class DictArithmetic(dict):
 
         Parameters
         ---------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class.
 
@@ -175,8 +175,7 @@ class DictArithmetic(dict):
 
         Parameters
         ----------
-        *args and **kwargs : defines a dictionary.
-            Ie ``d = dict(*args, **kwargs)``.
+        arguments : defines a dictionary, ie ``d = dict(*args, **kwargs)``.
             Each element in d will be added in place to this instance following
             all the required convensions.
 

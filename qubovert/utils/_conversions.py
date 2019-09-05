@@ -338,8 +338,9 @@ class Conversions:
 
         Parameters
         ----------
-        Defined in the child class. They should be parameters that define
-        lagrange multipliers or factors in the QUBO.
+        arguments : Defined in the child class.
+            They should be parameters that define lagrange multipliers or
+            factors in the QUBO.
 
         Return
         -------
@@ -367,8 +368,9 @@ class Conversions:
 
         Parameters
         ----------
-        Defined in the child class. They should be parameters that define
-        lagrange multipliers or factors in the Ising model.
+        arguments : Defined in the child class.
+            They should be parameters that define lagrange multipliers or
+            factors in the Ising model.
 
         Return
         ------
@@ -398,8 +400,9 @@ class Conversions:
 
         Parameters
         ----------
-        Defined in the child class. They should be parameters that define
-        lagrange multipliers or factors in the QUBO.
+        arguments : Defined in the child class.
+            They should be parameters that define lagrange multipliers or
+            factors in the QUBO.
 
         Return
         -------
@@ -427,8 +430,9 @@ class Conversions:
 
         Parameters
         ----------
-        Defined in the child class. They should be parameters that define
-        lagrange multipliers or factors in the Ising model.
+        arguments : Defined in the child class.
+            They should be parameters that define lagrange multipliers or
+            factors in the Ising model.
 
         Return
         ------

@@ -79,25 +79,27 @@ class HOBO(PUBO):
     implementation.
 
     We then implement logical operations:
-    AND, OR, XOR, ONE, NOT, NAND, NOR, NXOR, add_constraint_AND,
-    add_constraint_OR, add_constraint_XOR, add_constraint_ONE,
-    add_constraint_NOT, add_constraint_NAND, add_constraint_NOR,
-    add_constraint_NXOR.
+
+    - AND, NAND, add_constraint_AND, add_constraint_NAND,
+    - OR, NOR, add_constraint_OR, add_constraint_NOR,
+    - XOR, NXOR, add_constraint_XOR, add_constraint_NXOR,
+    - ONE, NOT, add_constraint_ONE, add_constraint_NOT.
+
     See each of their docstrings for important details on their implementation.
 
     Notes
     -----
-    Variables names that begin with ``"_a"`` should not be used since they are
-    used internally to deal with some ancilla variables to enforce constraints.
-
-    The ``self.solve_bruteforce`` method will solve the HOBO ensuring that all
-    the inputted constraints are satisfied. Whereas
-    ``qubovert.utils.solve_pubo_bruteforce(self)`` or
-    ``qubovert.utils.solve_pubo_bruteforce(self.to_pubo())`` will solve the
-    PUBO created from the HOBO. If the inputted constraints are not enforced
-    strong enough (ie too small lagrange multipliers) then these may not give
-    the correct result, whereas ``self.solve_bruteforce()`` will always give
-    the correct result (ie one that satisfies all the constraints).
+    - Variables names that begin with ``"_a"`` should not be used since they
+      are used internally to deal with some ancilla variables to enforce
+      constraints.
+    - The ``self.solve_bruteforce`` method will solve the HOBO ensuring that
+      all the inputted constraints are satisfied. Whereas
+      ``qubovert.utils.solve_pubo_bruteforce(self)`` or
+      ``qubovert.utils.solve_pubo_bruteforce(self.to_pubo())`` will solve the
+      PUBO created from the HOBO. If the inputted constraints are not enforced
+      strong enough (ie too small lagrange multipliers) then these may not give
+      the correct result, whereas ``self.solve_bruteforce()`` will always give
+      the correct result (ie one that satisfies all the constraints).
 
     Examples
     --------
@@ -163,7 +165,7 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class. Alternatively, ``args[0]`` can be a HOBO object.
 
@@ -342,7 +344,7 @@ class HOBO(PUBO):
     def add_constraint_eq_zero(self, P, lam=1):
         r"""add_constraint_eq_zero.
 
-        Enforce that ``P == 0`` by adding ``lam * P**2`` to the HOBO.
+        Enforce that ``P == 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -396,7 +398,7 @@ class HOBO(PUBO):
     def add_constraint_lt_zero(self, P, lam=1):
         r"""add_constraint_lt_zero.
 
-        Enforce that ``P < 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``P < 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -430,7 +432,7 @@ class HOBO(PUBO):
     def add_constraint_le_zero(self, P, lam=1):
         r"""add_constraint_le_zero.
 
-        Enforce that ``P <= 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``P <= 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -464,7 +466,7 @@ class HOBO(PUBO):
     def add_constraint_gt_zero(self, P, lam=1):
         r"""add_constraint_gt_zero.
 
-        Enforce that ``P > 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``P > 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -498,7 +500,7 @@ class HOBO(PUBO):
     def add_constraint_ge_zero(self, P, lam=1):
         r"""add_constraint_ge_zero.
 
-        Enforce that ``P >= 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``P >= 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -532,8 +534,8 @@ class HOBO(PUBO):
     def AND(self, a, b, lam=1):
         r"""AND.
 
-        Add a penalty to the HOBO that enforces that :math:`a \land b` with
-        a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only zero when :math:`a \land b` is
+        True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -568,8 +570,8 @@ class HOBO(PUBO):
     def OR(self, a, b, lam=1):
         r"""OR.
 
-        Add a penalty to the HOBO that enforces that :math:`a \lor b` with
-        a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when :math:`a \lor b` is
+        True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -606,8 +608,8 @@ class HOBO(PUBO):
     def XOR(self, a, b, lam=1):
         r"""XOR.
 
-        Add a penalty to the HOBO that enforces that :math:`a \oplus b` with
-        a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when :math:`a \oplus b`
+        is True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -640,8 +642,8 @@ class HOBO(PUBO):
     def ONE(self, a, lam=1):
         r"""ONE.
 
-        Add a penalty to the HOBO that enforces that :math:`a == 1` with
-        a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when :math:`a == 1` is
+        True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -673,8 +675,8 @@ class HOBO(PUBO):
     def NAND(self, a, b, lam=1):
         r"""NAND.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot(a \land b)`
-        with a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when
+        :math:`\lnot(a \land b)` is True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -705,8 +707,8 @@ class HOBO(PUBO):
     def NOR(self, a, b, lam=1):
         r"""NOR.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot(a \lor b)`
-        with a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when
+        :math:`\lnot(a \lor b)` is True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -739,8 +741,8 @@ class HOBO(PUBO):
     def NXOR(self, a, b, lam=1):
         r"""NXOR.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot(a \oplus b)`
-        with a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when
+        :math:`\lnot(a \oplus b)` is True, with a penalty factor ``lam``.
 
         Parameters
         ----------
@@ -773,8 +775,8 @@ class HOBO(PUBO):
     def NOT(self, a, lam=1):
         r"""NOT.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot a` with
-        a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when
+        :math:`\lnot a` is True, with a penalty factor ``lam``.
 
         Parameters
         ----------

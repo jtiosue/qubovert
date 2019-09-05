@@ -55,17 +55,18 @@ class HOIO(HIsing):
 
     Notes
     -----
-    Variables names that begin with ``"_a"`` should not be used since they are
-    used internally to deal with some ancilla variables to enforce constraints.
-
-    The ``self.solve_bruteforce`` method will solve the HOIO ensuring that all
-    the inputted constraints are satisfied. Whereas
-    ``qubovert.utils.solve_hising_bruteforce(self)`` or
-    ``qubovert.utils.solve_hising_bruteforce(self.to_pubo())`` will solve the
-    HIsing created from the HOIO. If the inputted constraints are not enforced
-    strong enough (ie too small lagrange multipliers) then these may not give
-    the correct result, whereas ``self.solve_bruteforce()`` will always give
-    the correct result (ie one that satisfies all the constraints).
+    - Variables names that begin with ``"_a"`` should not be used since they
+      are used internally to deal with some ancilla variables to enforce
+      constraints.
+    - The ``self.solve_bruteforce`` method will solve the HOIO ensuring that
+      all the inputted constraints are satisfied. Whereas
+      ``qubovert.utils.solve_hising_bruteforce(self)`` or
+      ``qubovert.utils.solve_hising_bruteforce(self.to_pubo())`` will solve the
+      HIsing created from the HOIO. If the inputted constraints are not
+      enforced strong enough (ie too small lagrange multipliers) then these may
+      not give the correct result, whereas ``self.solve_bruteforce()`` will
+      always give the correct result (ie one that satisfies all the
+      constraints).
 
     Examples
     --------
@@ -98,7 +99,7 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class. Alternatively, ``args[0]`` can be a HOIO.
 

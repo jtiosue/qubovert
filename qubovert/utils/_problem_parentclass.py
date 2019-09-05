@@ -56,7 +56,7 @@ class Problem(Conversions):
 
         Parameters
         ---------
-        args and kwargs : Defined in child classes.
+        arguments : Defined in child classes.
 
         Return
         -------
@@ -208,7 +208,7 @@ class Problem(Conversions):
 
         Parameters
         ----------
-        *args and **kwargs : arguments and keyword arguments.
+        aruments : arguments and keyword arguments.
             Contains args and kwargs for the ``to_qubo`` method. Also contains
             a ``all_solutions`` boolean flag, which indicates whether or not
             to return all the solutions, or just the best one found.

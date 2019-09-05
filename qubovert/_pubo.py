@@ -136,7 +136,7 @@ class PUBO(BO, PUBOMatrix):
 
         Parameters
         ----------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class.
 

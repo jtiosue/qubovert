@@ -20,6 +20,7 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 """
 
 from qubovert.utils import Problem, IsingMatrix
+from qubovert import HOIO
 
 
 __all__ = 'GraphPartitioning',
@@ -240,14 +241,15 @@ class GraphPartitioning(Problem):
             A = min(2*self._degree, self._N) * B / 8
 
         L = IsingMatrix()
-        L += A * self._N + B * sum(self._edges.values()) / 2
+
+        # we don't use HOBO().to_ising because we want to keep our mapping.
 
         # encode H_A (equation 8)
-        for i in range(self._N):
-            for j in range(i+1, self._N):
-                L[(i, j)] += 2 * A
+        L += HOIO().add_constraint_eq_zero(
+            {(i,): 1 for i in range(self._N)}, lam=A)
 
         # encode H_B (equation 9)
+        L += B * sum(self._edges.values()) / 2
         for (u, v), w in self._edges.items():
             L[(self._vertex_to_index[u],
                self._vertex_to_index[v])] -= w * B / 2

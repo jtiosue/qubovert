@@ -16,6 +16,10 @@ Conversions
 
 .. autofunction:: qubovert.utils.ising_to_qubo
 
+.. autofunction:: qubovert.utils.matrix_to_qubo
+
+.. autofunction:: qubovert.utils.qubo_to_matrix
+
 .. autofunction:: qubovert.utils.binary_to_spin
 
 .. autofunction:: qubovert.utils.spin_to_binary

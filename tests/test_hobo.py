@@ -332,7 +332,8 @@ def test_hobo_eq_constraint():
     problem = HOBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
-    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1, ('b', 'c'): -1}, 10)
+    problem.add_constraint_eq_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): -1}, lam=10)
     problem.solve_bruteforce()
     solution = {'c': 1, 'b': 1, 'a': 0}
     obj = -4

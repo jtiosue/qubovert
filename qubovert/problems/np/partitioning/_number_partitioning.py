@@ -20,6 +20,7 @@ Contains the NumberPartitioning class. See
 """
 
 from qubovert.utils import Problem, IsingMatrix
+from qubovert import HOIO
 
 
 __all__ = 'NumberPartitioning',
@@ -162,15 +163,13 @@ class NumberPartitioning(Problem):
         >>> L = problem.to_ising()
 
         """
-        L = IsingMatrix()
-
-        for i in range(self._N):
-            L[(i,)] += self._S[i]
-
-        L **= 2
-        L *= A
-
-        return L
+        # we don't use HOBO().to_ising because we want to keep our mapping.
+        return IsingMatrix(
+            HOIO().add_constraint_eq_zero(
+                {(i,): self._S[i] for i in range(self._N)},
+                lam=A
+            )
+        )
 
     def convert_solution(self, solution):
         """convert_solution.

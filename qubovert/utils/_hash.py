@@ -15,7 +15,8 @@
 """_hash.py.
 
 This file contains the hash function that we use to sort keys in the matrices,
-used in PUBOMatrix, HIsingMatrix, QUBOMatrix, IsingMatrix.
+used in PUBOMatrix, HIsingMatrix, QUBOMatrix, IsingMatrix, and all of their
+subclasses.
 
 """
 

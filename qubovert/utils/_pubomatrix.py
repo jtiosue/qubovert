@@ -140,7 +140,7 @@ class PUBOMatrix(DictArithmetic):
 
         Parameters
         ----------
-        args and kwargs : parameters.
+        arguments : parameters.
             Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """

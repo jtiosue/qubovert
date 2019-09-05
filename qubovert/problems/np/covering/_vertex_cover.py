@@ -19,6 +19,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 """
 
 from qubovert.utils import Problem, QUBOMatrix
+from qubovert import HOBO
 
 
 __all__ = 'VertexCover',
@@ -177,19 +178,15 @@ class VertexCover(Problem):
 
         Q = QUBOMatrix()
 
-        Q += self._n * A  # constant comes from the constraint
-
         # encode H_B (equation 34)
         for i in range(self._N):
             Q[(i,)] += B
 
-        # encode H_A
-
+        # encode H_A, ie each edge is adjacent to at least one colored vertex.
+        # we don't use HOBO().to_qubo because we want to keep our mapping.
         for u, v in self._edges:
             iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
-            Q[(iu, iv)] += A
-            Q[(iu,)] -= A
-            Q[(iv,)] -= A
+            Q += HOBO().OR(iu, iv, lam=A)
 
         return Q
 

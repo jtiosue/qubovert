@@ -116,7 +116,7 @@ class QUBO(BO, QUBOMatrix):
 
         Parameters
         ----------
-        args and kwargs : define a dictionary with ``dict(*args, **kwargs)``.
+        arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class.
 
@@ -232,4 +232,4 @@ class QUBO(BO, QUBOMatrix):
         if not isinstance(key, tuple) or len(set(key)) > 2:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 unique "
-                "elements")
+                "elements. See PUBO for arbitrary numbers of unique elements.")
