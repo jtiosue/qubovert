@@ -187,7 +187,10 @@ class HIsing(BO, HIsingMatrix):
         P : qubovert.PUBO object.
 
         """
-        return hising_to_pubo(self)
+        P = hising_to_pubo(self)
+        P._mapping = self.mapping
+        P._reverse_mapping = self.reverse_mapping
+        return P
 
     def to_pubo(self, deg=None, lam=None):
         """to_pubo.

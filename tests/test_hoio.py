@@ -352,11 +352,10 @@ def test_hobo_eq_constraint():
         sol == solution
     ))
 
-    e, sols = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sols)
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
-        not problem.is_solution_valid(sols),
         sol != solution,
         not allclose(e, obj)
     ))
@@ -372,11 +371,10 @@ def test_hobo_eq_constraint():
         sol == solution
     ))
 
-    e, sols = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sols)
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
     assert all((
         problem.is_solution_valid(sol),
-        problem.is_solution_valid(sols),
         sol == solution,
         allclose(e, obj)
     ))

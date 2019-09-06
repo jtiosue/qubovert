@@ -20,11 +20,11 @@ from qubovert import HOBO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
-    pubo_value
+    pubo_value, decimal_to_binary, QUBOVertWarning
 )
 from sympy import Symbol
 from numpy import allclose
-from numpy.testing import assert_raises
+from numpy.testing import assert_raises, assert_warns
 
 
 """ TESTS FOR THE METHODS THAT HOBO INHERITS FROM PUBO """
@@ -324,7 +324,7 @@ def test_symbols():
     assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
 
-    d.add_constraint_eq_zero({(0,): a, (1,): -b})
+    d.add_constraint_eq_zero({(0,): a, (1,): -b}, bounds=(-1, 1))
     assert d == {(0,): a**2 - a, (0, 1): -2*a*b + 2, (1,): b**2 + b}
     assert d.subs(a, 0) == {(0, 1): 2, (1,): b**2 + b}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 6}
@@ -335,85 +335,740 @@ def test_symbols():
 
 def test_hobo_eq_constraint():
 
-    problem = HOBO({
+    lam = Symbol('lam')
+
+    P = HOBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
-    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1, ('b', 'c'): -1})
-    problem.solve_bruteforce()
+    P.add_constraint_eq_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): -1},
+        lam=lam
+    )
     solution = {'c': 1, 'b': 1, 'a': 0}
     obj = -4
 
+    problem = P.subs(lam, 1)
     sol = problem.solve_bruteforce()
     assert all((
         problem.is_solution_valid(sol),
         sol == solution
     ))
 
-    e, sols = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sols)
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
-        not problem.is_solution_valid(sols),
         sol != solution,
         not allclose(e, obj)
     ))
 
-    problem = HOBO({
-        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
-    })
-    problem.add_constraint_eq_zero(
-        {('a',): 1, ('b',): 1, ('b', 'c'): -1}, lam=10)
-    problem.solve_bruteforce()
-    solution = {'c': 1, 'b': 1, 'a': 0}
-    obj = -4
-
+    problem = P.subs(lam, 10)
     sol = problem.solve_bruteforce()
     assert all((
         problem.is_solution_valid(sol),
         sol == solution
     ))
 
-    e, sols = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sols)
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
     assert all((
         problem.is_solution_valid(sol),
-        problem.is_solution_valid(sols),
         sol == solution,
         allclose(e, obj)
     ))
 
 
+def test_hobo_lt_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_lt_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3},
+        lam=lam
+    )
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    problem = P.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_lt_constraint():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_lt_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3},
+        lam=lam, log_trick=False
+    )
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    problem = P.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_le_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3},
+        lam=lam
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_le_constraint():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3},
+        lam=lam, log_trick=False
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_gt_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_gt_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3},
+        lam=lam
+    )
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    problem = P.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_gt_constraint():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_gt_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3},
+        lam=lam, log_trick=False
+    )
+    solution = {'c': 1, 'b': 1, 'a': 0}
+    obj = -4
+
+    problem = P.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_ge_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_ge_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3},
+        lam=lam
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_ge_constraint():
+
+    lam = Symbol("lam")
+
+    P = HOBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_ge_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3},
+        lam=lam, log_trick=False
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hobo_constraints_warnings():
+
+    with assert_warns(QUBOVertWarning):  # qlwayss satisfied
+        HOBO().add_constraint_eq_zero({(): 0})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_eq_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_eq_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_lt_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_lt_zero({(): 1, (0,): -1})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOBO().add_constraint_lt_zero({(): -1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_le_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOBO().add_constraint_le_zero({(): -1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_gt_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_gt_zero({(): -1, (0,): 1})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOBO().add_constraint_gt_zero({(): 1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOBO().add_constraint_ge_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOBO().add_constraint_ge_zero({(): 1, (0,): .5})
+
+
 def test_hobo_logic():
 
-    H = HOBO().add_constraint_NAND('a', 'b', 'c').AND('a', 'b')
+    H = HOBO().NAND_eq('a', 'b', 'c', constraint=True).AND('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().add_constraint_OR('a', 'b', 'c').NOR('a', 'b')
+    H = HOBO().OR_eq('a', 'b', 'c', constraint=True).NOR('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 0, 'c': 0}
 
-    H = HOBO().add_constraint_XOR('a', 'b', 'c').NXOR('a', 'b').ONE('a')
+    H = HOBO().XOR_eq('a', 'b', 'c', constraint=True).NXOR('a', 'b').ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().add_constraint_NOT('a', 'b').ONE('a')
+    H = HOBO().NOT_eq('a', 'b', constraint=True).ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
 
     H = HOBO().NAND('a', 'b').NOT('a').OR(
-        'a', 'b').add_constraint_ONE('a', 'c')
+        'a', 'b').ONE_eq('a', 'c', constraint=True)
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
 
-    H = HOBO().XOR('a', 'b').add_constraint_NOR(
-        'a', 'c', 'b').ONE('c').add_constraint_ONE('a', 'c')
+    H = HOBO().XOR('a', 'b').NOR_eq(
+        'a', 'c', 'b').ONE('c').ONE_eq('a', 'c', constraint=True)
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 
-    H = HOBO().add_constraint_AND(
-        'a', 'b', 'c').add_constraint_NXOR('a', 'b', 'c').ONE('c')
+    H = HOBO().AND_eq('a', 'b', 'c', constraint=True).NXOR_eq(
+        'a', 'b', 'c', constraint=True).ONE('c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}
 
-    # TODO: more logic tests
+    # NOR_eq
+    H = HOBO().NOR_eq(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not any(sol[i] for i in range(5))) == sol[5]
+        assert not H.value(sol)
+    H = HOBO().NOR_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if (not any(sol[i] for i in range(5))) == sol[5]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().NOR_eq(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not any(sol[i] for i in range(2))) == sol[2]
+        assert not H.value(sol)
+    H = HOBO().NOR_eq(0, 1, 2, constraint=True)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if (not any(sol[i] for i in range(2))) == sol[2]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # OR_eq
+    H = HOBO().OR_eq(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert any(sol[i] for i in range(5)) == sol[5]
+        assert not H.value(sol)
+    H = HOBO().OR_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if any(sol[i] for i in range(5)) == sol[5]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().OR_eq(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert any(sol[i] for i in range(2)) == sol[2]
+        assert not H.value(sol)
+    H = HOBO().OR_eq(0, 1, 2, constraint=True)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if any(sol[i] for i in range(2)) == sol[2]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # NAND_eq
+    H = HOBO().NAND_eq(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not all(sol[i] for i in range(5))) == sol[5]
+        assert not H.value(sol)
+    H = HOBO().NAND_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if (not all(sol[i] for i in range(5))) == sol[5]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().NAND_eq(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not all(sol[i] for i in range(2))) == sol[2]
+        assert not H.value(sol)
+    H = HOBO().NAND_eq(0, 1, 2, constraint=True)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if (not all(sol[i] for i in range(2))) == sol[2]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # AND_eq
+    H = HOBO().AND_eq(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert all(sol[i] for i in range(5)) == sol[5]
+        assert not H.value(sol)
+    H = HOBO().AND_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if all(sol[i] for i in range(5)) == sol[5]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().AND_eq(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert all(sol[i] for i in range(2)) == sol[2]
+        assert not H.value(sol)
+    H = HOBO().AND_eq(0, 1, 2, constraint=True)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if all(sol[i] for i in range(2)) == sol[2]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # NOR
+    H = HOBO().NOR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not any(sol[i] for i in range(6))
+        assert not H.value(sol)
+    H = HOBO().NOR(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if not any(sol[i] for i in range(6)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().NOR(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not any(sol[i] for i in range(2))
+        assert not H.value(sol)
+    H = HOBO().NOR(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if not any(sol[i] for i in range(2)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # OR
+    H = HOBO().OR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert any(sol[i] for i in range(6))
+        assert not H.value(sol)
+    H = HOBO().OR(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if any(sol[i] for i in range(6)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().OR(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert any(sol[i] for i in range(2))
+        assert not H.value(sol)
+    H = HOBO().OR(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if any(sol[i] for i in range(2)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # NAND
+    H = HOBO().NAND(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not all(sol[i] for i in range(6))
+        assert not H.value(sol)
+    H = HOBO().NAND(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if not all(sol[i] for i in range(6)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().NAND(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not all(sol[i] for i in range(2))
+        assert not H.value(sol)
+    H = HOBO().NAND(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if not all(sol[i] for i in range(2)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # AND
+    H = HOBO().AND(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert all(sol[i] for i in range(6))
+        assert not H.value(sol)
+    H = HOBO().AND(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if all(sol[i] for i in range(6)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().AND(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert all(sol[i] for i in range(2))
+        assert not H.value(sol)
+    H = HOBO().AND(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if all(sol[i] for i in range(2)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)

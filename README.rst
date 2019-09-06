@@ -105,6 +105,8 @@ See the following HOBO example.
     print(H)
     # {('a', 1, 2): -4, (1, 2): 3}
 
+.. code:: python
+
     H = HOBO()
     H.add_constraint_eq_zero(
             {(0, 1): 1}
@@ -114,7 +116,8 @@ See the following HOBO example.
     print(H)
     # {(0, 1): 1, (1, 2): -1, (): 1}
 
-    H = HOBO().add_constraint_AND('a', 'b', 'c')
+    # enforce that c == a AND b
+    H = HOBO().AND_eq('a', 'b', 'c')
     print(H)
     # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
 
@@ -125,22 +128,28 @@ See the following HOBO example.
     # OR variables b and c
     H.OR('b', 'c')
 
-    # (a AND b) OR (c AND d)
-    H.OR(['a', 'b'], ['c', 'd'])
+    # (a AND b) OR (c AND d) OR e
+    H.OR(['a', 'b'], ['c', 'd'], 'e')
+
+    # enforce that 'b' = NOR('a', 'c', 'd')
+    H.NOR_eq('a', 'c', 'd', 'b')
 
     print(H)
-    # {('b', 'a'): -2, (): 4, ('b',): -1, ('c',): -1, ('c', 'd'): -1,
-    #  ('c', 'd', 'b', 'a'): 1}
+    # {(): 5, ('c',): -2, ('c', 'a', 'b', 'd'): 1, ('a', 'e', 'b'): 1,
+    #  ('c', 'e', 'd'): 1, ('e',): -1, ('a',): -1, ('c', 'a'): 1,
+    #  ('a', 'd'): 1, ('c', 'b'): 2, ('d',): -1, ('b', 'd'): 2}
     Q = H.to_qubo()
     print(Q)
-    # {(): 4, (0,): -1, (2,): -1, (2, 3): 1, (4,): 6, (0, 4): -4,
-    #  (1, 4): -4, (5,): 6, (2, 5): -4, (3, 5): -4, (4, 5): 1}
+    # {(): 5, (2,): -2, (5,): 12, (0, 1): 4, (0, 5): -8, (1, 5): -8,
+    #  (6,): 12, (2, 3): 4, (2, 6): -8, (3, 6): -8, (5, 6): 1, (4, 5): 1,
+    #  (4, 6): 1, (4,): -1, (0,): -1, (0, 2): 1, (0, 3): 1, (1, 2): 2,
+    #  (3,): -1, (1, 3): 2}
     obj_value, sol = qubo_solver(Q)
     print(sol)
-    # {0: 1, 1: 1, 2: 1, 3: 0, 4: 1, 5: 0}
+    # {0: 0, 1: 0, 2: 1, 3: 0, 4: 1, 5: 0, 6: 0}
     solution = H.convert_solution(sol)
     print(solution)
-    # {'b': 1, 'a': 1, 'c': 1, 'd': 0}
+    # {'a': 0, 'b': 0, 'c': 1, 'd': 0, 'e': 1}
 
 
 See the following PUBO example.
@@ -177,17 +186,22 @@ Symbols can also be used, for example:
 
     a, b = Symbol('a'), Symbol('b')
 
-    # enforce that z_0 + b z_1 == 0 with penalty a
-    H = HOIO().add_constraint_eq_zero({(0,): 1, (1,): b}, lam=a)
+    # enforce that z_0 + z_1 == 0 with penalty a
+    H = HOIO().add_constraint_eq_zero({(0,): 1, (1,): 1}, lam=a)
     print(H)
-    # {(): a*(b**2 + 1), (0, 1): 2*a*b}
-    H_subs = H.subs({b: 1})
-    print(H_subs)
     # {(): 2*a, (0, 1): 2*a}
-    H_subs_p = H.subs({a: 2, b: 1})
-    print(H_subs_p)
-    # {(): 4, (0, 1): 4}
+    H[(0, 1)] += b
+    print(H)
+    # {(): 2*a, (0, 1): 2*a + b}
+    H_subs = H.subs({a: 2})
+    print(H_subs)
+    # {(): 4, (0, 1): 4 + b}
 
+    H_subs = H.subs({a: 2, b: 3})
+    print(H_subs)
+    # {(): 4, (0, 1): 7}
+
+Please note that ``H.mapping`` is not necessarily equal to ``H.subs(...).mapping``. Thus, when using the ``HOBO.convert_solution`` function, make sure that you use the correct ``HOBO`` instance!
 
 The convension used is that ``()`` elements of every dictionary corresponds to offsets. Note that some QUBO solvers accept QUBOs where each key is a two element tuple (since for a QUBO ``{(0, 0): 1}`` is the same as ``{(0,): 1}``). To get this standard form from our ``QUBOMatrix`` object, just access the property ``Q``. Similar for the ``IsingMatrix``. For example:
 

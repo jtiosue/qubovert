@@ -31,6 +31,7 @@ Indices and tables
    utils/methods
    utils/matrices
    utils/parentclasses
+   utils/warnings
 
 
 .. toctree::

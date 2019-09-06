@@ -170,30 +170,29 @@ class HOIO(HIsing):
         """
         return self._ancilla
 
-    def convert_solution(self, solution):
-        """convert_solution.
+    @classmethod
+    def remove_ancilla_from_solution(cls, solution):
+        """remove_ancilla_from_solution.
 
-        Convert the solution to the integer labeled HOIO to the solution to
-        the originally labeled HOIO.
+        Take a solution to the HOIO and remove all the ancilla variables, (
+        represented by `_a` prefixes).
 
         Parameters
         ----------
-        solution : iterable or dict.
-            The PUBO, HIsing, QUBO, or Ising solution output. The PUBO solution
-            output is either a list or tuple where indices specify the label of
-            the variable and the element specifies whether it's 0 or 1 for PUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
-            label of the variable to is value. The QUBO/Ising solution output
-            includes the assignment for the ancilla variables used to reduce
-            the degree of the HIsing.
+        solution : dict.
+            Must be the solution in terms of the original variables. Thus if
+            ``solution`` is the solution to the ``self.to_pubo``,
+            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            formulations, then you should first call ``self.convert_solution``.
+            See ``help(self.convert_solution)``.
 
         Return
-        -------
+        ------
         res : dict.
-            Maps binary variable labels to their HOIO solutions values {-1, 1}.
+            The same as ``solution`` but with all the ancilla bits removed.
 
         """
-        return HOBO.convert_solution(self, solution)
+        return HOBO.remove_ancilla_from_solution(solution)
 
     def is_solution_valid(self, solution):
         """is_solution_valid.
@@ -202,9 +201,12 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        solution : dict or iterable.
-            Either the output of ``self.convert_solution`` or the input to
-            ``self.convert_solution`` (see ``help(self.convert_solution)``).
+        solution : dict.
+            Must be the solution in terms of the original variables. Thus if
+            ``solution`` is the solution to the ``self.to_pubo``,
+            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            formulations, then you should first call ``self.convert_solution``.
+            See ``help(self.convert_solution)``.
 
         Return
         ------
@@ -266,7 +268,7 @@ class HOIO(HIsing):
             The HIsing constraint such that H == 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
-        lam : float > 0 (optional, defaults to 1).
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
 
         Return
@@ -319,7 +321,7 @@ class HOIO(HIsing):
             The HIsing constraint such that H < 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
-        lam : float > 0 (optional, defaults to 1).
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
 
         Return
@@ -353,7 +355,7 @@ class HOIO(HIsing):
             The HIsing constraint such that H <= 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
-        lam : float > 0 (optional, defaults to 1).
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
 
         Return
@@ -387,7 +389,7 @@ class HOIO(HIsing):
             The HIsing constraint such that H > 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
-        lam : float > 0 (optional, defaults to 1).
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
 
         Return
@@ -421,7 +423,7 @@ class HOIO(HIsing):
             The HIsing constraint such that H >= 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
-        lam : float > 0 (optional, defaults to 1).
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
 
         Return

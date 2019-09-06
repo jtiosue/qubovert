@@ -265,7 +265,7 @@ class PUBO(BO, PUBOMatrix):
                     # it before (if found is True). This is because if we use
                     # the reduction multiple times, we need to enforce it
                     # multiple times.
-                    D += qubovert.HOBO().add_constraint_AND(x, y, z, lam(v))
+                    D += qubovert.HOBO().AND_eq(x, y, z, lam=lam(v))
                     k = tuple(sorted(
                             tuple(i for i in k if i not in (x, y)) + (z,)
                         ))
