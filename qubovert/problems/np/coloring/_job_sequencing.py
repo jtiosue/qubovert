@@ -58,7 +58,11 @@ class JobSequencing(Problem):
     ({'job1', 'job3'}, {'job2'})  # or ({'job2'}, {'job1', 'job3'})
     >>> print(problem.is_solution_valid(solution))
     True  # since each job is covered exactly once
-    >>> print(obj == max(sum(job_lengths[i] for i in x) for x in solution == 3)
+    >>> print(
+            obj ==
+            max(sum(job_lengths[i] for i in x) for x in solution) ==
+            3
+        )
     True
 
     References

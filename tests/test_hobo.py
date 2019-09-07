@@ -818,7 +818,7 @@ def test_hobo_logic():
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 0, 'c': 0}
 
-    H = HOBO().XOR_eq('a', 'b', 'c', constraint=True).NXOR('a', 'b').ONE('a')
+    H = HOBO().XOR_eq('a', 'b', 'c', constraint=True).XNOR('a', 'b').ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
@@ -836,7 +836,7 @@ def test_hobo_logic():
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 
-    H = HOBO().AND_eq('a', 'b', 'c', constraint=True).NXOR_eq(
+    H = HOBO().AND_eq('a', 'b', 'c', constraint=True).XNOR_eq(
         'a', 'b', 'c', constraint=True).ONE('c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}

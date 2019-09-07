@@ -22,6 +22,7 @@ Indices and tables
    BO/HIsing
    BO/QUBO
    BO/Ising
+   BO/sat
 
 
 .. toctree::

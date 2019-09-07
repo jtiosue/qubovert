@@ -20,6 +20,7 @@ Contains the HOBO class. See ``help(qubovert.HOBO)``.
 
 from . import PUBO
 from .utils import QUBOVertWarning
+from .sat import OR
 from numpy import log2, ceil
 
 
@@ -27,12 +28,6 @@ __all__ = 'HOBO',
 
 
 # TODO: add better constraints for constraints that match known forms.
-# including
-# For the log trick he mentions, we usually need a constraint like
-# ``sum(x) >= 1``. In order to enforce this constraint, we add a penalty to the
-# QUBO of the form ``1 - sum(x) + sum(x[i] x[j] for i in range(len(x)) for j in
-# range(i+1, len(x)))`` (the idea comes from arXiv:1811.11538v5).
-
 
 def _create_tuple(x):
     """_create_tuple.
@@ -107,7 +102,7 @@ class HOBO(PUBO):
 
     - ``AND``, ``NAND``, ``AND_eq``, ``NAND_eq``,
     - ``OR``, ``NOR```, ``OR_eq``, ``NOR_eq``,
-    - ``XOR``, ``NXOR``, ``XOR_eq``, ``NXOR_eq``,
+    - ``XOR``, ``XNOR``, ``XOR_eq``, ``XNOR_eq``,
     - ``ONE``, ``NOT``, ``ONE_eq``, ``NOT_eq``.
 
     See each of their docstrings for important details on their implementation.
@@ -1024,14 +1019,8 @@ class HOBO(PUBO):
         >>> H.OR(['a', 'b'], ['c', 'd'], ['e', 'f', 'g'])
 
         """
-        def or_(vars_):
-            if len(vars_) == 1:
-                return vars_[0]
-            x = or_(vars_[:-1])
-            return x + vars_[-1] - x * vars_[-1]
-
         variables = tuple(PUBO({_create_tuple(x): 1}) for x in variables)
-        P = 1 - or_(variables)
+        P = 1 - OR(*variables)
 
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
@@ -1216,8 +1205,8 @@ class HOBO(PUBO):
         self += lam * P
         return self
 
-    def NXOR(self, a, b, lam=1, constraint=False):
-        r"""NXOR.
+    def XNOR(self, a, b, lam=1, constraint=False):
+        r"""XNOR.
 
         Add a penalty to the HOBO that is only nonzero when
         :math:`\lnot(a \oplus b)` is True, with a penalty factor ``lam``.
@@ -1247,10 +1236,10 @@ class HOBO(PUBO):
         Examples
         --------
         >>> H = HOBO()
-        >>> H.NXOR('a', 'b')  # enforce a NXOR b
+        >>> H.XNOR('a', 'b')  # enforce a XNOR b
 
         >>> H = HOBO()
-        >>> H.NXOR(['a', 'b'], ['c', 'd'])  # enforce (a AND b) NXOR (c AND d)
+        >>> H.XNOR(['a', 'b'], ['c', 'd'])  # enforce (a AND b) XNOR (c AND d)
 
         """
         a, b = _create_tuple(a), _create_tuple(b)
@@ -1483,7 +1472,7 @@ class HOBO(PUBO):
         >>> H.XOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
 
         """
-        P = HOBO().NXOR(a, b) - {_create_tuple(c): 1}
+        P = HOBO().XNOR(a, b) - {_create_tuple(c): 1}
         if constraint:
             return self.add_constraint_eq_zero(P, lam=lam)
         self += lam * P**2
@@ -1665,8 +1654,8 @@ class HOBO(PUBO):
 
         return self
 
-    def NXOR_eq(self, a, b, c, lam=1, constraint=False):
-        r"""NXOR_eq.
+    def XNOR_eq(self, a, b, c, lam=1, constraint=False):
+        r"""XNOR_eq.
 
         Add a penalty to the HOBO that enforces that
         :math:`\lnot(a \oplus b) == c` with a penalty factor ``lam``.
@@ -1698,15 +1687,15 @@ class HOBO(PUBO):
         Examples
         --------
         >>> H = HOBO()
-        >>> H.NXOR_eq('a', 'b', 'c')  # enforce a NXOR b == c
+        >>> H.XNOR_eq('a', 'b', 'c')  # enforce a XNOR b == c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) NXOR (c AND d) == 'e'
-        >>> H.NXOR_eq(['a', 'b'], ['c', 'd'], 'e')
+        >>> # enforce (a AND b) XNOR (c AND d) == 'e'
+        >>> H.XNOR_eq(['a', 'b'], ['c', 'd'], 'e')
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) NXOR (c AND d) == ('e' AND 'f')
-        >>> H.NXOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
+        >>> # enforce (a AND b) XNOR (c AND d) == ('e' AND 'f')
+        >>> H.XNOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
 
         """
         P = HOBO().XOR(a, b) - {_create_tuple(c): 1}

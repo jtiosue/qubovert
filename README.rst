@@ -67,12 +67,16 @@ Then you can use it in Python versions 3.6 and above with
     # see the main functionality
     print(qubovert.__all__)
 
-    # see all the probles defined
-    print(qubovert.problems.__all__)
-
     # see the utilities defined
     help(qubovert.utils)
     print(qubovert.utils.__all__)
+
+    # see the satisfiability library
+    help(qubovert.sat)
+    print(qubovert.sat.__all__)
+
+    # see all the probles defined
+    print(qubovert.problems.__all__)
 
     # to see specifically the np problems:
     help(qubovert.problems.np)
@@ -87,6 +91,9 @@ Then you can use it in Python versions 3.6 and above with
 
 Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
 ---------------------------------------------------------------
+
+See ``qubovert.__all__``.
+
 - QUBO: Quadratic Unconstrained Binary Optimization
 - Ising: quadratic unconstrained spin-1/2 Hamiltonian
 - PUBO: Polynomial Unconstrained Binary Optimization
@@ -268,8 +275,57 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     # 0
 
 
-Convert common problems to QUBO form.
--------------------------------------
+Common binary optimization utilities (the ``utils`` library)
+------------------------------------------------------------
+
+See ``qubovert.utils.__all__``.
+
+We implement various utility functions, including
+
+- ``solve_pubo_bruteforce``,
+- ``solve_hising_bruteforce``,
+- ``pubo_value``,
+- ``hising_value``,
+- ``pubo_to_hising``,
+- ``hising_to_pubo``,
+- ``subgraph``,
+
+and more.
+
+
+Converting SAT problems (the ``sat`` library)
+---------------------------------------------
+
+See ``qubovert.sat.__all__``.
+
+Consider the following 3-SAT example.
+
+.. code:: python
+
+    from qubovert.sat import AND, NOT, OR
+    from anywhere import qubo_solver
+
+    C = AND(OR(0, 1, 2), OR(NOT(0), 2, NOT(3)), OR(NOT(1), NOT(2), 3))
+
+    # C is 1 for a satisfying assignment, else 0
+    # So minimizing P will solve it.
+    P = -C
+
+    # P is a PUBO
+    Q = P.to_qubo()
+    solution = qubo_solver(Q)
+
+    print(solution)  # {0: 0, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0, 6: 0}
+    converted_sol = P.convert_solution(solution)
+    print(converted_sol) # {0: 0, 3: 0, 1: 0, 2: 1}
+
+    print(C.value(converted_sol))  # will print 1 because it satisfies C
+
+
+Convert common problems to QUBO form (the ``problems`` library)
+---------------------------------------------------------------
+
+See ``qubovert.problems.__all__``.
 
 So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 

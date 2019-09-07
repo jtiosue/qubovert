@@ -20,15 +20,21 @@ problems are formatted in QUBO form when the solver is a quantum computer.
 See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
 for all the problems defined, and ``qubovert.utils.__all__`` for some utilities
 used.
+
 """
 
 from ._version import __version__
+
 from . import utils
 
 from ._qubo import *
 from ._ising import *
 from ._pubo import *
 from ._hising import *
+
+# sat is used in HOBO, but used PUBO
+from . import sat
+
 from ._hobo import *
 from ._hoio import *
 
