@@ -20,6 +20,7 @@ from qubovert.utils import subgraph
 from sympy import Symbol
 from qubovert.utils import QUBOMatrix, PUBOMatrix, IsingMatrix, HIsingMatrix
 from qubovert import QUBO, PUBO, Ising, HIsing, HOBO, HOIO
+from numpy.testing import assert_raises
 
 
 def test_subgraph():
@@ -39,3 +40,6 @@ def test_subgraph():
         assert type(S) == t
         assert S == {(0, 1): -4, (0,): 3-a, (1,): 2}
         assert S.subs(a, -10) == {(0, 1): -4, (0,): 13, (1,): 2}
+
+    with assert_raises(ValueError):
+        subgraph({0: 1, (0, 1): 1}, {})

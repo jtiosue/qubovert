@@ -24,6 +24,7 @@ from qubovert.utils import (
 from qubovert import QUBO, Ising, PUBO, HIsing
 from sympy import Symbol
 import numpy as np
+from numpy.testing import assert_raises
 
 
 def test_qubo_to_ising_to_qubo():
@@ -95,6 +96,12 @@ def test_decimal_to_binary():
     assert decimal_to_binary(10, 7) == (0, 0, 0, 1, 0, 1, 0)
     assert decimal_to_binary(10) == (1, 0, 1, 0)
 
+    with assert_raises(ValueError):
+        decimal_to_binary(.5)
+
+    with assert_raises(ValueError):
+        decimal_to_binary(1000, 2)
+
 
 def test_decimal_to_spin():
 
@@ -125,6 +132,9 @@ def test_matrix_to_qubo():
     matrix, qubo = [[-3, 1], [-1, 2]], {(0,): -3, (1,): 2}
     assert matrix_to_qubo(matrix) == qubo
 
+    with assert_raises(ValueError):
+        matrix_to_qubo([[1, 2, 3], [1, 0, 1]])
+
 
 def test_qubo_to_matrix():
 
@@ -135,6 +145,12 @@ def test_qubo_to_matrix():
     matrix = [[-3, .5], [.5, 2]]
     assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
     assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))
+
+    with assert_raises(ValueError):
+        qubo_to_matrix({})
+
+    with assert_raises(ValueError):
+        qubo_to_matrix({(): 1, (0,): -1})
 
 
 def test_symbols():

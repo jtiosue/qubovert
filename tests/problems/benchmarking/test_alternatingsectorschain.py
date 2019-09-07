@@ -19,6 +19,7 @@ Contains tests for the AlternatingSectorsChain class.
 from qubovert.problems import AlternatingSectorsChain
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 problem = AlternatingSectorsChain(12)
@@ -27,6 +28,18 @@ problem = AlternatingSectorsChain(12)
 def test_AlternatingSectorsChain_str():
 
     assert eval(str(problem)) == problem
+
+
+def test_errors():
+
+    with assert_raises(ValueError):
+        AlternatingSectorsChain(10, min_strength=-1)
+
+    with assert_raises(ValueError):
+        AlternatingSectorsChain(0)
+
+    with assert_raises(ValueError):
+        AlternatingSectorsChain(3, chain_length=1)
 
 
 def test_AlternatingSectorsChain_bruteforce():

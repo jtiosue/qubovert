@@ -682,3 +682,20 @@ class DictArithmetic(dict):
                 d[k] = val
 
         return d
+
+    def simplify(self):
+        """simplify.
+
+        If ``self`` has any symbolic expressions, this will go ghrough and
+        simplify them.
+
+        Return
+        ------
+        None. Updates it in place.
+
+        """
+        for k, v in self.items():
+            try:
+                self[k] = v.simplify()
+            except AttributeError:
+                pass

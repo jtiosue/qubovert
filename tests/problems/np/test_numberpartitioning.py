@@ -19,6 +19,7 @@ Contains tests for the NumberPartitioning class.
 from qubovert.problems import NumberPartitioning
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 S_withsoln = 1, 2, 3, 4
@@ -35,6 +36,17 @@ def test_numberpartitioning_str():
 
     assert eval(str(problem_withsoln)) == problem_withsoln
     assert eval(str(problem_withoutsoln)) == problem_withoutsoln
+
+
+def test_properties():
+
+    assert problem_withsoln.S == S_withsoln
+
+
+def test_invalid():
+
+    with assert_raises(ValueError):
+        NumberPartitioning([0, 1, 2])
 
 
 def test_numberpartitioning_bruteforce():

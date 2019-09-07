@@ -34,6 +34,17 @@ def test_qubo_checkkey():
         IsingMatrix({(0, 1, 2): -1})
 
 
+def test_properties():
+
+    L = IsingMatrix()
+    L[(0,)] -= 1
+    L[(0, 1)] += 1
+    L += 2
+    assert L.offset == 2
+    assert L.h == {0: -1}
+    assert L.J == {(0, 1): 1}
+
+
 def test_ising_default_valid():
 
     d = IsingMatrix()

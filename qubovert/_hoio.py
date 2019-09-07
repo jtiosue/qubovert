@@ -19,12 +19,10 @@ Contains the HOIO class. See ``help(qubovert.HOIO)``.
 """
 
 from . import HIsing, HOBO
+from .utils import hising_to_pubo, pubo_to_hising
 
 
 __all__ = 'HOIO',
-
-
-# TODO: add better constraints for constraints that match known forms.
 
 
 class HOIO(HIsing):
@@ -70,7 +68,8 @@ class HOIO(HIsing):
     Examples
     --------
     See ``qubovert.HIsing`` for more examples of using HOIO without
-    constraints.
+    constraints. See ``qubovert.HOBO`` for many constraint examples in PUBO
+    form. ``HOIO`` is the same but converting to HIsing.
 
     >>> H = HOIO()
     >>> H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
@@ -80,11 +79,9 @@ class HOIO(HIsing):
     >>> H = HOIO()
     >>> H.add_constraint_eq_zero(
             {(0, 1): 1}
-        ).add_constraint_eq_zero(
+        ).add_constraint_lt_zero(
             {(1, 2): 1, (): -1}
         )
-    >>> H
-    {(): 3, (1, 2): -2}
 
     """
 
@@ -257,10 +254,12 @@ class HOIO(HIsing):
         """
         return HOBO.subs(self, *args, **kwargs)
 
-    def add_constraint_eq_zero(self, H, lam=1):
+    def add_constraint_eq_zero(self,
+                               H, lam=1,
+                               bounds=None, suppress_warnings=False):
         r"""add_constraint_eq_zero.
 
-        Enforce that ``H == 0`` by adding ``lam * H**2`` to the HOIO.
+        Enforce that ``H == 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -268,8 +267,17 @@ class HOIO(HIsing):
             The HIsing constraint such that H == 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
+        bounds : two element tuple (optional, defaluts to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they may be
+            calculated (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
 
         Return
         ------
@@ -279,41 +287,36 @@ class HOIO(HIsing):
 
         Examples
         --------
-        The following enforces that :math:`z_0 + z_1 - 2 == 0`.
-
-        >>> H = HOIO()
-        >>> H.add_constraint_eq_zero({(0,): 1, (1,): 1, (): -2})
-        >>> H
-        {(): 6, (0, 1): 2, (0,): -4, (1,): -4}
-
         The following enforces that :math:`\sum_{i=1}^{3} i z_i z_{i+1} == 0`.
 
         >>> H = HOIO()
         >>> H.add_constraint_eq_zero({(1, 2): 1, (2, 3): 2, (3, 4): 3})
-        >>> H
-        {(): 14, (1, 3): 4, (1, 2, 3, 4): 6, (2, 4): 12}
 
         Here we show how operations can be strung together.
 
         >>> H = HOIO()
-        >>> H.add_constraint_eq_zero(
-                {(0, 1): 1, (0,): -1}
+        >>> H.add_constraint_lt_zero(
+                {(0, 1): 1}
             ).add_constraint_eq_zero(
                 {(1, 2): 1, (): -1}
             )
-        >>> H
-        {(): 4, (1,): -2, (1, 2): -2}
 
         """
         H = HIsing(H)
-        self += lam * H ** 2
         self._constraints.setdefault("eq", []).append(H)
+        self += pubo_to_hising(HOBO().add_constraint_eq_zero(
+            hising_to_pubo(H), lam=lam,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        ))
         return self
 
-    def add_constraint_lt_zero(self, H, lam=1):
+    def add_constraint_lt_zero(self,
+                               H, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
         r"""add_constraint_lt_zero.
 
-        Enforce that ``H < 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``H < 0`` by penalizing invalid solutions with ``lam``.
+        See Notes below for more details.
 
         Parameters
         ----------
@@ -321,33 +324,71 @@ class HOIO(HIsing):
             The HIsing constraint such that H < 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaluts to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : HOIO.
+            Updates the HOIO in place, but returns ``self`` so that operations
             can be strung together.
-
-        Examples
-        --------
-        FINISH
 
         Notes
         -----
-        FINISH
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints (ie constraints of the form
+          :math:`z_0 + 2z_1 + ... < 0`). However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function. For example,
+
+          >>> H = HOIO()
+          >>> H.add_constraint_lt_zero(
+          >>>     {(0,): 0.5, (): 1.65, (1,): 1.0, (2,): -0.25})
+          >>> test_sol = {0: -1, 1: -1, 2: 1}
+          >>> H.is_solution_valid(test_sol)
+          True
+          >>> H.value(test_sol)
+          0.01
+
+          {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
+          cause a nonzero penalty to be added to the objective function.
+
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\min_z \text{H.value(z)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\min_z \text{H.value(z)}|` ancilla
+          bits will be used.
 
         """
         H = HIsing(H)
-        raise NotImplementedError("Coming soon!")
         self._constraints.setdefault("lt", []).append(H)
+        self += pubo_to_hising(HOBO().add_constraint_lt_zero(
+            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        ))
         return self
 
-    def add_constraint_le_zero(self, H, lam=1):
+    def add_constraint_le_zero(self,
+                               H, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
         r"""add_constraint_le_zero.
 
-        Enforce that ``H <= 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``H <= 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -355,33 +396,75 @@ class HOIO(HIsing):
             The HIsing constraint such that H <= 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaluts to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : HOIO.
+            Updates the HOIO in place, but returns ``self`` so that operations
             can be strung together.
-
-        Examples
-        --------
-        FINISH
 
         Notes
         -----
-        FINISH
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints (ie constraints of the form
+          :math:`z_0 + 2z_1 + ... \leq 0`). However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function. For example,
+
+          >>> H = HOIO()
+          >>> H.add_constraint_le_zero(
+                  {(0,): 0.5, (): 1.15, (1,): 1.0, (2,): -0.75})
+          >> H
+          {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
+           (2,): -2.4749999999999996, ('_a0', 0): 0.5, ('_a0',): 1.65,
+           (1, 2): -1.5, ('_a0', 1): 1.0, ('_a0', 2): -0.75}
+          >>> test_sol = {0: -1, 1: -1, 2: 1, '_a0': 1}
+          >>> H.is_solution_valid(test_sol)
+          True
+          >>> H.value(test_sol)
+          0.01
+
+          {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
+          cause a nonzero penalty to be added to the objective function.
+
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\min_z \text{H.value(z)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\min_z \text{H.value(z)}|` ancilla
+          bits will be used.
 
         """
         H = HIsing(H)
-        raise NotImplementedError("Coming soon!")
         self._constraints.setdefault("le", []).append(H)
+        self += pubo_to_hising(HOBO().add_constraint_le_zero(
+            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        ))
         return self
 
-    def add_constraint_gt_zero(self, H, lam=1):
+    def add_constraint_gt_zero(self,
+                               H, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
         r"""add_constraint_gt_zero.
 
-        Enforce that ``H > 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``H > 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -389,33 +472,71 @@ class HOIO(HIsing):
             The HIsing constraint such that H > 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaluts to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : HOIO.
+            Updates the HOIO in place, but returns ``self`` so that operations
             can be strung together.
-
-        Examples
-        --------
-        FINISH
 
         Notes
         -----
-        FINISH
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints (ie constraints of the form
+          :math:`z_0 + 2z_1 + ... > 0`). However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function. For example,
+
+          >>> H = HOIO()
+          >>> H.add_constraint_gt_zero(
+                  {(0,): -0.5, (): -1.65, (1,): -1.0, (2,): 0.25})
+          >>> test_sol = {0: -1, 1: -1, 2: 1}
+          >>> H.is_solution_valid(test_sol)
+          True
+          >>> H.value(sol)
+          0.01
+
+          {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
+          cause a nonzero penalty to be added to the objective function.
+
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\max_z \text{H.value(z)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\max_z \text{H.value(z)}|` ancilla
+          bits will be used.
 
         """
         H = HIsing(H)
-        raise NotImplementedError("Coming soon!")
         self._constraints.setdefault("gt", []).append(H)
+        self += pubo_to_hising(HOBO().add_constraint_gt_zero(
+            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        ))
         return self
 
-    def add_constraint_ge_zero(self, H, lam=1):
+    def add_constraint_ge_zero(self,
+                               H, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
         r"""add_constraint_ge_zero.
 
-        Enforce that ``H >= 0`` by penalizing invalid solution with ``lam``.
+        Enforce that ``H >= 0`` by penalizing invalid solutions with ``lam``.
 
         Parameters
         ----------
@@ -423,25 +544,64 @@ class HOIO(HIsing):
             The HIsing constraint such that H >= 0. Note that ``H`` will be
             converted to a ``qubovert.HIsing`` object if it is not already,
             thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaluts to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : HOIO.
+            Updates the HOIO in place, but returns ``self`` so that operations
             can be strung together.
-
-        Examples
-        --------
-        FINISH
 
         Notes
         -----
-        FINISH
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints (ie constraints of the form
+          :math:`z_0 + 2z_1 + ... \geq 0`). However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function. For example,
+
+          >>> H = HOIO()
+          >>> H.add_constraint_ge_zero(
+                  {(0,): -0.5, (): -1.15, (1,): -1.0, (2,): 0.75})
+          >>> H
+          {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
+           (2,): -2.4749999999999996, ('_a0', 0): 0.5, ('_a0',): 1.65,
+           (1, 2): -1.5, ('_a0', 1): 1.0, ('_a0', 2): -0.75}
+          >>> H.is_solution_valid(test_sol)
+          True
+          >>> H.value(test_sol)
+          0.01
+
+          {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
+          cause a nonzero penalty to be added to the objective function.
+
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\max_z \text{H.value(z)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\max_z \text{H.value(z)}|` ancilla
+          bits will be used.
 
         """
         H = HIsing(H)
-        raise NotImplementedError("Coming soon!")
         self._constraints.setdefault("ge", []).append(H)
+        self += pubo_to_hising(HOBO().add_constraint_ge_zero(
+            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        ))
         return self

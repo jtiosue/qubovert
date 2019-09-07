@@ -30,6 +30,12 @@ def test_vertexcover_str():
     assert eval(str(problem)) == problem
 
 
+def test_properties():
+
+    assert problem.E == edges
+    problem.V
+
+
 def test_vertexcover_bruteforce():
 
     assert problem.solve_bruteforce() == {"a", "c"}

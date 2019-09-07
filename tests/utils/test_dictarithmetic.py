@@ -187,3 +187,6 @@ def test_symbols():
     assert d.subs(a, 2) == {(0,): -2, (0, 1): 2, (1,): b}
     assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
+
+    # rounding when symbols are involved.
+    round(d)

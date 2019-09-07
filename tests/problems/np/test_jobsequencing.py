@@ -40,6 +40,16 @@ def test_jobsequencing_str():
     assert eval(str(problem_log)) == problem_log
 
 
+def test_jobsequencing_properties():
+
+    x, m = (2, 1, 2), 2
+    p = JobSequencing(x, m)
+    assert p.job_lengths == x
+    assert p.num_workers == m
+    assert p.log_trick
+    p.M
+
+
 def test_jobsequencing_bruteforce():
 
     assert problem.solve_bruteforce() in solutions

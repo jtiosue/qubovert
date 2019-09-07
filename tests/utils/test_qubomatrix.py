@@ -34,6 +34,16 @@ def test_qubo_checkkey():
         QUBOMatrix({(0, 1, 2): -1})
 
 
+def test_properties():
+
+    Q = QUBOMatrix()
+    Q[(0,)] -= 1
+    Q[(0, 1)] += 1
+    Q += 2
+    assert Q.offset == 2
+    assert Q.Q == {(0, 0): -1, (0, 1): 1}
+
+
 def test_qubo_default_valid():
 
     d = QUBOMatrix()

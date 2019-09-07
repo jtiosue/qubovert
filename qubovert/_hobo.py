@@ -139,13 +139,34 @@ class HOBO(PUBO):
     {('a', 1, 2): -4, (1, 2): 3}
 
     >>> H = HOBO()
-    >>> H.add_constraint_eq_zero(
-            {(0, 1): 1}
-        ).add_constraint_eq_zero(
-            {(1, 2): 1, (): -1}
-        )
-    >>> H
-    {(0, 1): 1, (1, 2): -1, (): 1}
+    >>>
+    >>> # minimize -x_0 - x_1 - x_2
+    >>> for i in (0, 1, 2):
+    >>>     H[(i,)] -= 1
+    >>>
+    >>> # subject to constraints
+    >>> H.add_constraint_eq_zero(  # enforce that x_0 x_1 - x_2 == 0
+    >>>     {(0, 1): 1, (2,): -1}
+    >>> ).add_constraint_lt_zero(  # enforce that x_1 x_2 + x_0 < 1
+    >>>     {(1, 2): 1, (0,): 1, (): -1}
+    >>> )
+    >>> print(H)
+    >>> # {(1,): -2, (2,): -1, (0, 1): 2, (1, 2): 2, (0, 1, 2): 2}
+    >>>
+    >>> print(H.solve_bruteforce(all_solutions=True))
+    >>> # [{0: 0, 1: 1, 2: 0}]
+    >>>
+    >>> Q = H.to_qubo()
+    >>> solutions = [H.convert_solution(sol)
+    >>>              for sol in Q.solve_bruteforce(all_solutions=True)]
+    >>> print(solutions)
+    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+    >>>
+    >>> L = H.to_ising()
+    >>> solutions = [H.convert_solution(sol)
+    >>>              for sol in L.solve_bruteforce(all_solutions=True)]
+    >>> print(solutions)
+    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
 
     >>> H = HOBO().AND_eq('a', 'b', 'c')
     >>> H
@@ -537,7 +558,7 @@ class HOBO(PUBO):
           >>> test_sol = {0: 0, 1: 0, 2: 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(sol)
+          >>> H.value(test_sol)
           0.01
 
           {0: 0, 1: 0, 2: 1} is a valid solution to ``H``, but it will still
@@ -648,7 +669,7 @@ class HOBO(PUBO):
           >>> test_sol = {0: 0, 1: 0, 2: 1, '_a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(sol)
+          >>> H.value(test_sol)
           0.01
 
           {0: 0, 1: 0, 2: 1} is a valid solution to ``H``, but it will still
@@ -765,7 +786,7 @@ class HOBO(PUBO):
           >>> test_sol = {0: 0, 1: 0, 2: 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(sol)
+          >>> H.value(test_sol)
           0.01
 
           {0: 0, 1: 0, 2: 1} is a valid solution to ``H``, but it will still
@@ -773,9 +794,9 @@ class HOBO(PUBO):
 
         - To enforce the inequality constraint, ancilla bits will be
           introduced (labels with `_a`). If ``log_trick`` is ``True``, then
-          approximately :math:`\log_2 |\min_x \text{P.value(x)}|`
+          approximately :math:`\log_2 |\max_x \text{P.value(x)}|`
           ancilla bits will be used. If ``log_trick`` is ``False``, then
-          approximately :math:`|\min_x \text{P.value(x)}|` ancilla
+          approximately :math:`|\max_x \text{P.value(x)}|` ancilla
           bits will be used.
 
         Examples
@@ -861,7 +882,7 @@ class HOBO(PUBO):
           >>> test_sol = {0: 0, 1: 0, 2: 1, '_a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(sol)
+          >>> H.value(test_sol)
           0.01
 
           {0: 0, 1: 0, 2: 1} is a valid solution to ``H``, but it will still
@@ -869,9 +890,9 @@ class HOBO(PUBO):
 
         - To enforce the inequality constraint, ancilla bits will be
           introduced (labels with `_a`). If ``log_trick`` is ``True``, then
-          approximately :math:`\log_2 |\min_x \text{P.value(x)}|`
+          approximately :math:`\log_2 |\max_x \text{P.value(x)}|`
           ancilla bits will be used. If ``log_trick`` is ``False``, then
-          approximately :math:`|\min_x \text{P.value(x)}|` ancilla
+          approximately :math:`|\max_x \text{P.value(x)}|` ancilla
           bits will be used.
 
         Examples

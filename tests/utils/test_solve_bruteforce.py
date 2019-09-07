@@ -22,6 +22,14 @@ from qubovert.utils import (
 )
 
 
+def test_errors():
+
+    assert solve_pubo_bruteforce({}) == (0, {})
+    assert solve_pubo_bruteforce({}, all_solutions=True) == (0, [{}])
+    assert solve_pubo_bruteforce({(): 5}) == (5, {})
+    assert solve_pubo_bruteforce({(): 5}, all_solutions=True) == (5, [{}])
+
+
 def test_solve_qubo_bruteforce():
 
     Q = {('0', 1): 1, (1, '2'): 1, (1, 1): -1, ('2', '2'): -2}

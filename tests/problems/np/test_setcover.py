@@ -35,6 +35,13 @@ def test_setcover_str():
     assert eval(str(problem_weighted)) == problem_weighted
 
 
+def test_properties():
+
+    problem.weights
+    problem.M
+    problem.log_trick
+
+
 def test_coverable():
 
     assert problem.is_coverable()

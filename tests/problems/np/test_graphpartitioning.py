@@ -41,6 +41,14 @@ def test_graphpartitioning_str():
     assert eval(str(problem)) == problem
 
 
+def test_graphpartitioning_properties():
+
+    assert problem.E == edges
+    problem.V
+    problem.degree
+    problem.weights
+
+
 def test_graphpartitioning_bruteforce():
 
     assert problem.solve_bruteforce() in solutions

@@ -76,6 +76,9 @@ def test_pubo_on_qubo():
     solution = {'c': 1, 'b': 1, 'a': 1}
     obj = -8
 
+    with assert_raises(ValueError):
+        problem.to_pubo(deg=1)
+
     Problem(problem, solution, obj).runtests()
 
 

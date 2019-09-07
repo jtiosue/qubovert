@@ -20,14 +20,15 @@ from qubovert import HOIO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
-    hising_value
+    hising_value, pubo_to_hising, binary_to_spin,
+    QUBOVertWarning
 )
 from sympy import Symbol
 from numpy import allclose
-from numpy.testing import assert_raises
+from numpy.testing import assert_raises, assert_warns
 
 
-""" TESTS FOR THE METHODS THAT HOBO INHERITS FROM HISING """
+""" TESTS FOR THE METHODS THAT HOIO INHERITS FROM HISING """
 
 
 class Problem:
@@ -330,22 +331,32 @@ def test_symbols():
     assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
 
-    d.add_constraint_eq_zero({(0,): a, (1,): -b})
-    assert d == {(0,): -a, (0, 1): -2*a*b + 2, (1,): b, (): a**2 + b**2}
-    assert d.subs(a, 0) == {(0, 1): 2, (1,): b, (): b**2}
+    d.add_constraint_eq_zero({(0,): a, (1,): -b}, bounds=(-1, 1))
+    d.simplify()
+    assert d == {(0,): -a, (0, 1): -2.*a*b + 2.,
+                 (1,): b, (): 1.*a**2 + 1.*b**2}
+    assert d.subs(a, 0) == {(0, 1): 2, (1,): b, (): 1.*b**2}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 2, (): 4}
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
-def test_hobo_eq_constraint():
+def test_hoio_eq_constraint():
 
-    problem = HOIO({('a',): -1, ('b',): -2, ('a', 'b'): -10, (): -2})
-    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1})
-    solution = {'b': 1, 'a': -1}
-    obj = 7
+    lam = Symbol('lam')
 
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_eq_zero(
+        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): -1}),
+        lam=lam
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    obj = -4
+
+    problem = H.subs(lam, 1)
     sol = problem.solve_bruteforce()
     assert all((
         problem.is_solution_valid(sol),
@@ -360,11 +371,7 @@ def test_hobo_eq_constraint():
         not allclose(e, obj)
     ))
 
-    problem = HOIO({('a',): -1, ('b',): -2, ('a', 'b'): -10, (): -2})
-    problem.add_constraint_eq_zero({('a',): 1, ('b',): 1}, lam=10)
-    solution = {'b': 1, 'a': -1}
-    obj = 7
-
+    problem = H.subs(lam, 10)
     sol = problem.solve_bruteforce()
     assert all((
         problem.is_solution_valid(sol),
@@ -378,3 +385,441 @@ def test_hobo_eq_constraint():
         sol == solution,
         allclose(e, obj)
     ))
+
+
+def test_hoio_lt_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_lt_zero(
+        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
+        lam=lam
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    obj = -4
+
+    problem = H.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_lt_constraint():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_lt_zero(
+        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
+        lam=lam, log_trick=False
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    obj = -4
+
+    problem = H.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_le_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_le_zero(
+        pubo_to_hising(
+            {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3}
+        ),
+        lam=lam
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    obj = -8
+
+    problem = H.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_le_constraint():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_le_zero(
+        pubo_to_hising(
+            {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3}
+        ),
+        lam=lam, log_trick=False
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    obj = -8
+
+    problem = H.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_gt_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_gt_zero(
+        pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
+        lam=lam
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    obj = -4
+
+    problem = H.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_gt_constraint():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_gt_zero(
+        pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
+        lam=lam, log_trick=False
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    obj = -4
+
+    problem = H.subs(lam, 1)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_ge_constraint_logtrick():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_ge_zero(
+        pubo_to_hising(
+            {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3}
+        ),
+        lam=lam
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    obj = -8
+
+    problem = H.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_ge_constraint():
+
+    lam = Symbol("lam")
+
+    H = HOIO(pubo_to_hising({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_ge_zero(
+        pubo_to_hising(
+            {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3}
+        ),
+        lam=lam, log_trick=False
+    )
+    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    obj = -8
+
+    problem = H.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = H.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_hoio_constraints_warnings():
+
+    with assert_warns(QUBOVertWarning):  # qlwayss satisfied
+        HOIO().add_constraint_eq_zero({(): 0})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_eq_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_eq_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_lt_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_lt_zero({(): 1, (0,): -1})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOIO().add_constraint_lt_zero({(): -1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_le_zero({(): 1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOIO().add_constraint_le_zero({(): -1, (0,): -.5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_gt_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_gt_zero({(): -1, (0,): 1})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOIO().add_constraint_gt_zero({(): 1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # not satisfiable
+        HOIO().add_constraint_ge_zero({(): -1, (0,): .5})
+
+    with assert_warns(QUBOVertWarning):  # always satisfied
+        HOIO().add_constraint_ge_zero({(): 1, (0,): .5})

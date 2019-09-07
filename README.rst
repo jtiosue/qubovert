@@ -87,9 +87,16 @@ Then you can use it in Python versions 3.6 and above with
 
 Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
 ---------------------------------------------------------------
+- QUBO: Quadratic Unconstrained Binary Optimization
+- Ising: quadratic unconstrained spin-1/2 Hamiltonian
+- PUBO: Polynomial Unconstrained Binary Optimization
+- HIsing: Higher order unconstrained spin-1/2 Hamiltonian
+- HOBO: Higher Order Binary Optimization
+- HOIO: Higher Order Ising Optimization
+
 See the docstrings for ``qubovert.HOBO``, ``qubovert.HOIO``, ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
 
-See the following HOBO example.
+See the following HOBO examples (much of the same functionality can be used with HOIO problems).
 
 .. code:: python
 
@@ -108,13 +115,36 @@ See the following HOBO example.
 .. code:: python
 
     H = HOBO()
-    H.add_constraint_eq_zero(
-            {(0, 1): 1}
-        ).add_constraint_eq_zero(
-            {(1, 2): 1, (): -1}
-        )
+
+    # minimize -x_0 - x_1 - x_2
+    for i in (0, 1, 2):
+        H[(i,)] -= 1
+
+    # subject to constraints
+    H.add_constraint_eq_zero(  # enforce that x_0 x_1 - x_2 == 0
+        {(0, 1): 1, (2,): -1}
+    ).add_constraint_lt_zero(  # enforce that x_1 x_2 + x_0 < 1
+        {(1, 2): 1, (0,): 1, (): -1}
+    )
     print(H)
-    # {(0, 1): 1, (1, 2): -1, (): 1}
+    # {(1,): -2, (2,): -1, (0, 1): 2, (1, 2): 2, (0, 1, 2): 2}
+
+    print(H.solve_bruteforce(all_solutions=True))
+    # [{0: 0, 1: 1, 2: 0}]
+
+    Q = H.to_qubo()
+    solutions = [H.convert_solution(sol)
+                 for sol in Q.solve_bruteforce(all_solutions=True)]
+    print(solutions)
+    # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+
+    L = H.to_ising()
+    solutions = [H.convert_solution(sol)
+                 for sol in L.solve_bruteforce(all_solutions=True)]
+    print(solutions)
+    # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+
+.. code:: python
 
     # enforce that c == a AND b
     H = HOBO().AND_eq('a', 'b', 'c')
