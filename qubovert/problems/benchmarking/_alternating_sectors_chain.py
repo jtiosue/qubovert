@@ -18,7 +18,8 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import Problem, IsingMatrix
+from qubovert.utils import IsingMatrix
+from qubovert.problems import Problem
 
 
 __all__ = 'AlternatingSectorsChain',
@@ -35,7 +36,7 @@ class AlternatingSectorsChain(Problem):
     but useful for benchmarking some solvers or solving techniques.
 
     AlternatingSectorsChain inherits some methods and attributes from the
-    Problem class. See ``help(qubovert.utils.Problem)``.
+    Problem class. See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------

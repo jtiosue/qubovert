@@ -35,15 +35,15 @@ class HOIO(HIsing):
     ``HOIO`` has all the same methods as ``HIsing``, but adds some constraint
     methods; namely
 
-    - ``add_constraint_eq_zero(H, lam=1)`` enforces that ``H == 0`` by
+    - ``add_constraint_eq_zero(H, lam=1, ...)`` enforces that ``H == 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_lt_zero(H, lam=1)`` enforces that ``H < 0`` by
+    - ``add_constraint_lt_zero(H, lam=1, ...)`` enforces that ``H < 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_le_zero(H, lam=1)`` enforces that ``H <= 0`` by
+    - ``add_constraint_le_zero(H, lam=1, ...)`` enforces that ``H <= 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_gt_zero(H, lam=1)`` enforces that ``H > 0`` by
+    - ``add_constraint_gt_zero(H, lam=1, ...)`` enforces that ``H > 0`` by
       penalizing with ``lam``, and
-    - ``add_constraint_ge_zero(H, lam=1)`` enforces that ``H >= 0`` by
+    - ``add_constraint_ge_zero(H, lam=1, ...)`` enforces that ``H >= 0`` by
       penalizing with ``lam``.
 
     Each of these takes in a HIsing ``H`` and a lagrange multiplier ``lam``

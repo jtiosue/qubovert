@@ -19,8 +19,9 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-from qubovert.utils import Problem, IsingMatrix
+from qubovert.utils import IsingMatrix
 from qubovert import HOIO
+from qubovert.problems import Problem
 
 
 __all__ = 'GraphPartitioning',
@@ -38,7 +39,7 @@ class GraphPartitioning(Problem):
     total weight of the edges) connecting the two subsets is minimized.
 
     GraphPartitioning inherits some methods and attributes from the Problem
-    class. See ``help(qubovert.utils.Problem)``.
+    class. See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------

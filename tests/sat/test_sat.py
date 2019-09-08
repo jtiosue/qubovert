@@ -35,6 +35,7 @@ def test_sat_not():
 
 def test_sat_and():
 
+    assert AND() == {(): 1}
     assert AND('x', 'y') == PUBO({('x', 'y'): 1})
     assert AND({('x', 'y'): 1}, 'a') == PUBO({('x', 'y', 'a'): 1})
 
@@ -50,6 +51,7 @@ def test_sat_and():
 
 def test_sat_nand():
 
+    assert NAND() == {}
     assert NAND('x', 'y') == PUBO({(): 1, ('x', 'y'): -1})
     assert NAND({('x', 'y'): 1}, 'a') == PUBO({(): 1, ('x', 'y', 'a'): -1})
 
@@ -65,6 +67,7 @@ def test_sat_nand():
 
 def test_sat_or():
 
+    assert OR() == {(): 1}
     assert OR('x', 'y') == PUBO({('x',): 1, ('y',): 1, ('x', 'y'): -1})
     assert (
         OR({('x', 'y'): 1}, 'a') ==
@@ -83,6 +86,7 @@ def test_sat_or():
 
 def test_sat_nor():
 
+    assert NOR() == {}
     assert (
         NOR('x', 'y') == PUBO({(): 1, ('x',): -1, ('y',): -1, ('x', 'y'): 1})
     )
@@ -103,6 +107,7 @@ def test_sat_nor():
 
 def test_sat_xor():
 
+    assert XOR() == {(): 1}
     assert XOR('x', 'y') == PUBO({('x',): 1, ('y',): 1, ('x', 'y'): -2})
     assert (
         XOR({('x', 'y'): 1}, 'a') ==
@@ -121,6 +126,7 @@ def test_sat_xor():
 
 def test_sat_xnor():
 
+    assert XNOR() == {}
     assert (
         XNOR('x', 'y') == PUBO({(): 1, ('x',): -1, ('y',): -1, ('x', 'y'): 2})
     )

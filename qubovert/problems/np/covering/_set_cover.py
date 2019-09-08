@@ -19,7 +19,8 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 """
 
 from numpy import log2, allclose
-from qubovert.utils import Problem, QUBOMatrix, solve_qubo_bruteforce
+from qubovert.utils import QUBOMatrix, solve_qubo_bruteforce
+from qubovert.problems import Problem
 
 
 __all__ = 'SetCover',
@@ -38,7 +39,7 @@ class SetCover(Problem):
     has an associated weight.
 
     This class inherits some methods and attributes from the
-    ``qubovert.utils.Problem`` class.
+    ``qubovert.problems.Problem`` class.
 
     Example
     -------
@@ -317,11 +318,11 @@ class SetCover(Problem):
 
         Q = QUBOMatrix()
 
-        Q += self._n * A  # constant comes from the first constraint
+        Q += self._n * A  # constant comes from the constraints
 
         # encode H_B (equation 46)
         for i in range(self._N):
-            Q[(i, i)] += self._weights[i] * B
+            Q[(i,)] += self._weights[i] * B
 
         # encode H_A
 
@@ -350,29 +351,20 @@ class SetCover(Problem):
 
             else:  # using the log_trick
 
-                # first constraint
+                # no first constraint now, but modify the second constraint.
                 for m in range(self._log_M+1):
                     i = self._x(alpha, m)
-                    Q[(i, i)] -= A
-                    for mp in range(m+1, self._log_M+1):
-                        ip = self._x(alpha, mp)
-                        Q[(i, ip)] += A
-
-                # second constraint
-                for m in range(self._log_M+1):
-                    i = self._x(alpha, m)
-                    Q[(i, i)] += A*pow(2, 2*m)
+                    Q[(i, i)] += A * (pow(2, 2*m) + 2 * pow(2, m))
                     for mp in range(m+1, self._log_M+1):
                         ip = self._x(alpha, mp)
                         Q[(i, ip)] += 2*A*pow(2, m+mp)
                     for j in self._filtered_range(alpha):
                         Q[(j, i)] -= 2*A*pow(2, m)
 
-            # for both using and not using the log trick
             for i in self._filtered_range(alpha):
-                Q[(i, i)] += A
+                Q[(i,)] += A if not self._log_trick else -A
                 for j in self._filtered_range(alpha, i+1):
-                    Q[(i, j)] += 2*A
+                    Q[(i, j)] += 2 * A
 
         return Q
 

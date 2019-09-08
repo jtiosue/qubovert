@@ -18,8 +18,8 @@ QUBO stands for Quadratic Unconstrained Binary Optimization. QUBO problems
 have a one-to-one mapping to classical Ising problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
 See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
-for all the problems defined, and ``qubovert.utils.__all__`` for some utilities
-used.
+for problems defined, and ``qubovert.utils.__all__`` for some utility
+functions, and ``qubovert.sat.__all__`` for the satisfiability library.
 
 """
 
@@ -31,10 +31,6 @@ from ._qubo import *
 from ._ising import *
 from ._pubo import *
 from ._hising import *
-
-# sat is used in HOBO, but used PUBO
-from . import sat
-
 from ._hobo import *
 from ._hoio import *
 
@@ -54,6 +50,7 @@ __all__ = (
     __all_hoio__
 )
 
+from . import sat
 from . import problems
 
 name = "qubovert"

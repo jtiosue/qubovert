@@ -810,147 +810,205 @@ def test_hobo_constraints_warnings():
 
 def test_hobo_logic():
 
-    H = HOBO().NAND_eq('a', 'b', 'c', constraint=True).AND('a', 'b')
+    H = HOBO().add_constraint_eq_NAND('c', 'a', 'b').AND('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().OR_eq('a', 'b', 'c', constraint=True).NOR('a', 'b')
+    H = HOBO().add_constraint_eq_OR('c', 'a', 'b').NOR('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 0, 'c': 0}
 
-    H = HOBO().XOR_eq('a', 'b', 'c', constraint=True).XNOR('a', 'b').ONE('a')
+    H = HOBO().add_constraint_eq_XOR('c', 'a', 'b').XNOR('a', 'b').ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().NOT_eq('a', 'b', constraint=True).ONE('a')
+    H = HOBO().add_constraint_eq_NOT('a', 'b').ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
 
     H = HOBO().NAND('a', 'b').NOT('a').OR(
-        'a', 'b').ONE_eq('a', 'c', constraint=True)
+        'a', 'b').add_constraint_eq_ONE('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
 
-    H = HOBO().XOR('a', 'b').NOR_eq(
-        'a', 'c', 'b').ONE('c').ONE_eq('a', 'c', constraint=True)
+    H = HOBO().XOR('a', 'b').add_constraint_eq_NOR(
+        'b', 'a', 'c').ONE('c').add_constraint_eq_ONE('a', 'c', )
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 
-    H = HOBO().AND_eq('a', 'b', 'c', constraint=True).XNOR_eq(
-        'a', 'b', 'c', constraint=True).ONE('c')
+    H = HOBO().add_constraint_eq_AND('c', 'a', 'b').add_constraint_eq_XNOR(
+        'c', 'a', 'b').ONE('c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}
 
-    # NOR_eq
-    H = HOBO().NOR_eq(0, 1, 2, 3, 4, 5)
+    # add_constraint_eq_NOR
+    H = HOBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert (not any(sol[i] for i in range(5))) == sol[5]
+        assert (not any(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().NOR_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    H = HOBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
-        if (not any(sol[i] for i in range(5))) == sol[5]:
+        if (not any(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().NOR_eq(0, 1, 2)
+    H = HOBO().add_constraint_eq_NOR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert (not any(sol[i] for i in range(2))) == sol[2]
+        assert (not any(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().NOR_eq(0, 1, 2, constraint=True)
+    H = HOBO().add_constraint_eq_NOR(0, 1, 2)
     for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
-        if (not any(sol[i] for i in range(2))) == sol[2]:
+        if (not any(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    # OR_eq
-    H = HOBO().OR_eq(0, 1, 2, 3, 4, 5)
+    # add_constraint_eq_OR
+    H = HOBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert any(sol[i] for i in range(5)) == sol[5]
+        assert any(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().OR_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    H = HOBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
-        if any(sol[i] for i in range(5)) == sol[5]:
+        if any(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().OR_eq(0, 1, 2)
+    H = HOBO().add_constraint_eq_OR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert any(sol[i] for i in range(2)) == sol[2]
+        assert any(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().OR_eq(0, 1, 2, constraint=True)
+    H = HOBO().add_constraint_eq_OR(0, 1, 2)
     for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
-        if any(sol[i] for i in range(2)) == sol[2]:
+        if any(sol[i] for i in range(1, 3)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    # NAND_eq
-    H = HOBO().NAND_eq(0, 1, 2, 3, 4, 5)
+    # add_constraint_eq_NAND
+    H = HOBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert (not all(sol[i] for i in range(5))) == sol[5]
+        assert (not all(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().NAND_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    H = HOBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
-        if (not all(sol[i] for i in range(5))) == sol[5]:
+        if (not all(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().NAND_eq(0, 1, 2)
+    H = HOBO().add_constraint_eq_NAND(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert (not all(sol[i] for i in range(2))) == sol[2]
+        assert (not all(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().NAND_eq(0, 1, 2, constraint=True)
+    H = HOBO().add_constraint_eq_NAND(0, 1, 2)
     for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
-        if (not all(sol[i] for i in range(2))) == sol[2]:
+        if (not all(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    # AND_eq
-    H = HOBO().AND_eq(0, 1, 2, 3, 4, 5)
+    # add_constraint_eq_AND
+    H = HOBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert all(sol[i] for i in range(5)) == sol[5]
+        assert all(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().AND_eq(0, 1, 2, 3, 4, 5, constraint=True)
+    H = HOBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
-        if all(sol[i] for i in range(5)) == sol[5]:
+        if all(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().AND_eq(0, 1, 2)
+    H = HOBO().add_constraint_eq_AND(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert all(sol[i] for i in range(2)) == sol[2]
+        assert all(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().AND_eq(0, 1, 2, constraint=True)
+    H = HOBO().add_constraint_eq_AND(0, 1, 2)
     for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
-        if all(sol[i] for i in range(2)) == sol[2]:
+        if all(sol[i] for i in range(1, 3)) == sol[0]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # add_constraint_eq_XOR
+    H = HOBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert sum(sol[i] for i in range(1, 6)) % 2 == sol[0]
+        assert not H.value(sol)
+    H = HOBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if sum(sol[i] for i in range(1, 6)) % 2 == sol[0]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().add_constraint_eq_XOR(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert sum(sol[i] for i in range(1, 3)) % 2 == sol[0]
+        assert not H.value(sol)
+    H = HOBO().add_constraint_eq_XOR(0, 1, 2)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if sum(sol[i] for i in range(1, 3)) % 2 == sol[0]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # add_constraint_eq_XNOR
+    H = HOBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]
+        assert not H.value(sol)
+    H = HOBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().add_constraint_eq_XNOR(0, 1, 2)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]
+        assert not H.value(sol)
+    H = HOBO().add_constraint_eq_XNOR(0, 1, 2)
+    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+        if (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:
@@ -1067,6 +1125,64 @@ def test_hobo_logic():
     H = HOBO().AND(0, 1, constraint=True)
     for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
         if all(sol[i] for i in range(2)):
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # XOR
+    H = HOBO().XOR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert sum(sol[i] for i in range(6)) % 2
+        assert not H.value(sol)
+    H = HOBO().XOR(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if sum(sol[i] for i in range(6)) % 2:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().XOR(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert sum(sol[i] for i in range(2)) % 2
+        assert not H.value(sol)
+    H = HOBO().XOR(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if sum(sol[i] for i in range(2)) % 2:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    # XNOR
+    H = HOBO().XNOR(0, 1, 2, 3, 4, 5)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not sum(sol[i] for i in range(6)) % 2
+        assert not H.value(sol)
+    H = HOBO().XNOR(0, 1, 2, 3, 4, 5, constraint=True)
+    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+        if not sum(sol[i] for i in range(6)) % 2:
+            assert H.is_solution_valid(sol)
+            assert not H.value(sol)
+        else:
+            assert not H.is_solution_valid(sol)
+            assert H.value(sol)
+
+    H = HOBO().XNOR(0, 1)
+    sols = H.solve_bruteforce(True)
+    for sol in sols:
+        assert not sum(sol[i] for i in range(2)) % 2
+        assert not H.value(sol)
+    H = HOBO().XNOR(0, 1, constraint=True)
+    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+        if not sum(sol[i] for i in range(2)) % 2:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
         else:

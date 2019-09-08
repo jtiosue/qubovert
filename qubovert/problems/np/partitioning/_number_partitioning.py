@@ -19,8 +19,9 @@ Contains the NumberPartitioning class. See
 
 """
 
-from qubovert.utils import Problem, IsingMatrix
+from qubovert.utils import IsingMatrix
 from qubovert import HOIO
+from qubovert.problems import Problem
 
 
 __all__ = 'NumberPartitioning',
@@ -45,7 +46,7 @@ class NumberPartitioning(Problem):
     the difference in the sum between the two partitions.
 
     This class inherits some methods and attributes from the Problem class. For
-    more info, see ``help(qubovert.utils.Problem)``.
+    more info, see ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------

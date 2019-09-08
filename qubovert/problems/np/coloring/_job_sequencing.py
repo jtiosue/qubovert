@@ -20,7 +20,8 @@ See ``help(qubovert.problems.JobSequencing)``.
 """
 
 from numpy import log2
-from qubovert.utils import Problem, QUBOMatrix, decimal_to_binary
+from qubovert.utils import QUBOMatrix, decimal_to_binary
+from qubovert.problems import Problem
 
 
 __all__ = 'JobSequencing',
@@ -38,7 +39,7 @@ class JobSequencing(Problem):
     minimized.
 
     This class inherits some methods and attributes from the
-    ``qubovert.utils.Problem`` class.
+    ``qubovert.problems.Problem`` class.
 
     Example
     -------

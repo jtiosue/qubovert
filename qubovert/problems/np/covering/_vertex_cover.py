@@ -18,8 +18,9 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 
-from qubovert.utils import Problem, QUBOMatrix
+from qubovert.utils import QUBOMatrix
 from qubovert import HOBO
+from qubovert.problems import Problem
 
 
 __all__ = 'VertexCover',
@@ -32,11 +33,11 @@ class VertexCover(Problem):
     Ising formluations. Based on the paper hereforth designated [Lucas]_.
 
     The goal of the VertexCover problem is to find the smallest number of
-    verticies that can be coloredsuch that every edge of the graph is
+    verticies that can be colored such that every edge of the graph is
     incident to a colored vertex.
 
     VertexCover inherits some methods and attributes from the Problem class.
-    See ``help(qubovert.utils.Problem)``.
+    See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------

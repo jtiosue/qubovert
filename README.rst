@@ -154,22 +154,24 @@ See the following HOBO examples (much of the same functionality can be used with
 .. code:: python
 
     # enforce that c == a AND b
-    H = HOBO().AND_eq('a', 'b', 'c')
+    H = HOBO().add_constraint_eq_AND('c', 'a', 'b')
     print(H)
     # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
 
+.. code:: python
+
     H = HOBO()
-    # AND variables a and b, and variables b and c
+    # make it favorable to AND variables a and b, and variables b and c
     H.AND('a', 'b').AND('b', 'c')
 
-    # OR variables b and c
+    # make it favorable to OR variables b and c
     H.OR('b', 'c')
 
-    # (a AND b) OR (c AND d) OR e
+    # make it favorable to (a AND b) OR (c AND d) OR e
     H.OR(['a', 'b'], ['c', 'd'], 'e')
 
     # enforce that 'b' = NOR('a', 'c', 'd')
-    H.NOR_eq('a', 'c', 'd', 'b')
+    H.add_constraint_eq_NOR('b', 'a', 'c', 'd')
 
     print(H)
     # {(): 5, ('c',): -2, ('c', 'a', 'b', 'd'): 1, ('a', 'e', 'b'): 1,

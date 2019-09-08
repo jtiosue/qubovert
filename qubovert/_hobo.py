@@ -20,7 +20,7 @@ Contains the HOBO class. See ``help(qubovert.HOBO)``.
 
 from . import PUBO
 from .utils import QUBOVertWarning
-from .sat import OR
+from .sat import OR, XOR
 from numpy import log2, ceil
 
 
@@ -83,15 +83,15 @@ class HOBO(PUBO):
     ``HOBO`` has all the same methods as ``PUBO``, but adds some constraint
     methods; namely
 
-    - ``add_constraint_eq_zero(P, lam=1)`` enforces that ``P == 0`` by
+    - ``add_constraint_eq_zero(P, lam=1, ...)`` enforces that ``P == 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_lt_zero(P, lam=1)`` enforces that ``P < 0`` by
+    - ``add_constraint_lt_zero(P, lam=1, ...)`` enforces that ``P < 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_le_zero(P, lam=1)`` enforces that ``P <= 0`` by
+    - ``add_constraint_le_zero(P, lam=1, ...)`` enforces that ``P <= 0`` by
       penalizing with ``lam``,
-    - ``add_constraint_gt_zero(P, lam=1)`` enforces that ``P > 0`` by
+    - ``add_constraint_gt_zero(P, lam=1, ...)`` enforces that ``P > 0`` by
       penalizing with ``lam``, and
-    - ``add_constraint_ge_zero(P, lam=1)`` enforces that ``P >= 0`` by
+    - ``add_constraint_ge_zero(P, lam=1, ...)`` enforces that ``P >= 0`` by
       penalizing with ``lam``.
 
     Each of these takes in a PUBO ``P`` and a lagrange multiplier ``lam`` that
@@ -100,10 +100,10 @@ class HOBO(PUBO):
 
     We then implement logical operations:
 
-    - ``AND``, ``NAND``, ``AND_eq``, ``NAND_eq``,
-    - ``OR``, ``NOR```, ``OR_eq``, ``NOR_eq``,
-    - ``XOR``, ``XNOR``, ``XOR_eq``, ``XNOR_eq``,
-    - ``ONE``, ``NOT``, ``ONE_eq``, ``NOT_eq``.
+    - ``AND``, ``NAND``, ``add_constraint_eq_AND``, ``add_constraint_eq_NAND``,
+    - ``OR``, ``NOR```, ``add_constraint_eq_OR``, ``add_constraint_eq_NOR``,
+    - ``XOR``, ``XNOR``, ``add_constraint_eq_XOR``, ``add_constraint_eq_XNOR``,
+    - ``ONE``, ``NOT``, ``add_constraint_eq_ONE``, ``add_constraint_eq_NOT``.
 
     See each of their docstrings for important details on their implementation.
 
@@ -163,7 +163,9 @@ class HOBO(PUBO):
     >>> print(solutions)
     >>> # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
 
-    >>> H = HOBO().AND_eq('a', 'b', 'c')
+    Enforce that c == a b
+
+    >>> H = HOBO().add_constraint_eq_AND('c', 'a', 'b')
     >>> H
     {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
 
@@ -171,13 +173,13 @@ class HOBO(PUBO):
     >>> # or from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> H = HOBO()
     >>>
-    >>> # AND variables a and b, and variables b and c
+    >>> # make it favorable to AND variables a and b, and variables b and c
     >>> H.AND('a', 'b').AND('b', 'c')
     >>>
-    >>> # OR variables b and c
+    >>> # make it favorable to OR variables b and c
     >>> H.OR('b', 'c')
     >>>
-    >>> # (a AND b) OR (c AND d)
+    >>> # make it favorable to (a AND b) OR (c AND d)
     >>> H.OR(['a', 'b'], ['c', 'd'])
     >>>
     >>> H
@@ -420,8 +422,6 @@ class HOBO(PUBO):
         }
         return d
 
-    # constraints/logic
-
     def add_constraint_eq_zero(self,
                                P, lam=1,
                                bounds=None, suppress_warnings=False):
@@ -497,6 +497,10 @@ class HOBO(PUBO):
         elif max_val < 0:
             if not suppress_warnings:
                 QUBOVertWarning.warn("Constraint cannot be satisfied")
+            self -= lam * P
+        elif min_val == 0:
+            self += lam * P
+        elif max_val == 0:
             self -= lam * P
         else:
             self += lam * P ** 2
@@ -723,8 +727,6 @@ class HOBO(PUBO):
                     P[(self._next_ancilla,)] += 1
                     max_val += 1
 
-            # self += lam * P ** 2
-
             self += HOBO().add_constraint_eq_zero(
                 P, lam=lam,
                 bounds=(min_val, max_val), suppress_warnings=True
@@ -817,7 +819,7 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._constraints.setdefault("gt", []).append(P)
         if bounds is not None:
-            bounds = -bounds[0], -bounds[1]
+            bounds = -bounds[1], -bounds[0]
         self += HOBO().add_constraint_lt_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -915,12 +917,400 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._constraints.setdefault("ge", []).append(P)
         if bounds is not None:
-            bounds = -bounds[0], -bounds[1]
+            bounds = -bounds[1], -bounds[0]
         self += HOBO().add_constraint_le_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         return self
+
+    def add_constraint_eq_AND(self, a, *variables, lam=1):
+        r"""add_constraint_eq_AND.
+
+        Add a penalty to the HOBO that enforces that
+        :math:`a = v_0 \land v_1 \land v_2 \land ...`,
+        with a penalty factor
+        ``lam``, where ``v_1 = variables[0]``, ``v_2 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_AND('a', 'b', 'c')  # enforce a == b AND c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b AND c AND d) == 'e'
+        >>> H.add_constraint_eq_AND('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b AND c AND d) == 'e'
+        >>> H.add_constraint_eq_AND('e', 'a', 'b', 'c', 'd')
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b AND c AND d) == 'e' AND 'f'
+        >>> H.add_constraint_eq_AND(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        References
+        ----------
+        https://arxiv.org/pdf/1307.8041.pdf equation 6.
+
+        """
+        n = len(variables)
+        if n < 2:
+            raise ValueError("Must supply at least two variables to AND. "
+                             "See ``add_constraint_eq_ONE`` for less.")
+        a = _create_tuple(a)
+        b, c = (), ()
+        for v in variables[:n // 2]:
+            b += _create_tuple(v)
+        for v in variables[n // 2:]:
+            c += _create_tuple(v)
+
+        P = PUBO({a: 3, b+c: 1, b+a: -2, c+a: -2})
+
+        return self.add_constraint_eq_zero(P, lam, bounds=(0, 3))
+
+    def add_constraint_eq_OR(self, a, *variables, lam=1):
+        r"""add_constraint_eq_OR.
+
+        Add a penalty to the HOBO that enforces that
+        :math:`v_0 \lor v_1 \lor v_2 \lor ... == a`,
+        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_OR('a', 'b', 'c')  # enforce a == b OR c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) OR (c AND d) == 'e'
+        >>> H.add_constraint_eq_OR('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) OR (c AND d) OR e == f
+        >>> H.add_constraint_eq_OR('f', ['a', 'b'], ['c', 'd'], 'e')
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) OR (c AND d) == ('e' AND 'f')
+        >>> H.add_constraint_eq_OR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        """
+        n = len(variables)
+        if n < 2:
+            raise ValueError("Must supply at least two variables to OR.")
+
+        a = _create_tuple(a)
+        if n == 2:
+            b, c = tuple(_create_tuple(x) for x in variables)
+            P = PUBO({a: 1, b: 1, c: 1, b+c: 1, b+a: -2, c+a: -2})
+            bounds = 0, 3
+        else:
+            P = HOBO().NOR(*variables) - {a: 1}
+            bounds = -1, 1
+
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
+
+    def add_constraint_eq_XOR(self, a, *variables, lam=1):
+        r"""add_constraint_eq_XOR.
+
+        Add a penalty to the HOBO that enforces that
+        :math:`v_0 \oplus v_1 \oplus ... == a`
+        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_XOR('a', 'b', 'c')  # enforce a == b XOR c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) XOR (c AND d) == 'e'
+        >>> H.add_constraint_eq_XOR('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) XOR (c AND d) == ('e' AND 'f')
+        >>> H.add_constraint_eq_XOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        """
+        P = HOBO().XNOR(*variables) - {_create_tuple(a): 1}
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
+
+    def add_constraint_eq_ONE(self, a, b, lam=1):
+        r"""add_constraint_eq_ONE.
+
+        Add a penalty to the HOBO that enforces that :math:`a == b` with
+        a penalty factor ``lam``.
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        b : any hashable object or a list of hashable objects.
+            The label for binary variables ``b``.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_ONE('a', 'b')  # enforce a == b
+
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_ONE(['a', 'b'], 'c')  # enforce (a AND b) == c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) == (c AND d)
+        >>> H.add_constraint_eq_ONE(['a', 'b'], ['c', 'd'])
+
+        """
+        P = PUBO({_create_tuple(a): 1, _create_tuple(b): -1})
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
+
+    def add_constraint_eq_NAND(self, a, *variables, lam=1):
+        r"""add_constraint_eq_NAND.
+
+        Add a penalty to the HOBO that enforces that
+        :math:`\lnot (v_0 \land v_1 \land v_2 \land ...) == a`, with a
+        penalty factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_NAND('a', 'b', 'c')  # enforce a == b NAND c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NAND (c AND d) == 'e'
+        >>> H.add_constraint_eq_NAND('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NAND (c AND d) NAND e == f
+        >>> H.add_constraint_eq_NAND('f', ['a', 'b'], ['c', 'd'], 'e')
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NAND (c AND d) == 'e' AND 'f'
+        >>> H.add_constraint_eq_NAND(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        """
+        n = len(variables)
+        if n < 2:
+            raise ValueError("Must supply at least two variables to NAND. "
+                             "See ``add_constraint_eq_NOT`` for less.")
+        a = _create_tuple(a)
+        b, c = (), ()
+        for v in variables[:n // 2]:
+            b += _create_tuple(v)
+        for v in variables[n // 2:]:
+            c += _create_tuple(v)
+
+        P = PUBO({(): 3, b: -2, c: -2, a: -3, b+c: 1, b+a: 2, c+a: 2})
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 3))
+
+    def add_constraint_eq_NOR(self, a, *variables, lam=1):
+        r"""add_constraint_eq_NOR.
+
+        Add a penalty to the HOBO that enforces that
+        :math:`\lnot(v_0 \lor v_1 \lor v_2 \lor ...) == a`,
+        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_NOR('a', 'b', 'c')  # enforce a == b NOR c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NOR (c AND d) == 'e'
+        >>> H.add_constraint_eq_NOR('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NOR (c AND d) NOR e == f
+        >>> H.add_constraint_eq_NOR('f', ['a', 'b'], ['c', 'd'], 'e')
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) NOR (c AND d) == ('e' AND 'f')
+        >>> H.add_constraint_eq_NOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        """
+        n = len(variables)
+        if n < 2:
+            raise ValueError("Must supply at least two variables to NOR.")
+
+        a = _create_tuple(a)
+        if n == 2:
+            b, c = tuple(_create_tuple(x) for x in variables)
+            P = PUBO({a: -1, b: -1, c: -1, (): 1, b+c: 1, b+a: 2, c+a: 2})
+            bounds = 0, 3
+        else:
+            P = HOBO().OR(*variables) - {a: 1}
+            bounds = -1, 1
+
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
+
+    def add_constraint_eq_XNOR(self, a, *variables, lam=1):
+        r"""add_constraint_eq_XNOR.
+
+        Add a penalty to the HOBO that enforces that
+        :math:\lnot(`v_0 \oplus v_1 \oplus ...) == a`
+        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ...
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_XNOR('a', 'b', 'c')  # enforce a == b XNOR c
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) XNOR (c AND d) == 'e'
+        >>> H.add_constraint_eq_XNOR('e', ['a', 'b'], ['c', 'd'])
+
+        >>> H = HOBO()
+        >>> # enforce (a AND b) XNOR (c AND d) == ('e' AND 'f')
+        >>> H.add_constraint_eq_XNOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+
+        """
+        P = HOBO().XOR(*variables) - {_create_tuple(a): 1}
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
+
+    def add_constraint_eq_NOT(self, a, b, lam=1):
+        r"""NOT.
+
+        Add a penalty to the HOBO that enforces that :math:`\lnot a == b` with
+        a penalty factor ``lam``.
+
+        Parameters
+        ----------
+        a : any hashable object or a list of hashable objects.
+            The label for binary variables ``a``.
+        b : any hashable object or a list of hashable objects.
+            The label for binary variables ``b``.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the clause.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Examples
+        --------
+        >>> H = HOBO()
+        >>> H.add_constraint_eq_NOT('a', 'b')  # enforce NOT(a) == b
+
+        >>> H = HOBO()
+        >>> # enforce NOT (a AND b) == c
+        >>> H.add_constraint_eq_NOT(['a', 'b'], 'c')
+
+        >>> H = HOBO()
+        >>> # enforce NOT(a AND b) == (c AND d)
+        >>> H.add_constraint_eq_NOT(['a', 'b'], ['c', 'd'])
+
+        """
+        P = HOBO().ONE(a) - {_create_tuple(b): 1}
+        return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def AND(self, *variables, lam=1, constraint=False):
         r"""AND.
@@ -938,11 +1328,10 @@ class HOBO(PUBO):
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -987,11 +1376,10 @@ class HOBO(PUBO):
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1019,35 +1407,37 @@ class HOBO(PUBO):
         >>> H.OR(['a', 'b'], ['c', 'd'], ['e', 'f', 'g'])
 
         """
-        variables = tuple(PUBO({_create_tuple(x): 1}) for x in variables)
+        variables = tuple({_create_tuple(x): 1} for x in variables)
         P = 1 - OR(*variables)
 
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        self += lam * P
+
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self
 
-    def XOR(self, a, b, lam=1, constraint=False):
+    def XOR(self, *variables, lam=1, constraint=False):
         r"""XOR.
 
-        Add a penalty to the HOBO that is only nonzero when :math:`a \oplus b`
-        is True, with a penalty factor ``lam``.
+        Add a penalty to the HOBO that is only nonzero when
+        :math:`v_0 \oplus v_1 \oplus ... \oplus v_n` is True, with a penalty
+        factor ``lam``, where ``v_0 = variables[0]``, ``v_1 = variables[1]``,
+        ..., ``v_n = variables[-1]``. See ``qubovert.sat.XOR`` for the
+        XOR convention that qubovert uses for more than two inputs.
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1063,12 +1453,17 @@ class HOBO(PUBO):
         >>> H = HOBO()
         >>> H.XOR(['a', 'b'], ['c', 'd'])  # enforce (a AND b) XOR (c AND d)
 
+        >>> H = HOBO()
+        >>> H.XOR('a', 'b', 'c')  # enforce a XOR b XOR c
+
         """
-        a, b = _create_tuple(a), _create_tuple(b)
-        P = PUBO({a: -1, b: -1, a+b: 2, (): 1})
+        variables = tuple({_create_tuple(x): 1} for x in variables)
+        P = 1 - XOR(*variables)
+
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        self += lam * P
+
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self
 
     def ONE(self, a, lam=1, constraint=False):
@@ -1083,6 +1478,12 @@ class HOBO(PUBO):
             The label for binary variables ``a``.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
+        constraint: bool (optional, defaults to False).
+            Whether or not this should expression should be added to the set
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1102,10 +1503,10 @@ class HOBO(PUBO):
         P = PUBO({(): 1, _create_tuple(a): -1})
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        self += lam * P
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self
 
-    def NAND(self, *variables, lam=1, constraint=True):
+    def NAND(self, *variables, lam=1, constraint=False):
         r"""NAND.
 
         Add a penalty to the HOBO that is only zero when
@@ -1121,11 +1522,10 @@ class HOBO(PUBO):
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1170,11 +1570,10 @@ class HOBO(PUBO):
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1199,33 +1598,34 @@ class HOBO(PUBO):
 
         """
         P = 1 - HOBO().OR(*variables)
-
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        self += lam * P
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self
 
-    def XNOR(self, a, b, lam=1, constraint=False):
+    def XNOR(self, *variables, lam=1, constraint=False):
         r"""XNOR.
 
         Add a penalty to the HOBO that is only nonzero when
-        :math:`\lnot(a \oplus b)` is True, with a penalty factor ``lam``.
+        :math:`\lnor(v_0 \oplus v_1 \oplus ... \oplus v_n)` is True, with a
+        penalty  factor ``lam``, where ``v_0 = variables[0]``,
+        ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``. See
+        ``qubovert.sat.XNOR`` for the XNOR convention that qubovert uses for
+        more than two inputs.
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
+        *variables : arguments.
+            Each element of variables is a hashable object or a list of
+            hashable objects. They are the label of the binary variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1241,12 +1641,14 @@ class HOBO(PUBO):
         >>> H = HOBO()
         >>> H.XNOR(['a', 'b'], ['c', 'd'])  # enforce (a AND b) XNOR (c AND d)
 
+        >>> H = HOBO()
+        >>> H.XNOR('a', 'b', 'c')  # enforce a XNOR b XNOR c
+
         """
-        a, b = _create_tuple(a), _create_tuple(b)
-        P = PUBO({a: 1, b: 1, a+b: -2})
+        P = 1 - HOBO().XOR(*variables)
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        self += lam * P
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self
 
     def NOT(self, a, lam=1, constraint=False):
@@ -1263,11 +1665,10 @@ class HOBO(PUBO):
             Langrange multiplier to penalize violations of the clause.
         constraint: bool (optional, defaults to False).
             Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
+            of constraints (see ``self.constraints``). This affects the method
+            ``self.is_solution_valid`` and ``self.solve_bruteforce``, which
+            will both ensure that solutions satisfy all the constraints in
+            ``self.constraints``.
 
         Return
         ------
@@ -1288,464 +1689,8 @@ class HOBO(PUBO):
         {(a, b): 1}
 
         """
-        a = _create_tuple(a)
-        self[a] += lam
-        if constraint:
-            self._constraints.setdefault("eq", []).append(PUBO({a: 1}))
-        return self
-
-    def AND_eq(self, *variables, lam=1, constraint=False):
-        r"""AND_eq.
-
-        Add a penalty to the HOBO that enforces that
-        :math:`v_0 \land v_1 \land v_2 \land ... == v_n`,
-        with a penalty factor
-        ``lam``, where ``v_1 = variables[0]``, ``v_2 = variables[1]``, ...,
-        ``v_n = variables[-1]``.
-
-        Parameters
-        ----------
-        *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.AND_eq('a', 'b', 'c')  # enforce a AND b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b AND c AND d) == 'e'
-        >>> H.AND_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b AND c AND d) == 'e'
-        >>> H.AND_eq('a', 'b', 'c', 'd', 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b AND c AND d) == 'e' AND 'f'
-        >>> H.AND_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        References
-        ----------
-        https://arxiv.org/pdf/1307.8041.pdf equation 6.
-
-        """
-        n = len(variables)
-        if n < 3:
-            raise ValueError("Must supply at least three variables. "
-                             "See ``ONE_eq`` for less.")
-        c = _create_tuple(variables[-1])
-        a, b = (), ()
-        for v in variables[:n // 2]:
-            a += _create_tuple(v)
-        for v in variables[n // 2:-1]:
-            b += _create_tuple(v)
-
-        P = PUBO({c: 3, a+b: 1, a+c: -2, b+c: -2})
-        self += lam * P
+        P = PUBO({_create_tuple(a): 1})
         if constraint:
             self._constraints.setdefault("eq", []).append(P)
-        return self
-
-    def OR_eq(self, *variables, lam=1, constraint=False):
-        r"""OR_eq.
-
-        Add a penalty to the HOBO that enforces that
-        :math:`v_0 \lor v_1 \lor v_2 \lor ... == v_n`,
-        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
-        ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``.
-
-        Parameters
-        ----------
-        *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.OR_eq('a', 'b', 'c')  # enforce a OR b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) == 'e'
-        >>> H.OR_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) OR e == f
-        >>> H.OR_eq(['a', 'b'], ['c', 'd'], 'e', 'f')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) == ('e' AND 'f')
-        >>> H.OR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        """
-        n = len(variables)
-        if n < 3:
-            raise ValueError("Must supply at least three variables.")
-
-        if n == 3:
-            a, b, c = tuple(_create_tuple(x) for x in variables)
-            P = PUBO({a: 1, b: 1, c: 1, a+b: 1, a+c: -2, b+c: -2})
-            self += lam * P
-            if constraint:
-                self._constraints.setdefault("eq", []).append(P)
-        else:
-            P = HOBO().NOR(*variables[:-1]) - {_create_tuple(variables[-1]): 1}
-            self += lam * P**2
-            if constraint:
-                self._constraints.setdefault("eq", []).append(P)
-
-        return self
-
-    def XOR_eq(self, a, b, c, lam=1, constraint=False):
-        r"""XOR_eq.
-
-        Add a penalty to the HOBO that enforces that :math:`a \oplus b == c`
-        with a penalty factor ``lam``.
-
-        Parameters
-        ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
-        c : any hashable object or a list of hashable objects.
-            The label for binary variables ``c``.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.XOR_eq('a', 'b', 'c')  # enforce a XOR b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XOR (c AND d) == 'e'
-        >>> H.XOR_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XOR (c AND d) == ('e' AND 'f')
-        >>> H.XOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        """
-        P = HOBO().XNOR(a, b) - {_create_tuple(c): 1}
-        if constraint:
-            return self.add_constraint_eq_zero(P, lam=lam)
-        self += lam * P**2
-        return self
-
-    def ONE_eq(self, a, b, lam=1, constraint=False):
-        r"""ONE_eq.
-
-        Add a penalty to the HOBO that enforces that :math:`a == b` with
-        a penalty factor ``lam``.
-
-        Parameters
-        ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.ONE_eq('a', 'b')  # enforce a == b
-
-        >>> H = HOBO()
-        >>> H.ONE_eq(['a', 'b'], 'c')  # enforce (a AND b) == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) == (c AND d)
-        >>> H.ONE_eq(['a', 'b'], ['c', 'd'])
-
-        """
-        P = {_create_tuple(a): 1, _create_tuple(b): -1}
-        if constraint:
-            return self.add_constraint_eq_zero(P, lam=lam)
-        self += lam * P**2
-        return self
-
-    def NAND_eq(self, *variables, lam=1, constraint=False):
-        r"""NAND_eq.
-
-        Add a penalty to the HOBO that enforces that
-        :math:`\lnot (v_0 \land v_1 \land v_2 \land ...) == v_n`, with a
-        penalty factor ``lam``, where ``v_0 = variables[0]``,
-        ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``.
-
-        Parameters
-        ----------
-        *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.NAND_eq('a', 'b', 'c')  # enforce a NAND b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) == 'e'
-        >>> H.NAND_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) NAND e == f
-        >>> H.NAND_eq(['a', 'b'], ['c', 'd'], 'e', 'f')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) == 'e' AND 'f'
-        >>> H.NAND_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        """
-        n = len(variables)
-        if n < 3:
-            raise ValueError("Must supply at least three variables. "
-                             "See ``NOT_eq`` for less.")
-        c = _create_tuple(variables[-1])
-        a, b = (), ()
-        for v in variables[:n // 2]:
-            a += _create_tuple(v)
-        for v in variables[n // 2:-1]:
-            b += _create_tuple(v)
-
-        P = PUBO({(): 3, a: -2, b: -2, c: -3, a+b: 1, a+c: 2, b+c: 2})
-        self += lam * P
-        if constraint:
-            self._constraints.setdefault("eq", []).append(P)
-        return self
-
-    def NOR_eq(self, *variables, lam=1, constraint=False):
-        r"""NOR_eq.
-
-        Add a penalty to the HOBO that enforces that
-        :math:`\lnot(v_0 \lor v_1 \lor v_2 \lor ... == v_n)`,
-        with a penalty factor ``lam``, where ``v_0 = variables[0]``,
-        ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``.
-
-        Parameters
-        ----------
-        *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.NOR_eq('a', 'b', 'c')  # enforce a NOR b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) == 'e'
-        >>> H.NOR_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) NOR e == f
-        >>> H.NOR_eq(['a', 'b'], ['c', 'd'], 'e', 'f')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) == ('e' AND 'f')
-        >>> H.NOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        """
-        n = len(variables)
-        if n < 3:
-            raise ValueError("Must supply at least three variables.")
-
-        if n == 3:
-            a, b, c = tuple(_create_tuple(x) for x in variables)
-            P = PUBO({a: -1, b: -1, c: -1, (): 1, a+b: 1, a+c: 2, b+c: 2})
-            self += lam * P
-            if constraint:
-                self._constraints.setdefault("eq", []).append(P)
-        else:
-            P = HOBO().OR(*variables[:-1]) - {_create_tuple(variables[-1]): 1}
-            self += lam * P**2
-            if constraint:
-                self._constraints.setdefault("eq", []).append(P)
-
-        return self
-
-    def XNOR_eq(self, a, b, c, lam=1, constraint=False):
-        r"""XNOR_eq.
-
-        Add a penalty to the HOBO that enforces that
-        :math:`\lnot(a \oplus b) == c` with a penalty factor ``lam``.
-
-        Parameters
-        ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
-        c : any hashable object or a list of hashable objects.
-            The label for binary variables ``c``.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.XNOR_eq('a', 'b', 'c')  # enforce a XNOR b == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XNOR (c AND d) == 'e'
-        >>> H.XNOR_eq(['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XNOR (c AND d) == ('e' AND 'f')
-        >>> H.XNOR_eq(['a', 'b'], ['c', 'd'], ['e', 'f'])
-
-        """
-        P = HOBO().XOR(a, b) - {_create_tuple(c): 1}
-        if constraint:
-            return self.add_constraint_eq_zero(P, lam=lam)
-        self += lam * P**2
-        return self
-
-    def NOT_eq(self, a, b, lam=1, constraint=False):
-        r"""NOT.
-
-        Add a penalty to the HOBO that enforces that :math:`\lnot a == b` with
-        a penalty factor ``lam``.
-
-        Parameters
-        ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
-        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
-            Langrange multiplier to penalize violations of the clause.
-        constraint: bool (optional, defaults to False).
-            Whether or not this should expression should be added to the set
-            of constraints (see ``self.constraints``). This mostly only effects
-            the method ``self.solve_bruteforce``. If ``constraint`` is True,
-            then the ``solve_bruteforce`` method will guarentee that this
-            AND clause holds, otherwise it will just minimize the penalty
-            coming from the AND addition to the HOBO.
-
-        Return
-        ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
-            can be strung together.
-
-        Examples
-        --------
-        >>> H = HOBO()
-        >>> H.NOT_eq('a', 'b')  # enforce NOT(a) == b
-
-        >>> H = HOBO()
-        >>> H.NOT_eq(['a', 'b'], 'c')  # enforce NOT(a AND b) == c
-        >>> H = HOBO()
-        >>> # enforce NOT(a AND b) == (c AND d)
-        >>> H.NOT_eq(['a', 'b'], ['c', 'd'])
-
-        """
-        P = HOBO().ONE(a) - {_create_tuple(b): 1}
-        if constraint:
-            return self.add_constraint_eq_zero(P, lam=lam)
-        self += lam * P**2
+        self += HOBO().add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
         return self

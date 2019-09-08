@@ -29,7 +29,6 @@ from ._hisingmatrix import *
 from ._qubomatrix import *
 from ._isingmatrix import *
 from ._conversions import *
-from ._problem_parentclass import *
 from ._bo_parentclass import *
 
 from ._warn import __all__ as __all_warn__
@@ -42,7 +41,6 @@ from ._hisingmatrix import __all__ as __all_hisingmatrix__
 from ._qubomatrix import __all__ as __all_qubomatrix__
 from ._isingmatrix import __all__ as __all_isingmatrix__
 from ._conversions import __all__ as __all_conversions__
-from ._problem_parentclass import __all__ as __all_problem_parentclass__
 from ._bo_parentclass import __all__ as __all_bo__
 
 
@@ -57,7 +55,6 @@ __all__ = (
     __all_qubomatrix__ +
     __all_isingmatrix__ +
     __all_conversions__ +
-    __all_problem_parentclass__ +
     __all_bo__
 )
 

@@ -39,6 +39,7 @@ Indices and tables
    :maxdepth: 2
    :caption: Problems
 
+   problems/parentclass
    problems/np/index
    problems/benchmarking/index
 

@@ -93,7 +93,7 @@ class DictArithmetic(dict):
     We also include arithmetic, addition, subtraction, scalar division,
     scalar multiplication, and all those in place. For example,
 
-    >>> d = DictArithmetic((0, 0)=1, (0, 1)=-2)
+    >>> d = DictArithmetic({(0, 0): 1, (0, 1): -2})
     >>> g = d + {(0, 0): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4

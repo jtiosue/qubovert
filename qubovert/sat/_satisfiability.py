@@ -323,6 +323,7 @@ def XOR(*variables):
     {(0, 1): 1, (0, 1, 'x'): -2, ('x',): 1}
 
     The following test will pass.
+
     >>> for n in range(1, 5):
     >>>     P = XOR(*tuple(range(n)))
     >>>     for i in range(1 << n):
@@ -387,6 +388,7 @@ def XNOR(*variables):
     {(): 1, (0, 1): -1, (0, 1, 'x'): 2, ('x',): -1}
 
     The following test will pass.
+
     >>> for n in range(1, 5):
     >>>     P = XNOR(*tuple(range(n)))
     >>>     for i in range(1 << n):

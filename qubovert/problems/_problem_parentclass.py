@@ -19,7 +19,7 @@ the problem classes.
 
 """
 
-from . import Conversions
+from qubovert.utils import Conversions
 
 
 __all__ = 'Problem',
@@ -80,7 +80,7 @@ class Problem(Conversions):
             The number of variables in the QUBO/Ising formulation.
 
         """
-        raise NotImplementedError("Method to be implemented in child classes")
+        return self.to_qubo().num_binary_variables
 
     def __repr__(self):
         """__repr__.
@@ -93,9 +93,9 @@ class Problem(Conversions):
 
         """
         s = str(self)
-        if len(s) < 37:
+        if len(s) < 50:
             return s
-        return s[:37] + " ..."
+        return s[:50] + " ...)"
 
     def __str__(self):
         """__str__.
