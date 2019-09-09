@@ -34,7 +34,8 @@ QUBOVert
     :target: https://pepy.tech/project/qubovert
     :alt: pypi dist downloads
 
-Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see `notebooks <https://github.com/jiosue/QUBOVert/tree/master/notebook_examples>`_
+
+Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/QUBOVert/tree/master/notebook_examples>`_.
 
 
 Installation
