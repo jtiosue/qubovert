@@ -292,7 +292,7 @@ class JobSequencing(Problem):
         # minimize worker 0's length
         for job, length in self._lengths.items():
             ind = self._x(job, 0)  # worker zero
-            Q[(ind, ind)] += B * length
+            Q[(ind,)] += B * length
 
         # encode H_A (equation 54)
 
@@ -300,7 +300,7 @@ class JobSequencing(Problem):
         for job in self._lengths:
             for worker in range(self._m):
                 ind = self._x(job, worker)
-                Q[(ind, ind)] -= 2 * A
+                Q[(ind,)] -= 2 * A
                 for workerp in range(self._m):
                     indp = self._x(job, workerp)
                     Q[(ind, indp)] += A

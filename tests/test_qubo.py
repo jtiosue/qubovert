@@ -254,9 +254,17 @@ def test_qubo_multiplication():
 def test_properties():
 
     temp = QUBO({('0', '0'): 1, ('0', 1): 2})
-    temp.offset
-    temp.mapping
-    temp.reverse_mapping
+    assert not temp.offset
+
+    d = QUBO()
+    d[(0,)] += 1
+    d[(1,)] += 2
+    assert d == d.to_qubo() == {(0,): 1, (1,): 2}
+    assert d.mapping == d.reverse_mapping == {0: 0, 1: 1}
+
+    d.set_mapping({1: 0, 0: 1})
+    assert d.to_qubo() == {(1,): 1, (0,): 2}
+    assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
 
 def test_round():

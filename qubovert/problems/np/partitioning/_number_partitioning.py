@@ -164,13 +164,7 @@ class NumberPartitioning(Problem):
         >>> L = problem.to_ising()
 
         """
-        # we don't use HOBO().to_ising because we want to keep our mapping.
-        return IsingMatrix(
-            HOIO().add_constraint_eq_zero(
-                {(i,): self._S[i] for i in range(self._N)},
-                lam=A
-            )
-        )
+        return A * IsingMatrix({(i,): self._S[i] for i in range(self._N)}) ** 2
 
     def convert_solution(self, solution):
         """convert_solution.

@@ -21,6 +21,7 @@ class for some Binary Optimization classes, such as ``qubovert.QUBO``,
 """
 
 from . import Conversions
+from ._dict_arithmetic import _generate_key_value_pairs
 
 
 __all__ = 'BO',
@@ -110,6 +111,109 @@ class BO(Conversions):
 
         """
         return self.num_binary_variables - 1
+
+    def set_mapping(self, *args, **kwargs):
+        """set_mapping.
+
+        ``BO`` sublcasses automatically create a mapping from variable names to
+        integers as they are being built. However, the mapping is based on the
+        order in which elements are entered and therefore may not be as
+        desired. Of course, the ``convert_solution`` method keeps track of the
+        mapping and can/should always be used. But if you want a consistent
+        mapping, then ``set_mapping`` can be used.
+
+        Consider the following examples (we use the ``qubovert.QUBO`` class for
+        the examples, which is a subclass of ``BO``).
+
+        Example 1:
+
+        >>> from qubovert import QUBO
+        >>> Q = QUBO()
+        >>> Q[(0,)] += 1
+        >>> Q[(1,)] += 2
+        >>> Q.mapping
+        {0: 0, 1: 1}
+        >>> Q.to_qubo()
+        {(0,): 1, (1,): 2}
+
+        Example 2:
+
+        >>> from qubovert import QUBO
+        >>> Q = QUBO()
+        >>> Q[(1,)] += 2
+        >>> Q[(0,)] += 1
+        >>> Q.mapping
+        {0: 1, 1: 0}
+        >>> Q.to_qubo()
+        {(0,): 2, (1,): 1}
+
+        To ensure consistency in mappings, you can provide your own mapping
+        with ``set_mapping``. See the following modified examples.
+
+        Modified example 1:
+
+        >>> from qubovert import QUBO
+        >>> Q = QUBO()
+        >>> Q[(0,)] += 1
+        >>> Q[(1,)] += 2
+        >>> Q.set_mapping({0: 0, 1: 1})
+        >>> Q.mapping
+        {0: 0, 1: 1}
+        >>> Q.to_qubo()
+        {(0,): 1, (1,): 2}
+
+        Modified example 2:
+
+        >>> from qubovert import QUBO
+        >>> Q = QUBO()
+        >>> Q[(1,)] += 2
+        >>> Q[(0,)] += 1
+        >>> Q.set_mapping({0: 0, 1: 1})
+        >>> Q.mapping
+        {0: 0, 1: 1}
+        >>> Q.to_qubo()
+        {(0,): 1, (1,): 2}
+
+        Parameters
+        ----------
+        arguments : defines a dictionary with ``d = dict(*args, **kwargs)``.
+            ``d`` will become the mapping. See ``help(self.mapping)``
+
+        Notes
+        -----
+        Using ``set_mapping`` to set the mapping will also automatically
+        set the ``reverse_mapping``, so there is no need to call both
+        ``set_mapping`` and ``set_reverse_mapping``.
+
+        """
+        self._mapping, self._reverse_mapping = {}, {}
+        for k, v in _generate_key_value_pairs(*args, **kwargs):
+            self._mapping[k] = v
+            self._reverse_mapping[v] = k
+
+    def set_reverse_mapping(self, *args, **kwargs):
+        """set_reverse_mapping.
+
+        Same as ``set_mapping`` but reversed. See
+        ``help(self.reverse_mapping)`` and ``help(self.set_mapping)``.
+
+        Parameters
+        ----------
+        arguments : defines a dictionary with ``d = dict(*args, **kwargs)``.
+            ``d`` will become the reverse mapping. See
+            ``help(self.reverse_mapping)``.
+
+        Notes
+        -----
+        Using ``set_reverse_mapping`` to set the mapping will also
+        automatically set the ``mapping``, so there is no need to call both
+        ``set_mapping`` and ``set_reverse_mapping``.
+
+        """
+        self._mapping, self._reverse_mapping = {}, {}
+        for k, v in _generate_key_value_pairs(*args, **kwargs):
+            self._mapping[v] = k
+            self._reverse_mapping[k] = v
 
     def __setitem__(self, key, value):
         """__setitem__.

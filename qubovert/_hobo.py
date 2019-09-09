@@ -73,6 +73,37 @@ def _pubo_value_extrema(P):
     return min_, max_
 
 
+def _get_bounds(P, bounds):
+    """_get_bounds.
+
+    Compute the missing bounds of ``P``.
+
+    Parameters
+    ----------
+    P : PUBO object.
+    bounds : two element tuple or None.
+        A tuple ``(min, max)``, the minimum and maximum values that the
+        PUBO ``P`` can take. If ``bounds`` is None, then they will be
+        calculated (approximately), or if either of the elements of
+        ``bounds`` is None, then that element will be calculated
+        (approximately).
+
+    Return
+    ------
+    res : two element tuple.
+        The bounds of ``P``.
+
+    """
+    if bounds is None or bounds == (None, None):
+        bounds = _pubo_value_extrema(P)
+    elif bounds[0] is None:
+        bounds = _pubo_value_extrema(P)[0], bounds[1]
+    elif bounds[1] is None:
+        bounds = bounds[0], _pubo_value_extrema(P)[1]
+
+    return bounds
+
+
 class HOBO(PUBO):
     """HOBO.
 
@@ -109,7 +140,7 @@ class HOBO(PUBO):
 
     Notes
     -----
-    - Variables names that begin with ``"_a"`` should not be used since they
+    - Variables names that begin with ``"__a"`` should not be used since they
       are used internally to deal with some ancilla variables to enforce
       constraints.
     - The ``self.solve_bruteforce`` method will solve the HOBO ensuring that
@@ -244,7 +275,7 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        *args and **kwargs : defines a dictionary or HOBO.
+        arguments : defines a dictionary or HOBO.
             Ie ``d = dict(*args, **kwargs)``.
             Each element in d will be added in place to this instance following
             all the required convensions.
@@ -304,7 +335,7 @@ class HOBO(PUBO):
 
         """
         self._ancilla += 1
-        return "_a%d" % (self._ancilla - 1)
+        return "__a%d" % (self._ancilla - 1)
 
     @classmethod
     def remove_ancilla_from_solution(cls, solution):
@@ -328,7 +359,7 @@ class HOBO(PUBO):
             The same as ``solution`` but with all the ancilla bits removed.
 
         """
-        return {k: v for k, v in solution.items() if str(k)[:2] != "_a"}
+        return {k: v for k, v in solution.items() if str(k)[:3] != "__a"}
 
     def is_solution_valid(self, solution):
         """is_solution_valid.
@@ -440,7 +471,7 @@ class HOBO(PUBO):
             are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             PUBO ``P`` can take. If ``bounds`` is None, then they may be
             calculated (approximately).
@@ -485,7 +516,7 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._constraints.setdefault("eq", []).append(P)
 
-        min_val, max_val = _pubo_value_extrema(P) if bounds is None else bounds
+        min_val, max_val = _get_bounds(P, bounds)
 
         if min_val == max_val == 0:
             if not suppress_warnings:
@@ -529,10 +560,12 @@ class HOBO(PUBO):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             PUBO ``P`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -579,11 +612,12 @@ class HOBO(PUBO):
                  ('a', 'b'): -4, ('c',): 3, (): -2}
             )
         >>> H
-        {('b', 'c', 'a'): -19, ('b', '_a0', 'c', 'a'): -2,
-         ('b', 'c', 'a', '_a1'): -4, ('a',): -3, ('b', 'a'): 24, ('c', 'a'): 6,
-         ('_a0', 'a'): 2, ('a', '_a1'): 4, ('b', '_a0', 'a'): -8,
-         ('b', 'a', '_a1'): -16, ('c',): -3, ('_a0', 'c'): 6, ('c', '_a1'): 12,
-         (): 4, ('_a0',): -3, ('_a1',): -4, ('_a0', '_a1'): 4}
+        {('b', 'c', 'a'): -19, ('b', '__a0', 'c', 'a'): -2,
+         ('b', 'c', 'a', '__a1'): -4, ('a',): -3, ('b', 'a'): 24,
+         ('c', 'a'): 6, ('__a0', 'a'): 2, ('a', '__a1'): 4,
+         ('b', '__a0', 'a'): -8, ('b', 'a', '__a1'): -16, ('c',): -3,
+         ('__a0', 'c'): 6, ('c', '__a1'): 12, (): 4, ('__a0',): -3,
+         ('__a1',): -4, ('__a0', '__a1'): 4}
         >>> H.is_solution_valid({'b': 0, 'c': 0, 'a': 1})
         True
         >>> H.is_solution_valid({'b': 0, 'c': 1, 'a': 1})
@@ -593,7 +627,7 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._constraints.setdefault("lt", []).append(P)
 
-        min_val, max_val = _pubo_value_extrema(P) if bounds is None else bounds
+        min_val, max_val = _get_bounds(P, bounds)
 
         if min_val >= 0:
             if not suppress_warnings:
@@ -636,10 +670,12 @@ class HOBO(PUBO):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             PUBO ``P`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -662,10 +698,10 @@ class HOBO(PUBO):
           >>> H = HOBO()
           >>> H.add_constraint_le_zero({(0,): 1, (1,): 2, (2,): -1.5, (): .4})
           >>> H
-          {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '_a0'): 2,
-           (1,): 5.6, (1, 2): -6.0, (1, '_a0'): 4, (2,): 1.0499999999999998,
-           (2, '_a0'): -3.0, (): 0.16000000000000003, ('_a0',): 1.8}
-          >>> test_sol = {0: 0, 1: 0, 2: 1, '_a0': 1}
+          {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '__a0'): 2,
+           (1,): 5.6, (1, 2): -6.0, (1, '__a0'): 4, (2,): 1.0499999999999998,
+           (2, '__a0'): -3.0, (): 0.16000000000000003, ('__a0',): 1.8}
+          >>> test_sol = {0: 0, 1: 0, 2: 1, '__a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
           >>> H.value(test_sol)
@@ -690,13 +726,14 @@ class HOBO(PUBO):
                  ('a', 'b'): -4, ('c',): 3, (): -2}
             )
         >>> H
-        {('b', 'c', 'a'): -19, ('b', 'c', 'a', '_a0'): -2,
-         ('_a1', 'b', 'c', 'a'): -4, ('_a2', 'b', 'c', 'a'): -8, ('a',): -3,
-         ('b', 'a'): 24, ('c', 'a'): 6, ('a', '_a0'): 2, ('_a1', 'a'): 4,
-         ('_a2', 'a'): 8, ('b', 'a', '_a0'): -8, ('_a1', 'b', 'a'): -16,
-         ('_a2', 'b', 'a'): -32, ('c',): -3, ('c', '_a0'): 6, ('_a1', 'c'): 12,
-         ('_a2', 'c'): 24, (): 4, ('_a0',): -3, ('_a1',): -4,
-         ('_a1', '_a0'): 4, ('_a2', '_a0'): 8, ('_a2', '_a1'): 16}
+        {('b', 'c', 'a'): -19, ('b', 'c', 'a', '__a0'): -2,
+         ('__a1', 'b', 'c', 'a'): -4, ('__a2', 'b', 'c', 'a'): -8, ('a',): -3,
+         ('b', 'a'): 24, ('c', 'a'): 6, ('a', '__a0'): 2, ('__a1', 'a'): 4,
+         ('__a2', 'a'): 8, ('b', 'a', '__a0'): -8, ('__a1', 'b', 'a'): -16,
+         ('__a2', 'b', 'a'): -32, ('c',): -3, ('c', '__a0'): 6,
+         ('__a1', 'c'): 12, ('__a2', 'c'): 24, (): 4, ('__a0',): -3,
+         ('__a1',): -4, ('__a1', '__a0'): 4, ('__a2', '__a0'): 8,
+         ('__a2', '__a1'): 16}
         >>> H.is_solution_valid({'b': 0, 'c': 0, 'a': 1})
         True
         >>> H.is_solution_valid({'b': 0, 'c': 1, 'a': 1})
@@ -706,7 +743,7 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._constraints.setdefault("le", []).append(P)
 
-        min_val, max_val = _pubo_value_extrema(P) if bounds is None else bounds
+        min_val, max_val = _get_bounds(P, bounds)
 
         if min_val > 0:
             if not suppress_warnings:
@@ -755,10 +792,12 @@ class HOBO(PUBO):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             PUBO ``P`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -805,11 +844,12 @@ class HOBO(PUBO):
                  ('a', 'b'): 4, ('c',): -3, (): 2}
             )
         >>> H
-        {('b', 'c', 'a'): -19, ('b', '_a0', 'c', 'a'): -2,
-         ('b', 'c', 'a', '_a1'): -4, ('a',): -3, ('b', 'a'): 24, ('c', 'a'): 6,
-         ('_a0', 'a'): 2, ('a', '_a1'): 4, ('b', '_a0', 'a'): -8,
-         ('b', 'a', '_a1'): -16, ('c',): -3, ('_a0', 'c'): 6, ('c', '_a1'): 12,
-         (): 4, ('_a0',): -3, ('_a1',): -4, ('_a0', '_a1'): 4}
+        {('b', 'c', 'a'): -19, ('b', '__a0', 'c', 'a'): -2,
+         ('b', 'c', 'a', '__a1'): -4, ('a',): -3, ('b', 'a'): 24,
+         ('c', 'a'): 6, ('__a0', 'a'): 2, ('a', '__a1'): 4,
+         ('b', '__a0', 'a'): -8, ('b', 'a', '__a1'): -16, ('c',): -3,
+         ('__a0', 'c'): 6, ('c', '__a1'): 12, (): 4, ('__a0',): -3,
+         ('__a1',): -4, ('__a0', '__a1'): 4}
         >>> H.is_solution_valid({'b': 0, 'c': 0, 'a': 1})
         True
         >>> H.is_solution_valid({'b': 0, 'c': 1, 'a': 1})
@@ -818,8 +858,8 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         self._constraints.setdefault("gt", []).append(P)
-        if bounds is not None:
-            bounds = -bounds[1], -bounds[0]
+        min_val, max_val = _get_bounds(P, bounds)
+        bounds = -max_val, -min_val
         self += HOBO().add_constraint_lt_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -847,10 +887,14 @@ class HOBO(PUBO):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             PUBO ``P`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -873,10 +917,10 @@ class HOBO(PUBO):
           >>> H = HOBO()
           >>> H.add_constraint_ge_zero({(0,): -1, (1,): -2, (2,):1.5, (): -.4})
           >>> H
-          {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '_a0'): 2,
-           (1,): 5.6, (1, 2): -6.0, (1, '_a0'): 4, (2,): 1.0499999999999998,
-           (2, '_a0'): -3.0, (): 0.16000000000000003, ('_a0',): 1.8}
-          >>> test_sol = {0: 0, 1: 0, 2: 1, '_a0': 1}
+          {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '__a0'): 2,
+           (1,): 5.6, (1, 2): -6.0, (1, '__a0'): 4, (2,): 1.0499999999999998,
+           (2, '__a0'): -3.0, (): 0.16000000000000003, ('__a0',): 1.8}
+          >>> test_sol = {0: 0, 1: 0, 2: 1, '__a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
           >>> H.value(test_sol)
@@ -901,13 +945,14 @@ class HOBO(PUBO):
                  ('a', 'b'): 4, ('c',): -3, (): 2}
             )
         >>> H
-        {('b', 'c', 'a'): -19, ('b', 'c', 'a', '_a0'): -2,
-         ('_a1', 'b', 'c', 'a'): -4, ('_a2', 'b', 'c', 'a'): -8, ('a',): -3,
-         ('b', 'a'): 24, ('c', 'a'): 6, ('a', '_a0'): 2, ('_a1', 'a'): 4,
-         ('_a2', 'a'): 8, ('b', 'a', '_a0'): -8, ('_a1', 'b', 'a'): -16,
-         ('_a2', 'b', 'a'): -32, ('c',): -3, ('c', '_a0'): 6, ('_a1', 'c'): 12,
-         ('_a2', 'c'): 24, (): 4, ('_a0',): -3, ('_a1',): -4,
-         ('_a1', '_a0'): 4, ('_a2', '_a0'): 8, ('_a2', '_a1'): 16}
+        {('b', 'c', 'a'): -19, ('b', 'c', 'a', '__a0'): -2,
+         ('__a1', 'b', 'c', 'a'): -4, ('__a2', 'b', 'c', 'a'): -8, ('a',): -3,
+         ('b', 'a'): 24, ('c', 'a'): 6, ('a', '__a0'): 2, ('__a1', 'a'): 4,
+         ('__a2', 'a'): 8, ('b', 'a', '__a0'): -8, ('__a1', 'b', 'a'): -16,
+         ('__a2', 'b', 'a'): -32, ('c',): -3, ('c', '__a0'): 6,
+         ('__a1', 'c'): 12, ('__a2', 'c'): 24, (): 4, ('__a0',): -3,
+         ('__a1',): -4, ('__a1', '__a0'): 4, ('__a2', '__a0'): 8,
+         ('__a2', '__a1'): 16}
         >>> H.is_solution_valid({'b': 0, 'c': 0, 'a': 1})
         True
         >>> H.is_solution_valid({'b': 0, 'c': 1, 'a': 1})
@@ -916,8 +961,8 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         self._constraints.setdefault("ge", []).append(P)
-        if bounds is not None:
-            bounds = -bounds[1], -bounds[0]
+        min_val, max_val = _get_bounds(P, bounds)
+        bounds = -max_val, -min_val
         self += HOBO().add_constraint_le_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -1607,7 +1652,7 @@ class HOBO(PUBO):
         r"""XNOR.
 
         Add a penalty to the HOBO that is only nonzero when
-        :math:`\lnor(v_0 \oplus v_1 \oplus ... \oplus v_n)` is True, with a
+        :math:`\lnot(v_0 \oplus v_1 \oplus ... \oplus v_n)` is True, with a
         penalty  factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``. See
         ``qubovert.sat.XNOR`` for the XNOR convention that qubovert uses for

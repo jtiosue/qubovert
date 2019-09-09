@@ -31,7 +31,8 @@ def _generate_key_value_pairs(*args, **kwargs):
 
     Parameters
     ----------
-    args and kwargs define a dictionary. See ``help(dict)``.
+    arguments : define a dictionary.
+        args and kwargs define a dictionary. See ``help(dict)``.
 
     Yields
     ------

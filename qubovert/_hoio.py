@@ -52,7 +52,7 @@ class HOIO(HIsing):
 
     Notes
     -----
-    - Variables names that begin with ``"_a"`` should not be used since they
+    - Variables names that begin with ``"__a"`` should not be used since they
       are used internally to deal with some ancilla variables to enforce
       constraints.
     - The ``self.solve_bruteforce`` method will solve the HOIO ensuring that
@@ -272,10 +272,12 @@ class HOIO(HIsing):
             are present.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the constraint.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             HIsing ``H`` can take. If ``bounds`` is None, then they may be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -332,10 +334,12 @@ class HOIO(HIsing):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             HIsing ``H`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -404,10 +408,12 @@ class HOIO(HIsing):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             HIsing ``H`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -432,9 +438,9 @@ class HOIO(HIsing):
                   {(0,): 0.5, (): 1.15, (1,): 1.0, (2,): -0.75})
           >> H
           {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
-           (2,): -2.4749999999999996, ('_a0', 0): 0.5, ('_a0',): 1.65,
-           (1, 2): -1.5, ('_a0', 1): 1.0, ('_a0', 2): -0.75}
-          >>> test_sol = {0: -1, 1: -1, 2: 1, '_a0': 1}
+           (2,): -2.4749999999999996, ('__a0', 0): 0.5, ('__a0',): 1.65,
+           (1, 2): -1.5, ('__a0', 1): 1.0, ('__a0', 2): -0.75}
+          >>> test_sol = {0: -1, 1: -1, 2: 1, '__a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
           >>> H.value(test_sol)
@@ -480,10 +486,12 @@ class HOIO(HIsing):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             HIsing ``H`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -552,10 +560,12 @@ class HOIO(HIsing):
         log_trick : bool (optional, defaults to True).
             Whether or not to use the log trick to enforce the inequality
             constraint. See Notes below for more details.
-        bounds : two element tuple (optional, defaluts to None).
+        bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
             HIsing ``H`` can take. If ``bounds`` is None, then they will be
-            calculated (approximately).
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
         suppress_warnings : bool (optional, defaults to False).
             Whether or not to surpress warnings.
 
@@ -580,8 +590,8 @@ class HOIO(HIsing):
                   {(0,): -0.5, (): -1.15, (1,): -1.0, (2,): 0.75})
           >>> H
           {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
-           (2,): -2.4749999999999996, ('_a0', 0): 0.5, ('_a0',): 1.65,
-           (1, 2): -1.5, ('_a0', 1): 1.0, ('_a0', 2): -0.75}
+           (2,): -2.4749999999999996, ('__a0', 0): 0.5, ('__a0',): 1.65,
+           (1, 2): -1.5, ('__a0', 1): 1.0, ('__a0', 2): -0.75}
           >>> H.is_solution_valid(test_sol)
           True
           >>> H.value(test_sol)

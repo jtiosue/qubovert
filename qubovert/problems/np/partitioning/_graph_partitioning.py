@@ -19,7 +19,7 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-from qubovert.utils import IsingMatrix
+# from qubovert.utils import IsingMatrix
 from qubovert import HOIO
 from qubovert.problems import Problem
 
@@ -241,21 +241,34 @@ class GraphPartitioning(Problem):
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-        L = IsingMatrix()
+#        L = IsingMatrix()
+#
+#        # we don't use HOBO().to_ising because we want to keep our mapping.
+#
+#        # encode H_A (equation 8)
+#        L += HOIO().add_constraint_eq_zero(
+#            {(i,): 1 for i in range(self._N)}, lam=A)
+#
+#        # encode H_B (equation 9)
+#        L += B * sum(self._edges.values()) / 2
+#        for (u, v), w in self._edges.items():
+#            L[(self._vertex_to_index[u],
+#               self._vertex_to_index[v])] -= w * B / 2
+#
+#        return L
 
-        # we don't use HOBO().to_ising because we want to keep our mapping.
+        H = HOIO()
+        H.set_mapping(self._vertex_to_index)
 
         # encode H_A (equation 8)
-        L += HOIO().add_constraint_eq_zero(
-            {(i,): 1 for i in range(self._N)}, lam=A)
+        H.add_constraint_eq_zero({(i,): 1 for i in self._vertices}, lam=A)
 
         # encode H_B (equation 9)
-        L += B * sum(self._edges.values()) / 2
-        for (u, v), w in self._edges.items():
-            L[(self._vertex_to_index[u],
-               self._vertex_to_index[v])] -= w * B / 2
+        H += B * sum(self._edges.values()) / 2
+        for e, w in self._edges.items():
+            H[e] -= w * B / 2
 
-        return L
+        return H.to_ising()
 
     def convert_solution(self, solution):
         """convert_solution.

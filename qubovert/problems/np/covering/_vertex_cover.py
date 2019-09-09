@@ -18,7 +18,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 
-from qubovert.utils import QUBOMatrix
+# from qubovert.utils import QUBOMatrix
 from qubovert import HOBO
 from qubovert.problems import Problem
 
@@ -177,19 +177,32 @@ class VertexCover(Problem):
         """
         # all naming conventions follow the paper listed in the docstring
 
-        Q = QUBOMatrix()
+#        Q = QUBOMatrix()
+#
+#        # encode H_B (equation 34)
+#        for i in range(self._N):
+#            Q[(i,)] += B
+#
+#        # encode H_A, ie each edge is adjacent to at least one colored vertex.
+#        # we don't use HOBO().to_qubo because we want to keep our mapping.
+#        for u, v in self._edges:
+#            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
+#            Q += HOBO().OR(iu, iv, lam=A)
+#
+#        return Q
+
+        H = HOBO()
+        H.set_mapping(self._vertex_to_index)
 
         # encode H_B (equation 34)
-        for i in range(self._N):
-            Q[(i,)] += B
+        for v in self._vertices:
+            H[(v,)] += B
 
         # encode H_A, ie each edge is adjacent to at least one colored vertex.
-        # we don't use HOBO().to_qubo because we want to keep our mapping.
         for u, v in self._edges:
-            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
-            Q += HOBO().OR(iu, iv, lam=A)
+            H.OR(u, v, lam=A)
 
-        return Q
+        return H.to_qubo()
 
     def convert_solution(self, solution):
         """convert_solution.

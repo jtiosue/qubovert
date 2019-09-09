@@ -298,9 +298,17 @@ def test_ising_multiplication():
 def test_properties():
 
     temp = HIsing({('0', '0'): 1, ('0', 1): 2})
-    temp.offset
-    temp.mapping
-    temp.reverse_mapping
+    assert temp.offset == 1
+
+    d = HIsing()
+    d[(0,)] += 1
+    d[(1,)] += 2
+    assert d == d.to_ising() == {(0,): 1, (1,): 2}
+    assert d.mapping == d.reverse_mapping == {0: 0, 1: 1}
+
+    d.set_mapping({1: 0, 0: 1})
+    assert d.to_ising() == {(1,): 1, (0,): 2}
+    assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
 
 def test_round():
