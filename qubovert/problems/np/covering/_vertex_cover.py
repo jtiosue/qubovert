@@ -14,11 +14,16 @@
 
 """_vertex_cover.py.
 
-Contains the VertexCover class. See ``help(qubovert.VertexCover)``.
+Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 
-from qubovert.utils import Problem, QUBOMatrix
+# from qubovert.utils import QUBOMatrix
+from qubovert import HOBO
+from qubovert.problems import Problem
+
+
+__all__ = 'VertexCover',
 
 
 class VertexCover(Problem):
@@ -28,23 +33,22 @@ class VertexCover(Problem):
     Ising formluations. Based on the paper hereforth designated [Lucas]_.
 
     The goal of the VertexCover problem is to find the smallest number of
-    verticies that can be coloredsuch that every edge of the graph is
+    verticies that can be colored such that every edge of the graph is
     incident to a colored vertex.
 
     VertexCover inherits some methods and attributes from the Problem class.
-    See ``help(qubovert.utils.Problem)``.
+    See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------
-    >>> from qubovert import VertexCover
+    >>> from qubovert.problems import VertexCover
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> edges = {("a", "b"), ("a", "c"), ("c", "d"), ("a", "d")}
     >>> problem = VertexCover(edges)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q  = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -59,7 +63,7 @@ class VertexCover(Problem):
     References
     ----------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.
+        in Physics, 2:5, 2014.
 
     """
 
@@ -146,6 +150,10 @@ class VertexCover(Problem):
         becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. ``A`` and
         ``B`` are parameters to enforce constraints.
 
+        It is formatted such that if all the constraints are satisfied, then
+        the objective function will be equal to the total number of colored
+        verticies.
+
         Parameters
         ----------
         A: positive float (optional, defaults to 2).
@@ -155,44 +163,46 @@ class VertexCover(Problem):
 
         Return
         -------
-        res : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see help(qubovert.utils.QUBOMatrix).
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
-                will be equal to the total number of colored verticies.
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see help(qubovert.utils.QUBOMatrix).
 
         Example
         -------
         >>> problem = VertexCover({(0, 1), (0, 2)})
-        >>> Q, offset = problem.to_qubo()
+        >>> Q = problem.to_qubo()
 
         """
         # all naming conventions follow the paper listed in the docstring
 
-        Q = QUBOMatrix()
+#        Q = QUBOMatrix()
+#
+#        # encode H_B (equation 34)
+#        for i in range(self._N):
+#            Q[(i,)] += B
+#
+#        # encode H_A, ie each edge is adjacent to at least one colored vertex.
+#        # we don't use HOBO().to_qubo because we want to keep our mapping.
+#        for u, v in self._edges:
+#            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
+#            Q += HOBO().OR(iu, iv, lam=A)
+#
+#        return Q
 
-        offset = self._n * A  # comes from the constraint
+        H = HOBO()
+        H.set_mapping(self._vertex_to_index)
 
         # encode H_B (equation 34)
-        for i in range(self._N):
-            Q[(i, i)] += B
+        for v in self._vertices:
+            H[(v,)] += B
 
-        # encode H_A
-
-        # Q keeps itself upper triangular, so we don't need to worry about it.
+        # encode H_A, ie each edge is adjacent to at least one colored vertex.
         for u, v in self._edges:
-            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
-            Q[(iu, iv)] += A
-            Q[(iu, iu)] -= A
-            Q[(iv, iv)] -= A
+            H.OR(u, v, lam=A)
 
-        return Q, offset
+        return H.to_qubo()
 
     def convert_solution(self, solution):
         """convert_solution.

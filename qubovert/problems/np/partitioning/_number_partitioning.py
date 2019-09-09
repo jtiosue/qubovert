@@ -15,11 +15,16 @@
 """_number_partitioning.py.
 
 Contains the NumberPartitioning class. See
-``help(qubovert.NumberPartitioning)``.
+``help(qubovert.problems.NumberPartitioning)``.
 
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+from qubovert.utils import IsingMatrix
+from qubovert import HOIO
+from qubovert.problems import Problem
+
+
+__all__ = 'NumberPartitioning',
 
 
 class NumberPartitioning(Problem):
@@ -41,19 +46,18 @@ class NumberPartitioning(Problem):
     the difference in the sum between the two partitions.
 
     This class inherits some methods and attributes from the Problem class. For
-    more info, see ``help(qubovert.utils.Problem)``.
+    more info, see ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------
-    >>> from qubovert import NumberPartitioning
+    >>> from qubovert.problems import NumberPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> S = [1, 2, 3, 4]
     >>> problem = NumberPartitioning(S)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -68,7 +72,7 @@ class NumberPartitioning(Problem):
     References
     ----------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.
+       in Physics, 2:5, 2014.
 
     """
 
@@ -91,7 +95,7 @@ class NumberPartitioning(Problem):
         Parameters
         ----------
         S: tuple or list.
-            tuple or list of N positive numbers that we are attempting to
+            tuple or list of N nonzero numbers that we are attempting to
             partition into two partitions of equal sum.
 
         Example
@@ -99,6 +103,8 @@ class NumberPartitioning(Problem):
         >>> problem = NumberPartitioning([1, 2, 3, 4])
 
         """
+        if not all(S):
+            raise ValueError("Numbers must be nonzero")
         self._input_type = type(S)
         self._S = self._input_type(x for x in S)  # copy the input
         self._N = len(S)
@@ -136,10 +142,9 @@ class NumberPartitioning(Problem):
         r"""to_ising.
 
         Create and return the number partitioning problem in Ising form
-        following section 2.1 of [Lucas]. The J coupling matrix for the Ising
-        will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing
-        :math:`\sum_{i \leq j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
+        following section 2.1 of [Lucas]. It is
+        the value such that the solution to the Ising formulation is 0
+        if a valid number partitioning exists.
 
         Parameters
         ----------
@@ -148,36 +153,18 @@ class NumberPartitioning(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables. It is
-                the value such that the solution to the Ising formulation is 0
-                if a valid number partitioning exists.
+        L : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> h, J, offset = problem.to_ising()
+        >>> L = problem.to_ising()
 
         """
-        h, J = IsingField(), IsingCoupling()
-        offset = A * sum(pow(x, 2) for x in self._S)
-
-        for i in range(self._N):
-            for j in range(i+1, self._N):
-                J[(i, j)] += (2 * A * self._S[i] * self._S[j])
-
-        return h, J, offset
+        return A * IsingMatrix({(i,): self._S[i] for i in range(self._N)}) ** 2
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -206,8 +193,8 @@ class NumberPartitioning(Problem):
         Example
         -------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> Q, offset = problem.to_qubo()
-        >>> value, solution = solve_qubo(Q, offset)
+        >>> Q = problem.to_qubo()
+        >>> value, solution = solve_qubo(Q)
         >>> print(solution)
         [0, 1, 1, 0]
         # ie 1 and 4 are in one partition, and 2 and 3 are in the other

@@ -20,16 +20,19 @@ The conversions are based on [Lucas].
 References
 ----------
 .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in
-Physics, 2:5, 2014.
+   Physics, 2:5, 2014.
 
 """
 
-from ._number_partitioning import NumberPartitioning
-from ._graph_partitioning import GraphPartitioning
+from ._number_partitioning import *
+from ._graph_partitioning import *
+
+from ._number_partitioning import __all__ as __all_np__
+from ._graph_partitioning import __all__ as __all_gp__
 
 __all__ = (
-    "NumberPartitioning",
-    "GraphPartitioning",
+    __all_np__ +
+    __all_gp__
 )
 
 name = "partitioning"

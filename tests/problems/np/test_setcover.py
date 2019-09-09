@@ -16,7 +16,7 @@
 Contains tests for the SetCover class.
 """
 
-from qubovert import SetCover
+from qubovert.problems import SetCover
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
 
@@ -35,60 +35,72 @@ def test_setcover_str():
     assert eval(str(problem_weighted)) == problem_weighted
 
 
+def test_properties():
+
+    problem.weights
+    problem.M
+    problem.log_trick
+
+
 def test_coverable():
 
     assert problem.is_coverable()
     assert not SetCover(U, V[:-1]).is_coverable()
 
 
+def test_setcover_bruteforce():
+
+    assert problem.solve_bruteforce() == {0, 2}
+
+
 # QUBO
 
 def test_setcover_qubo_logtrick_solve():
 
-    Q, offset = problem_log.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem_log.to_qubo())
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
 
 def test_setcover_qubo_solve():
 
-    Q_notlog, offset = problem.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q_notlog, offset)
+    e, sol = solve_qubo_bruteforce(problem.to_qubo())
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
 
 def test_setcover_qubo_logtrick_numvars():
 
-    Q, offset = problem_log.to_qubo()
+    Q = problem_log.to_qubo()
     assert (
-        len(set(y for x in Q for y in x))
-        ==
-        problem_log.num_binary_variables
+        len(set(y for x in Q for y in x)) ==
+        problem_log.num_binary_variables ==
+        Q.num_binary_variables
     )
 
 
 def test_setcover_qubo_numvars():
 
-    Q_notlog, offset = problem.to_qubo()
+    Q_notlog = problem.to_qubo()
     assert (
-        len(set(y for x in Q_notlog for y in x))
-        ==
-        problem.num_binary_variables
+        len(set(y for x in Q_notlog for y in x)) ==
+        problem.num_binary_variables ==
+        Q_notlog.num_binary_variables
     )
 
 
 def test_weighted_setcover():
 
-    Q, offset = problem_weighted.to_qubo()
-    e, sol = solve_qubo_bruteforce(Q, offset)
+    e, sol = solve_qubo_bruteforce(problem_weighted.to_qubo())
     solution = problem_weighted.convert_solution(sol)
     assert problem_weighted.is_solution_valid(solution)
+    assert problem_weighted.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, 1.1)
 
@@ -97,39 +109,31 @@ def test_weighted_setcover():
 
 def test_setcover_ising_logtrick_solve():
 
-    h, J, offset = problem_log.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem_log.to_ising())
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
 
 def test_setcover_ising_solve():
 
-    h, J, offset = problem.to_ising()
-    e, sol = solve_ising_bruteforce(h, J, offset)
+    e, sol = solve_ising_bruteforce(problem.to_ising())
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 
 
 def test_setcover_ising_logtrick_numvars():
 
-    h, J, offset = problem_log.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys())))
-        ==
-        problem_log.num_binary_variables
-    )
+    L = problem_log.to_ising()
+    assert L.num_binary_variables == problem_log.num_binary_variables
 
 
 def test_setcover_ising_numvars():
 
-    h, J, offset = problem.to_ising()
-    assert (
-        len(set(y for x in J for y in x).union(set(h.keys())))
-        ==
-        problem.num_binary_variables
-    )
+    L = problem.to_ising()
+    assert L.num_binary_variables == problem.num_binary_variables

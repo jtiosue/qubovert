@@ -2,8 +2,11 @@ numpy
 pydocstyle
 pytest
 pytest-codestyle
+pytest-cov
 sphinx
 sphinx_rtd_theme
 setuptools
 wheel
 twine
+codecov
+sympy

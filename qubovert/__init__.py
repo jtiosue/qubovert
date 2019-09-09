@@ -17,18 +17,40 @@
 QUBO stands for Quadratic Unconstrained Binary Optimization. QUBO problems
 have a one-to-one mapping to classical Ising problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
-See ``qubovert.__all__`` for all the problems defined, and
-``qubovert.utils.__all__`` for some utilities used.
+See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
+for problems defined, and ``qubovert.utils.__all__`` for some utility
+functions, and ``qubovert.sat.__all__`` for the satisfiability library.
+
 """
 
 from ._version import __version__
+
 from . import utils
-from .problems import *
 
-from .problems import __all__ as __all_problems__
+from ._qubo import *
+from ._ising import *
+from ._pubo import *
+from ._hising import *
+from ._hobo import *
+from ._hoio import *
 
-# if someone does `from qubovert import *`, import all of the problems, but
-# not utils.
-__all__ = __all_problems__
+from ._qubo import __all__ as __all_qubo__
+from ._ising import __all__ as __all_ising__
+from ._pubo import __all__ as __all_pubo__
+from ._hising import __all__ as __all_hising__
+from ._hobo import __all__ as __all_hobo__
+from ._hoio import __all__ as __all_hoio__
+
+__all__ = (
+    __all_qubo__ +
+    __all_ising__ +
+    __all_pubo__ +
+    __all_hising__ +
+    __all_hobo__ +
+    __all_hoio__
+)
+
+from . import sat
+from . import problems
 
 name = "qubovert"

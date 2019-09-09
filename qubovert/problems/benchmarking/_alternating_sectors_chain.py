@@ -12,38 +12,41 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_alternating_sector_chain.py.
+"""_alternating_sectors_chain.py.
 
-Contains the AlternatingSectorChain class. See
-``help(qubovert.AlternatingSectorChain)``.
+Contains the AlternatingSectorsChain class. See
+``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+from qubovert.utils import IsingMatrix
+from qubovert.problems import Problem
 
 
-class AlternatingSectorChain(Problem):
-    """AlternatingSectorChain.
+__all__ = 'AlternatingSectorsChain',
 
-    Class to manage converting Alternating Sector Chain to and from its QUBO
+
+class AlternatingSectorsChain(Problem):
+    """AlternatingSectorsChain.
+
+    Class to manage converting Alternating Sectors Chain to and from its QUBO
     and Ising formluations.
 
-    The Alternating Sector Chain problem has a solution for which
+    The Alternating Sectors Chain problem has a solution for which
     all the binary variable or spins are equal. It is a trivial problem,
     but useful for benchmarking some solvers or solving techniques.
 
-    AlternatingSectorChain inherits some methods and attributes from the
-    Problem class. See ``help(qubovert.utils.Problem)``.
+    AlternatingSectorsChain inherits some methods and attributes from the
+    Problem class. See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------
-    >>> from qubovert import AlternatingSectorChain
+    >>> from qubovert.problems import AlternatingSectorsChain
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
-    >>> problem = AlternatingSectorChain(10)
-    >>> Q, offset = problem.to_qubo()
+    >>> problem = AlternatingSectorsChain(10)
+    >>> Q  = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -59,7 +62,7 @@ class AlternatingSectorChain(Problem):
                  chain_length=3, min_strength=1, max_strength=10):
         """__init__.
 
-        The Alternating Sector Chain problem has a solution for which
+        The Alternating Sectors Chain problem has a solution for which
         all the binary variable or spins are equal. It is a trivial problem,
         but useful for benchmarking some solvers or solving techniques.
 
@@ -77,7 +80,7 @@ class AlternatingSectorChain(Problem):
         Examples
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
-        >>> problem = AlternatingSectorChain(*args)
+        >>> problem = AlternatingSectorsChain(*args)
         >>> h, J, offset = problem.to_ising(pbc=True)
         >>> h
         {}
@@ -113,7 +116,7 @@ class AlternatingSectorChain(Problem):
     def to_ising(self, pbc=False):
         r"""to_ising.
 
-        Create and return the alternating sector chain problem in Ising form
+        Create and return the alternating Sectors chain problem in Ising form
         The J coupling matrix for the Ising will be returned as an
         uppertriangular dictionary. Thus, the problem becomes minimizing
         :math:`\sum_{i <= j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
@@ -125,64 +128,47 @@ class AlternatingSectorChain(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables.
+        L : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
-        >>> problem = AlternatingSectorChain(*args)
-        >>> h, J, offset = problem.to_ising(pbc=True)
-        >>> h
-        {}
-        >>> offset
-        0
-        >>> J
+        >>> problem = AlternatingSectorsChain(*args)
+        >>> L = problem.to_ising(pbc=True)
+        >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1, (5, 0): 1}
 
-        >>> h, J, offset = problem.to_ising(pbc=False)
-        >>> h
-        {}
-        >>> offset
-        0
-        >>> J
+        >>> L = problem.to_ising(pbc=False)
+        >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1}
 
         """
-        h, J, offset = IsingField(), IsingCoupling(), 0
+        L = IsingMatrix()
 
         for q in range(self._N-1):
-            J[(q, q+1)] = (
+            L[(q, q+1)] = (
                 self._min_strength
                 if (q // self._chain_length) % 2
                 else self._max_strength
             )
 
         if pbc:
-            J[(self._N-1, 0)] = (
+            L[(self._N-1, 0)] = (
                 self._min_strength
                 if ((self._N-1) // self._chain_length) % 2
                 else self._max_strength
             )
 
-        return h, J, offset
+        return L
 
     def convert_solution(self, solution):
         """convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the
-        Alternating Sector Chain problem.
+        Alternating Sectors Chain problem.
 
         Parameters
         ----------
@@ -200,7 +186,7 @@ class AlternatingSectorChain(Problem):
 
         Examples
         --------
-        >>> problem = AlternatingSectorChain(5)
+        >>> problem = AlternatingSectorsChain(5)
         >>> problem.convert_solution([0, 0, 1, 0, 1])
         (-1, -1, 1, -1, 1)
         >>> problem.convert_solution([-1, -1, 1, -1, 1])
@@ -221,7 +207,7 @@ class AlternatingSectorChain(Problem):
         ----------
         solution : iterable or dict.
             solution can be the output of
-            AlternatingSectorChain.convert_solution,
+            AlternatingSectorsChain.convert_solution,
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO

@@ -1,17 +1,17 @@
 language: python
 
-#python:
-#  - 3.6
+python:
+  - "3.6"
+  - "3.7"
+  - "3.7-dev"
+#  - "3.8-dev"
 
 install:
-  # - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
-  - pip install -e .
+  - make install
 
 script:
-  - pydocstyle convention=numpy qubovert
-  - pytest --codestyle --ignore=docs
-  # I think pytest --codestyle also runs all the tests, but just in case ...
-  - pytest
-  - python setup.py sdist bdist_wheel
-  - twine check dist/*
+  - make test
+
+after_script:
+  - make submitcoverage
+  - make clean

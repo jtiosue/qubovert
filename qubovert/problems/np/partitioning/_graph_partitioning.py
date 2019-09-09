@@ -14,38 +14,44 @@
 
 """_graph_partitioning.py.
 
-Contains the GraphPartitioning class. See ``help(qubovert.GraphPartitioning)``.
+Contains the GraphPartitioning class.
+See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-from qubovert.utils import Problem, IsingCoupling, IsingField
+# from qubovert.utils import IsingMatrix
+from qubovert import HOIO
+from qubovert.problems import Problem
+
+
+__all__ = 'GraphPartitioning',
 
 
 class GraphPartitioning(Problem):
     """GraphPartitioning.
 
-    Class to manage converting Graph Partitioning to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas].
+    Class to manage converting (Weighted) Graph Partitioning to and from its
+    QUBO and Ising formluations. Based on the paper hereforth designated
+    [Lucas].
 
     The goal of the Graph Partitioning problem is to partition the verticies
-    of a graph into two equal subsets such that the number of edges connecting
-    the two subsets is minimized. There must be an even number of vertices.
+    of a graph into two equal subsets such that the number of edges (or the
+    total weight of the edges) connecting the two subsets is minimized.
 
     GraphPartitioning inherits some methods and attributes from the Problem
-    class. See ``help(qubovert.utils.Problem)``.
+    class. See ``help(qubovert.problems.Problem)``.
 
     Example usage
     -------------
-    >>> from qubovert import GraphPartitioning
+    >>> from qubovert.problems import GraphPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> edges = {("a", "b"), ("a", "c"), ("c", "d"),
                  ("b", "c"), ("e", "f"), ("d", "e")}
     >>> problem = GraphPartitioning(edges)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -65,23 +71,31 @@ class GraphPartitioning(Problem):
     References
     ---------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.
+       in Physics, 2:5, 2014.
 
     """
 
     def __init__(self, edges):
         """__init__.
 
-        The goal of the Graph Partitioning problem is to partition the vertices
-        of a graph into two equal subsets such that the number of edges
-        connecting the two subsets is minimized. All naming conventions follow
-        the names in the paper [Lucas].
+        The goal of the (Weighted) Graph Partitioning problem is to partition
+        the vertices of a graph into two equal subsets such that the number of
+        edges (or the total weight of the edges) connecting the two subsets is
+        minimized. All naming conventions follow the names in the paper
+        [Lucas].
 
         Parameters
         ----------
-        edges : set of two element tuples.
-            Describes edges of the graph. Important: the graph must have an
-            even number of vertices!
+        edges : set or dict.
+            If edges is a set, then it must be a set of two element tuples
+            describing the edges of the graph. Ie each tuple is a connection
+            between two vertices. If a tuple has a repeated label (for example,
+            (2, 2)), it will be ignored.
+
+            If edges is a dict then the keys must be
+            two element tuples and the values are the weights associated with
+            that edge. If a key has a repeated label (for example, (2, 2)), it
+            will be ignored.
 
         Examples
         -------
@@ -91,15 +105,20 @@ class GraphPartitioning(Problem):
         >>> edges = {(0, 1), (0, 2)}
         >>> problem = GraphPartitioning(edges)
 
+        >>> edges = {(0, 1): 2, (1, 2): -1}
+        >>> problem = GraphPartitioning(edges)
+
         """
-        self._edges = edges.copy()
+        if isinstance(edges, set):
+            self._edges = {k: 1 for k in edges if k[0] != k[1]}
+        else:
+            self._edges = {k: v for k, v in edges.items() if k[0] != k[1]}
+
         self._vertices = {y for x in edges for y in x}
         self._vertex_to_index = {x: i for i, x in enumerate(self._vertices)}
         self._index_to_vertex = {i: x for x, i in
                                  self._vertex_to_index.items()}
-        self._N, self._n = len(self._vertices), len(self._edges)
-        if self._N % 2:
-            raise ValueError("The graph must have an even number of vertices")
+        self._N = len(self._vertices)
 
         all_degs = {}
         for e in edges:
@@ -120,7 +139,7 @@ class GraphPartitioning(Problem):
             A copy of the edge set defining the Graph Partitioning problem.
 
         """
-        return self._edges.copy()
+        return set(self._edges.keys())
 
     @property
     def V(self):
@@ -137,6 +156,21 @@ class GraphPartitioning(Problem):
 
         """
         return self._vertices.copy()
+
+    @property
+    def weights(self):
+        """weights.
+
+        Returns a dictionary mapping the edges of the graph to their associated
+        weights.
+
+        Return
+        -------
+        weights : dict.
+            Keys are two element tuples, values are numbers.
+
+        """
+        return self._edges.copy()
 
     @property
     def degree(self):
@@ -170,11 +204,13 @@ class GraphPartitioning(Problem):
         r"""to_ising.
 
         Create and return the graph partitioning problem in Ising form
-        following section 2.2 of [Lucas]. The J coupling matrix for the Ising
-        will be returned as an uppertriangular dictionary. Thus, the problem
-        becomes minimizing
-        :math:`\sum_{i \leq j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
-        A and B are parameters to enforce constraints.
+        following section 2.2 of [Lucas]. A and B are parameters to enforce
+        constraints.
+
+        It is formatted such that the solution to the Ising formulation is
+        equal to the the total number of edges connecting the two
+        partitions (or the total weight if we are solving weighted
+        partitioning).
 
         Parameters
         ----------
@@ -190,46 +226,49 @@ class GraphPartitioning(Problem):
 
         Return
         -------
-        res : tuple (h, J, offset).
-            h : qubovert.utils.IsingField object.
-                Maps variable labels to the Ising field value. For most
-                practical purposes, you can use IsingField in the same
-                way as an ordinary dictionary. For more information, see
-                ``help(qubovert.utils.IsingField)``.
-            J : qubovert.utils.IsingField object.
-                J is the upper triangular Ising coupling matrix, a
-                IsingCoupling object. For most practical purposes, you can use
-                IsingCoupling in the same way as an ordinary dictionary. For
-                more information, see ``help(qubovert.utils.IsingCoupling)``.
-            offset : float.
-                The part of the Ising function independent of variables. It is
-                the value such that the solution to the Ising formulation is
-                equal to the the total number of edges connecting the two
-                partitions.
+        L : qubovert.utils.IsingMatrix object.
+            For most practical purposes, you can use IsingMatrix in the
+            same way as an ordinary dictionary. For more information, see
+            ``help(qubovert.utils.IsingMatrix)``.
 
         Example
         --------
         >>> problem = GraphPartitioning({(0, 1), (1, 2), (0, 3)})
-        >>> h, J, offset = problem.to_ising()
+        >>> L = problem.to_ising()
 
         """
         # all naming conventions follow the paper listed in the docstring
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-        h, J = IsingField(), IsingCoupling()
-        offset = A * self._N + B * self._n / 2
+#        L = IsingMatrix()
+#
+#        # we don't use HOBO().to_ising because we want to keep our mapping.
+#
+#        # encode H_A (equation 8)
+#        L += HOIO().add_constraint_eq_zero(
+#            {(i,): 1 for i in range(self._N)}, lam=A)
+#
+#        # encode H_B (equation 9)
+#        L += B * sum(self._edges.values()) / 2
+#        for (u, v), w in self._edges.items():
+#            L[(self._vertex_to_index[u],
+#               self._vertex_to_index[v])] -= w * B / 2
+#
+#        return L
+
+        H = HOIO()
+        H.set_mapping(self._vertex_to_index)
 
         # encode H_A (equation 8)
-        for i in range(self._N):
-            for j in range(i+1, self._N):
-                J[(i, j)] += 2 * A
+        H.add_constraint_eq_zero({(i,): 1 for i in self._vertices}, lam=A)
 
         # encode H_B (equation 9)
-        for u, v in self._edges:
-            J[(self._vertex_to_index[u], self._vertex_to_index[v])] -= B / 2
+        H += B * sum(self._edges.values()) / 2
+        for e, w in self._edges.items():
+            H[e] -= w * B / 2
 
-        return h, J, offset
+        return H.to_ising()
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -259,9 +298,8 @@ class GraphPartitioning(Problem):
         >>> edges = {("a", "b"), ("a", "c"), ("c", "d"),
                      ("b", "c"), ("e", "f"), ("d", "e")}
         >>> problem = GraphPartitioning(edges)
-        >>> Q, offset = problem.to_qubo()
+        >>> Q = problem.to_qubo()
         >>> obj, sol = solve_qubo(Q)
-        >>> obj += offset
         >>> print(problem.convert_solution(sol))
         ({'a', 'b', 'c'}, {'d', 'e', 'f'})
 
@@ -281,7 +319,8 @@ class GraphPartitioning(Problem):
         """is_solution_valid.
 
         Returns whether or not the proposed solution has an equal number of
-        vertices in each partition.
+        vertices in each partition. NOTE: this is impossible if the number of
+        edges is odd!
 
         Parameters
         ----------

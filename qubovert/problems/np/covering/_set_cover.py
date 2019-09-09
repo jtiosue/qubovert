@@ -14,12 +14,16 @@
 
 """_set_cover.py.
 
-Contains the SetCover class. See ``help(qubovert.SetCover)``.
+Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 
 """
 
 from numpy import log2, allclose
-from qubovert.utils import Problem, QUBOMatrix
+from qubovert.utils import QUBOMatrix, solve_qubo_bruteforce
+from qubovert.problems import Problem
+
+
+__all__ = 'SetCover',
 
 
 class SetCover(Problem):
@@ -35,20 +39,19 @@ class SetCover(Problem):
     has an associated weight.
 
     This class inherits some methods and attributes from the
-    ``qubovert.utils.Problem`` class.
+    ``qubovert.problems.Problem`` class.
 
     Example
     -------
-    >>> from qubovert import SetCover
+    >>> from qubovert.problems import SetCover
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
     >>> # from qubovert.utils import solve_qubo_bruteforce as qubo_solver
     >>> U = {"a", "b", "c", "d"}
     >>> V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
     >>> problem = SetCover(U, V)
-    >>> Q, offset = problem.to_qubo()
+    >>> Q = problem.to_qubo()
     >>> obj, sol = qubo_solver(Q)
-    >>> obj += offset
     >>> solution = problem.convert_solution(sol)
 
     >>> print(solution)
@@ -61,7 +64,7 @@ class SetCover(Problem):
     References
     ----------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-    in Physics, 2:5, 2014.
+        in Physics, 2:5, 2014.
 
     """
 
@@ -290,6 +293,11 @@ class SetCover(Problem):
         becomes minimizing :math:`\sum_{i \leq j} x_i x_j Q_{ij}`. A and B are
         parameters to enforce constraints.
 
+        If all the constraints are satisfied, then the objective function
+        will be equal to the total number of sets in the cover (or for
+        the weighted Set Cover problem, it will equal the total weight
+        of included sets in the cover).
+
         Parameters
         ----------
         A: positive float (optional, defaults to 2).
@@ -299,30 +307,22 @@ class SetCover(Problem):
 
         Return
         -------
-        res : tuple (Q, offset).
-            Q : qubovert.utils.QUBOMatrix object.
-                The upper triangular QUBO matrix, a QUBOMatrix object.
-                For most practical purposes, you can use QUBOMatrix in the
-                same way as an ordinary dictionary. For more information,
-                see ``help(qubovert.utils.QUBOMatrix)``.
-            offset : float.
-                The sum of the terms in the formulation that don't involve any
-                variables. It is formatted such that if all the constraints are
-                satisfied, then :math:`\sum_{i \leq j} x_i x_j Q_{ij} + offset`
-                will be equal to the total number of sets in the cover (or for
-                the weighted Set Cover problem, it will equal the total weight
-                of included sets in the cover).
+        Q : qubovert.utils.QUBOMatrix object.
+            The upper triangular QUBO matrix, a QUBOMatrix object.
+            For most practical purposes, you can use QUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUBOMatrix)``.
 
         """
         # all naming conventions follow the paper listed in the docstring
 
         Q = QUBOMatrix()
 
-        offset = self._n * A  # comes from the first constraint
+        Q += self._n * A  # constant comes from the constraints
 
         # encode H_B (equation 46)
         for i in range(self._N):
-            Q[(i, i)] += self._weights[i] * B
+            Q[(i,)] += self._weights[i] * B
 
         # encode H_A
 
@@ -351,31 +351,22 @@ class SetCover(Problem):
 
             else:  # using the log_trick
 
-                # first constraint
+                # no first constraint now, but modify the second constraint.
                 for m in range(self._log_M+1):
                     i = self._x(alpha, m)
-                    Q[(i, i)] -= A
-                    for mp in range(m+1, self._log_M+1):
-                        ip = self._x(alpha, mp)
-                        Q[(i, ip)] += A
-
-                # second constraint
-                for m in range(self._log_M+1):
-                    i = self._x(alpha, m)
-                    Q[(i, i)] += A*pow(2, 2*m)
+                    Q[(i, i)] += A * (pow(2, 2*m) + 2 * pow(2, m))
                     for mp in range(m+1, self._log_M+1):
                         ip = self._x(alpha, mp)
                         Q[(i, ip)] += 2*A*pow(2, m+mp)
                     for j in self._filtered_range(alpha):
                         Q[(j, i)] -= 2*A*pow(2, m)
 
-            # for both using and not using the log trick
             for i in self._filtered_range(alpha):
-                Q[(i, i)] += A
+                Q[(i,)] += A if not self._log_trick else -A
                 for j in self._filtered_range(alpha, i+1):
-                    Q[(i, j)] += 2*A
+                    Q[(i, j)] += 2 * A
 
-        return Q, offset
+        return Q
 
     def convert_solution(self, solution):
         """convert_solution.
@@ -429,3 +420,74 @@ class SetCover(Problem):
 
         covered = set(x for i in solution for x in self._V[i])
         return covered == self._U
+
+    def solve_bruteforce(self, all_solutions=False):
+        """solve_bruteforce.
+
+        Solves the Set Cover problem exactly with a brute force method. THIS
+        SHOULD NOT BE USED FOR LARGE PROBLEMS! The advantage over this method
+        as opposed to using a brute force QUBO solver is that the QUBO
+        formulation has many slack variables.
+
+        Parameters
+        ----------
+        all_solutions : boolean (optional, defaults to False).
+            If ``all_solutions`` is set to True, all the best solutions to the
+            problem will be returned rather than just one of the best. If the
+            problem is very big, then it is best if ``all_solutions == False``,
+            otherwise this function will use a lot of memory.
+
+        Returns
+        -------
+        res : set or list of sets.
+            A set of which sets are included in the set cover. So if this
+            function returns ``{0, 2, 3}``, then the set cover is the sets
+            ``V[0]``, ``V[2]``, and ``V[3]``. If ``all_solutions == True``,
+            then ``res`` will be a list of sets, where each element of the list
+            is one of the optimal solutions.
+
+        Examples
+        --------
+        >>> from qubovert import SetCover
+        >>> U = {"a", "b", "c", "d"}
+        >>> V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
+        >>> problem = SetCover(U, V)
+        >>> print(problem.solve_bruteforce())
+        {0, 2}
+
+        """
+        # minimize the objective function
+        Q = {(i,): self._weights[i] for i in range(self._N)}
+        # subject to the constraint
+        valid = self.is_solution_valid
+
+        obj, sol = solve_qubo_bruteforce(Q, all_solutions, valid)
+
+        if obj is None:
+            raise ValueError("Problem is not solvable. See "
+                             "``SetCover.is_coverable()``")
+
+        if all_solutions:
+            return [self.convert_solution(s) for s in sol]
+        return self.convert_solution(sol)
+
+#        best = None
+#        all_sols = {}
+#        for x in range(1 << self._N):
+#            sol = decimal_to_binary(x, self._N)
+#            cover = self.convert_solution(sol)
+#            if self.is_solution_valid(cover):
+#                if not all_solutions and (best is None or
+#                                          len(cover) < len(best)):
+#                    best = cover
+#                elif all_solutions and (best is None or
+#                                        len(cover) <= len(best)):
+#                    best = cover
+#                    all_sols.setdefault(len(cover), []).append(cover)
+#
+#        if best is None:
+#            raise ValueError("Problem is not solvable. See "
+#                             "``SetCover.is_coverable()``")
+#        if all_solutions:
+#            return all_sols[len(best)]
+#        return best

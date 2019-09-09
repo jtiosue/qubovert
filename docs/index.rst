@@ -1,56 +1,51 @@
 Welcome to qubovert's documentation!
 ====================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
 Indices and tables
-==================
+-----------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
 
 
-README
-======
-
 .. include:: ../README.rst
 
 
-Problems defined
-================
+.. toctree::
+   :maxdepth: 2
+   :caption: Binary/Ising Optimization
 
-Note that these are all imported to use globally. For example, you can use the ``SetCover`` class with any of the following.
-
-.. code:: python
-
-    import qubovert
-    qubovert.SetCover(...)
-    qubovert.problems.SetCover(...)
-    qubovert.problems.np.SetCover(...)
-    qubovert.problems.np.covering.SetCover(...)
-
-
-.. automodule:: qubovert.problems
-    :members:
+   BO/HOBO
+   BO/HOIO
+   BO/PUBO
+   BO/HIsing
+   BO/QUBO
+   BO/Ising
+   BO/sat
 
 
-Utility methods
-===============
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
 
-Note that the ``utils`` modules will not be imported with ``from qubovert import *``. You must import ``qubovert.utils`` explicitly.
+   utils/methods
+   utils/matrices
+   utils/parentclasses
+   utils/warnings
 
 
-.. automodule:: qubovert.utils
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Problems
+
+   problems/parentclass
+   problems/np/index
+   problems/benchmarking/index
 
 
-Copyright
-=========
+.. toctree::
+   :maxdepth: 2
+   :caption: Copyright
 
-Joseph T. Iosue, joe.iosue@yahoo.com.
-
-.. include:: ../LICENSE
+   copyright

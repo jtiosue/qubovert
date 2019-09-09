@@ -12,9 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-Set up details for `pip install qubovert` or `pip install -e .` if installing
-by source.
+"""setup.py.
+
+Set up details for ``pip install qubovert`` or ``pip install -e .`` if
+installing by source.
+
 """
 
 import setuptools
@@ -35,6 +37,7 @@ setuptools.setup(
     author_email="joe.iosue@yahoo.com",
     description="A package for converting common problems to QUBO/Ising form",
     long_description=README,
+    long_description_content_type='text/x-rst',
     url="https://github.com/jiosue/qubovert",
     license="Apache Software License 2.0",
     packages=setuptools.find_packages(exclude=("tests", "docs")),
