@@ -1,4 +1,4 @@
-# windows testing batch file
+# ignore windows testing batch file
 runtests.bat
 
 # Byte-compiled / optimized / DLL files
