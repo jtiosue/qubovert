@@ -12,6 +12,9 @@ QUBOVert
 .. image:: https://codecov.io/gh/jiosue/QUBOVert/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/jiosue/QUBOVert
     :alt: Code Coverage
+.. image:: https://img.shields.io/lgtm/grade/python/g/jiosue/QUBOVert.svg?logo=lgtm&logoWidth=18
+    :target: https://lgtm.com/projects/g/jiosue/QUBOVert/context:python
+    :alt: Code Quality
 
 *dev branch*
 
