@@ -1196,3 +1196,30 @@ def test_hobo_logic():
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
+
+
+def test_hobo_special_constraint_le():
+
+    H = HOBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2,): 1, (): -1})
+    assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
+
+    H = HOBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -1})
+    assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
+
+    H = HOBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2,): 1, (): -2})
+    assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
+
+    H = HOBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -2})
+    assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
+
+    H = HOBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2,): -1, (): 1})
+    assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
+
+    H = HOBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 1})
+    assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
+
+    H = HOBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2,): -1, (): 2})
+    assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
+
+    H = HOBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 2})
+    assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}

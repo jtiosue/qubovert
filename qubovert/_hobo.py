@@ -27,7 +27,39 @@ from numpy import log2, ceil
 __all__ = 'HOBO',
 
 
-# TODO: add better constraints for constraints that match known forms.
+# special constraint forms
+
+def _special_constraints_le_zero(hobo, P, lam):
+    """_special_constraints_le_zero.
+
+    See if the constraint that ``P <= 0`` matches any special forms.
+
+    Parameters
+    ----------
+    hobo : HOBO object.
+        The HOBO to add the constraint to.
+    P : PUBO object.
+        The PUBO constraint such that ``P <= 0``.
+        are present.
+    lam : float > 0 or sympy.Symbol.
+        Langrange multiplier to penalize violations of the constraint.
+
+    Return
+    ------
+    success : bool.
+        True if a special constraint was found and added to ``hobo``, else
+        False.
+
+    """
+    # if P is of the form sum(x_i) <= 1.
+    if P.offset == -1 and all(x == 1 for x in (P + 1).values()):
+        hobo += lam * P * (P + 1) / 2
+        return True
+
+    return False
+
+
+# helpers
 
 def _create_tuple(x):
     """_create_tuple.
@@ -103,6 +135,8 @@ def _get_bounds(P, bounds):
 
     return bounds
 
+
+# main class
 
 class HOBO(PUBO):
     """HOBO.
@@ -742,6 +776,9 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         self._constraints.setdefault("le", []).append(P)
+
+        if _special_constraints_le_zero(self, P, lam):
+            return self
 
         min_val, max_val = _get_bounds(P, bounds)
 
