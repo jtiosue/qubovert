@@ -24,7 +24,7 @@ from .sat import OR, XOR
 from numpy import log2, ceil
 
 
-__all__ = 'HOBO',
+__all__ = 'HOBO', 'binary_var'
 
 
 # special constraint forms
@@ -134,6 +134,52 @@ def _get_bounds(P, bounds):
         bounds = bounds[0], _pubo_value_extrema(P)[1]
 
     return bounds
+
+
+def binary_var(name):
+    """binary_var.
+
+    Create a HOBO (see ``qubovert.HOBO``) from a single binary variable.
+
+    Parameters
+    ----------
+    name : any hashable object.
+        Name of the binary variable.
+
+    Return
+    ------
+    hobo : qubovert.HOBO object.
+        The model representing the binary variable.
+
+    Examples
+    --------
+    >>> from qubovert import binary_var, HOBO
+    >>>
+    >>> x0 = binary_var("x0")
+    >>> print(x0)
+    {('x0',): 1}
+    >>> print(isinstance(x0, HOBO))
+    True
+
+    >>> x = [binary_var('x{}'.format(i)) for i in range(5)]
+    >>> hobo = sum(x)
+    >>> print(hobo)
+    {('x0',): 1, ('x1',): 1, ('x2',): 1, ('x3',): 1, ('x4',): 1}
+    >>> hobo **= 2
+    >>> print(hobo)
+    {('x0',): 1, ('x0', 'x1'): 2, ('x2', 'x0'): 2, ('x3', 'x0'): 2,
+     ('x4', 'x0'): 2, ('x1',): 1, ('x2', 'x1'): 2, ('x3', 'x1'): 2,
+     ('x4', 'x1'): 2, ('x2',): 1, ('x2', 'x3'): 2, ('x2', 'x4'): 2, ('x3',): 1,
+     ('x4', 'x3'): 2, ('x4',): 1}
+    >>> hobo *= -1
+    >>> print(hobo.solve_bruteforce())
+    {'x0': 1, 'x1': 1, 'x2': 1, 'x3': 1, 'x4': 1}
+    >>> hobo.add_constraint_eq_zero(x[0] + x[1])
+    >>> print(hobo.solve_bruteforce())
+    {'x0': 0, 'x1': 0, 'x2': 1, 'x3': 1, 'x4': 1}
+
+    """
+    return HOBO({(name,): 1})
 
 
 # main class

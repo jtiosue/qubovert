@@ -59,7 +59,7 @@ To install from source:
   pip install -e .
 
 
-Then you can use it in Python versions 3.6 and above with
+Then you can use it in Python **versions 3.6 and above** with
 
 .. code:: python
 

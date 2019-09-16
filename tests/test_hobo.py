@@ -16,7 +16,7 @@
 Contains tests for the HOBO class.
 """
 
-from qubovert import HOBO
+from qubovert import HOBO, binary_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
@@ -336,6 +336,15 @@ def test_symbols():
     assert d == {(0,): a**2 - a, (0, 1): -2*a*b + 2, (1,): b**2 + b}
     assert d.subs(a, 0) == {(0, 1): 2, (1,): b**2 + b}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 6}
+
+
+def test_binary_var():
+
+    x = [binary_var(i) for i in range(5)]
+    assert all(x[i] == {(i,): 1} for i in range(5))
+    assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
+    assert sum(x) == {(i,): 1 for i in range(5)}
+    assert isinstance(x[0], HOBO)
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """
