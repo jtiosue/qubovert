@@ -726,10 +726,11 @@ class HOBO(PUBO):
                 P = P + 1
                 min_val += 1
                 max_val += 1
-            self += HOBO().add_constraint_le_zero(
+            self.add_constraint_le_zero(
                 P, lam=lam, log_trick=log_trick,
                 bounds=(min_val, max_val), suppress_warnings=True
             )
+            self._constraints["le"].pop(-1)
 
         return self
 
@@ -851,10 +852,11 @@ class HOBO(PUBO):
                     P[(self._next_ancilla,)] += 1
                     max_val += 1
 
-            self += HOBO().add_constraint_eq_zero(
+            self.add_constraint_eq_zero(
                 P, lam=lam,
                 bounds=(min_val, max_val), suppress_warnings=True
             )
+            self._constraints["eq"].pop(-1)
 
         return self
 
@@ -947,10 +949,11 @@ class HOBO(PUBO):
         self._constraints.setdefault("gt", []).append(P)
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
-        self += HOBO().add_constraint_lt_zero(
+        self.add_constraint_lt_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
+        self._constraints["lt"].pop(-1)
         return self
 
     def add_constraint_ge_zero(self,
@@ -1050,10 +1053,11 @@ class HOBO(PUBO):
         self._constraints.setdefault("ge", []).append(P)
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
-        self += HOBO().add_constraint_le_zero(
+        self.add_constraint_le_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
+        self._constraints["le"].pop(-1)
         return self
 
     def add_constraint_eq_AND(self, a, *variables, lam=1):
