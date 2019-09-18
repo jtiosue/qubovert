@@ -200,7 +200,7 @@ class VertexCover(Problem):
 
         # encode H_A, ie each edge is adjacent to at least one colored vertex.
         for u, v in self._edges:
-            H.OR(u, v, lam=A)
+            H.add_constraint_OR(u, v, lam=A)
 
         return H.to_qubo()
 

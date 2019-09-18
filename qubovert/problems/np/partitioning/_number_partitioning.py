@@ -20,7 +20,6 @@ Contains the NumberPartitioning class. See
 """
 
 from qubovert.utils import IsingMatrix
-from qubovert import HOIO
 from qubovert.problems import Problem
 
 
