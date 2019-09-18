@@ -22,7 +22,56 @@ from . import HIsing, HOBO
 from .utils import hising_to_pubo, pubo_to_hising
 
 
-__all__ = 'HOIO',
+__all__ = 'HOIO', 'spin_var'
+
+
+def spin_var(name):
+    """spin_var.
+
+    Create a HOIO (see ``qubovert.HOIO``) from a single spin variable.
+
+    Parameters
+    ----------
+    name : any hashable object.
+        Name of the spin variable.
+
+    Return
+    ------
+    hoio : qubovert.HOIO object.
+        The model representing the binary variable.
+
+    Examples
+    --------
+    >>> from qubovert import spin_var, HOIO
+    >>>
+    >>> z0 = spin_var("z0")
+    >>> print(z0)
+    {('z0',): 1}
+    >>> print(isinstance(z0, HOIO))
+    True
+
+    >>> z = [spin_var('z{}'.format(i)) for i in range(5)]
+    >>> hoio = sum(z)
+    >>> print(hoio)
+    {('z0',): 1, ('z1',): 1, ('z2',): 1, ('z3',): 1, ('z4',): 1}
+    >>> hoio **= 2
+    >>> print(hoio)
+    {(): 5, ('z0', 'z1'): 2, ('z2', 'z0'): 2, ('z3', 'z0'): 2, ('z0', 'z4'): 2,
+     ('z2', 'z1'): 2, ('z3', 'z1'): 2, ('z4', 'z1'): 2, ('z3', 'z2'): 2,
+     ('z2', 'z4'): 2, ('z3', 'z4'): 2}
+    >>> hoio *= -1
+    >>> print(hoio.solve_bruteforce(all_solutions=True))
+    [{'z0': -1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
+     {'z0': 1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1}]
+    >>> hoio.add_constraint_eq_zero(z[0] + z[1])
+    >>> print(hoio.solve_bruteforce(all_solutions=True))
+    [{'z0': -1, 'z1': 1, 'z2': -1, 'z3': -1, 'z4': -1},
+     {'z0': -1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1},
+     {'z0': 1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
+     {'z0': 1, 'z1': -1, 'z2': 1, 'z3': 1, 'z4': 1}]
+
+    """
+    return HOIO({(name,): 1})
 
 
 class HOIO(HIsing):

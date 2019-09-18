@@ -16,7 +16,7 @@
 Contains tests for the HOIO class.
 """
 
-from qubovert import HOIO
+from qubovert import HOIO, spin_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
@@ -345,6 +345,15 @@ def test_symbols():
                  (1,): b, (): 1.*a**2 + 1.*b**2}
     assert d.subs(a, 0) == {(0, 1): 2, (1,): b, (): 1.*b**2}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 2, (): 4}
+
+
+def test_spin_var():
+
+    z = [spin_var(i) for i in range(5)]
+    assert all(z[i] == {(i,): 1} for i in range(5))
+    assert z[0] * z[1] * z[2] == {(0, 1, 2): 1}
+    assert sum(z) == {(i,): 1 for i in range(5)}
+    assert isinstance(z[0], HOIO)
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """

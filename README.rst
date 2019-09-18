@@ -59,7 +59,7 @@ To install from source:
   pip install -e .
 
 
-Then you can use it in Python versions 3.6 and above with
+Then you can use it in Python **versions 3.6 and above** with
 
 .. code:: python
 
@@ -166,13 +166,13 @@ See the following HOBO examples (much of the same functionality can be used with
 
     H = HOBO()
     # make it favorable to AND variables a and b, and variables b and c
-    H.AND('a', 'b').AND('b', 'c')
+    H.add_constraint_AND('a', 'b').add_constraint_AND('b', 'c')
 
     # make it favorable to OR variables b and c
-    H.OR('b', 'c')
+    H.add_constraint_OR('b', 'c')
 
     # make it favorable to (a AND b) OR (c AND d) OR e
-    H.OR(['a', 'b'], ['c', 'd'], 'e')
+    H.add_constraint_OR(['a', 'b'], ['c', 'd'], 'e')
 
     # enforce that 'b' = NOR('a', 'c', 'd')
     H.add_constraint_eq_NOR('b', 'a', 'c', 'd')
