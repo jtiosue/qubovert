@@ -211,10 +211,14 @@ class HOBO(PUBO):
 
     We then implement logical operations:
 
-    - ``AND``, ``NAND``, ``add_constraint_eq_AND``, ``add_constraint_eq_NAND``,
-    - ``OR``, ``NOR```, ``add_constraint_eq_OR``, ``add_constraint_eq_NOR``,
-    - ``XOR``, ``XNOR``, ``add_constraint_eq_XOR``, ``add_constraint_eq_XNOR``,
-    - ``ONE``, ``NOT``, ``add_constraint_eq_ONE``, ``add_constraint_eq_NOT``.
+    - ``add_constraint_AND``, ``add_constraint_NAND``,
+    - ``add_constraint_eq_AND``, ``add_constraint_eq_NAND``,
+    - ``add_constraint_OR``, ``add_constraint_NOR```,
+    - ``add_constraint_eq_OR``, ``add_constraint_eq_NOR``,
+    - ``add_constraint_XOR``, ``add_constraint_XNOR``,
+    - ``add_constraint_eq_XOR``, ``add_constraint_eq_XNOR``,
+    - ``add_constraint_ONE``, ``add_constraint_NOT``,
+    - ``add_constraint_eq_ONE``, ``add_constraint_eq_NOT``.
 
     See each of their docstrings for important details on their implementation.
 
@@ -285,13 +289,13 @@ class HOBO(PUBO):
     >>> H = HOBO()
     >>>
     >>> # make it favorable to AND variables a and b, and variables b and c
-    >>> H.AND('a', 'b').AND('b', 'c')
+    >>> H.add_constraint_AND('a', 'b').add_constraint_AND('b', 'c')
     >>>
     >>> # make it favorable to OR variables b and c
-    >>> H.OR('b', 'c')
+    >>> H.add_constraint_OR('b', 'c')
     >>>
     >>> # make it favorable to (a AND b) OR (c AND d)
-    >>> H.OR(['a', 'b'], ['c', 'd'])
+    >>> H.add_constraint_OR(['a', 'b'], ['c', 'd'])
     >>>
     >>> H
     {('b', 'a'): -2, (): 4, ('b',): -1, ('c',): -1,
@@ -839,7 +843,7 @@ class HOBO(PUBO):
             # don't mutate the P that we put in self._constraints
             P = P.copy()
             if log_trick and min_val:
-                for i in range(int(ceil(log2(-min_val)))):
+                for i in range(int(ceil(log2(-min_val + 1)))):
                     P[(self._next_ancilla,)] += pow(2, i)
                     max_val += pow(2, i)
             elif min_val:
