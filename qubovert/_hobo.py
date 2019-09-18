@@ -391,6 +391,36 @@ class HOBO(PUBO):
         """
         return {k: [x.copy() for x in v] for k, v in self._constraints.items()}
 
+    def _append_constraint(self, key, constraint):
+        """_append_constraint.
+
+        Internal method to add a constraint to the constraints dictionary.
+
+        Parameters
+        ----------
+        key : str.
+            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
+        constraint : qubovert.PUBO object.
+
+        """
+        self._constraints.setdefault(key, []).append(constraint)
+
+    def _pop_constraint(self, key):
+        """_append_constraint.
+
+        Internal method to remove the most recently added constraint.
+
+        Parameters
+        ----------
+        key : str.
+            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
+
+        """
+        if self._constraints.get(key, []):
+            self._constraints[key].pop()
+            if not self._constraints[key]:
+                self._constraints.pop(key)
+
     @property
     def num_ancillas(self):
         """num_ancillas.
@@ -598,7 +628,7 @@ class HOBO(PUBO):
 
         """
         P = PUBO(P)
-        self._constraints.setdefault("eq", []).append(P)
+        self._append_constraint("eq", P)
 
         min_val, max_val = _get_bounds(P, bounds)
 
@@ -709,7 +739,7 @@ class HOBO(PUBO):
 
         """
         P = PUBO(P)
-        self._constraints.setdefault("lt", []).append(P)
+        self._append_constraint("lt", P)
 
         min_val, max_val = _get_bounds(P, bounds)
 
@@ -730,7 +760,7 @@ class HOBO(PUBO):
                 P, lam=lam, log_trick=log_trick,
                 bounds=(min_val, max_val), suppress_warnings=True
             )
-            self._constraints["le"].pop(-1)
+            self._pop_constraint("le")
 
         return self
 
@@ -826,7 +856,7 @@ class HOBO(PUBO):
 
         """
         P = PUBO(P)
-        self._constraints.setdefault("le", []).append(P)
+        self._append_constraint("le", P)
 
         if _special_constraints_le_zero(self, P, lam):
             return self
@@ -856,7 +886,7 @@ class HOBO(PUBO):
                 P, lam=lam,
                 bounds=(min_val, max_val), suppress_warnings=True
             )
-            self._constraints["eq"].pop(-1)
+            self._pop_constraint("eq")
 
         return self
 
@@ -946,14 +976,14 @@ class HOBO(PUBO):
 
         """
         P = PUBO(P)
-        self._constraints.setdefault("gt", []).append(P)
+        self._append_constraint("gt", P)
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
         self.add_constraint_lt_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
-        self._constraints["lt"].pop(-1)
+        self._pop_constraint("lt")
         return self
 
     def add_constraint_ge_zero(self,
@@ -1050,14 +1080,14 @@ class HOBO(PUBO):
 
         """
         P = PUBO(P)
-        self._constraints.setdefault("ge", []).append(P)
+        self._append_constraint("ge", P)
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
         self.add_constraint_le_zero(
             -P, lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
-        self._constraints["le"].pop(-1)
+        self._pop_constraint("le")
         return self
 
     def add_constraint_eq_AND(self, a, *variables, lam=1):

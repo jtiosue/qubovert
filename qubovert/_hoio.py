@@ -74,6 +74,26 @@ def spin_var(name):
     return HOIO({(name,): 1})
 
 
+def _empty_hobo(hoio):
+    """_empty_hobo.
+
+    Create an empty HOBO whose ancilla variables begin at
+    ``hoio.num_ancillas``.
+
+    Parameters
+    ----------
+    hoio : HOIO object.
+
+    Return
+    ------
+    hobo : HOBO object.
+
+    """
+    h = HOBO()
+    h._ancilla = hoio._ancilla
+    return h
+
+
 class HOIO(HIsing):
     """HOBO.
 
@@ -200,6 +220,20 @@ class HOIO(HIsing):
 
         """
         return {k: [x.copy() for x in v] for k, v in self._constraints.items()}
+
+    def _append_constraint(self, key, constraint):
+        """_append_constraint.
+
+        Internal method to add a constraint to the constraints dictionary.
+
+        Parameters
+        ----------
+        key : str.
+            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
+        constraint : qubovert.HIsing object.
+
+        """
+        HOBO._append_constraint(self, key, constraint)
 
     @property
     def num_ancillas(self):
@@ -354,11 +388,14 @@ class HOIO(HIsing):
 
         """
         H = HIsing(H)
-        self._constraints.setdefault("eq", []).append(H)
-        self += pubo_to_hising(HOBO().add_constraint_eq_zero(
+        self._append_constraint("eq", H)
+
+        h = _empty_hobo(self).add_constraint_eq_zero(
             hising_to_pubo(H), lam=lam,
             bounds=bounds, suppress_warnings=suppress_warnings
-        ))
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
         return self
 
     def add_constraint_lt_zero(self,
@@ -429,11 +466,13 @@ class HOIO(HIsing):
 
         """
         H = HIsing(H)
-        self._constraints.setdefault("lt", []).append(H)
-        self += pubo_to_hising(HOBO().add_constraint_lt_zero(
+        self._append_constraint("lt", H)
+        h = _empty_hobo(self).add_constraint_lt_zero(
             hising_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
-        ))
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
         return self
 
     def add_constraint_le_zero(self,
@@ -507,11 +546,13 @@ class HOIO(HIsing):
 
         """
         H = HIsing(H)
-        self._constraints.setdefault("le", []).append(H)
-        self += pubo_to_hising(HOBO().add_constraint_le_zero(
+        self._append_constraint("le", H)
+        h = _empty_hobo(self).add_constraint_le_zero(
             hising_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
-        ))
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
         return self
 
     def add_constraint_gt_zero(self,
@@ -581,11 +622,13 @@ class HOIO(HIsing):
 
         """
         H = HIsing(H)
-        self._constraints.setdefault("gt", []).append(H)
-        self += pubo_to_hising(HOBO().add_constraint_gt_zero(
+        self._append_constraint("gt", H)
+        h = _empty_hobo(self).add_constraint_gt_zero(
             hising_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
-        ))
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
         return self
 
     def add_constraint_ge_zero(self,
@@ -658,9 +701,11 @@ class HOIO(HIsing):
 
         """
         H = HIsing(H)
-        self._constraints.setdefault("ge", []).append(H)
-        self += pubo_to_hising(HOBO().add_constraint_ge_zero(
+        self._append_constraint("ge", H)
+        h = _empty_hobo(self).add_constraint_ge_zero(
             hising_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
-        ))
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
         return self
