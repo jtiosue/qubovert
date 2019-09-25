@@ -28,6 +28,10 @@ Conversions
 
 .. autofunction:: qubovert.utils.decimal_to_spin
 
+.. autofunction:: qubovert.utils.binary_to_decimal
+
+.. autofunction:: qubovert.utils.spin_to_decimal
+
 
 Values
 ------

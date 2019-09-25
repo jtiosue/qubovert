@@ -64,9 +64,7 @@ def ONE(x):
 
 
     """
-    if isinstance(x, dict):
-        return PUBO(x)
-    return PUBO({(x,): 1})
+    return PUBO(x) if isinstance(x, dict) else PUBO({(x,): 1})
 
 
 def NOT(x):
@@ -150,7 +148,7 @@ def AND(*variables):
     """
     P = PUBO() + 1
     for v in variables:
-        P *= (v if isinstance(v, dict) else {(v,): 1})
+        P *= ONE(v)
     return P
 
 
@@ -235,10 +233,8 @@ def OR(*variables):
     if not variables:
         return PUBO() + 1
     elif len(variables) == 1:
-        v = variables[0]
-        return PUBO(v) if isinstance(v, dict) else PUBO({(v,): 1})
-    x, v = OR(*variables[:-1]), variables[-1]
-    v = v if isinstance(v, dict) else {(v,): 1}
+        return ONE(variables[0])
+    x, v = OR(*variables[:-1]), ONE(variables[-1])
     return x + v * (1 - x)
 
 
@@ -337,10 +333,8 @@ def XOR(*variables):
     if not variables:
         return PUBO() + 1
     elif len(variables) == 1:
-        v = variables[0]
-        return PUBO(v) if isinstance(v, dict) else PUBO({(v,): 1})
-    x, v = XOR(*variables[:-1]), variables[-1]
-    v = v if isinstance(v, dict) else {(v,): 1}
+        return ONE(variables[0])
+    x, v = XOR(*variables[:-1]), ONE(variables[-1])
     return (x - v) ** 2
 
 

@@ -695,7 +695,8 @@ class DictArithmetic(dict):
         None. Updates it in place.
 
         """
-        for k, v in self.items():
+        # it might be changing size, so convert items to a tuple
+        for k, v in tuple(self.items()):
             try:
                 self[k] = v.simplify()
             except AttributeError:
