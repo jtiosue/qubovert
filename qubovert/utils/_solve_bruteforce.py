@@ -21,7 +21,9 @@ as QUBO/PUBO and HIsing objective function evaluators.
 
 
 __all__ = (
-    'binary_to_spin', 'spin_to_binary', 'decimal_to_spin', 'decimal_to_binary',
+    'binary_to_spin', 'spin_to_binary',
+    'decimal_to_spin', 'spin_to_decimal',
+    'decimal_to_binary', 'binary_to_decimal',
     'pubo_value', 'qubo_value', 'hising_value', 'ising_value',
     'solve_pubo_bruteforce', 'solve_qubo_bruteforce',
     'solve_hising_bruteforce', 'solve_ising_bruteforce'
@@ -128,6 +130,29 @@ def decimal_to_binary(d, num_bits=None):
     return (0,) * (num_bits - lb) + tuple(int(x) for x in b)
 
 
+def binary_to_decimal(b):
+    """binary_to_decimal.
+
+    Convert a bit string to its decimal form.
+
+    Parameters
+    ----------
+    b : tuple or list of 0s and 1s.
+        The binary bit string.
+
+    Return
+    ------
+    d : int.
+
+    Examples
+    --------
+    >>> binary_to_decimal((1, 1, 0))
+    6
+
+    """
+    return int("".join(str(x) for x in b), base=2)
+
+
 def decimal_to_spin(d, num_spins=None):
     """decimal_to_spin.
 
@@ -157,6 +182,29 @@ def decimal_to_spin(d, num_spins=None):
 
     """
     return binary_to_spin(decimal_to_binary(d, num_spins))
+
+
+def spin_to_decimal(b):
+    """spin_to_decimal.
+
+    Convert a spin string to its decimal form.
+
+    Parameters
+    ----------
+    b : tuple or list of -1s and 1s.
+        The spin bit string.
+
+    Return
+    ------
+    d : int.
+
+    Examples
+    --------
+    >>> spin_to_decimal((1, 1, -1))
+    6
+
+    """
+    return binary_to_decimal(spin_to_binary(b))
 
 
 def pubo_value(x, P):

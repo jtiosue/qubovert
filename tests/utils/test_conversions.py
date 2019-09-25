@@ -19,7 +19,7 @@ Contains tests for the QUBO/PUBO to/from Ising/HIsing functions.
 from qubovert.utils import (
     qubo_to_ising, ising_to_qubo, pubo_to_hising, hising_to_pubo,
     binary_to_spin, spin_to_binary, decimal_to_binary, decimal_to_spin,
-    qubo_to_matrix, matrix_to_qubo
+    qubo_to_matrix, matrix_to_qubo, binary_to_decimal, spin_to_decimal
 )
 from qubovert import QUBO, Ising, PUBO, HIsing
 from sympy import Symbol
@@ -107,6 +107,18 @@ def test_decimal_to_spin():
 
     assert decimal_to_spin(10, 7) == (-1, -1, -1, 1, -1, 1, -1)
     assert decimal_to_spin(10) == (1, -1, 1, -1)
+
+
+def test_binary_to_decimal():
+
+    for i in range(8):
+        assert i == binary_to_decimal(decimal_to_binary(i))
+
+
+def test_spin_to_decimal():
+
+    for i in range(8):
+        assert i == spin_to_decimal(decimal_to_spin(i))
 
 
 def test_binary_to_spin():

@@ -337,6 +337,10 @@ def test_symbols():
     assert d.subs(a, 0) == {(0, 1): 2, (1,): b**2 + b}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 6}
 
+    d = HOBO()
+    d += a
+    assert d.subs(a, 0) == {}
+
 
 def test_binary_var():
 

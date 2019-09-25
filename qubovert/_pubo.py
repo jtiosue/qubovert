@@ -232,48 +232,43 @@ class PUBO(BO, PUBOMatrix):
 
         for kp, v in self.items():
             key = tuple(sorted(self._mapping[i] for i in kp))
-            if key in reductions:
-                D[(reductions[key],)] += v
-            else:
-                # find a reduction if len(key) > deg
-                k = key
-                while len(k) > deg:
-
-                    # find a variable pair in k that has already been reduced.
-                    found = False
-                    for i, x in enumerate(k[:-1]):
-                        for y in k[i+1:]:
-                            if (x, y) in reductions:
-                                found = True
-                                break
-                        if found:
+            # find a reduction if len(key) > deg
+            while len(key) > deg:
+                # find a variable pair in k that has already been reduced.
+                found = False
+                for i, x in enumerate(key[:-1]):
+                    for y in key[i+1:]:
+                        if (x, y) in reductions:
+                            found = True
                             break
-
                     if found:
-                        # z is the ancilla variable for this reduction
-                        z = reductions[(x, y)]
-                    else:
-                        # found is False so we haven't already reduced the
-                        # variable pair (x, y), so just take the first two and
-                        # reduce them.
-                        # TODO: come up with a better way to choose x, y here.
-                        x, y, z = k[0], k[1], ancilla
-                        reductions[(x, y)] = z
-                        ancilla += 1
+                        break
 
-                    # note we add the constraint even if we've already added
-                    # it before (if found is True). This is because if we use
-                    # the reduction multiple times, we need to enforce it
-                    # multiple times.
+                if found:
+                    # z is the ancilla variable for this reduction
+                    z = reductions[(x, y)]
+                else:
+                    # found is False so we haven't already reduced the
+                    # variable pair (x, y), so just take the first two and
+                    # reduce them.
+                    # TODO: come up with a better way to choose x, y here.
+                    x, y, z = key[0], key[1], ancilla
+                    reductions[(x, y)] = z
+                    ancilla += 1
 
-                    # enforce that z == x y
-                    D += qubovert.HOBO().add_constraint_eq_AND(
-                        z, x, y, lam=lam(v)
-                    )
-                    k = tuple(sorted(
-                        tuple(i for i in k if i not in (x, y)) + (z,)
-                    ))
-                D[k] += v
+                # note we add the constraint even if we've already added
+                # it before (if found is True). This is because if we use
+                # the reduction multiple times, we need to enforce it
+                # multiple times.
+
+                # enforce that z == x y
+                D += qubovert.HOBO().add_constraint_eq_AND(
+                    z, x, y, lam=lam(v)
+                )
+                key = tuple(sorted(
+                    tuple(i for i in key if i not in (x, y)) + (z,)
+                ))
+            D[key] += v
 
     def to_pubo(self, deg=None, lam=None):
         """to_pubo.

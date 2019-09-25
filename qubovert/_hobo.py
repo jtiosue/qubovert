@@ -20,7 +20,7 @@ Contains the HOBO class. See ``help(qubovert.HOBO)``.
 
 from . import PUBO
 from .utils import QUBOVertWarning
-from .sat import OR, XOR
+from .sat import OR, XOR, ONE, NOT, AND
 from numpy import log2, ceil
 
 
@@ -60,23 +60,6 @@ def _special_constraints_le_zero(hobo, P, lam):
 
 
 # helpers
-
-def _create_tuple(x):
-    """_create_tuple.
-
-    Create a tuple from ``x``.
-
-    Parameters
-    ----------
-    x : object or list.
-
-    Return
-    ------
-    res : tuple.
-
-    """
-    return tuple(x) if isinstance(x, list) else (x,)
-
 
 def _pubo_value_extrema(P):
     """_pubo_value_extrema.
@@ -1100,11 +1083,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1121,15 +1105,13 @@ class HOBO(PUBO):
 
         >>> H = HOBO()
         >>> # enforce (a AND b AND c AND d) == 'e'
-        >>> H.add_constraint_eq_AND('e', ['a', 'b'], ['c', 'd'])
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b AND c AND d) == 'e'
         >>> H.add_constraint_eq_AND('e', 'a', 'b', 'c', 'd')
 
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b, c = binary_var('a'), binary_var('b'), binary_var('c')
         >>> H = HOBO()
-        >>> # enforce (a AND b AND c AND d) == 'e' AND 'f'
-        >>> H.add_constraint_eq_AND(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> # enforce that a == b AND c
+        >>> H.add_constraint_eq_AND(a, b, c)
 
         References
         ----------
@@ -1140,14 +1122,15 @@ class HOBO(PUBO):
         if n < 2:
             raise ValueError("Must supply at least two variables to AND. "
                              "See ``add_constraint_eq_ONE`` for less.")
-        a = _create_tuple(a)
-        b, c = (), ()
-        for v in variables[:n // 2]:
-            b += _create_tuple(v)
-        for v in variables[n // 2:]:
-            c += _create_tuple(v)
 
-        P = PUBO({a: 3, b+c: 1, b+a: -2, c+a: -2})
+        a = ONE(a)
+        b, c = 1, 1
+        for v in variables[:n // 2]:
+            b *= ONE(v)
+        for v in variables[n // 2:]:
+            c *= ONE(v)
+
+        P = 3 * a + b * c - 2 * a * (b + c)
 
         return self.add_constraint_eq_zero(P, lam, bounds=(0, 3))
 
@@ -1161,11 +1144,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1181,29 +1165,21 @@ class HOBO(PUBO):
         >>> H.add_constraint_eq_OR('a', 'b', 'c')  # enforce a == b OR c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) == 'e'
-        >>> H.add_constraint_eq_OR('e', ['a', 'b'], ['c', 'd'])
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) OR e == f
-        >>> H.add_constraint_eq_OR('f', ['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) == ('e' AND 'f')
-        >>> H.add_constraint_eq_OR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> # enforce a == b OR c OR d
+        >>> H.add_constraint_eq_OR('a', 'b', 'c', 'd')
 
         """
         n = len(variables)
         if n < 2:
             raise ValueError("Must supply at least two variables to OR.")
 
-        a = _create_tuple(a)
+        a = ONE(a)
         if n == 2:
-            b, c = tuple(_create_tuple(x) for x in variables)
-            P = PUBO({a: 1, b: 1, c: 1, b+c: 1, b+a: -2, c+a: -2})
+            b, c = ONE(variables[0]), ONE(variables[1])
+            P = a + b + c + b * c - 2 * a * (b + c)
             bounds = 0, 3
         else:
-            P = HOBO().add_constraint_NOR(*variables) - {a: 1}
+            P = HOBO().add_constraint_NOR(*variables) - a
             bounds = -1, 1
 
         return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
@@ -1218,11 +1194,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1238,15 +1215,11 @@ class HOBO(PUBO):
         >>> H.add_constraint_eq_XOR('a', 'b', 'c')  # enforce a == b XOR c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) XOR (c AND d) == 'e'
-        >>> H.add_constraint_eq_XOR('e', ['a', 'b'], ['c', 'd'])
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XOR (c AND d) == ('e' AND 'f')
-        >>> H.add_constraint_eq_XOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> # enforce a == b XOR c XOR d
+        >>> H.add_constraint_eq_XOR('a', 'b', 'c', 'd')
 
         """
-        P = HOBO().add_constraint_XNOR(*variables) - {_create_tuple(a): 1}
+        P = HOBO().add_constraint_XNOR(*variables) - ONE(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_ONE(self, a, b, lam=1):
@@ -1257,10 +1230,10 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
+        a : any hashable object or a dict.
+            The label for binary variables ``a``, or its PUBO representation.
+        b : any hashable object or a dict.
+            The label for binary variables ``b``, or its PUBO representation.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1275,15 +1248,13 @@ class HOBO(PUBO):
         >>> H = HOBO()
         >>> H.add_constraint_eq_ONE('a', 'b')  # enforce a == b
 
+        >>> from qubovert import HOBO, binary_var
+        >>> a, b = binary_var('a'), binary_var('b')
         >>> H = HOBO()
-        >>> H.add_constraint_eq_ONE(['a', 'b'], 'c')  # enforce (a AND b) == c
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) == (c AND d)
-        >>> H.add_constraint_eq_ONE(['a', 'b'], ['c', 'd'])
+        >>> H.add_constraint_eq_ONE(a, b)  # enforce a == b
 
         """
-        P = PUBO({_create_tuple(a): 1, _create_tuple(b): -1})
+        P = ONE(a) - ONE(b)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_NAND(self, a, *variables, lam=1):
@@ -1296,11 +1267,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variables ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1316,30 +1288,26 @@ class HOBO(PUBO):
         >>> H.add_constraint_eq_NAND('a', 'b', 'c')  # enforce a == b NAND c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) == 'e'
-        >>> H.add_constraint_eq_NAND('e', ['a', 'b'], ['c', 'd'])
+        >>> # enforce a == b NAND c NAND d
+        >>> H.add_constraint_eq_NAND('a', 'b', 'c', 'd')
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) NAND e == f
-        >>> H.add_constraint_eq_NAND('f', ['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d) == 'e' AND 'f'
-        >>> H.add_constraint_eq_NAND(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b, c = binary_var('a'), binary_var('b'), binary_var('c')
+        >>> # enforce a == b NAND c
+        >>> H = HOBO().add_constraint_eq_NAND(a, b, c)
 
         """
         n = len(variables)
         if n < 2:
             raise ValueError("Must supply at least two variables to NAND. "
                              "See ``add_constraint_eq_NOT`` for less.")
-        a = _create_tuple(a)
-        b, c = (), ()
+        b, c = 1, 1
         for v in variables[:n // 2]:
-            b += _create_tuple(v)
+            b *= ONE(v)
         for v in variables[n // 2:]:
-            c += _create_tuple(v)
+            c *= ONE(v)
 
-        P = PUBO({(): 3, b: -2, c: -2, a: -3, b+c: 1, b+a: 2, c+a: 2})
+        P = NOT(a) * (3 - 2 * (b + c)) + b * c
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 3))
 
     def add_constraint_eq_NOR(self, a, *variables, lam=1):
@@ -1352,11 +1320,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1372,29 +1341,26 @@ class HOBO(PUBO):
         >>> H.add_constraint_eq_NOR('a', 'b', 'c')  # enforce a == b NOR c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) == 'e'
-        >>> H.add_constraint_eq_NOR('e', ['a', 'b'], ['c', 'd'])
+        >>> # enforce a == b NOR c NOR d
+        >>> H.add_constraint_eq_NOR('a', 'b', 'c', 'd')
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) NOR e == f
-        >>> H.add_constraint_eq_NOR('f', ['a', 'b'], ['c', 'd'], 'e')
-
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d) == ('e' AND 'f')
-        >>> H.add_constraint_eq_NOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> from qubovert import binary_var, HOBO
+        >>> # enforce a == b NOR c
+        >>> a, b, c = binary_var('a'), binary_var('b'), binary_var('c')
+        >>> H.add_constraint_eq_NOR(a, b, c)
 
         """
         n = len(variables)
         if n < 2:
             raise ValueError("Must supply at least two variables to NOR.")
 
-        a = _create_tuple(a)
+        a = ONE(a)
         if n == 2:
-            b, c = tuple(_create_tuple(x) for x in variables)
-            P = PUBO({a: -1, b: -1, c: -1, (): 1, b+c: 1, b+a: 2, c+a: 2})
+            b, c = ONE(variables[0]), ONE(variables[1])
+            P = 1 - a - b - c + b * c + 2 * a * (b + c)
             bounds = 0, 3
         else:
-            P = HOBO().add_constraint_OR(*variables) - {a: 1}
+            P = HOBO().add_constraint_OR(*variables) - a
             bounds = -1, 1
 
         return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
@@ -1409,11 +1375,12 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1429,15 +1396,16 @@ class HOBO(PUBO):
         >>> H.add_constraint_eq_XNOR('a', 'b', 'c')  # enforce a == b XNOR c
 
         >>> H = HOBO()
-        >>> # enforce (a AND b) XNOR (c AND d) == 'e'
-        >>> H.add_constraint_eq_XNOR('e', ['a', 'b'], ['c', 'd'])
+        >>> # enforce a == b XNOR c XNOR d
+        >>> H.add_constraint_eq_XNOR('a', 'b', 'c', 'd')
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) XNOR (c AND d) == ('e' AND 'f')
-        >>> H.add_constraint_eq_XNOR(['e', 'f'], ['a', 'b'], ['c', 'd'])
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b, c = binary_var('a'), binary_var('b'), binary_var('c')
+        >>> # enforce a == b XNOR c
+        >>> H = HOBO().add_constraint_eq_XNOR(a, b, c)
 
         """
-        P = HOBO().add_constraint_XOR(*variables) - {_create_tuple(a): 1}
+        P = HOBO().add_constraint_XOR(*variables) - ONE(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_NOT(self, a, b, lam=1):
@@ -1448,10 +1416,10 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
-        b : any hashable object or a list of hashable objects.
-            The label for binary variables ``b``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
+        b : any hashable object or a dict.
+            The label for binary variable ``b``, or its PUBO representation.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1466,16 +1434,12 @@ class HOBO(PUBO):
         >>> H = HOBO()
         >>> H.add_constraint_eq_NOT('a', 'b')  # enforce NOT(a) == b
 
-        >>> H = HOBO()
-        >>> # enforce NOT (a AND b) == c
-        >>> H.add_constraint_eq_NOT(['a', 'b'], 'c')
-
-        >>> H = HOBO()
-        >>> # enforce NOT(a AND b) == (c AND d)
-        >>> H.add_constraint_eq_NOT(['a', 'b'], ['c', 'd'])
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> H.add_constraint_eq_NOT(a, b)  # enforce NOT(a) == b
 
         """
-        P = HOBO().add_constraint_ONE(a) - {_create_tuple(b): 1}
+        P = HOBO().add_constraint_ONE(a) - ONE(b)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_AND(self, *variables, lam=1):
@@ -1488,8 +1452,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1507,20 +1472,16 @@ class HOBO(PUBO):
         {('b', 'a'): -1, (): 1}
 
         >>> H = HOBO()
-        >>> H.add_constraint_AND(['a', 'b'], ['c', 'd'])
-        >>> # enforce a AND b AND c AND d
-        >>> H
-        {('c', 'd', 'b', 'a'): -1, (): 1}
-
-        >>> H = HOBO()
         >>> H.add_constraint_AND('a', 'b', 'c', 'd')
         >>> # enforce a AND b AND c AND d
 
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a AND b
+        >>> H = HOBO().add_constraint_AND(a, b)
+
         """
-        t = ()
-        for x in variables:
-            t += _create_tuple(x)
-        return self.add_constraint_ONE(list(t), lam=lam)
+        return self.add_constraint_ONE(AND(*variables), lam=lam)
 
     def add_constraint_OR(self, *variables, lam=1):
         r"""add_constraint_OR.
@@ -1532,8 +1493,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1551,20 +1513,14 @@ class HOBO(PUBO):
         {('a',): -1, ('b',): -1, ('b', 'a'): 1, (): 1}
 
         >>> H = HOBO()
-        >>> H.add_constraint_OR(['a', 'b'], ['c', 'd'])
-        >>> # enforce (a AND b) OR (c AND d)
-        >>> H
-        {('b', 'a'): -1, ('c', 'd'): -1, ('c', 'd', 'b', 'a'): 1, (): 1}
-
-        >>> H = HOBO()
         >>> H.add_constraint_OR('a', 'b', 'c', 'd')  # enforce a OR b OR c OR d
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) OR (c AND d) OR (e AND f AND g)
-        >>> H.add_constraint_OR(['a', 'b'], ['c', 'd'], ['e', 'f', 'g'])
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a OR b
+        >>> H = HOBO().add_constraint_OR(a, b)
 
         """
-        variables = tuple({_create_tuple(x): 1} for x in variables)
         P = 1 - OR(*variables)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
 
@@ -1580,8 +1536,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1597,14 +1554,14 @@ class HOBO(PUBO):
         >>> H.add_constraint_XOR('a', 'b')  # enforce a XOR b
 
         >>> H = HOBO()
-        >>> H.add_constraint_XOR(['a', 'b'], ['c', 'd'])
-        >>> # enforce (a AND b) XOR (c AND d)
-
-        >>> H = HOBO()
         >>> H.add_constraint_XOR('a', 'b', 'c')  # enforce a XOR b XOR c
 
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a XOR b
+        >>> H = HOBO().add_constraint_XOR(a, b)
+
         """
-        variables = tuple({_create_tuple(x): 1} for x in variables)
         P = 1 - XOR(*variables)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
 
@@ -1616,8 +1573,8 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variable ``a``, or its PUBO representation.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1632,12 +1589,13 @@ class HOBO(PUBO):
         >>> H = HOBO()
         >>> H.add_constraint_ONE('a')  # enforce a
 
-        >>> H = HOBO()
-        >>> H.add_constraint_ONE(['a', 'b'])  # enforce (a AND b)
+        >>> from qubovert import binary_var, HOBO
+        >>> a = binary_var('a')
+        >>> # enforce a
+        >>> H = HOBO().add_constraint_ONE(a)
 
         """
-        P = PUBO({(): 1, _create_tuple(a): -1})
-        return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
+        return self.add_constraint_eq_zero(NOT(a), lam=lam, bounds=(0, 1))
 
     def add_constraint_NAND(self, *variables, lam=1):
         r"""add_constraint_NAND.
@@ -1649,8 +1607,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1666,22 +1625,16 @@ class HOBO(PUBO):
         >>> H.add_constraint_NAND('a', 'b')  # enforce a NAND b
 
         >>> H = HOBO()
-        >>> H.add_constraint_NAND(['a', 'b'], ['c', 'd'])
-        >>> # enforce (a AND b) NAND (c AND d)
-
-        >>> H = HOBO()
         >>> H.add_constraint_NAND('a', 'b', 'c', 'd')
         >>> # enforce a NAND b NAND c NAND d
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NAND (c AND d AND e) NAND f
-        >>> H.add_constraint_NAND(['a', 'b'], ['c', 'd', 'e'], 'f')
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a NAND b
+        >>> H = HOBO().add_constraint_NAND(a, b)
 
         """
-        t = ()
-        for x in variables:
-            t += _create_tuple(x)
-        return self.add_constraint_NOT(list(t), lam=lam)
+        return self.add_constraint_NOT(AND(*variables), lam=lam)
 
     def add_constraint_NOR(self, *variables, lam=1):
         r"""add_constraint_NOR.
@@ -1693,8 +1646,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1710,16 +1664,13 @@ class HOBO(PUBO):
         >>> H.add_constraint_NOR('a', 'b')  # enforce a NOR b
 
         >>> H = HOBO()
-        >>> H.add_constraint_NOR(['a', 'b'], ['c', 'd'])
-        >>> # enforce (a AND b) NOR (c AND d)
-
-        >>> H = HOBO()
         >>> H.add_constraint_NOR('a', 'b', 'c', 'd')
         >>> # enforce a NOR b NOR c NOR d
 
-        >>> H = HOBO()
-        >>> # enforce (a AND b) NOR (c AND d NAD e) NOR f
-        >>> H.add_constraint_NOR(['a', 'b'], ['c', 'd', 'e'], 'f')
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a NOR b
+        >>> H = HOBO().add_constraint_NOR(a, b)
 
         """
         P = 1 - HOBO().add_constraint_OR(*variables)
@@ -1738,8 +1689,9 @@ class HOBO(PUBO):
         Parameters
         ----------
         *variables : arguments.
-            Each element of variables is a hashable object or a list of
-            hashable objects. They are the label of the binary variables.
+            Each element of variables is a hashable object or a dict
+            (its PUBO representation). They are the label of the binary
+            variables.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1755,11 +1707,12 @@ class HOBO(PUBO):
         >>> H.add_constraint_XNOR('a', 'b')  # enforce a XNOR b
 
         >>> H = HOBO()
-        >>> H.add_constraint_XNOR(['a', 'b'], ['c', 'd'])
-        >>> # enforce (a AND b) XNOR (c AND d)
-
-        >>> H = HOBO()
         >>> H.add_constraint_XNOR('a', 'b', 'c')  # enforce a XNOR b XNOR c
+
+        >>> from qubovert import binary_var, HOBO
+        >>> a, b = binary_var('a'), binary_var('b')
+        >>> # enforce a XNOR b
+        >>> H = HOBO().add_constraint_XNOR(a, b)
 
         """
         P = 1 - HOBO().add_constraint_XOR(*variables)
@@ -1773,8 +1726,8 @@ class HOBO(PUBO):
 
         Parameters
         ----------
-        a : any hashable object or a list of hashable objects.
-            The label for binary variables ``a``.
+        a : any hashable object or a dict.
+            The label for binary variables ``a``, or its PUBO representation.
         lam : float > 0 or sympy.Symbol (optional, defaults to 1).
             Langrange multiplier to penalize violations of the clause.
 
@@ -1791,11 +1744,10 @@ class HOBO(PUBO):
         >>> H
         {('a',): 1}
 
-        >>> H = HOBO()
-        >>> H.add_constraint_NOT(['a', 'b'])  # enforce NOT (a AND b)
-        >>> H
-        {(a, b): 1}
+        >>> from qubovert import binary_var, HOBO
+        >>> a = binary_var('a')
+        >>> # enforce not a
+        >>> H = HOBO().add_constraint_NOT(a)
 
         """
-        P = PUBO({_create_tuple(a): 1})
-        return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
+        return self.add_constraint_eq_zero(ONE(a), lam=lam, bounds=(0, 1))
