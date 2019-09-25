@@ -43,7 +43,7 @@ Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <htt
 
 Installation
 ------------
-`For the old, stable release`.
+`For the stable release`.
 
 .. code:: shell
 
@@ -122,6 +122,17 @@ See the following HOBO examples (much of the same functionality can be used with
     H -= 1
     print(H)
     # {('a', 1, 2): -4, (1, 2): 3}
+
+
+.. code:: python
+
+    from qubovert import binary_var
+
+    x0, x1, x2 = binary_var("x0"), binary_var("x1"), binary_var("x2")
+    H = x0 + 2 * x1 * x2 - 3 + x2
+    print(H)
+    # {('x0',): 1, ('x1', 'x2'): 2, (): -3, ('x2',): 1}
+
 
 .. code:: python
 

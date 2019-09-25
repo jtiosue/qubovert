@@ -61,23 +61,6 @@ def _special_constraints_le_zero(hobo, P, lam):
 
 # helpers
 
-#def _create_tuple(x):
-#    """_create_tuple.
-#
-#    Create a tuple from ``x``.
-#
-#    Parameters
-#    ----------
-#    x : object or list.
-#
-#    Return
-#    ------
-#    res : tuple.
-#
-#    """
-#    return tuple(x) if isinstance(x, list) else (x,)
-
-
 def _pubo_value_extrema(P):
     """_pubo_value_extrema.
 
