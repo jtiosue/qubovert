@@ -155,6 +155,20 @@ class DictArithmetic(dict):
         else:
             self.pop(key, 0)
 
+    @property
+    def num_terms(self):
+        """num_terms.
+
+        Return the number of terms in the dictionary.
+
+        Return
+        ------
+        n : int.
+            Number of terms in the dictionary.
+
+        """
+        return len(self)
+
     def copy(self):
         """copy.
 

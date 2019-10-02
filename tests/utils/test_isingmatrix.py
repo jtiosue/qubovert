@@ -85,6 +85,12 @@ def test_ising_num_binary_variables():
     assert d.num_binary_variables == 2
 
 
+def test_num_terms():
+
+    d = IsingMatrix({(0,): 1, (0, 3): 2, (0, 2): -1})
+    assert d.num_terms == len(d)
+
+
 def test_ising_max_index():
 
     d = IsingMatrix({(0,): 1, (0, 3): 2})
