@@ -284,7 +284,23 @@ class PUBO(BO, PUBOMatrix):
                 D += qubovert.HOBO().add_constraint_eq_AND(
                     z, x, y, lam=lam(v)
                 )
-                key = tuple(i for i in key if i not in (x, y)) + (z,)
+
+                # key is sorted, but it is not necessarily the case that
+                # z > all of the other elements in key. So let's efficiently
+                # figure out where to put z (without calling sorted)
+
+                old_key, key, z_inserted = key, (), False
+                for i in old_key:
+                    if i in (x, y):
+                        continue
+                    elif not z_inserted and z < i:
+                        key += (z, i)
+                        z_inserted = True
+                    else:
+                        key += (i,)
+                if not z_inserted:
+                    key += (z,)
+
             D[key] += v
 
     def to_pubo(self, deg=None, lam=None):
