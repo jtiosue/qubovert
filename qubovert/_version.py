@@ -14,4 +14,4 @@
 
 """Defines the version number of qubovert."""
 
-__version__ = "0.0.6"
+__version__ = "0.1.0"

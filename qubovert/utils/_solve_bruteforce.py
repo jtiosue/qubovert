@@ -150,7 +150,7 @@ def binary_to_decimal(b):
     6
 
     """
-    return int("".join(str(x) for x in b), base=2)
+    return int("".join(str(x) for x in b), base=2) if b else 0
 
 
 def decimal_to_spin(d, num_spins=None):

@@ -71,6 +71,12 @@ def test_hising_num_binary_variables():
     assert d.num_binary_variables == 3
 
 
+def test_num_terms():
+
+    d = HIsingMatrix({(0,): 1, (0, 3): 2, (0, 2): -1})
+    assert d.num_terms == len(d)
+
+
 def test_hising_max_index():
 
     d = HIsingMatrix({(0,): 1, (0, 3): 2, (0, 4, 3): 3})

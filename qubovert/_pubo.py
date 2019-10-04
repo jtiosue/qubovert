@@ -18,6 +18,7 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 
 """
 
+from collections import defaultdict
 from .utils import BO, PUBOMatrix, QUBOMatrix
 from . import QUBO
 # in PUBO._reduce_degree, we use HOBO.add_constraint_AND. But HOBO inherits
@@ -226,21 +227,37 @@ class PUBO(BO, PUBOMatrix):
         if deg is None:
             deg = self.degree
 
+        # determine the most common pairs
+        pair_frequencies, mapped_self = defaultdict(int), {}
+        for k, v in self.items():
+            key = tuple(sorted(self._mapping[i] for i in k))
+            mapped_self[key] = mapped_self.get(key, 0) + v
+            len_key = len(key)
+            for i in range(len_key):
+                for j in range(i + 1, len_key):
+                    pair = key[i], key[j]
+                    pair_frequencies[pair] += 1
+
         # next available label
         ancilla = self.num_binary_variables
-        reductions = {}
 
-        for kp, v in self.items():
-            key = tuple(sorted(self._mapping[i] for i in kp))
+        # do the reductions
+        reductions = {}
+        for key, v in mapped_self.items():
             # find a reduction if len(key) > deg
             while len(key) > deg:
                 # find a variable pair in k that has already been reduced.
                 found = False
+                best_pair = None, None
                 for i, x in enumerate(key[:-1]):
                     for y in key[i+1:]:
-                        if (x, y) in reductions:
+                        pair = x, y
+                        if pair in reductions:
                             found = True
                             break
+                        elif (best_pair[0] is None or
+                              pair_frequencies[pair] > best_pair[0]):
+                            best_pair = pair_frequencies[pair], pair
                     if found:
                         break
 
@@ -249,12 +266,14 @@ class PUBO(BO, PUBOMatrix):
                     z = reductions[(x, y)]
                 else:
                     # found is False so we haven't already reduced the
-                    # variable pair (x, y), so just take the first two and
-                    # reduce them.
-                    # TODO: come up with a better way to choose x, y here.
-                    x, y, z = key[0], key[1], ancilla
+                    # variable pair (x, y), so take the pair that has the
+                    # greatest frequency
+                    x, y = best_pair[1]
+                    z = ancilla
                     reductions[(x, y)] = z
                     ancilla += 1
+                    pair_frequencies[(x, z)] += 1
+                    pair_frequencies[(y, z)] += 1
 
                 # note we add the constraint even if we've already added
                 # it before (if found is True). This is because if we use
@@ -265,9 +284,23 @@ class PUBO(BO, PUBOMatrix):
                 D += qubovert.HOBO().add_constraint_eq_AND(
                     z, x, y, lam=lam(v)
                 )
-                key = tuple(sorted(
-                    tuple(i for i in key if i not in (x, y)) + (z,)
-                ))
+
+                # key is sorted, but it is not necessarily the case that
+                # z > all of the other elements in key. So let's efficiently
+                # figure out where to put z (without calling sorted)
+
+                old_key, key, z_inserted = key, (), False
+                for i in old_key:
+                    if i in (x, y):
+                        continue
+                    elif not z_inserted and z < i:
+                        key += (z, i)
+                        z_inserted = True
+                    else:
+                        key += (i,)
+                if not z_inserted:
+                    key += (z,)
+
             D[key] += v
 
     def to_pubo(self, deg=None, lam=None):

@@ -162,6 +162,12 @@ def test_ising_num_binary_variables():
     assert d.max_index == 1
 
 
+def test_num_terms():
+
+    d = HOIO({(0,): 1, (0, 3): 2, (0, 2): -1})
+    assert d.num_terms == len(d)
+
+
 def test_hoio_degree():
 
     d = HOIO()

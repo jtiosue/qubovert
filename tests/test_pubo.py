@@ -159,6 +159,18 @@ def test_pubo_num_binary_variables():
     assert d.max_index == 4
 
 
+def test_num_terms():
+
+    d = PUBO({(0,): 1, (0, 3): 2, (0, 2): -1})
+    assert d.num_terms == len(d)
+
+
+def test_num_terms():
+
+    d = PUBO({(0,): 1, (0, 3): 2, (0, 3, 4): -1})
+    assert d.num_terms == len(d)
+
+
 def test_pubo_degree():
 
     d = PUBO()

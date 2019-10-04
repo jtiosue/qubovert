@@ -112,8 +112,6 @@ See the following HOBO examples (much of the same functionality can be used with
 .. code:: python
 
     from qubovert import HOBO
-    from any_module import qubo_solver
-    # or from qubovert.utils import solve_qubo_bruteforce as qubo_solver
 
     H = HOBO()
     H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
@@ -133,6 +131,22 @@ See the following HOBO examples (much of the same functionality can be used with
     print(H)
     # {('x0',): 1, ('x1', 'x2'): 2, (): -3, ('x2',): 1}
 
+
+Note that for large problems, it is slower to use the `binary_var` functionality. For example, consider the following where creating `H0` is much faster than creating `H1`!
+
+.. code:: python
+
+    from qubovert import binary_var, HOBO
+
+    H0 = HOBO()
+    for i in range(1000):
+        H0[(i,)] += 1
+
+    xs = [binary_var(i) for i in range(1000)]
+    H1 = sum(xs)
+
+
+Here we show how to solve problems with the bruteforce solver, and how to convert problems to QUBO and Ising form. You can use any QUBO/Ising solver you'd like to solve!
 
 .. code:: python
 
@@ -166,12 +180,8 @@ See the following HOBO examples (much of the same functionality can be used with
     print(solutions)
     # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
 
-.. code:: python
 
-    # enforce that c == a AND b
-    H = HOBO().add_constraint_eq_AND('c', 'a', 'b')
-    print(H)
-    # {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
+Here we show how to add various boolean constraints to models.
 
 .. code:: python
 
