@@ -631,7 +631,7 @@ class HOBO(PUBO):
         elif max_val == 0:
             self -= lam * P
         else:
-            self += lam * P ** 2
+            self += lam * P * P
 
         return self
 

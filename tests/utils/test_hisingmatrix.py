@@ -224,6 +224,19 @@ def test_round():
     assert round(d, 3) == {(0,): 3.456, (1,): -1.535}
 
 
+def test_normalize():
+
+    temp = {(0,): 4, (1,): -2}
+    d = HIsingMatrix(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+    temp = {(0,): -4, (1,): 2}
+    d = HIsingMatrix(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')

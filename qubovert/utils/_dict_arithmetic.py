@@ -641,6 +641,48 @@ class DictArithmetic(dict):
         """
         return -1 * self
 
+    def normalize(self, value=1):
+        """normalize.
+
+        Normalize the coefficients to a maximum magnitude.
+
+        Parameters
+        ----------
+        value : float (optional, defaults to 1).
+            Every coefficient value will be normalized such that the
+            coefficient with the maximum magnitude will be +/- 1.
+
+        Examples
+        --------
+        >>> from qubovert.utils import DictArithmetic
+        >>> d = DictArithmetic({(0, 1): 1, (1, 2, 'x'): 4})
+        >>> d.normalize()
+        >>> print(d)
+        {(0, 1): 0.25, (1, 2, 'x'): 1}
+
+        >>> from qubovert.utils import DictArithmetic
+        >>> d = DictArithmetic({(0, 1): 1, (1, 2, 'x'): -4})
+        >>> d.normalize()
+        >>> print(d)
+        {(0, 1): 0.25, (1, 2, 'x'): -1}
+
+        >>> from qubovert import PUBO
+        >>> d = PUBO({(0, 1): 1, (1, 2, 'x'): 4})
+        >>> d.normalize()
+        >>> print(d)
+        {(0, 1): 0.25, (1, 2, 'x'): 1}
+
+        >>> from qubovert.utils import PUBO
+        >>> d = PUBO({(0, 1): 1, (1, 2, 'x'): -4})
+        >>> d.normalize()
+        >>> print(d)
+        {(0, 1): 0.25, (1, 2, 'x'): -1}
+
+        """
+        mult = value / max(abs(v) for v in self.values())
+        for k in self:
+            self[k] *= mult
+
     def __round__(self, ndigits=None):
         """round.
 

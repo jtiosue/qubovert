@@ -62,7 +62,6 @@ def ONE(x):
     >>> P.value({0: 1, 1: 1})
     1
 
-
     """
     return PUBO(x) if isinstance(x, dict) else PUBO({(x,): 1})
 
