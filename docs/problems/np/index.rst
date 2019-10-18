@@ -23,3 +23,4 @@ For example, you can use the ``SetCover`` class with any of the following.
    jobsequencing
    graphpartitioning
    numberpartitioning
+   bilp

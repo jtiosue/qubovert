@@ -163,7 +163,8 @@ class NumberPartitioning(Problem):
         >>> L = problem.to_ising()
 
         """
-        return A * IsingMatrix({(i,): self._S[i] for i in range(self._N)}) ** 2
+        L = IsingMatrix({(i,): self._S[i] for i in range(self._N)})
+        return A * L * L
 
     def convert_solution(self, solution):
         """convert_solution.
