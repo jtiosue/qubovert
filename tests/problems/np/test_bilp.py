@@ -19,6 +19,7 @@ Contains tests for the BILP class.
 from qubovert.problems import BILP
 from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 c = [1, 2, -1]
@@ -38,6 +39,15 @@ def test_properties():
     assert allclose(problem.c, c)
     assert allclose(problem.S, S)
     assert allclose(problem.b, b)
+
+
+def test_errors():
+
+    with assert_raises(ValueError):
+        BILP([c], S, b)
+
+    with assert_raises(ValueError):
+        BILP(c, S, b + [0])
 
 
 def test_bilp_bruteforce():
