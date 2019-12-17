@@ -375,6 +375,21 @@ def test_spin_var():
     assert isinstance(z[0], HOIO)
 
 
+def test_integer_var():
+
+    var = HOIO.integer_var('a', 4)
+    assert (
+        var ==
+        {('a0',): 0.5, (): 7.5, ('a1',): 1.0, ('a2',): 2.0, ('a3',): 4.0}
+    )
+
+    var = HOIO.integer_var('a', 4, log_trick=False)
+    assert (
+        var ==
+        {('a0',): 0.5, (): 2.0, ('a1',): 0.5, ('a2',): 0.5, ('a3',): 0.5}
+    )
+
+
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
@@ -421,6 +436,24 @@ def test_hoio_eq_constraint():
         sol == solution,
         allclose(e, obj)
     ))
+
+
+def test_hoio_ne_constraint_logtrick():
+
+    for i in range(1 << 4):
+        P = HOIO().integer_var('a', 4) - i
+        H = HOIO().add_constraint_ne_zero(P)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+
+def test_hoio_ne_constraint():
+
+    for i in range(1 << 3):
+        P = HOIO().integer_var('a', 3) - i
+        H = HOIO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
 
 
 def test_hoio_lt_constraint_logtrick():

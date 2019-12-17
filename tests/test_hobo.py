@@ -370,6 +370,15 @@ def test_binary_var():
     assert isinstance(x[0], HOBO)
 
 
+def test_integer_var():
+
+    var = HOBO.integer_var('a', 4)
+    assert var == {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+
+    var = HOBO.integer_var('a', 4, log_trick=False)
+    assert var == {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
+
+
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
@@ -416,6 +425,24 @@ def test_hobo_eq_constraint():
         sol == solution,
         allclose(e, obj)
     ))
+
+
+def test_hobo_ne_constraint_logtrick():
+
+    for i in range(1 << 4):
+        P = HOBO().integer_var('a', 4) - i
+        H = HOBO().add_constraint_ne_zero(P)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+
+def test_hobo_ne_constraint():
+
+    for i in range(1 << 3):
+        P = HOBO().integer_var('a', 3) - i
+        H = HOBO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
 
 
 def test_hobo_lt_constraint_logtrick():
