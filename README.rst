@@ -1,31 +1,31 @@
 ========
-QUBOVert
+qubovert
 ========
 *master branch*
 
-.. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=master
-    :target: https://travis-ci.com/jiosue/QUBOVert
+.. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=master
+    :target: https://travis-ci.com/jiosue/qubovert
     :alt: Travis-CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-.. image:: https://codecov.io/gh/jiosue/QUBOVert/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jiosue/QUBOVert
+.. image:: https://codecov.io/gh/jiosue/qubovert/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/jiosue/qubovert
     :alt: Code Coverage
-.. image:: https://img.shields.io/lgtm/grade/python/g/jiosue/QUBOVert.svg?logo=lgtm&logoWidth=18
-    :target: https://lgtm.com/projects/g/jiosue/QUBOVert/context:python
+.. image:: https://img.shields.io/lgtm/grade/python/g/jiosue/qubovert.svg?logo=lgtm&logoWidth=18
+    :target: https://lgtm.com/projects/g/jiosue/qubovert/context:python
     :alt: Code Quality
 
 *dev branch*
 
-.. image:: https://travis-ci.com/jiosue/QUBOVert.svg?branch=dev
-    :target: https://travis-ci.com/jiosue/QUBOVert
+.. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=dev
+    :target: https://travis-ci.com/jiosue/qubovert
     :alt: Travis-CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
     :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
     :alt: Documentation Status
-.. image:: https://codecov.io/gh/jiosue/QUBOVert/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/jiosue/QUBOVert
+.. image:: https://codecov.io/gh/jiosue/qubovert/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/jiosue/qubovert
     :alt: Code Coverage
 
 *pypi distribution*
@@ -38,7 +38,7 @@ QUBOVert
     :alt: pypi dist downloads
 
 
-Please see the `Repository <https://github.com/jiosue/QUBOVert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/QUBOVert/tree/master/notebook_examples>`_.
+Please see the `Repository <https://github.com/jiosue/qubovert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_.
 
 
 Installation
