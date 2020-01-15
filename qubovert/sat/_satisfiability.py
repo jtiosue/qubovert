@@ -18,7 +18,9 @@ This file contains functions for converting SAT problems to PUBOs.
 
 """
 
-from qubovert import PUBO
+# for BINARY_MODELS, we can't just `from qubovert import BINARY_MODELS` because
+# it causes circular imports, so instead just import qubovert.
+import qubovert as qv
 
 
 __all__ = "ONE", "NOT", "AND", "NAND", "OR", "NOR", "XOR", "XNOR"
@@ -36,8 +38,10 @@ def ONE(x):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
-        The binary expression for the logic operation.
+    P : ``qubovert.PUBO`` object or same type as ``type(x)``.
+        If ``x`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(x)``. Otherwise, ``type(P) == type(x)``.
 
     Example
     -------
@@ -49,6 +53,8 @@ def ONE(x):
     1
     >>> P.value({'x': 0})
     0
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = ONE({(0, 1): 1})
     >>> P
@@ -61,10 +67,23 @@ def ONE(x):
     0
     >>> P.value({0: 1, 1: 1})
     1
+    >>> type(P)
+    qubovert._pubo.PUBO
 
+    >>> from qubovert import binary_var
+    >>> x = binary_var('x')
+    >>> P = ONE(x)
+    >>> P.value({'x': 1})
+    1
+    >>> P.value({'x': 0})
+    0
+    >>> type(P)
+    qubovert.HOBO
 
     """
-    return PUBO(x) if isinstance(x, dict) else PUBO({(x,): 1})
+    if isinstance(x, qv.BINARY_MODELS):
+        return x.copy()
+    return qv.PUBO(x) if isinstance(x, dict) else qv.PUBO({(x,): 1})
 
 
 def NOT(x):
@@ -79,8 +98,11 @@ def NOT(x):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(x)``.
         The binary expression for the logic operation.
+        If ``x`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(x)``. Otherwise, ``type(P) == type(x)``.
 
     Example
     -------
@@ -92,6 +114,8 @@ def NOT(x):
     0
     >>> P.value({'x': 0})
     1
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = NOT({(0, 1): 1})
     >>> P
@@ -104,6 +128,16 @@ def NOT(x):
     1
     >>> P.value({0: 1, 1: 1})
     0
+
+    >>> from qubovert import binary_var
+    >>> x = binary_var('x')
+    >>> P = NOT(x)
+    >>> P.value({'x': 1})
+    0
+    >>> P.value({'x': 0})
+    1
+    >>> type(P)
+    qubovert.HOBO
 
     """
     return 1 - ONE(x)
@@ -123,8 +157,12 @@ def AND(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -140,15 +178,28 @@ def AND(*variables):
     0
     >>> P.value({0: 1, 1: 1})
     1
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = AND({(0, 1): 1}, 'x')  # and of 0, 1, and 'x'.
     >>> P
     {(0, 1, 'x'): 1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = AND(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     """
-    P = PUBO() + 1
-    for v in variables:
-        P *= ONE(v)
+    if not variables:
+        P = qv.PUBO() + 1
+    else:
+        P = 1
+        for v in variables:
+            P *= ONE(v)
     return P
 
 
@@ -167,8 +218,12 @@ def NAND(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -184,10 +239,20 @@ def NAND(*variables):
     1
     >>> P.value({0: 1, 1: 1})
     0
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = NAND({(0, 1): 1}, 'x')  # nand of 0, 1, and 'x'.
     >>> P
     {(): 1, (0, 1, 'x'): -1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = NAND(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     """
     return NOT(AND(*variables))
@@ -207,8 +272,12 @@ def OR(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -224,14 +293,24 @@ def OR(*variables):
     1
     >>> P.value({0: 1, 1: 1})
     1
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = OR({(0, 1): 1}, 'x')  # or of 0, 1, and 'x'.
     >>> P
     {(0, 1): 1, (0, 1, 'x'): -1, ('x',): 1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = OR(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     """
     if not variables:
-        return PUBO() + 1
+        return qv.PUBO() + 1
     elif len(variables) == 1:
         return ONE(variables[0])
     x, v = OR(*variables[:-1]), ONE(variables[-1])
@@ -253,8 +332,12 @@ def NOR(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -270,10 +353,20 @@ def NOR(*variables):
     0
     >>> P.value({0: 1, 1: 1})
     0
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = NOR({(0, 1): 1}, 'x')  # nor of 0, 1, and 'x'.
     >>> P
     {(0, 1): -1, (0, 1, 'x'): 1, ('x',): -1, (): 1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = NOR(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     """
     return NOT(OR(*variables))
@@ -296,8 +389,12 @@ def XOR(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -313,10 +410,20 @@ def XOR(*variables):
     1
     >>> P.value({0: 1, 1: 1})
     0
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = XOR({(0, 1): 1}, 'x')  # xor of 0, 1, and 'x'.
     >>> P
     {(0, 1): 1, (0, 1, 'x'): -2, ('x',): 1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = XOR(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     The following test will pass.
 
@@ -331,7 +438,7 @@ def XOR(*variables):
 
     """
     if not variables:
-        return PUBO() + 1
+        return qv.PUBO() + 1
     elif len(variables) == 1:
         return ONE(variables[0])
     x, v = XOR(*variables[:-1]), ONE(variables[-1])
@@ -359,8 +466,12 @@ def XNOR(*variables):
 
     Return
     ------
-    P : ``qubovert.PUBO`` object.
+    P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The binary expression for the logic operation.
+        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
+        ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
+        then ``type(P) == type(variables[0])``. Otherwise,
+        ``type(P) == type(variables[0])``.
 
     Example
     -------
@@ -376,10 +487,20 @@ def XNOR(*variables):
     0
     >>> P.value({0: 1, 1: 1})
     1
+    >>> type(P)
+    qubovert._pubo.PUBO
 
     >>> P = XNOR({(0, 1): 1}, 'x')  # xnor of 0, 1, and 'x'.
     >>> P
     {(): 1, (0, 1): -1, (0, 1, 'x'): 2, ('x',): -1}
+    >>> type(P)
+    qubovert._pubo.PUBO
+
+    >>> from qubovert import binary_var
+    >>> x, y = binary_var('x'), binary_var('y')
+    >>> P = XNOR(x, y)
+    >>> type(P)
+    qubovert.HOBO
 
     The following test will pass.
 

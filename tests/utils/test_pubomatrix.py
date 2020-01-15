@@ -52,6 +52,16 @@ def test_pubo_remove_value_when_zero():
     assert d.variables == set()
 
 
+def test_pubo_clear():
+
+    d = PUBOMatrix()
+    d[(0,)] += 1
+    d.clear()
+    assert d.degree == 0
+    assert d.num_binary_variables == 0
+    assert d.variables == set()
+
+
 def test_pubo_reinitialize_dictionary():
 
     d = PUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1, (2, 0, 1): -2})
@@ -211,6 +221,19 @@ def test_round():
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
     assert round(d, 2) == {(0,): 3.46, (1,): -1.53}
     assert round(d, 3) == {(0,): 3.456, (1,): -1.535}
+
+
+def test_normalize():
+
+    temp = {(0,): 4, (1,): -2}
+    d = PUBOMatrix(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+    temp = {(0,): -4, (1,): 2}
+    d = PUBOMatrix(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
 
 
 def test_symbols():

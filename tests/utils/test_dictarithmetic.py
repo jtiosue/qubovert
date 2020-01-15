@@ -182,6 +182,19 @@ def test_dictarithmetic_round():
     assert round(d, 3) == dict(a=3.456, b=-1.535)
 
 
+def test_normalize():
+
+    temp = {(0,): 4, (1,): -2}
+    d = DictArithmetic(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+    temp = {(0,): -4, (1,): 2}
+    d = DictArithmetic(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')

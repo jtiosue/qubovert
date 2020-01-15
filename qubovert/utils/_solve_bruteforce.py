@@ -309,7 +309,7 @@ def ising_value(z, L):
     r"""ising_value.
 
     Find the value of
-        :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}t`.
+        :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}`.
     The J's are encoded by keys with pairs of labels in L, and the h's are
     encoded by keys with a single label in L.
 

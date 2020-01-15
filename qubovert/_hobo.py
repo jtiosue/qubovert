@@ -24,10 +24,50 @@ from .sat import OR, XOR, ONE, NOT, AND
 from numpy import log2, ceil
 
 
-__all__ = 'HOBO', 'binary_var'
+__all__ = 'HOBO', 'binary_var', 'integer_var'
 
 
 # special constraint forms
+
+def _special_constraints_eq_zero(hobo, P, lam):
+    """_special_constraints_eq_zero.
+
+    See if the constraint that ``P == 0`` matches any special forms.
+
+    Parameters
+    ----------
+    hobo : HOBO object.
+        The HOBO to add the constraint to.
+    P : PUBO object.
+        The PUBO constraint such that ``P == 0``.
+        are present.
+    lam : float > 0 or sympy.Symbol.
+        Langrange multiplier to penalize violations of the constraint.
+
+    Return
+    ------
+    success : bool.
+        True if a special constraint was found and added to ``hobo``, else
+        False.
+
+    """
+    # if P is of the form z == x * y. ie z == AND(x, y)
+    if not P.offset and P.num_binary_variables == 3 and P.num_terms == 2:
+        v, k = tuple(P.values()), tuple(P.keys())
+        if v[0] == - v[1] and (len(k[0]), len(k[1])) in ((1, 2), (2, 1)):
+            a, = k[0] if len(k[0]) == 1 else k[1]
+            b, c = k[0] if len(k[0]) == 2 else k[1]
+            hobo += HOBO().add_constraint_eq_AND(a, b, c, lam=lam)
+            return True
+
+    # if P is of the form z == 1 - x * y. ie z == NAND(x, y)
+
+    # if P is of the form z == x * y. ie z == OR(x, y)
+
+    # if P is of the form z == x * y. ie z == NOR(x, y)
+
+    return False
+
 
 def _special_constraints_le_zero(hobo, P, lam):
     """_special_constraints_le_zero.
@@ -165,6 +205,44 @@ def binary_var(name):
     return HOBO({(name,): 1})
 
 
+def integer_var(prefix, num_bits, log_trick=True):
+    """integer_var.
+
+    Return a HOBO object representing an integer variable with `num_bits`
+    bits.
+
+    Parameters
+    ----------
+    prefix : str.
+        The prefix for the binary variable names.
+    num_bits : int.
+        Number of bits to represent the integer variable with.
+    log_trick : bool (optional, defaults to True).
+        Whether or not to use a log encoding for the integer.
+
+    Return
+    ------
+    i : qubovert.HOBO object.
+
+    Example
+    -------
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4, log_trick=False)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
+
+    """
+    var = HOBO()
+    for i in range(num_bits):
+        var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
+    return var
+
+
 # main class
 
 class HOBO(PUBO):
@@ -178,6 +256,8 @@ class HOBO(PUBO):
     methods; namely
 
     - ``add_constraint_eq_zero(P, lam=1, ...)`` enforces that ``P == 0`` by
+      penalizing with ``lam``,
+    - ``add_constraint_ne_zero(P, lam=1, ...)`` enforces that ``P != 0`` by
       penalizing with ``lam``,
     - ``add_constraint_lt_zero(P, lam=1, ...)`` enforces that ``P < 0`` by
       penalizing with ``lam``,
@@ -364,10 +444,11 @@ class HOBO(PUBO):
         ------
         res : dict.
             The keys of ``res`` are some or all of
-            ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, and ``'ge'``.
+            ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``, ``'gt'``, and ``'ge'``.
             The values are lists of ``qubovert.PUBO`` objects. For a
             given key, value pair ``k, v``, the ``v[i]`` element represents
             the PUBO ``v[i]`` being == 0 if ``k == 'eq'``,
+            != 0 if ``k == 'ne'``,
             < 0 if ``k == 'lt'``, <= 0 if ``k == 'le'``,
             > 0 if ``k == 'gt'``, >= 0 if ``k == 'ge'``.
 
@@ -382,7 +463,8 @@ class HOBO(PUBO):
         Parameters
         ----------
         key : str.
-            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
+            One of ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``, ``'gt'``, or
+            ``'ge'``.
         constraint : qubovert.PUBO object.
 
         """
@@ -396,7 +478,8 @@ class HOBO(PUBO):
         Parameters
         ----------
         key : str.
-            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
+            One of ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``, ``'gt'``, or
+            ``'ge'``.
 
         """
         if self._constraints.get(key, []):
@@ -480,6 +563,10 @@ class HOBO(PUBO):
         """
         if any(v.value(solution) != 0
                for v in self._constraints.get('eq', [])):
+            return False
+
+        if any(v.value(solution) == 0
+               for v in self._constraints.get('ne', [])):
             return False
 
         if any(v.value(solution) >= 0
@@ -613,6 +700,9 @@ class HOBO(PUBO):
         P = PUBO(P)
         self._append_constraint("eq", P)
 
+        if _special_constraints_eq_zero(self, P, lam):
+            return self
+
         min_val, max_val = _get_bounds(P, bounds)
 
         if min_val == max_val == 0:
@@ -631,7 +721,152 @@ class HOBO(PUBO):
         elif max_val == 0:
             self -= lam * P
         else:
-            self += lam * P ** 2
+            self += lam * P * P
+
+        return self
+
+    def add_constraint_ne_zero(self,
+                               P, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
+        r"""add_constraint_ne_zero.
+
+        Enforce that ``P != 0`` by penalizing invalid solutions with ``lam``.
+        See Notes below for more details.
+
+        Parameters
+        ----------
+        P : dict representing a PUBO.
+            The PUBO constraint such that P != 0. Note that ``P`` will be
+            converted to a ``qubovert.PUBO`` object if it is not already, thus
+            it must follow the conventions, see ``help(qubovert.PUBO)``.
+            Please note that if ``P`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaults to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            PUBO ``P`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
+
+        Return
+        ------
+        self : HOBO.
+            Updates the HOBO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Notes
+        -----
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints (ie constraints of the form
+          :math:`x_0 + 2x_1 + ... != 0`). However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function.
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\min_x \text{P.value(x)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\min_x \text{P.value(x)}|` ancilla
+          bits will be used.
+
+        Examples
+        --------
+        Enforce that :math:`-x_a x_b x_c + x_a -4x_a x_b + 3x_c != 2`.
+
+        >>> H = HOBO().add_constraint_ne_zero(
+                {('a', 'b', 'c'): -1, ('a',): 2,
+                ('a', 'b'): -4, ('c',): 3, (): -2}
+            )
+        >>> print(H)
+        {('c', 'a', 'b'): -19, ('__a0', 'c', 'a', 'b'): -4,
+         ('__a0', 'c', '__a1', 'a', 'b'): -4, ('c', '__a1', 'a', 'b'): 2,
+         ('__a0', 'c', '__a2', 'a', 'b'): -8, ('c', '__a2', 'a', 'b'): 4,
+         ('__a0', '__a3', 'c', 'a', 'b'): -16, ('__a3', 'c', 'a', 'b'): 8,
+         ('__a0', 'c', '__a4', 'a', 'b'): -32, ('c', '__a4', 'a', 'b'): 16,
+         ('a',): -8, ('c', 'a'): 12, ('__a0', 'a'): 8,
+         ('__a0', '__a1', 'a'): 8, ('__a1', 'a'): -4,
+         ('__a0', '__a2', 'a'): 16, ('__a2', 'a'): -8,
+         ('__a0', '__a3', 'a'): 32, ('__a3', 'a'): -16,
+         ('__a0', '__a4', 'a'): 64, ('__a4', 'a'): -32, ('a', 'b'): 24,
+         ('__a0', 'a', 'b'): -16, ('__a0', '__a1', 'a', 'b'): -16,
+         ('__a1', 'a', 'b'): 8, ('__a0', '__a2', 'a', 'b'): -32,
+         ('__a2', 'a', 'b'): 16, ('__a0', '__a3', 'a', 'b'): -64,
+         ('__a3', 'a', 'b'): 32, ('__a0', '__a4', 'a', 'b'): -128,
+         ('__a4', 'a', 'b'): 64, ('__a0', 'c'): 12, ('__a0', 'c', '__a1'): 12,
+         ('c', '__a1'): -6, ('__a0', 'c', '__a2'): 24, ('c', '__a2'): -12,
+         ('__a0', '__a3', 'c'): 48, ('__a3', 'c'): -24,
+         ('__a0', 'c', '__a4'): 96, ('c', '__a4'): -48, ('c',): -9, (): 9,
+         ('__a0',): -8, ('__a0', '__a1'): -8, ('__a1',): 7,
+         ('__a0', '__a2'): -16, ('__a2',): 16, ('__a3',): 40,
+         ('__a0', '__a4'): -64, ('__a4',): 112, ('__a2', '__a1'): 4,
+         ('__a3', '__a1'): 8, ('__a4', '__a1'): 16, ('__a3', '__a2'): 16,
+         ('__a4', '__a2'): 32, ('__a0', '__a3'): -32, ('__a3', '__a4'): 64}
+        >>> print(H.is_solution_valid({'b': 0, 'c': 0, 'a': 1}))
+        False
+        >>> print(H.is_solution_valid({'b': 0, 'c': 1, 'a': 1}))
+        True
+
+        """
+        P = PUBO(P)
+        self._append_constraint("ne", P)
+
+        min_val, max_val = _get_bounds(P, bounds)
+
+        if min_val == max_val == 0:
+            if not suppress_warnings:
+                QUBOVertWarning.warn("Constraint cannot be satisfied")
+            self += lam
+        elif min_val > 0:
+            if not suppress_warnings:
+                QUBOVertWarning.warn("Constraint is always satisfied")
+        elif max_val < 0:
+            if not suppress_warnings:
+                QUBOVertWarning.warn("Constraint is always satisfied")
+        elif min_val == 0:
+            return self.add_constraint_gt_zero(
+                P, lam=lam,
+                bounds=(min_val, max_val), suppress_warnings=suppress_warnings
+            )
+            self._pop_constraint('gt')
+        elif max_val == 0:
+            return self.add_constraint_lt_zero(
+                P, lam=lam,
+                bounds=(min_val, max_val), suppress_warnings=suppress_warnings
+            )
+            self._pop_constraint('lt')
+
+        else:
+            # don't mutate the P that we put in self._constraints
+            P = P.copy()
+            sign = 2 * binary_var(self._next_ancilla) - 1
+            P += sign
+            max_val += 1
+            min_val -= 1
+            if log_trick:
+                for i in range(int(ceil(log2(max_val-min_val)))):
+                    P += sign * pow(2, i) * binary_var(self._next_ancilla)
+                    max_val += pow(2, i)
+                    min_val -= pow(2, i)
+            else:
+                for _ in range(int(ceil(max_val-min_val-1))):
+                    P += sign * binary_var(self._next_ancilla)
+                    max_val += 1
+                    min_val -= 1
+
+            self.add_constraint_eq_zero(
+                P, lam=lam,
+                bounds=(min_val, max_val), suppress_warnings=True
+            )
+            self._pop_constraint("eq")
 
         return self
 

@@ -24,7 +24,7 @@ from . import QUBO
 # in PUBO._reduce_degree, we use HOBO.add_constraint_AND. But HOBO inherits
 # from PUBO, so can't say `from . import HOBO` here. Instead, just import
 # qubovert
-import qubovert
+import qubovert as qv
 
 
 __all__ = 'PUBO',
@@ -202,7 +202,7 @@ class PUBO(BO, PUBOMatrix):
         deg : int >= 2.
             The degree of the model to reduce to. If``deg`` is None, then
             the model's degree will not be reduced.
-        lam : function.
+        lam : function, numeric, or symbol.
             If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
             ``lam`` is the penalty factor to introduce in order to enforce the
             ancilla constraints. When we reduce the degree of the model, we add
@@ -213,7 +213,8 @@ class PUBO(BO, PUBOMatrix):
             order model may be reduced to a term ``(0, 3): 3`` for the lower
             order model, and then the fact that ``3`` should be the product
             of ``1`` and ``2`` will be enforced with a penalty weight
-            ``lam(3)``.
+            ``lam(3)``. If ``lam`` is a number of symbol, then it will be used
+            as described above, where ``lam(v) = lam``.
 
         Return
         -------
@@ -222,10 +223,15 @@ class PUBO(BO, PUBOMatrix):
         """
         if deg is not None and deg < 2:
             raise ValueError("deg must be >= 2")
-        if lam is None:
-            lam = PUBO.default_lam
         if deg is None:
             deg = self.degree
+
+        if lam is None:
+            func_lam = PUBO.default_lam
+        elif callable(lam):
+            func_lam = lam
+        else:
+            def func_lam(v): return lam
 
         # determine the most common pairs
         pair_frequencies, mapped_self = defaultdict(int), {}
@@ -281,8 +287,8 @@ class PUBO(BO, PUBOMatrix):
                 # multiple times.
 
                 # enforce that z == x y
-                D += qubovert.HOBO().add_constraint_eq_AND(
-                    z, x, y, lam=lam(v)
+                D += qv.HOBO().add_constraint_eq_AND(
+                    z, x, y, lam=func_lam(v)
                 )
 
                 # key is sorted, but it is not necessarily the case that

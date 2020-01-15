@@ -63,7 +63,9 @@ Hash
 .. autofunction:: qubovert.utils.hash_function
 
 
-Subgraph
+Useful functions
 --------
 
 .. autofunction:: qubovert.utils.subgraph
+
+.. autofunction:: qubovert.utils.normalize

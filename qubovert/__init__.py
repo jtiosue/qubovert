@@ -53,4 +53,7 @@ __all__ = (
 from . import sat
 from . import problems
 
+BINARY_MODELS = QUBO, PUBO, HOBO, utils.QUBOMatrix, utils.PUBOMatrix
+SPIN_MODELS = Ising, HIsing, HOIO, utils.IsingMatrix, utils.HIsingMatrix
+
 name = "qubovert"

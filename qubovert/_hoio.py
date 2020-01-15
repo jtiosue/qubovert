@@ -106,6 +106,8 @@ class HOIO(HIsing):
 
     - ``add_constraint_eq_zero(H, lam=1, ...)`` enforces that ``H == 0`` by
       penalizing with ``lam``,
+    - ``add_constraint_ne_zero(H, lam=1, ...)`` enforces that ``H != 0`` by
+      penalizing with ``lam``,
     - ``add_constraint_lt_zero(H, lam=1, ...)`` enforces that ``H < 0`` by
       penalizing with ``lam``,
     - ``add_constraint_le_zero(H, lam=1, ...)`` enforces that ``H <= 0`` by
@@ -211,10 +213,11 @@ class HOIO(HIsing):
         Return
         ------
         res : dict.
-            The keys of ``res`` are ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, and
-            ``'ge'``. The values are lists of ``qubovert.HIsing`` objects. For
-            a given key, value pair ``k, v``, the ``v[i]`` element represents
-            the HIsing ``v[i]`` being == 0 if ``k == 'eq'``,
+            The keys of ``res`` are ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``,
+            ``'gt'``, and ``'ge'``. The values are lists of ``qubovert.HIsing``
+            objects. For a given key, value pair ``k, v``, the ``v[i]`` element
+            represents the HIsing ``v[i]`` being
+            == 0 if ``k == 'eq'``, != 0 if ``k == 'ne'``,
             < 0 if ``k == 'lt'``, <= 0 if ``k == 'le'``,
             > 0 if ``k == 'gt'``, >= 0 if ``k == 'ge'``.
 
@@ -392,6 +395,69 @@ class HOIO(HIsing):
 
         h = _empty_hobo(self).add_constraint_eq_zero(
             hising_to_pubo(H), lam=lam,
+            bounds=bounds, suppress_warnings=suppress_warnings
+        )
+        self._ancilla = h._ancilla
+        self += pubo_to_hising(h)
+        return self
+
+    def add_constraint_ne_zero(self,
+                               H, lam=1, log_trick=True,
+                               bounds=None, suppress_warnings=False):
+        r"""add_constraint_ne_zero.
+
+        Enforce that ``H != 0`` by penalizing invalid solutions with ``lam``.
+        See Notes below for more details.
+
+        Parameters
+        ----------
+        H : dict representing a HIsing.
+            The HIsing constraint such that H != 0. Note that ``H`` will be
+            converted to a ``qubovert.HIsing`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+            Please note that if ``H`` contains any symbols, then ``bounds``
+            must be supplied, since they cannot be determined when symbols
+            are present.
+        lam : float > 0 or sympy.Symbol (optional, defaults to 1).
+            Langrange multiplier to penalize violations of the constraint.
+        log_trick : bool (optional, defaults to True).
+            Whether or not to use the log trick to enforce the inequality
+            constraint. See Notes below for more details.
+        bounds : two element tuple (optional, defaults to None).
+            A tuple ``(min, max)``, the minimum and maximum values that the
+            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            calculated (approximately), or if either of the elements of
+            ``bounds`` is None, then that element will be calculated
+            (approximately).
+        suppress_warnings : bool (optional, defaults to False).
+            Whether or not to surpress warnings.
+
+        Return
+        ------
+        self : HOIO.
+            Updates the HOIO in place, but returns ``self`` so that operations
+            can be strung together.
+
+        Notes
+        -----
+        - There is no general way to enforce non integer inequality
+          constraints. Thus this function is only guarenteed to work for
+          integer inequality constraints. However, it can be used for non
+          integer inequality constraints, but it is recommended that the value
+          of ``lam`` be set small, since valid solutions may still recieve a
+          penalty to the objective function.
+        - To enforce the inequality constraint, ancilla bits will be
+          introduced (labels with `_a`). If ``log_trick`` is ``True``, then
+          approximately :math:`\log_2 |\min_x \text{P.value(x)}|`
+          ancilla bits will be used. If ``log_trick`` is ``False``, then
+          approximately :math:`|\min_x \text{P.value(x)}|` ancilla
+          bits will be used.
+
+        """
+        H = HIsing(H)
+        self._append_constraint("ne", H)
+        h = _empty_hobo(self).add_constraint_ne_zero(
+            hising_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla

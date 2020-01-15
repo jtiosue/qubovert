@@ -185,8 +185,23 @@ class PUBOMatrix(DictArithmetic):
 
         """
         d = self.copy()
-        self.clear()
+        super().clear()
         self.__init__(d)
+
+    def clear(self):
+        """clear.
+
+        For efficiency, the internal variables for ``degree``,
+        ``num_binary_variables``, ``max_index`` are computed as the dictionary
+        is being built (and in subclasses such as ``qubovert.PUBO``, properties
+        such as ``mapping`` and ``reverse_mapping``). This can cause these
+        values to be wrong for some specific situations. Thus, when we clear,
+        we also need to reset all of these cached values. This function
+        remove all the elments from ``self`` and resets the cached values.
+
+        """
+        super().clear()
+        self.__init__()
 
     @property
     def degree(self):

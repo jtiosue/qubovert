@@ -16,7 +16,7 @@
 Contains tests for the HOBO class.
 """
 
-from qubovert import HOBO, binary_var
+from qubovert import HOBO, binary_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
@@ -326,6 +326,19 @@ def test_round():
     assert round(d, 3) == {(0,): 3.456, (1,): -1.535}
 
 
+def test_normalize():
+
+    temp = {(0,): 4, (1,): -2}
+    d = HOBO(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+    temp = {(0,): -4, (1,): 2}
+    d = HOBO(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
@@ -355,6 +368,15 @@ def test_binary_var():
     assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
     assert sum(x) == {(i,): 1 for i in range(5)}
     assert isinstance(x[0], HOBO)
+
+
+def test_integer_var():
+
+    var = integer_var('a', 4)
+    assert var == {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+
+    var = integer_var('a', 4, log_trick=False)
+    assert var == {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """
@@ -403,6 +425,24 @@ def test_hobo_eq_constraint():
         sol == solution,
         allclose(e, obj)
     ))
+
+
+def test_hobo_ne_constraint_logtrick():
+
+    for i in range(1 << 4):
+        P = integer_var('a', 4) - i
+        H = HOBO().add_constraint_ne_zero(P)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+
+def test_hobo_ne_constraint():
+
+    for i in range(1 << 3):
+        P = integer_var('a', 3) - i
+        H = HOBO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
 
 
 def test_hobo_lt_constraint_logtrick():
@@ -1247,3 +1287,12 @@ def test_hobo_special_constraint_le():
 
     H = HOBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 2})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
+
+
+def test_hobo_special_constraint_eq():
+
+    x, y, z = binary_var('x'), binary_var('y'), binary_var('z')
+    H1 = HOBO().add_constraint_eq_zero(z - x * y)
+    H2 = HOBO().add_constraint_eq_zero(x * y - z)
+    H3 = HOBO().add_constraint_eq_AND(z, x, y)
+    assert H1 == H2 == H3

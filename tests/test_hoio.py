@@ -16,7 +16,7 @@
 Contains tests for the HOIO class.
 """
 
-from qubovert import HOIO, spin_var
+from qubovert import HOIO, spin_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
@@ -333,6 +333,19 @@ def test_round():
     assert round(d, 3) == {(0,): 3.456, (1,): -1.535}
 
 
+def test_normalize():
+
+    temp = {(0,): 4, (1,): -2}
+    d = HOIO(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+    temp = {(0,): -4, (1,): 2}
+    d = HOIO(temp)
+    d.normalize()
+    assert d == {k: v / 4 for k, v in temp.items()}
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
@@ -408,6 +421,24 @@ def test_hoio_eq_constraint():
         sol == solution,
         allclose(e, obj)
     ))
+
+
+def test_hoio_ne_constraint_logtrick():
+
+    for i in range(1 << 4):
+        P = pubo_to_hising(integer_var('a', 4)) - i
+        H = HOIO().add_constraint_ne_zero(P)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+
+def test_hoio_ne_constraint():
+
+    for i in range(1 << 3):
+        P = pubo_to_hising(integer_var('a', 3)) - i
+        H = HOIO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
 
 
 def test_hoio_lt_constraint_logtrick():
