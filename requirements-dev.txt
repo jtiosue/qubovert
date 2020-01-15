@@ -9,4 +9,4 @@ setuptools
 wheel
 twine
 codecov
-sympy
+sympy==1.3
