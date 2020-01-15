@@ -22,7 +22,7 @@ problems, as well as various misc converters
 from . import QUBOMatrix, IsingMatrix, PUBOMatrix, HIsingMatrix
 # for QUBO, Ising, PUBO, HIsing, can't import directly because it will cause
 # circular imports, so instead just import qubovert.
-import qubovert
+import qubovert as qv
 
 
 __all__ = (
@@ -74,8 +74,8 @@ def qubo_to_ising(Q):
         L = IsingMatrix()
         squash_key = QUBOMatrix.squash_key
     else:
-        L = qubovert.Ising()
-        squash_key = qubovert.QUBO.squash_key
+        L = qv.Ising()
+        squash_key = qv.QUBO.squash_key
 
     for kp, v in Q.items():
         k = squash_key(kp)
@@ -139,8 +139,8 @@ def ising_to_qubo(L):
         Q = QUBOMatrix()
         squash_key = IsingMatrix.squash_key
     else:
-        Q = qubovert.QUBO()
-        squash_key = qubovert.Ising.squash_key
+        Q = qv.QUBO()
+        squash_key = qv.Ising.squash_key
 
     for kp, v in L.items():
         k = squash_key(kp)
@@ -229,8 +229,8 @@ def pubo_to_hising(P):
         H = HIsingMatrix()
         squash_key = PUBOMatrix.squash_key
     else:
-        H = qubovert.HIsing()
-        squash_key = qubovert.PUBO.squash_key
+        H = qv.HIsing()
+        squash_key = qv.PUBO.squash_key
 
     for k, v in P.items():
         for key, value in generate_new_key_value(squash_key(k)):
@@ -307,8 +307,8 @@ def hising_to_pubo(H):
         P = PUBOMatrix()
         squash_key = HIsingMatrix.squash_key
     else:
-        P = qubovert.PUBO()
-        squash_key = qubovert.HIsing.squash_key
+        P = qv.PUBO()
+        squash_key = qv.HIsing.squash_key
 
     for k, v in H.items():
         for key, value in generate_new_key_value(squash_key(k)):

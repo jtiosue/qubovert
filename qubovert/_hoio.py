@@ -340,43 +340,6 @@ class HOIO(HIsing):
         """
         return HOBO.subs(self, *args, **kwargs)
 
-    @staticmethod
-    def integer_var(prefix, num_bits, log_trick=True):
-        """integer_var.
-
-        Return a HOIO object representing an integer variable with `num_bits`
-        bits.
-
-        Parameters
-        ----------
-        prefix : str.
-            The prefix for the spin variable names.
-        num_bits : int.
-            Number of bits to represent the integer variable with.
-        log_trick : bool (optional, defaults to True).
-            Whether or not to use a log encoding for the integer.
-
-        Return
-        ------
-        i : qubovert.HOIO object.
-
-        Example
-        -------
-        >>> from qubovert import HOIO
-        >>> var = HOIO.integer_var('a', 4)
-        >>> print(var)
-        {('a0',): 0.5, (): 7.5, ('a1',): 1.0, ('a2',): 2.0, ('a3',): 4.0}
-
-        >>> from qubovert import HOIO
-        >>> var = HOIO.integer_var('a', 4, log_trick=False)
-        >>> print(var)
-        {('a0',): 0.5, (): 2.0, ('a1',): 0.5, ('a2',): 0.5, ('a3',): 0.5}
-
-        """
-        return HOIO(pubo_to_hising(
-            HOBO.integer_var(prefix, num_bits, log_trick)
-        ))
-
     def add_constraint_eq_zero(self,
                                H, lam=1,
                                bounds=None, suppress_warnings=False):

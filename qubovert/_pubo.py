@@ -24,7 +24,7 @@ from . import QUBO
 # in PUBO._reduce_degree, we use HOBO.add_constraint_AND. But HOBO inherits
 # from PUBO, so can't say `from . import HOBO` here. Instead, just import
 # qubovert
-import qubovert
+import qubovert as qv
 
 
 __all__ = 'PUBO',
@@ -287,7 +287,7 @@ class PUBO(BO, PUBOMatrix):
                 # multiple times.
 
                 # enforce that z == x y
-                D += qubovert.HOBO().add_constraint_eq_AND(
+                D += qv.HOBO().add_constraint_eq_AND(
                     z, x, y, lam=func_lam(v)
                 )
 

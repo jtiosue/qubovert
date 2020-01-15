@@ -52,6 +52,16 @@ def test_pubo_remove_value_when_zero():
     assert d.variables == set()
 
 
+def test_pubo_clear():
+
+    d = PUBOMatrix()
+    d[(0,)] += 1
+    d.clear()
+    assert d.degree == 0
+    assert d.num_binary_variables == 0
+    assert d.variables == set()
+
+
 def test_pubo_reinitialize_dictionary():
 
     d = PUBOMatrix({(0, 0): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1, (2, 0, 1): -2})

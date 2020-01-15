@@ -24,10 +24,50 @@ from .sat import OR, XOR, ONE, NOT, AND
 from numpy import log2, ceil
 
 
-__all__ = 'HOBO', 'binary_var'
+__all__ = 'HOBO', 'binary_var', 'integer_var'
 
 
 # special constraint forms
+
+def _special_constraints_eq_zero(hobo, P, lam):
+    """_special_constraints_eq_zero.
+
+    See if the constraint that ``P == 0`` matches any special forms.
+
+    Parameters
+    ----------
+    hobo : HOBO object.
+        The HOBO to add the constraint to.
+    P : PUBO object.
+        The PUBO constraint such that ``P == 0``.
+        are present.
+    lam : float > 0 or sympy.Symbol.
+        Langrange multiplier to penalize violations of the constraint.
+
+    Return
+    ------
+    success : bool.
+        True if a special constraint was found and added to ``hobo``, else
+        False.
+
+    """
+    # if P is of the form z == x * y. ie z == AND(x, y)
+    if not P.offset and P.num_binary_variables == 3 and P.num_terms == 2:
+        v, k = tuple(P.values()), tuple(P.keys())
+        if v[0] == - v[1] and (len(k[0]), len(k[1])) in ((1, 2), (2, 1)):
+            a, = k[0] if len(k[0]) == 1 else k[1]
+            b, c = k[0] if len(k[0]) == 2 else k[1]
+            hobo += HOBO().add_constraint_eq_AND(a, b, c, lam=lam)
+            return True
+
+    # if P is of the form z == 1 - x * y. ie z == NAND(x, y)
+
+    # if P is of the form z == x * y. ie z == OR(x, y)
+
+    # if P is of the form z == x * y. ie z == NOR(x, y)
+
+    return False
+
 
 def _special_constraints_le_zero(hobo, P, lam):
     """_special_constraints_le_zero.
@@ -163,6 +203,44 @@ def binary_var(name):
 
     """
     return HOBO({(name,): 1})
+
+
+def integer_var(prefix, num_bits, log_trick=True):
+    """integer_var.
+
+    Return a HOBO object representing an integer variable with `num_bits`
+    bits.
+
+    Parameters
+    ----------
+    prefix : str.
+        The prefix for the binary variable names.
+    num_bits : int.
+        Number of bits to represent the integer variable with.
+    log_trick : bool (optional, defaults to True).
+        Whether or not to use a log encoding for the integer.
+
+    Return
+    ------
+    i : qubovert.HOBO object.
+
+    Example
+    -------
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4, log_trick=False)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
+
+    """
+    var = HOBO()
+    for i in range(num_bits):
+        var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
+    return var
 
 
 # main class
@@ -559,44 +637,6 @@ class HOBO(PUBO):
         }
         return d
 
-    @staticmethod
-    def integer_var(prefix, num_bits, log_trick=True):
-        """integer_var.
-
-        Return a HOBO object representing an integer variable with `num_bits`
-        bits.
-
-        Parameters
-        ----------
-        prefix : str.
-            The prefix for the binary variable names.
-        num_bits : int.
-            Number of bits to represent the integer variable with.
-        log_trick : bool (optional, defaults to True).
-            Whether or not to use a log encoding for the integer.
-
-        Return
-        ------
-        i : qubovert.HOBO object.
-
-        Example
-        -------
-        >>> from qubovert import HOBO
-        >>> var = HOBO.integer_var('a', 4)
-        >>> print(var)
-        {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
-
-        >>> from qubovert import HOBO
-        >>> var = HOBO.integer_var('a', 4, log_trick=False)
-        >>> print(var)
-        {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
-
-        """
-        var = HOBO()
-        for i in range(num_bits):
-            var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
-        return var
-
     def add_constraint_eq_zero(self,
                                P, lam=1,
                                bounds=None, suppress_warnings=False):
@@ -659,6 +699,9 @@ class HOBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("eq", P)
+
+        if _special_constraints_eq_zero(self, P, lam):
+            return self
 
         min_val, max_val = _get_bounds(P, bounds)
 
