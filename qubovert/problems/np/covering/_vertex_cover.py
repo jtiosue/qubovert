@@ -21,6 +21,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 # from qubovert.utils import QUBOMatrix
 from qubovert import HOBO
 from qubovert.problems import Problem
+from qubovert.utils import solution_type, spin_to_binary
 
 
 __all__ = 'VertexCover',
@@ -204,7 +205,7 @@ class VertexCover(Problem):
 
         return H.to_qubo()
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=False):
         """convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the Vertex
@@ -216,8 +217,16 @@ class VertexCover(Problem):
             The QUBO or Ising solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -229,11 +238,14 @@ class VertexCover(Problem):
         """
         if not isinstance(solution, dict):
             solution = dict(enumerate(solution))
+        sol_type = solution_type(solution)
+        if sol_type == 'spin' or (sol_type is None and spin):
+            solution = spin_to_binary(solution)
         return set(
-            self._index_to_vertex[i] for i, x in solution.items() if x == 1
+            self._index_to_vertex[i] for i, x in solution.items() if x
         )
 
-    def is_solution_valid(self, solution):
+    def is_solution_valid(self, solution, spin=False):
         """is_solution_valid.
 
         Returns whether or not the proposed solution satisfies the constraint
@@ -246,8 +258,16 @@ class VertexCover(Problem):
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -256,6 +276,6 @@ class VertexCover(Problem):
 
         """
         if not isinstance(solution, set):
-            solution = self.convert_solution(solution)
+            solution = self.convert_solution(solution, spin)
 
         return all(i in solution or j in solution for i, j in self._edges)

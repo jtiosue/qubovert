@@ -166,7 +166,7 @@ class NumberPartitioning(Problem):
         L = IsingMatrix({(i,): self._S[i] for i in range(self._N)})
         return A * L * L
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=False):
         """convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the
@@ -178,8 +178,16 @@ class NumberPartitioning(Problem):
             The QUBO or Ising solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -213,7 +221,7 @@ class NumberPartitioning(Problem):
         )
         return partition1, partition2
 
-    def is_solution_valid(self, solution):
+    def is_solution_valid(self, solution, spin=False):
         """is_solution_valid.
 
         Returns whether or not the proposed solution partitions S into two sets
@@ -226,8 +234,16 @@ class NumberPartitioning(Problem):
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -242,6 +258,6 @@ class NumberPartitioning(Problem):
         )
 
         if not_converted:
-            solution = self.convert_solution(solution)
+            solution = self.convert_solution(solution, spin)
 
         return sum(solution[0]) == sum(solution[1])

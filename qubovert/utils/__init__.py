@@ -20,6 +20,7 @@ See ``__all__`` for a list of the utilities.
 
 # import order here is important!
 from ._warn import *
+from ._solution_type import *
 from ._hash import *
 from ._subgraph import *
 from ._normalize import *
@@ -33,6 +34,7 @@ from ._conversions import *
 from ._bo_parentclass import *
 
 from ._warn import __all__ as __all_warn__
+from ._solution_type import __all__ as __all_st__
 from ._hash import __all__ as __all_hash__
 from ._subgraph import __all__ as __all_subgraph__
 from ._normalize import __all__ as __all_normalize__
@@ -48,6 +50,7 @@ from ._bo_parentclass import __all__ as __all_bo__
 
 __all__ = (
     __all_warn__ +
+    __all_st__ +
     __all_hash__ +
     __all_subgraph__ +
     __all_normalize__ +

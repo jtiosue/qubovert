@@ -89,7 +89,7 @@ def test_AlternatingSectorsChain_qubo_numvars():
 def test_AlternatingSectorsChain_ising_solve():
 
     e, sol = solve_ising_bruteforce(problem.to_ising(True))
-    solution = problem.convert_solution(sol)
+    solution = problem.convert_solution(sol, True)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)
@@ -99,7 +99,7 @@ def test_AlternatingSectorsChain_ising_solve():
     # not pbc
 
     e, sol = solve_ising_bruteforce(problem.to_ising(False))
-    solution = problem.convert_solution(sol)
+    solution = problem.convert_solution(sol, True)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)

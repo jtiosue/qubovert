@@ -18,7 +18,7 @@ Contains the BILP class. See ``help(qubovert.problems.BILP)``.
 
 """
 
-from qubovert.utils import QUBOMatrix
+from qubovert.utils import QUBOMatrix, solution_type, spin_to_binary
 from qubovert.problems import Problem
 import numpy as np
 
@@ -214,7 +214,7 @@ class BILP(Problem):
 
         return Q
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=False):
         r"""convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the BILP
@@ -226,8 +226,16 @@ class BILP(Problem):
             The QUBO or Ising solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -235,9 +243,12 @@ class BILP(Problem):
             An array representing the :math:`\mathbf{x}` vector.
 
         """
-        return np.array([1 if solution[i] == 1 else 0 for i in range(self._N)])
+        sol_type = solution_type(solution)
+        if sol_type == 'spin' or (sol_type is None and spin):
+            solution = spin_to_binary(solution)
+        return np.array([int(bool(solution[i])) for i in range(self._N)])
 
-    def is_solution_valid(self, solution):
+    def is_solution_valid(self, solution, spin=False):
         r"""is_solution_valid.
 
         Returns whether or not the proposed solution satisfies the constraint
@@ -250,8 +261,16 @@ class BILP(Problem):
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -260,7 +279,7 @@ class BILP(Problem):
 
         """
         if not isinstance(solution, np.ndarray):
-            solution = self.convert_solution(solution)
+            solution = self.convert_solution(solution, spin)
 
         return np.allclose(
             self._S @ np.array([solution]).T,

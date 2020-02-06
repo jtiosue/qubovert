@@ -18,7 +18,7 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import IsingMatrix
+from qubovert.utils import IsingMatrix, binary_to_spin, solution_type
 from qubovert.problems import Problem
 
 
@@ -164,7 +164,7 @@ class AlternatingSectorsChain(Problem):
 
         return L
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=False):
         """convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the
@@ -176,8 +176,16 @@ class AlternatingSectorsChain(Problem):
             The QUBO or Ising solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -188,16 +196,19 @@ class AlternatingSectorsChain(Problem):
         --------
         >>> problem = AlternatingSectorsChain(5)
         >>> problem.convert_solution([0, 0, 1, 0, 1])
-        (-1, -1, 1, -1, 1)
+        (1, 1, -1, 1, -1)
         >>> problem.convert_solution([-1, -1, 1, -1, 1])
         (-1, -1, 1, -1, 1)
 
         """
         if isinstance(solution, dict):
-            solution = tuple(v for k, v in sorted(solution.items()))
-        return tuple(x if x else -1 for x in solution)
+            solution = tuple(v for _, v in sorted(solution.items()))
+        sol_type = solution_type(solution)
+        if sol_type == 'bin' or (sol_type is None and not spin):
+            return binary_to_spin(solution)
+        return solution
 
-    def is_solution_valid(self, solution):
+    def is_solution_valid(self, solution, spin=False):
         """is_solution_valid.
 
         Returns whether or not the proposed solution is the correct solution,
@@ -211,8 +222,16 @@ class AlternatingSectorsChain(Problem):
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -221,7 +240,7 @@ class AlternatingSectorsChain(Problem):
 
         """
         if isinstance(solution, dict):
-            solution = self.convert_solution(solution)
+            solution = self.convert_solution(solution, spin)
 
         return all(
             x == 1 for x in solution

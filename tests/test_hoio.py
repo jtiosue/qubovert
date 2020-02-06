@@ -37,9 +37,9 @@ class Problem:
 
         self.problem, self.solution, self.obj = problem, solution, obj
 
-    def is_valid(self, e, solution):
+    def is_valid(self, e, solution, spin):
 
-        sol = self.problem.convert_solution(solution)
+        sol = self.problem.convert_solution(solution, spin)
         return all((
             self.problem.is_solution_valid(sol),
             self.problem.is_solution_valid(solution),
@@ -52,18 +52,18 @@ class Problem:
         assert self.problem.solve_bruteforce() == self.solution
 
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
-        assert self.is_valid(e, sol)
+        assert self.is_valid(e, sol, False)
 
         e, sol = solve_ising_bruteforce(self.problem.to_ising())
-        assert self.is_valid(e, sol)
+        assert self.is_valid(e, sol, True)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
             e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
-            assert self.is_valid(e, sol)
+            assert self.is_valid(e, sol, True)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
-            assert self.is_valid(e, sol)
+            assert self.is_valid(e, sol, False)
 
         assert (
             self.problem.value(self.solution) ==
@@ -360,10 +360,19 @@ def test_symbols():
 
     d.add_constraint_eq_zero({(0,): a, (1,): -b}, bounds=(-1, 1))
     d.simplify()
-    assert d == {(0,): -a, (0, 1): -2.*a*b + 2.,
-                 (1,): b, (): 1.*a**2 + 1.*b**2}
-    assert d.subs(a, 0) == {(0, 1): 2, (1,): b, (): 1.*b**2}
+    assert d == {(0,): -1.*a, (0, 1): -2.*a*b + 2.,
+                 (1,): 1.*b, (): 1.*a**2 + 1.*b**2}
+    assert d.subs(a, 0) == {(0, 1): 2, (1,): 1.*b, (): 1.*b**2}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 2, (): 4}
+
+
+def test_convert_solution_all_1s():
+
+    d = HOIO({(0,): 1})
+    assert d.convert_solution({0: 0}) == {0: 1}
+    assert d.convert_solution({0: -1}) == {0: -1}
+    assert d.convert_solution({0: 1}) == {0: 1}
+    assert d.convert_solution({0: 1}, False) == {0: -1}
 
 
 def test_spin_var():
@@ -400,7 +409,7 @@ def test_hoio_eq_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, False)
     assert all((
         not problem.is_solution_valid(sol),
         sol != solution,

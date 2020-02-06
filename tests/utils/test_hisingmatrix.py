@@ -269,8 +269,8 @@ def test_hisingmatrix_solve_bruteforce():
     assert (
         sols
         ==
-        [{0: -1, 1: -1, 3: 1, 4: 1, 5: 1},
+        [{0: 1, 1: 1, 3: 1, 4: 1, 5: 1},
          {0: -1, 1: 1, 3: 1, 4: 1, 5: 1},
-         {0: 1, 1: 1, 3: 1, 4: 1, 5: 1}]
+         {0: -1, 1: -1, 3: 1, 4: 1, 5: 1}]
     )
     assert all(allclose(H.value(s), -3) for s in sols)

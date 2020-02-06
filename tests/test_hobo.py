@@ -36,9 +36,9 @@ class Problem:
 
         self.problem, self.solution, self.obj = problem, solution, obj
 
-    def is_valid(self, e, solution):
+    def is_valid(self, e, solution, spin):
 
-        sol = self.problem.convert_solution(solution)
+        sol = self.problem.convert_solution(solution, spin)
         return all((
             self.problem.is_solution_valid(sol),
             self.problem.is_solution_valid(solution),
@@ -51,18 +51,18 @@ class Problem:
         assert self.problem.solve_bruteforce() == self.solution
 
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
-        assert self.is_valid(e, sol)
+        assert self.is_valid(e, sol, False)
 
         e, sol = solve_ising_bruteforce(self.problem.to_ising())
-        assert self.is_valid(e, sol)
+        assert self.is_valid(e, sol, True)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
             e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
-            assert self.is_valid(e, sol)
+            assert self.is_valid(e, sol, True)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
-            assert self.is_valid(e, sol)
+            assert self.is_valid(e, sol, False)
 
         assert (
             self.problem.value(self.solution) ==
@@ -359,6 +359,15 @@ def test_symbols():
     d = HOBO()
     d += a
     assert d.subs(a, 0) == {}
+
+
+def test_convert_solution_all_1s():
+
+    d = HOBO({(0,): 1})
+    assert d.convert_solution({0: 0}) == {0: 0}
+    assert d.convert_solution({0: -1}) == {0: 1}
+    assert d.convert_solution({0: 1}) == {0: 1}
+    assert d.convert_solution({0: 1}, True) == {0: 0}
 
 
 def test_binary_var():
