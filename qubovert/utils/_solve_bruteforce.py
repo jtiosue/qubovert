@@ -33,7 +33,7 @@ __all__ = (
 def binary_to_spin(x):
     """binary_to_spin.
 
-    Convert a binary number in {0, 1} to a spin in {-1, 1}, in that order.
+    Convert a binary number in {0, 1} to a spin in {1, -1}, in that order.
 
     Parameters
     ----------
@@ -43,17 +43,17 @@ def binary_to_spin(x):
     Returns
     -------
     z : int, iterable of ints, or dict mapping labels to ints.
-        Each integer is either -1 or 1.
+        Each integer is either 1 or -1.
 
     Example
     -------
-    >>> binary_to_spin(0)  # will print -1
-    >>> binary_to_spin(1)  # will print 1
-    >>> binary_to_spin([0, 1, 1])  # will print [-1, 1, 1]
-    >>> binary_to_spin({"a": 0, "b": 1})  # will print {"a": -1, "b": 1}
+    >>> binary_to_spin(0)  # will print 1
+    >>> binary_to_spin(1)  # will print -1
+    >>> binary_to_spin([0, 1, 1])  # will print [1, -1, -1]
+    >>> binary_to_spin({"a": 0, "b": 1})  # will print {"a": 1, "b": -1}
 
     """
-    convert = {0: -1, 1: 1}
+    convert = {0: 1, 1: -1}
     if isinstance(x, (int, float)) and x in convert:
         return convert[x]
     elif isinstance(x, dict):
@@ -64,12 +64,12 @@ def binary_to_spin(x):
 def spin_to_binary(z):
     """spin_to_binary.
 
-    Convert a spin in {-1, 1} to a binary variable in {0, 1}, in that order.
+    Convert a spin in {1, -1} to a binary variable in {0, 1}, in that order.
 
     Parameters
     ----------
     z : int, iterable of ints, or dict mapping labels to ints.
-        Each integer is either -1 or 1.
+        Each integer is either 1 or -1.
 
     Returns
     -------
@@ -78,13 +78,13 @@ def spin_to_binary(z):
 
     Example
     -------
-    >>> spin_to_binary(-1)  # will print 0
-    >>> spin_to_binary(1)  # will print 1
-    >>> spin_to_binary([-1, 1, 1])  # will print [0, 1, 1]
-    >>> spin_to_binary({"a": -1, "b": 1})  # will print {"a": 0, "b": 1}
+    >>> spin_to_binary(-1)  # will print 1
+    >>> spin_to_binary(1)  # will print 0
+    >>> spin_to_binary([-1, 1, 1])  # will print [1, 0, 0]
+    >>> spin_to_binary({"a": -1, "b": 1})  # will print {"a": 1, "b": 0}
 
     """
-    convert = {-1: 0, 1: 1}
+    convert = {-1: 1, 1: 0}
     if isinstance(z, (int, float)) and z in convert:
         return convert[z]
     elif isinstance(z, dict):
@@ -157,7 +157,7 @@ def decimal_to_spin(d, num_spins=None):
     """decimal_to_spin.
 
     Convert the integer ``d`` to its spin representation (ie its binary
-    representation, but with -1 and 1 instead of 0 and 1).
+    representation, but with 1 and -1 instead of 0 and 1).
 
     Parameters
     ----------
@@ -175,10 +175,10 @@ def decimal_to_spin(d, num_spins=None):
     Example
     -------
     >>> decimal_to_spin(10, 7)
-    (-1, -1, -1, 1, -1, 1, -1)
+    (1, 1, 1, -1, 1, -1, 1)
 
     >>> decimal_to_spin(10)
-    (1, -1, 1, -1)
+    (-1, 1, -1, 1)
 
     """
     return binary_to_spin(decimal_to_binary(d, num_spins))
@@ -191,7 +191,7 @@ def spin_to_decimal(b):
 
     Parameters
     ----------
-    b : tuple or list of -1s and 1s.
+    b : tuple or list of 1s and -1s.
         The spin bit string.
 
     Return
@@ -200,7 +200,7 @@ def spin_to_decimal(b):
 
     Examples
     --------
-    >>> spin_to_decimal((1, 1, -1))
+    >>> spin_to_decimal((-1, -1, 1))
     6
 
     """
@@ -281,7 +281,7 @@ def hising_value(z, H):
     Parameters
     ----------
     z: dict or iterable.
-        Maps variable labels to their values, -1 or 1. Ie z[i] must be the
+        Maps variable labels to their values, 1 or -1. Ie z[i] must be the
         value of variable i.
     H : dict, qubovert.utils.HIsingMatrix, or qubovert.HIsing object.
         Maps spin labels to values.
@@ -316,7 +316,7 @@ def ising_value(z, L):
     Parameters
     ----------
     z: dict or iterable.
-        Maps variable labels to their values, -1 or 1. Ie z[i] must be the
+        Maps variable labels to their values, 1 or -1. Ie z[i] must be the
         value of variable i.
     L : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
         Maps spin labels to values.

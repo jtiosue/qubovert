@@ -321,7 +321,7 @@ class HIsing(BO, HIsingMatrix):
         """
         return self._create_pubo().to_qubo(lam)
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=True):
         """convert_solution.
 
         Convert the solution to the integer labeled HIsing to the solution to
@@ -333,10 +333,18 @@ class HIsing(BO, HIsingMatrix):
             The HIsing, HIsing, Ising, or Ising solution output. The HIsing
             solution output is either a list or tuple where indices specify the
             label of the variable and the element specifies whether it's 0 or 1
-            for HIsing (or -1 or 1 for Ising), or it can be a dictionary that
+            for HIsing (or 1 or -1 for Ising), or it can be a dictionary that
             maps the label of the variable to is value. The Ising/Ising
             solution output includes the assignment for the ancilla variables
             used to reduce the degree of the HIsing.
+        spin : bool (optional, defaults to True).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -385,7 +393,7 @@ class HIsing(BO, HIsingMatrix):
         # this works for converting a solution to the pubo, qubo, hising, or
         # ising formulations, since in the to_ising function all ancilla
         # variables are labeled with integers >= self.num_binary_variables.
-        return Ising.convert_solution(self, solution)
+        return Ising.convert_solution(self, solution, spin)
 
     @staticmethod
     def _check_key_valid(key):

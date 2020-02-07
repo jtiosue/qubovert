@@ -19,7 +19,9 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 """
 
 from numpy import log2, allclose
-from qubovert.utils import QUBOMatrix, solve_qubo_bruteforce
+from qubovert.utils import (
+    QUBOMatrix, solve_qubo_bruteforce, solution_type, spin_to_binary
+)
 from qubovert.problems import Problem
 
 
@@ -368,7 +370,7 @@ class SetCover(Problem):
 
         return Q
 
-    def convert_solution(self, solution):
+    def convert_solution(self, solution, spin=False):
         """convert_solution.
 
         Convert the solution to the QUBO or Ising to the solution to the Set
@@ -382,6 +384,14 @@ class SetCover(Problem):
             variable and the element specifies whether it's 0 or 1 for QUBO
             (or -1 or 1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Returns
         -------
@@ -391,9 +401,12 @@ class SetCover(Problem):
             ``V[0]``, ``V[2]``, and ``V[3]``.
 
         """
-        return set(i for i in range(self._N) if solution[i] == 1)
+        sol_type = solution_type(solution)
+        if sol_type == 'spin' or (sol_type is None and spin):
+            solution = spin_to_binary(solution)
+        return set(i for i in range(self._N) if solution[i])
 
-    def is_solution_valid(self, solution):
+    def is_solution_valid(self, solution, spin=False):
         """is_solution_valid.
 
         Returns whether or not the proposed solution covers all the elements in
@@ -406,8 +419,16 @@ class SetCover(Problem):
             or the  QUBO or Ising solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for Ising), or it can be a dictionary that maps the
             label of the variable to is value.
+        spin : bool (optional, defaults to False).
+            `spin` indicates whether ``solution`` is the solution to the
+            binary {0, 1} formulation of the problem or the spin {1, -1}
+            formulation of the problem. This parameter usually does not matter,
+            and it will be ignored if possible. The only time it is used is if
+            ``solution`` contains all 1's. In this case, it is unclear whether
+            ``solution`` came from a spin or binary formulation of the
+            problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
@@ -416,7 +437,7 @@ class SetCover(Problem):
 
         """
         if not isinstance(solution, set):
-            solution = self.convert_solution(solution)
+            solution = self.convert_solution(solution, spin)
 
         covered = set(x for i in solution for x in self._V[i])
         return covered == self._U

@@ -307,3 +307,12 @@ def test_symbols():
     assert d.subs(a, 2) == {(0,): -2, (0, 1): 2, (1,): b}
     assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
+
+
+def test_convert_solution_all_1s():
+
+    d = QUBO({(0,): 1})
+    assert d.convert_solution({0: 0}) == {0: 0}
+    assert d.convert_solution({0: -1}) == {0: 1}
+    assert d.convert_solution({0: 1}) == {0: 1}
+    assert d.convert_solution({0: 1}, True) == {0: 0}

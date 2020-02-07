@@ -743,8 +743,8 @@ class DictArithmetic(dict):
     def simplify(self):
         """simplify.
 
-        If ``self`` has any symbolic expressions, this will go ghrough and
-        simplify them.
+        If ``self`` has any symbolic expressions, this will go through and
+        simplify them. This will also make everything a float!
 
         Return
         ------
@@ -754,6 +754,6 @@ class DictArithmetic(dict):
         # it might be changing size, so convert items to a tuple
         for k, v in tuple(self.items()):
             try:
-                self[k] = v.simplify()
+                self[k] = v.simplify() * 1.  # make everything a float
             except AttributeError:
-                pass
+                self[k] *= 1.  # make it a float

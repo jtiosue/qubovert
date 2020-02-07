@@ -35,7 +35,7 @@ def qubo_to_ising(Q):
     """qubo_to_ising.
 
     Convert the specified QUBO problem into an Ising problem. Note that
-    QUBO {0, 1} values go to Ising {-1, 1} values in that order!
+    QUBO {0, 1} values go to Ising {1, -1} values in that order!
 
     Parameters
     ----------
@@ -65,41 +65,16 @@ def qubo_to_ising(Q):
     True
 
     """
-    # could just use IsingMatrix(pubo_to_hising(Q)), but then we spend a lot of
-    # time converting from a HIsingMatrix to IsingMatrix, so instead we
-    # explictly write out the conversion.
-
     # not isinstance! because isinstance(QUBO, QUBOMatrix) is True
-    if type(Q) == QUBOMatrix:
-        L = IsingMatrix()
-        squash_key = QUBOMatrix.squash_key
-    else:
-        L = qv.Ising()
-        squash_key = qv.QUBO.squash_key
-
-    for kp, v in Q.items():
-        k = squash_key(kp)
-        if not k:
-            L[k] += v
-        elif len(k) == 1:
-            L[k] += v / 2
-            L[()] += v / 2
-        elif len(k) == 2:
-            i, j = k
-            L[k] += v / 4
-            L[(i,)] += v / 4
-            L[(j,)] += v / 4
-            L[()] += v / 4
-        # len(k) cannot be greater than 2 because the squash_key checks
-
-    return L
+    f = IsingMatrix if type(Q) == QUBOMatrix else qv.Ising
+    return f(pubo_to_hising(Q))
 
 
 def ising_to_qubo(L):
     """ising_to_qubo.
 
     Convert the specified Ising problem into an upper triangular QUBO problem.
-    Note that Ising {-1, 1} values go to QUBO {0, 1} values in that order!
+    Note that Ising {1, -1} values go to QUBO {0, 1} values in that order!
 
     Parameters
     ----------
@@ -130,41 +105,16 @@ def ising_to_qubo(L):
     True
 
     """
-    # could just use QUBOMatrix(hising_to_pubo(L)), but then we spend a lot of
-    # time converting from a PUBOMatrix to QUBOMatrix, so instead we explictly
-    # write out the conversion.
-
     # not isinstance! because isinstance(Ising, IsingMatrix) is True
-    if type(L) == IsingMatrix:
-        Q = QUBOMatrix()
-        squash_key = IsingMatrix.squash_key
-    else:
-        Q = qv.QUBO()
-        squash_key = qv.Ising.squash_key
-
-    for kp, v in L.items():
-        k = squash_key(kp)
-        if not k:
-            Q[k] += v
-        elif len(k) == 1:
-            Q[k] += 2 * v
-            Q[()] -= v
-        elif len(k) == 2:
-            i, j = k
-            Q[k] += 4 * v
-            Q[(i,)] -= 2 * v
-            Q[(j,)] -= 2 * v
-            Q[()] += v
-        # squash key ensures that len(k) <= 2
-
-    return Q
+    f = QUBOMatrix if type(L) == IsingMatrix else qv.QUBO
+    return f(hising_to_pubo(L))
 
 
 def pubo_to_hising(P):
     """pubo_to_hising.
 
     Convert the specified PUBO problem into an HIsing problem. Note that
-    PUBO {0, 1} values go to HIsing {-1, 1} values in that order!
+    PUBO {0, 1} values go to HIsing {1, -1} values in that order!
 
     Parameters
     ----------
@@ -200,8 +150,8 @@ def pubo_to_hising(P):
         Recursively generate the PUBO key, value pairs for converting the
         product ``x[k[0]] * ... * x[k[-1]]``, where each ``x`` is a binary
         variable in {0, 1}, to the product
-        ``(z[k[0]]+1)/2 * ... * (z[k[1]]+1)/2``., where each ``z`` is a spin
-        in {-1, 1}.
+        ``(1-z[k[0]])/2 * ... * (1-z[k[1]])/2``., where each ``z`` is a spin
+        in {1, -1}.
 
         Parameters
         ----------
@@ -221,7 +171,7 @@ def pubo_to_hising(P):
             yield k, 1
         else:
             for key, value in generate_new_key_value(k[1:]):
-                yield (k[0],) + key, value / 2
+                yield (k[0],) + key, -value / 2
                 yield key, value / 2
 
     # not isinstance! because isinstance(PUBO, PUBOMatrix) is True
@@ -243,7 +193,7 @@ def hising_to_pubo(H):
     """hising_to_pubo.
 
     Convert the specified HIsing problem into an upper triangular PUBO problem.
-    Note that HIsing {-1, 1} values go to PUBO {0, 1} values in that order!
+    Note that HIsing {1, -1} values go to PUBO {0, 1} values in that order!
 
     Parameters
     ----------
@@ -278,7 +228,7 @@ def hising_to_pubo(H):
 
         Recursively generate the PUBO key, value pairs for converting the
         product ``z[k[0]] * ... * z[k[-1]]``, where each ``z`` is a spin in
-        {-1, 1}, to the product ``(2*x[k[0]]-1) * ... * (2*x[k[1]]-1)``, where
+        {1, -1}, to the product ``(1-2*x[k[0]]) * ... * (1-2*x[k[1]])``, where
         each ``x`` is a binary variables in {0, 1}.
 
         Parameters
@@ -299,8 +249,8 @@ def hising_to_pubo(H):
             yield k, 1
         else:
             for key, value in generate_new_key_value(k[1:]):
-                yield (k[0],) + key, 2 * value
-                yield key, -value
+                yield (k[0],) + key, -2 * value
+                yield key, value
 
     # not isinstance! because isinstance(Ising, IsingMatrix) is True
     if type(H) == HIsingMatrix:

@@ -105,8 +105,8 @@ def test_decimal_to_binary():
 
 def test_decimal_to_spin():
 
-    assert decimal_to_spin(10, 7) == (-1, -1, -1, 1, -1, 1, -1)
-    assert decimal_to_spin(10) == (1, -1, 1, -1)
+    assert decimal_to_spin(10, 7) == (1, 1, 1, -1, 1, -1, 1)
+    assert decimal_to_spin(10) == (-1, 1, -1, 1)
 
 
 def test_binary_to_decimal():
@@ -123,20 +123,20 @@ def test_spin_to_decimal():
 
 def test_binary_to_spin():
 
-    assert binary_to_spin(0) == -1
-    assert binary_to_spin(1) == 1
-    assert binary_to_spin((0, 1)) == (-1, 1)
-    assert binary_to_spin([0, 1]) == [-1, 1]
-    assert binary_to_spin({"a": 0, "b": 1}) == {"a": -1, "b": 1}
+    assert binary_to_spin(0) == 1
+    assert binary_to_spin(1) == -1
+    assert binary_to_spin((0, 1)) == (1, -1)
+    assert binary_to_spin([0, 1]) == [1, -1]
+    assert binary_to_spin({"a": 0, "b": 1}) == {"a": 1, "b": -1}
 
 
 def test_spin_to_binary():
 
-    assert spin_to_binary(-1) == 0
-    assert spin_to_binary(1) == 1
-    assert spin_to_binary((-1, 1)) == (0, 1)
-    assert spin_to_binary([-1, 1]) == [0, 1]
-    assert spin_to_binary({"a": -1, "b": 1}) == {"a": 0, "b": 1}
+    assert spin_to_binary(-1) == 1
+    assert spin_to_binary(1) == 0
+    assert spin_to_binary((-1, 1)) == (1, 0)
+    assert spin_to_binary([-1, 1]) == [1, 0]
+    assert spin_to_binary({"a": -1, "b": 1}) == {"a": 1, "b": 0}
 
 
 def test_matrix_to_qubo():
@@ -168,9 +168,19 @@ def test_qubo_to_matrix():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    ising = {(0,): a, (0, 1): 1, (1,): -a, (1, 2): 1, (): -2*b, (2,): a}
-    assert ising == qubo_to_ising(ising_to_qubo(ising))
+    ising = {(0,): 1.0*a, (0, 1): 1., (1,): -1.0*a,
+             (1, 2): 1., (): -2.*b, (2,): 1.0*a}
+    ising1 = qubo_to_ising(ising_to_qubo(ising))
+    ising1.simplify()
+    ising = Ising(ising)
+    ising.simplify()
+    assert ising == ising1
 
     a, b = Symbol('a'), Symbol('b')
-    qubo = {(0,): a, (0, 1): 1, (1,): -a, (1, 2): 1, (): -2*b, (2,): a}
-    assert qubo == ising_to_qubo(qubo_to_ising(qubo))
+    qubo = {(0,): 1.0*a, (0, 1): 1., (1,): -1.0*a,
+            (1, 2): 1., (): -2.0*b, (2,): 1.0*a}
+    qubo1 = ising_to_qubo(qubo_to_ising(qubo))
+    qubo1.simplify()
+    qubo = QUBO(qubo)
+    qubo.simplify()
+    assert qubo == qubo1

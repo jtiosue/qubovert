@@ -55,7 +55,7 @@ def test_solve_ising_bruteforce():
     assert (
         solve_ising_bruteforce(L, True)
         ==
-        (1, [{0: -1, 1: -1}, {0: -1, 1: 1}, {0: 1, 1: 1}])
+        (1, [{0: 1, 1: 1}, {0: -1, 1: 1}, {0: -1, 1: -1}])
     )
 
 
@@ -100,7 +100,7 @@ def test_solve_hising_bruteforce():
     assert (
         solve_hising_bruteforce(H, True)
         ==
-        (-3, [{0: -1, 1: -1, 3: 1, 4: 1, 5: 1},
+        (-3, [{0: 1, 1: 1, 3: 1, 4: 1, 5: 1},
               {0: -1, 1: 1, 3: 1, 4: 1, 5: 1},
-              {0: 1, 1: 1, 3: 1, 4: 1, 5: 1}])
+              {0: -1, 1: -1, 3: 1, 4: 1, 5: 1}])
     )

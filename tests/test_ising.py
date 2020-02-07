@@ -33,7 +33,7 @@ solution = {'c': -1, 'b': -1, 'a': -1}
 def test_ising_qubo_solve():
 
     e, sols = solve_qubo_bruteforce(problem.to_qubo())
-    sol = problem.convert_solution(sols)
+    sol = problem.convert_solution(sols, False)
     assert problem.is_solution_valid(sol)
     assert problem.is_solution_valid(sols)
     assert sol == solution
@@ -316,3 +316,12 @@ def test_symbols():
     assert d.subs(a, 2) == {(0,): -2, (0, 1): 2, (1,): b}
     assert d.subs(b, 1) == {(0,): -a, (0, 1): 2, (1,): 1}
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
+
+
+def test_convert_solution_all_1s():
+
+    d = Ising({(0,): 1})
+    assert d.convert_solution({0: 0}) == {0: 1}
+    assert d.convert_solution({0: -1}) == {0: -1}
+    assert d.convert_solution({0: 1}) == {0: 1}
+    assert d.convert_solution({0: 1}, False) == {0: -1}

@@ -317,7 +317,7 @@ We implement various utility functions, including
 - ``hising_to_pubo``,
 - ``subgraph``,
 
-and more.
+and more. Please note that all conversions between binary and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
 
 
 Converting SAT problems (the ``sat`` library)

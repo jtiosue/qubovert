@@ -22,7 +22,7 @@ from numpy import allclose
 from numpy.testing import assert_raises
 
 
-def test_qubo_checkkey():
+def test_checkkey():
 
     with assert_raises(KeyError):
         IsingMatrix({('a',): -1})
@@ -271,5 +271,5 @@ def test_isingmatrix_solve_bruteforce():
 
     L = IsingMatrix({(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25})
     sols = L.solve_bruteforce(True)
-    assert sols == [{0: -1, 1: -1}, {0: -1, 1: 1}, {0: 1, 1: 1}]
+    assert sols == [{0: 1, 1: 1}, {0: -1, 1: 1}, {0: -1, 1: -1}]
     assert all(allclose(L.value(s), 1) for s in sols)
