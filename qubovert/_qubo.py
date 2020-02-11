@@ -18,7 +18,7 @@ Contains the QUBO class. See ``help(qubovert.QUBO)``.
 
 """
 
-from .utils import BO, QUBOMatrix, solution_type, spin_to_binary
+from .utils import BO, QUBOMatrix, PUBOMatrix, solution_type, spin_to_binary
 
 
 __all__ = 'QUBO',
@@ -159,6 +159,23 @@ class QUBO(BO, QUBOMatrix):
             Q[key] += v
 
         return Q
+
+    def to_pubo(self):
+        """to_pubo.
+
+        Since the model is already a QUBO, ``self.to_pubo`` will simply
+        return ``qubovert.utils.PUBOMatrix(self.to_qubo())``.
+
+        Return
+        ------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        return PUBOMatrix(self.to_qubo())
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.

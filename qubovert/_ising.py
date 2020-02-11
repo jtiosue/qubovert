@@ -18,7 +18,7 @@ Contains the Ising class. See ``help(qubovert.Ising)``.
 
 """
 
-from .utils import BO, IsingMatrix, solution_type, binary_to_spin
+from .utils import BO, IsingMatrix, HIsingMatrix, solution_type, binary_to_spin
 
 
 __all__ = 'Ising',
@@ -159,6 +159,23 @@ class Ising(BO, IsingMatrix):
             L[key] += v
 
         return L
+
+    def to_hising(self):
+        """to_hising.
+
+        Since the model is already a Ising, ``self.to_hising`` will simply
+        return ``qubovert.utils.HIsingMatrix(self.to_ising())``.
+
+        Return
+        -------
+        H : qubovert.utils.HIsingMatrix object.
+            The upper triangular HIsing matrix, a HIsingMatrix object.
+            For most practical purposes, you can use HIsingMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.HIsingMatrix)``.
+
+        """
+        return HIsingMatrix(self.to_ising())
 
     def convert_solution(self, solution, spin=True):
         """convert_solution.
