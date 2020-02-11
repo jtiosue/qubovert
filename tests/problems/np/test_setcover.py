@@ -17,7 +17,10 @@ Contains tests for the SetCover class.
 """
 
 from qubovert.problems import SetCover
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce
+)
 from numpy import allclose
 
 
@@ -137,3 +140,27 @@ def test_setcover_ising_numvars():
 
     L = problem.to_ising()
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_setcover_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution == {0, 2}
+    assert allclose(e, len(solution))
+
+
+# hising
+
+def test_setcover_hising_solve():
+
+    e, sol = solve_hising_bruteforce(problem.to_hising())
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution == {0, 2}
+    assert allclose(e, len(solution))

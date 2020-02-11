@@ -19,7 +19,7 @@ the problem classes.
 
 """
 
-from qubovert.utils import Conversions
+from qubovert.utils import Conversions, PUBOMatrix
 
 
 __all__ = 'Problem',
@@ -247,3 +247,20 @@ class Problem(Conversions):
         if all_solutions:
             return [self.convert_solution(x) for x in sol]
         return self.convert_solution(sol)
+
+    def to_pubo(self, *args, **kwargs):
+        """to_pubo.
+
+        Since the model is already degree two, ``self.to_pubo`` will simply
+        return ``qubovert.utils.PUBOMatrix(self.to_qubo(*args, **kwargs))``.
+
+        Return
+        ------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        return PUBOMatrix(self.to_qubo(*args, **kwargs))

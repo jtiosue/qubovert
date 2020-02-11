@@ -17,7 +17,10 @@ Contains tests for the BILP class.
 """
 
 from qubovert.problems import BILP
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce
+)
 from numpy import allclose
 from numpy.testing import assert_raises
 
@@ -95,3 +98,29 @@ def test_bilp_ising_numvars():
 
     L = problem.to_ising()
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_bilp_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    conv_solution = problem.convert_solution(sol)
+
+    assert allclose(conv_solution, solution)
+    assert problem.is_solution_valid(conv_solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, 2)
+
+
+# hising
+
+def test_bilp_hising_solve():
+
+    e, sol = solve_hising_bruteforce(problem.to_hising())
+    conv_solution = problem.convert_solution(sol)
+
+    assert allclose(conv_solution, solution)
+    assert problem.is_solution_valid(conv_solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, 2)

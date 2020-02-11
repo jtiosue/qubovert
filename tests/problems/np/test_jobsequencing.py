@@ -17,7 +17,10 @@ Contains tests for the JobSequencing class.
 """
 
 from qubovert.problems import JobSequencing
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce
+)
 from numpy import allclose
 
 
@@ -29,6 +32,8 @@ Q = problem.to_qubo()
 Q_log = problem_log.to_qubo()
 L = problem.to_ising()
 L_log = problem_log.to_ising()
+P = problem.to_pubo()
+H = problem.to_hising()
 
 solutions = ({'job1', 'job3'}, {'job2'}), ({'job2'}, {'job1', 'job3'})
 obj_val = 3
@@ -137,3 +142,27 @@ def test_jobsequencing_ising_logtrick_numvars():
 def test_jobsequencing_ising_numvars():
 
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_jobsequencing_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(P)
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution in solutions
+    assert allclose(e, obj_val)
+
+
+# hising
+
+def test_jobsequencing_hising_solve():
+
+    e, sol = solve_hising_bruteforce(H)
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution in solutions
+    assert allclose(e, obj_val)

@@ -17,7 +17,10 @@ Contains tests for the NumberPartitioning class.
 """
 
 from qubovert.problems import NumberPartitioning
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_ising_bruteforce,
+    solve_pubo_bruteforce, solve_hising_bruteforce
+)
 from numpy import allclose
 from numpy.testing import assert_raises
 
@@ -126,3 +129,46 @@ def test_numberpartitioning_ising_numvars():
 
     L = problem_withoutsoln.to_ising()
     assert L.num_binary_variables == problem_withoutsoln.num_binary_variables
+
+
+# PUBO
+
+def test_numberpartitioning_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem_withsoln.to_pubo())
+    solution = problem_withsoln.convert_solution(sol)
+
+    assert solution in solutions_withsoln
+    assert problem_withsoln.is_solution_valid(solution)
+    assert problem_withsoln.is_solution_valid(sol)
+    assert allclose(e, 0)
+
+    e, sol = solve_pubo_bruteforce(problem_withoutsoln.to_pubo())
+    solution = problem_withoutsoln.convert_solution(sol)
+
+    assert solution in solutions_withoutsoln
+    assert not problem_withoutsoln.is_solution_valid(solution)
+    assert not problem_withoutsoln.is_solution_valid(sol)
+    assert e != 0
+
+
+# hising
+
+
+def test_numberpartitioning_hising_solve():
+
+    e, sol = solve_hising_bruteforce(problem_withsoln.to_hising())
+    solution = problem_withsoln.convert_solution(sol)
+
+    assert solution in solutions_withsoln
+    assert problem_withsoln.is_solution_valid(solution)
+    assert problem_withsoln.is_solution_valid(sol)
+    assert allclose(e, 0)
+
+    e, sol = solve_hising_bruteforce(problem_withoutsoln.to_hising())
+    solution = problem_withoutsoln.convert_solution(sol)
+
+    assert solution in solutions_withoutsoln
+    assert not problem_withoutsoln.is_solution_valid(solution)
+    assert not problem_withoutsoln.is_solution_valid(sol)
+    assert e != 0
