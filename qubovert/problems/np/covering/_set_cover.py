@@ -20,7 +20,7 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 
 from numpy import log2, allclose
 from qubovert.utils import (
-    QUBOMatrix, solve_qubo_bruteforce, solution_type, spin_to_binary
+    QUBOMatrix, solve_qubo_bruteforce, solution_type, spin_to_boolean
 )
 from qubovert.problems import Problem
 
@@ -386,11 +386,11 @@ class SetCover(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Returns
@@ -403,7 +403,7 @@ class SetCover(Problem):
         """
         sol_type = solution_type(solution)
         if sol_type == 'spin' or (sol_type is None and spin):
-            solution = spin_to_binary(solution)
+            solution = spin_to_boolean(solution)
         return set(i for i in range(self._N) if solution[i])
 
     def is_solution_valid(self, solution, spin=False):
@@ -423,11 +423,11 @@ class SetCover(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -495,7 +495,7 @@ class SetCover(Problem):
 #        best = None
 #        all_sols = {}
 #        for x in range(1 << self._N):
-#            sol = decimal_to_binary(x, self._N)
+#            sol = decimal_to_boolean(x, self._N)
 #            cover = self.convert_solution(sol)
 #            if self.is_solution_valid(cover):
 #                if not all_solutions and (best is None or

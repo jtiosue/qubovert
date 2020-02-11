@@ -20,15 +20,15 @@ Conversions
 
 .. autofunction:: qubovert.utils.qubo_to_matrix
 
-.. autofunction:: qubovert.utils.binary_to_spin
+.. autofunction:: qubovert.utils.boolean_to_spin
 
-.. autofunction:: qubovert.utils.spin_to_binary
+.. autofunction:: qubovert.utils.spin_to_boolean
 
-.. autofunction:: qubovert.utils.decimal_to_binary
+.. autofunction:: qubovert.utils.decimal_to_boolean
 
 .. autofunction:: qubovert.utils.decimal_to_spin
 
-.. autofunction:: qubovert.utils.binary_to_decimal
+.. autofunction:: qubovert.utils.boolean_to_decimal
 
 .. autofunction:: qubovert.utils.spin_to_decimal
 

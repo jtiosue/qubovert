@@ -21,7 +21,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 # from qubovert.utils import QUBOMatrix
 from qubovert import HOBO
 from qubovert.problems import Problem
-from qubovert.utils import solution_type, spin_to_binary
+from qubovert.utils import solution_type, spin_to_boolean
 
 
 __all__ = 'VertexCover',
@@ -221,11 +221,11 @@ class VertexCover(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -240,7 +240,7 @@ class VertexCover(Problem):
             solution = dict(enumerate(solution))
         sol_type = solution_type(solution)
         if sol_type == 'spin' or (sol_type is None and spin):
-            solution = spin_to_binary(solution)
+            solution = spin_to_boolean(solution)
         return set(
             self._index_to_vertex[i] for i, x in solution.items() if x
         )
@@ -262,11 +262,11 @@ class VertexCover(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return

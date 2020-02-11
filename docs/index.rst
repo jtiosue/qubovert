@@ -14,7 +14,7 @@ Indices and tables
 
 .. toctree::
    :maxdepth: 2
-   :caption: Binary/Ising Optimization
+   :caption: Boolean/Ising Optimization
 
    BO/HOBO
    BO/HOIO

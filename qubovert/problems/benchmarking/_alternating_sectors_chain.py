@@ -18,7 +18,7 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import IsingMatrix, binary_to_spin, solution_type
+from qubovert.utils import IsingMatrix, boolean_to_spin, solution_type
 from qubovert.problems import Problem
 
 
@@ -32,7 +32,7 @@ class AlternatingSectorsChain(Problem):
     and Ising formluations.
 
     The Alternating Sectors Chain problem has a solution for which
-    all the binary variable or spins are equal. It is a trivial problem,
+    all the boolean variables or spins are equal. It is a trivial problem,
     but useful for benchmarking some solvers or solving techniques.
 
     AlternatingSectorsChain inherits some methods and attributes from the
@@ -63,7 +63,7 @@ class AlternatingSectorsChain(Problem):
         """__init__.
 
         The Alternating Sectors Chain problem has a solution for which
-        all the binary variable or spins are equal. It is a trivial problem,
+        all the boolean variables or spins are equal. It is a trivial problem,
         but useful for benchmarking some solvers or solving techniques.
 
         Parameters
@@ -180,11 +180,11 @@ class AlternatingSectorsChain(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -204,8 +204,8 @@ class AlternatingSectorsChain(Problem):
         if isinstance(solution, dict):
             solution = tuple(v for _, v in sorted(solution.items()))
         sol_type = solution_type(solution)
-        if sol_type == 'bin' or (sol_type is None and not spin):
-            return binary_to_spin(solution)
+        if sol_type == 'bool' or (sol_type is None and not spin):
+            return boolean_to_spin(solution)
         return solution
 
     def is_solution_valid(self, solution, spin=False):
@@ -226,11 +226,11 @@ class AlternatingSectorsChain(Problem):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return

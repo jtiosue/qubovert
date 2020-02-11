@@ -98,11 +98,11 @@ Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
 
 See ``qubovert.__all__``.
 
-- QUBO: Quadratic Unconstrained Binary Optimization
+- QUBO: Quadratic Unconstrained Boolean Optimization
 - Ising: quadratic unconstrained spin-1/2 Hamiltonian
-- PUBO: Polynomial Unconstrained Binary Optimization
+- PUBO: Polynomial Unconstrained Boolean Optimization
 - HIsing: Higher order unconstrained spin-1/2 Hamiltonian
-- HOBO: Higher Order Binary Optimization
+- HOBO: Higher Order Boolean Optimization
 - HOIO: Higher Order Ising Optimization
 
 See the docstrings for ``qubovert.HOBO``, ``qubovert.HOIO``, ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
@@ -124,25 +124,25 @@ See the following HOBO examples (much of the same functionality can be used with
 
 .. code:: python
 
-    from qubovert import binary_var
+    from qubovert import boolean_var
 
-    x0, x1, x2 = binary_var("x0"), binary_var("x1"), binary_var("x2")
+    x0, x1, x2 = boolean_var("x0"), boolean_var("x1"), boolean_var("x2")
     H = x0 + 2 * x1 * x2 - 3 + x2
     print(H)
     # {('x0',): 1, ('x1', 'x2'): 2, (): -3, ('x2',): 1}
 
 
-Note that for large problems, it is slower to use the `binary_var` functionality. For example, consider the following where creating `H0` is much faster than creating `H1`!
+Note that for large problems, it is slower to use the `boolean_var` functionality. For example, consider the following where creating `H0` is much faster than creating `H1`!
 
 .. code:: python
 
-    from qubovert import binary_var, HOBO
+    from qubovert import boolean_var, HOBO
 
     H0 = HOBO()
     for i in range(1000):
         H0[(i,)] += 1
 
-    xs = [binary_var(i) for i in range(1000)]
+    xs = [boolean_var(i) for i in range(1000)]
     H1 = sum(xs)
 
 
@@ -317,7 +317,7 @@ We implement various utility functions, including
 - ``hising_to_pubo``,
 - ``subgraph``,
 
-and more. Please note that all conversions between binary and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
+and more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
 
 
 Converting SAT problems (the ``sat`` library)

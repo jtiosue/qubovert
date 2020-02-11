@@ -18,7 +18,7 @@ Contains the QUBO class. See ``help(qubovert.QUBO)``.
 
 """
 
-from .utils import BO, QUBOMatrix, PUBOMatrix, solution_type, spin_to_binary
+from .utils import BO, QUBOMatrix, PUBOMatrix, solution_type, spin_to_boolean
 
 
 __all__ = 'QUBO',
@@ -30,7 +30,7 @@ class QUBO(BO, QUBOMatrix):
     Class to manage converting general QUBO problems to and from their
     QUBO and Ising formluations.
 
-    This class deals with QUBOs that have binary labels that do not range from
+    This class deals with QUBOs that have boolean labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
     ``qubovert.utils.QUBOMatrix``. Note that it is generally
     more efficient to initialize an empty QUBO object and then build the
@@ -108,7 +108,7 @@ class QUBO(BO, QUBOMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with QUBOs that have binary labels that do not range
+        This class deals with QUBOs that have boolean labels that do not range
         from 0 to n-1. If your labels are nonnegative integers, consider using
         ``qubovert.utils.QUBOMatrix``. Note that it is generally more efficient
         to initialize an empty QUBO object and then build the QUBO, rather than
@@ -193,17 +193,17 @@ class QUBO(BO, QUBOMatrix):
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
         res : dict.
-            Maps binary variable labels to their QUBO solutions values {0, 1}.
+            Maps boolean variable labels to their QUBO solutions values {0, 1}.
 
         Example
         -------
@@ -230,7 +230,7 @@ class QUBO(BO, QUBOMatrix):
         """
         sol_type = solution_type(solution)
         if sol_type == 'spin' or (sol_type is None and spin):
-            solution = spin_to_binary(solution)
+            solution = spin_to_boolean(solution)
         return {
             self._reverse_mapping[i]: solution[i]
             for i in range(self.num_binary_variables)

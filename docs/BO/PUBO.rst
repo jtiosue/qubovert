@@ -1,4 +1,4 @@
-Polynomial Unconstrained Binary Optimization (PUBO)
+Polynomial Unconstrained Boolean Optimization (PUBO)
 ===================================================
 
 Accessed with ``qubovert.PUBO``

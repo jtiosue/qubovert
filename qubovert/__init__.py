@@ -14,7 +14,7 @@
 
 """``qubovert`` is a module for converting problems into QUBO/Ising form.
 
-QUBO stands for Quadratic Unconstrained Binary Optimization. QUBO problems
+QUBO stands for Quadratic Unconstrained Boolean Optimization. QUBO problems
 have a one-to-one mapping to classical Ising problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
 See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
@@ -53,7 +53,7 @@ __all__ = (
 from . import sat
 from . import problems
 
-BINARY_MODELS = QUBO, PUBO, HOBO, utils.QUBOMatrix, utils.PUBOMatrix
+BOOLEAN_MODELS = QUBO, PUBO, HOBO, utils.QUBOMatrix, utils.PUBOMatrix
 SPIN_MODELS = Ising, HIsing, HOIO, utils.IsingMatrix, utils.HIsingMatrix
 
 name = "qubovert"

@@ -40,7 +40,7 @@ def qubo_to_ising(Q):
     Parameters
     ----------
     Q : dictionary, qubovert.QUBO, or qubovert.utils.QUBOMatrix object.
-        Maps tuples of binary variables indices to the Q value. See
+        Maps tuples of boolean variables indices to the Q value. See
         ``help(qubovert.QUBO)`` and ``help(qubovert.utils.QUBOMatrix)`` for
         info on formatting.
 
@@ -119,7 +119,7 @@ def pubo_to_hising(P):
     Parameters
     ----------
     P : dictionary, qubovert.PUBO, or qubovert.utils.PUBOMatrix object.
-        Maps tuples of binary variables indices to the P value. See
+        Maps tuples of boolean variables indices to the P value. See
         ``help(qubovert.PUBO)`` and ``help(qubovert.utils.PUBOMatrix)`` for
         info on formatting.
 
@@ -148,7 +148,7 @@ def pubo_to_hising(P):
         """generate_new_key_value.
 
         Recursively generate the PUBO key, value pairs for converting the
-        product ``x[k[0]] * ... * x[k[-1]]``, where each ``x`` is a binary
+        product ``x[k[0]] * ... * x[k[-1]]``, where each ``x`` is a boolean
         variable in {0, 1}, to the product
         ``(1-z[k[0]])/2 * ... * (1-z[k[1]])/2``., where each ``z`` is a spin
         in {1, -1}.
@@ -156,7 +156,7 @@ def pubo_to_hising(P):
         Parameters
         ----------
         k : tuple.
-            Each element of the tuple corresponds to a binary label.
+            Each element of the tuple corresponds to a boolean label.
 
         Yields
         ------
@@ -229,7 +229,7 @@ def hising_to_pubo(H):
         Recursively generate the PUBO key, value pairs for converting the
         product ``z[k[0]] * ... * z[k[-1]]``, where each ``z`` is a spin in
         {1, -1}, to the product ``(1-2*x[k[0]]) * ... * (1-2*x[k[1]])``, where
-        each ``x`` is a binary variables in {0, 1}.
+        each ``x`` is a boolean variables in {0, 1}.
 
         Parameters
         ----------

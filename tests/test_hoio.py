@@ -20,7 +20,7 @@ from qubovert import HOIO, spin_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
-    hising_value, pubo_to_hising, binary_to_spin,
+    hising_value, pubo_to_hising, boolean_to_spin,
     QUBOVertWarning
 )
 from sympy import Symbol
@@ -398,7 +398,7 @@ def test_hoio_eq_constraint():
         pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): -1}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -461,7 +461,7 @@ def test_hoio_lt_constraint_logtrick():
         pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -509,7 +509,7 @@ def test_hoio_lt_constraint():
         pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -560,7 +560,7 @@ def test_hoio_le_constraint_logtrick():
         ),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -611,7 +611,7 @@ def test_hoio_le_constraint():
         ),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -659,7 +659,7 @@ def test_hoio_gt_constraint_logtrick():
         pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -707,7 +707,7 @@ def test_hoio_gt_constraint():
         pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -758,7 +758,7 @@ def test_hoio_ge_constraint_logtrick():
         ),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -809,7 +809,7 @@ def test_hoio_ge_constraint():
         ),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)

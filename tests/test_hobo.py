@@ -16,11 +16,11 @@
 Contains tests for the HOBO class.
 """
 
-from qubovert import HOBO, binary_var, integer_var
+from qubovert import HOBO, boolean_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_ising_bruteforce,
     solve_pubo_bruteforce, solve_hising_bruteforce,
-    pubo_value, decimal_to_binary, QUBOVertWarning
+    pubo_value, decimal_to_boolean, QUBOVertWarning
 )
 from sympy import Symbol
 from numpy import allclose
@@ -370,9 +370,9 @@ def test_convert_solution_all_1s():
     assert d.convert_solution({0: 1}, True) == {0: 0}
 
 
-def test_binary_var():
+def test_boolean_var():
 
-    x = [binary_var(i) for i in range(5)]
+    x = [boolean_var(i) for i in range(5)]
     assert all(x[i] == {(i,): 1} for i in range(5))
     assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
     assert sum(x) == {(i,): 1 for i in range(5)}
@@ -929,7 +929,7 @@ def test_hobo_logic():
         assert (not any(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not any(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -943,7 +943,7 @@ def test_hobo_logic():
         assert (not any(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_NOR(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not any(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -958,7 +958,7 @@ def test_hobo_logic():
         assert any(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if any(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -972,7 +972,7 @@ def test_hobo_logic():
         assert any(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_OR(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if any(sol[i] for i in range(1, 3)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -987,7 +987,7 @@ def test_hobo_logic():
         assert (not all(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not all(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1001,7 +1001,7 @@ def test_hobo_logic():
         assert (not all(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_NAND(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not all(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1016,7 +1016,7 @@ def test_hobo_logic():
         assert all(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if all(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1030,7 +1030,7 @@ def test_hobo_logic():
         assert all(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_AND(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if all(sol[i] for i in range(1, 3)) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1045,7 +1045,7 @@ def test_hobo_logic():
         assert sum(sol[i] for i in range(1, 6)) % 2 == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if sum(sol[i] for i in range(1, 6)) % 2 == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1059,7 +1059,7 @@ def test_hobo_logic():
         assert sum(sol[i] for i in range(1, 3)) % 2 == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_XOR(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if sum(sol[i] for i in range(1, 3)) % 2 == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1074,7 +1074,7 @@ def test_hobo_logic():
         assert (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1088,7 +1088,7 @@ def test_hobo_logic():
         assert (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]
         assert not H.value(sol)
     H = HOBO().add_constraint_eq_XNOR(0, 1, 2)
-    for sol in (decimal_to_binary(i, 3) for i in range(1 << 3)):
+    for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1103,7 +1103,7 @@ def test_hobo_logic():
         assert not any(sol[i] for i in range(6))
         assert not H.value(sol)
     H = HOBO().add_constraint_NOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not any(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1117,7 +1117,7 @@ def test_hobo_logic():
         assert not any(sol[i] for i in range(2))
         assert not H.value(sol)
     H = HOBO().add_constraint_NOR(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not any(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1132,7 +1132,7 @@ def test_hobo_logic():
         assert any(sol[i] for i in range(6))
         assert not H.value(sol)
     H = HOBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if any(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1146,7 +1146,7 @@ def test_hobo_logic():
         assert any(sol[i] for i in range(2))
         assert not H.value(sol)
     H = HOBO().add_constraint_OR(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if any(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1161,7 +1161,7 @@ def test_hobo_logic():
         assert not all(sol[i] for i in range(6))
         assert not H.value(sol)
     H = HOBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not all(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1175,7 +1175,7 @@ def test_hobo_logic():
         assert not all(sol[i] for i in range(2))
         assert not H.value(sol)
     H = HOBO().add_constraint_NAND(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not all(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1190,7 +1190,7 @@ def test_hobo_logic():
         assert all(sol[i] for i in range(6))
         assert not H.value(sol)
     H = HOBO().add_constraint_AND(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if all(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1204,7 +1204,7 @@ def test_hobo_logic():
         assert all(sol[i] for i in range(2))
         assert not H.value(sol)
     H = HOBO().add_constraint_AND(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if all(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1219,7 +1219,7 @@ def test_hobo_logic():
         assert sum(sol[i] for i in range(6)) % 2
         assert not H.value(sol)
     H = HOBO().add_constraint_XOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if sum(sol[i] for i in range(6)) % 2:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1233,7 +1233,7 @@ def test_hobo_logic():
         assert sum(sol[i] for i in range(2)) % 2
         assert not H.value(sol)
     H = HOBO().add_constraint_XOR(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if sum(sol[i] for i in range(2)) % 2:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1248,7 +1248,7 @@ def test_hobo_logic():
         assert not sum(sol[i] for i in range(6)) % 2
         assert not H.value(sol)
     H = HOBO().add_constraint_XNOR(0, 1, 2, 3, 4, 5)
-    for sol in (decimal_to_binary(i, 6) for i in range(1 << 6)):
+    for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not sum(sol[i] for i in range(6)) % 2:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1262,7 +1262,7 @@ def test_hobo_logic():
         assert not sum(sol[i] for i in range(2)) % 2
         assert not H.value(sol)
     H = HOBO().add_constraint_XNOR(0, 1)
-    for sol in (decimal_to_binary(i, 2) for i in range(1 << 2)):
+    for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not sum(sol[i] for i in range(2)) % 2:
             assert H.is_solution_valid(sol)
             assert not H.value(sol)
@@ -1300,7 +1300,7 @@ def test_hobo_special_constraint_le():
 
 def test_hobo_special_constraint_eq():
 
-    x, y, z = binary_var('x'), binary_var('y'), binary_var('z')
+    x, y, z = boolean_var('x'), boolean_var('y'), boolean_var('z')
     H1 = HOBO().add_constraint_eq_zero(z - x * y)
     H2 = HOBO().add_constraint_eq_zero(x * y - z)
     H3 = HOBO().add_constraint_eq_AND(z, x, y)

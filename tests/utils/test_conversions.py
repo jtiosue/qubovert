@@ -18,8 +18,8 @@ Contains tests for the QUBO/PUBO to/from Ising/HIsing functions.
 
 from qubovert.utils import (
     qubo_to_ising, ising_to_qubo, pubo_to_hising, hising_to_pubo,
-    binary_to_spin, spin_to_binary, decimal_to_binary, decimal_to_spin,
-    qubo_to_matrix, matrix_to_qubo, binary_to_decimal, spin_to_decimal
+    boolean_to_spin, spin_to_boolean, decimal_to_boolean, decimal_to_spin,
+    qubo_to_matrix, matrix_to_qubo, boolean_to_decimal, spin_to_decimal
 )
 from qubovert import QUBO, Ising, PUBO, HIsing
 from sympy import Symbol
@@ -91,16 +91,16 @@ def test_ising_to_qubo_eq_hising_to_pubo():
     assert ising_to_qubo(ising) == hising_to_pubo(ising)
 
 
-def test_decimal_to_binary():
+def test_decimal_to_boolean():
 
-    assert decimal_to_binary(10, 7) == (0, 0, 0, 1, 0, 1, 0)
-    assert decimal_to_binary(10) == (1, 0, 1, 0)
-
-    with assert_raises(ValueError):
-        decimal_to_binary(.5)
+    assert decimal_to_boolean(10, 7) == (0, 0, 0, 1, 0, 1, 0)
+    assert decimal_to_boolean(10) == (1, 0, 1, 0)
 
     with assert_raises(ValueError):
-        decimal_to_binary(1000, 2)
+        decimal_to_boolean(.5)
+
+    with assert_raises(ValueError):
+        decimal_to_boolean(1000, 2)
 
 
 def test_decimal_to_spin():
@@ -109,10 +109,10 @@ def test_decimal_to_spin():
     assert decimal_to_spin(10) == (-1, 1, -1, 1)
 
 
-def test_binary_to_decimal():
+def test_boolean_to_decimal():
 
     for i in range(8):
-        assert i == binary_to_decimal(decimal_to_binary(i))
+        assert i == boolean_to_decimal(decimal_to_boolean(i))
 
 
 def test_spin_to_decimal():
@@ -121,22 +121,22 @@ def test_spin_to_decimal():
         assert i == spin_to_decimal(decimal_to_spin(i))
 
 
-def test_binary_to_spin():
+def test_boolean_to_spin():
 
-    assert binary_to_spin(0) == 1
-    assert binary_to_spin(1) == -1
-    assert binary_to_spin((0, 1)) == (1, -1)
-    assert binary_to_spin([0, 1]) == [1, -1]
-    assert binary_to_spin({"a": 0, "b": 1}) == {"a": 1, "b": -1}
+    assert boolean_to_spin(0) == 1
+    assert boolean_to_spin(1) == -1
+    assert boolean_to_spin((0, 1)) == (1, -1)
+    assert boolean_to_spin([0, 1]) == [1, -1]
+    assert boolean_to_spin({"a": 0, "b": 1}) == {"a": 1, "b": -1}
 
 
-def test_spin_to_binary():
+def test_spin_to_boolean():
 
-    assert spin_to_binary(-1) == 1
-    assert spin_to_binary(1) == 0
-    assert spin_to_binary((-1, 1)) == (1, 0)
-    assert spin_to_binary([-1, 1]) == [1, 0]
-    assert spin_to_binary({"a": -1, "b": 1}) == {"a": 1, "b": 0}
+    assert spin_to_boolean(-1) == 1
+    assert spin_to_boolean(1) == 0
+    assert spin_to_boolean((-1, 1)) == (1, 0)
+    assert spin_to_boolean([-1, 1]) == [1, 0]
+    assert spin_to_boolean({"a": -1, "b": 1}) == {"a": 1, "b": 0}
 
 
 def test_matrix_to_qubo():

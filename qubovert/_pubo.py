@@ -41,7 +41,7 @@ class PUBO(BO, PUBOMatrix):
     converting a solution to the problem with ancilla variables back to the
     solution to the original problem.
 
-    This class deals with PUBOs that have binary labels that do not range from
+    This class deals with PUBOs that have boolean labels that do not range from
     0 to n-1. Note that it is generally
     more efficient to initialize an empty PUBO object and then build the
     PUBO, rather than initialize a PUBO object with an already built dict.
@@ -130,7 +130,7 @@ class PUBO(BO, PUBOMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with PUBOs that have binary labels that do not range
+        This class deals with PUBOs that have boolean labels that do not range
         from 0 to n-1. Note that it is generally more efficient
         to initialize an empty PUBO object and then build the PUBO, rather than
         initialize a PUBO object with an already built dict.
@@ -415,17 +415,17 @@ class PUBO(BO, PUBOMatrix):
             the degree of the PUBO.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
         res : dict.
-            Maps binary variable labels to their PUBO solutions values {0, 1}.
+            Maps boolean variable labels to their PUBO solutions values {0, 1}.
 
         Example
         -------

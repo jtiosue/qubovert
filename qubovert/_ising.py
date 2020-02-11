@@ -18,7 +18,9 @@ Contains the Ising class. See ``help(qubovert.Ising)``.
 
 """
 
-from .utils import BO, IsingMatrix, HIsingMatrix, solution_type, binary_to_spin
+from .utils import (
+    BO, IsingMatrix, HIsingMatrix, solution_type, boolean_to_spin
+)
 
 
 __all__ = 'Ising',
@@ -30,7 +32,7 @@ class Ising(BO, IsingMatrix):
     Class to manage converting general Ising problems to and from their
     QUBO and Ising formluations.
 
-    This class deals with Isings that have binary labels that do not range from
+    This class deals with Isings that have spin labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
     ``qubovert.utils.IsingMatrix``. Note that it is generally
     more efficient to initialize an empty Ising object and then build the
@@ -108,7 +110,7 @@ class Ising(BO, IsingMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with Isings that have binary labels that do not range
+        This class deals with Isings that have spin labels that do not range
         from 0 to n-1. If your labels are nonnegative integers, consider using
         ``qubovert.utils.IsingMatrix``. Note that it is generally more
         efficient to initialize an empty Ising object and then build the Ising,
@@ -193,17 +195,17 @@ class Ising(BO, IsingMatrix):
             label of the variable to is value.
         spin : bool (optional, defaults to True).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
         res : dict.
-            Maps binary variable labels to their Ising solutions values {0, 1}.
+            Maps spin variable labels to their Ising solutions values {1, -1}.
 
         Example
         -------
@@ -229,8 +231,8 @@ class Ising(BO, IsingMatrix):
 
         """
         sol_type = solution_type(solution)
-        if sol_type == 'bin' or (sol_type is None and not spin):
-            solution = binary_to_spin(solution)
+        if sol_type == 'bool' or (sol_type is None and not spin):
+            solution = boolean_to_spin(solution)
         return {
             self._reverse_mapping[i]: solution[i]
             for i in range(self.num_binary_variables)

@@ -15,7 +15,7 @@
 """_solution_type.py.
 
 This file contains the function ``solution_type`` which takes in a solution and
-determines if it is known whether the solution came from a binary or spin
+determines if it is known whether the solution came from a boolean or spin
 formultion.
 
 """
@@ -27,7 +27,7 @@ __all__ = 'solution_type',
 def solution_type(solution):
     """solution_type.
 
-    Figure out if the ``solution`` is a solution to a binary or a spin model.
+    Figure out if the ``solution`` is a solution to a boolean or a spin model.
     If it cannot be determined (ie if ``solution`` is all 1s), then return
     ``None``.
 
@@ -44,7 +44,7 @@ def solution_type(solution):
     res : str.
         If it is determined that ``solution`` is the solution to a spin model,
         then ``res`` will be ``'spin'``. If it is determined that ``solution``
-        is the solution to a binary model, then `res`` will be ``'bin'``.
+        is the solution to a boolean model, then `res`` will be ``'bool'``.
         Otherwise, ``res`` will be ``None``.
 
     Examples
@@ -62,6 +62,6 @@ def solution_type(solution):
     sol = solution.values() if isinstance(solution, dict) else solution
     for v in sol:
         if v == 0:
-            return 'bin'
+            return 'bool'
         elif v == -1:
             return 'spin'

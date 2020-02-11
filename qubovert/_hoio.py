@@ -38,7 +38,7 @@ def spin_var(name):
     Return
     ------
     hoio : qubovert.HOIO object.
-        The model representing the binary variable.
+        The model representing the spin variable.
 
     Examples
     --------

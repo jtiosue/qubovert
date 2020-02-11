@@ -18,8 +18,8 @@ This file contains functions for converting SAT problems to PUBOs.
 
 """
 
-# for BINARY_MODELS, we can't just `from qubovert import BINARY_MODELS` because
-# it causes circular imports, so instead just import qubovert.
+# for BOOLEAN_MODELS, we can't just `from qubovert import BOOLEAN_MODELS`
+# because it causes circular imports, so instead just import qubovert.
 import qubovert as qv
 
 
@@ -70,8 +70,8 @@ def ONE(x):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x = binary_var('x')
+    >>> from qubovert import boolean_var
+    >>> x = boolean_var('x')
     >>> P = ONE(x)
     >>> P.value({'x': 1})
     1
@@ -81,7 +81,7 @@ def ONE(x):
     qubovert.HOBO
 
     """
-    if isinstance(x, qv.BINARY_MODELS):
+    if isinstance(x, qv.BOOLEAN_MODELS):
         return x.copy()
     return qv.PUBO(x) if isinstance(x, dict) else qv.PUBO({(x,): 1})
 
@@ -99,7 +99,7 @@ def NOT(x):
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(x)``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``x`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(x)``. Otherwise, ``type(P) == type(x)``.
@@ -129,8 +129,8 @@ def NOT(x):
     >>> P.value({0: 1, 1: 1})
     0
 
-    >>> from qubovert import binary_var
-    >>> x = binary_var('x')
+    >>> from qubovert import boolean_var
+    >>> x = boolean_var('x')
     >>> P = NOT(x)
     >>> P.value({'x': 1})
     0
@@ -152,13 +152,13 @@ def AND(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -187,8 +187,8 @@ def AND(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = AND(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -213,13 +213,13 @@ def NAND(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -248,8 +248,8 @@ def NAND(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = NAND(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -267,13 +267,13 @@ def OR(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -302,8 +302,8 @@ def OR(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = OR(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -327,13 +327,13 @@ def NOR(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -362,8 +362,8 @@ def NOR(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = NOR(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -384,13 +384,13 @@ def XOR(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -419,8 +419,8 @@ def XOR(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = XOR(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -430,7 +430,7 @@ def XOR(*variables):
     >>> for n in range(1, 5):
     >>>     P = XOR(*tuple(range(n)))
     >>>     for i in range(1 << n):
-    >>>         sol = decimal_to_binary(i, n)
+    >>>         sol = decimal_to_boolean(i, n)
     >>>         if sum(sol) % 2 == 1:
     >>>             assert P.value(sol) == 1
     >>>         else:
@@ -461,13 +461,13 @@ def XNOR(*variables):
     ----------
     *variables : arguments.
         ``variables`` can be of arbitrary length. Each variable can be a
-        hashable object, which is the label of the binary variable, or a dict
+        hashable object, which is the label of the boolean variable, or a dict
         (or subclass of dict) representing a boolean expression.
 
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
-        The binary expression for the logic operation.
+        The boolean expression for the logic operation.
         If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.HOBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
@@ -496,8 +496,8 @@ def XNOR(*variables):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> from qubovert import binary_var
-    >>> x, y = binary_var('x'), binary_var('y')
+    >>> from qubovert import boolean_var
+    >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = XNOR(x, y)
     >>> type(P)
     qubovert.HOBO
@@ -507,7 +507,7 @@ def XNOR(*variables):
     >>> for n in range(1, 5):
     >>>     P = XNOR(*tuple(range(n)))
     >>>     for i in range(1 << n):
-    >>>         sol = decimal_to_binary(i, n)
+    >>>         sol = decimal_to_boolean(i, n)
     >>>         if sum(sol) % 2 == 1:
     >>>             assert not P.value(sol)
     >>>         else:

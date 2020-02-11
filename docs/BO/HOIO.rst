@@ -6,8 +6,8 @@ Accessed with ``qubovert.HOIO``. Note that it is important to use the ``HOIO.con
 We also discuss the ``qubovert.spin_var`` function here, which is just returns a ``HOIO``.
 
 
+.. autofunction:: qubovert.spin_var
+
+
 .. autoclass:: qubovert.HOIO
     :members:
-
-
-.. autofunction:: qubovert.spin_var
