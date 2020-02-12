@@ -366,6 +366,7 @@ We implement various utility functions, including
 - ``pubo_to_puso``,
 - ``puso_to_pubo``,
 - ``subgraph``,
+- ``normalize``,
 
 and more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
 
