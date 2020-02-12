@@ -491,7 +491,6 @@ To see problem specifics, run
     # etc
 
 
-.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
-.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
-.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
+====
+
 .. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
