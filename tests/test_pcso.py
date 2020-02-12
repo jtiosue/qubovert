@@ -28,7 +28,7 @@ from numpy import allclose
 from numpy.testing import assert_raises, assert_warns
 
 
-""" TESTS FOR THE METHODS THAT PCSO INHERITS FROM HISING """
+""" TESTS FOR THE METHODS THAT PCSO INHERITS FROM PUSO """
 
 
 class Problem:
@@ -520,7 +520,7 @@ def test_pcso_lt_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -622,7 +622,7 @@ def test_pcso_le_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -670,7 +670,7 @@ def test_pcso_gt_constraint_logtrick():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -718,7 +718,7 @@ def test_pcso_gt_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -820,7 +820,7 @@ def test_pcso_ge_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),

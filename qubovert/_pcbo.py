@@ -19,9 +19,8 @@ Contains the PCBO class. See ``help(qubovert.PCBO)``.
 """
 
 from . import PUBO
-from .utils import QUBOVertWarning
+from .utils import QUBOVertWarning, num_bits
 from .sat import OR, XOR, ONE, NOT, AND
-from numpy import log2, ceil
 
 
 __all__ = 'PCBO', 'boolean_var', 'integer_var'
@@ -69,7 +68,7 @@ def _special_constraints_eq_zero(pcbo, P, lam):
     return False
 
 
-def _special_constraints_le_zero(pcbo, P, lam):
+def _special_constraints_le_zero(pcbo, P, lam, log_trick, bounds):
     """_special_constraints_le_zero.
 
     See if the constraint that ``P <= 0`` matches any special forms.
@@ -83,6 +82,12 @@ def _special_constraints_le_zero(pcbo, P, lam):
         are present.
     lam : float > 0 or sympy.Symbol.
         Langrange multiplier to penalize violations of the constraint.
+    log_trick : bool.
+        Whether or not to use the log trick to enforce the inequality
+        constraint.
+    bounds : two element tuple.
+        A tuple ``(min, max)``, the minimum and maximum values that the
+        PUBO ``P`` can take.
 
     Return
     ------
@@ -91,9 +96,30 @@ def _special_constraints_le_zero(pcbo, P, lam):
         False.
 
     """
+    min_val, max_val = bounds
+
+    # P without offset defined for convenience
+    P_wo_offset = P - P.offset
+
     # if P is of the form sum(x_i) <= 1.
-    if P.offset == -1 and all(x == 1 for x in (P + 1).values()):
-        pcbo += lam * P * (P + 1) / 2
+    if P.offset == -1 and all(x == 1 for x in P_wo_offset.values()):
+        pcbo += lam * P * P_wo_offset / 2
+        return True
+
+    # if P is of the form P_wo_offset <= -P.offset and P_wo_offset is always
+    # >= 0, and (important!) log_trick is False!!
+    elif not log_trick and not min_val - P.offset and P.offset <= 0:
+        # We have that P_wo_offset <= P.offset and min(P_wo_offset) = 0. So we
+        # can do a penalty lam(P_wo_offset - sum(ancillas))**2
+
+        # create ancillas
+        ancillas = PUBO()
+        for i in range(num_bits(-P.offset, log_trick)):
+            ancillas[(pcbo._next_ancilla,)] += 1
+
+        diff = P_wo_offset - ancillas
+        pcbo += lam * diff * diff
+
         return True
 
     return False
@@ -391,7 +417,7 @@ class PCBO(PUBO):
             the class. Alternatively, ``args[0]`` can be a PCBO object.
 
         Examples
-        -------
+        --------
         >>> pcbo = PCBO()
         >>> pcbo[('a',)] += 5
         >>> pcbo[(0, 'a')] -= 2
@@ -851,16 +877,11 @@ class PCBO(PUBO):
             P += sign
             max_val += 1
             min_val -= 1
-            if log_trick:
-                for i in range(int(ceil(log2(max_val-min_val)))):
-                    P += sign * pow(2, i) * boolean_var(self._next_ancilla)
-                    max_val += pow(2, i)
-                    min_val -= pow(2, i)
-            else:
-                for _ in range(int(ceil(max_val-min_val-1))):
-                    P += sign * boolean_var(self._next_ancilla)
-                    max_val += 1
-                    min_val -= 1
+            for i in range(num_bits(max_val - min_val - 1, log_trick)):
+                v = pow(2, i) if log_trick else 1
+                P += sign * v * boolean_var(self._next_ancilla)
+                max_val += v
+                min_val -= v
 
             self.add_constraint_eq_zero(
                 P, lam=lam,
@@ -1076,10 +1097,10 @@ class PCBO(PUBO):
         P = PUBO(P)
         self._append_constraint("le", P)
 
-        if _special_constraints_le_zero(self, P, lam):
-            return self
+        bounds = min_val, max_val = _get_bounds(P, bounds)
 
-        min_val, max_val = _get_bounds(P, bounds)
+        if _special_constraints_le_zero(self, P, lam, log_trick, bounds):
+            return self
 
         if min_val > 0:
             if not suppress_warnings:
@@ -1091,14 +1112,11 @@ class PCBO(PUBO):
         else:
             # don't mutate the P that we put in self._constraints
             P = P.copy()
-            if log_trick and min_val:
-                for i in range(int(ceil(log2(-min_val + 1)))):
-                    P[(self._next_ancilla,)] += pow(2, i)
-                    max_val += pow(2, i)
-            elif min_val:
-                for _ in range(int(ceil(-min_val))):
-                    P[(self._next_ancilla,)] += 1
-                    max_val += 1
+            if min_val:
+                for i in range(num_bits(-min_val, log_trick)):
+                    v = pow(2, i) if log_trick else 1
+                    P[(self._next_ancilla,)] += v
+                    max_val += v
 
             self.add_constraint_eq_zero(
                 P, lam=lam,

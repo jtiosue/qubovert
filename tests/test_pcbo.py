@@ -1273,6 +1273,8 @@ def test_pcbo_logic():
 
 def test_pcbo_special_constraint_le():
 
+    # first one
+
     H = PCBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2,): 1, (): -1})
     assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
 
@@ -1296,6 +1298,40 @@ def test_pcbo_special_constraint_le():
 
     H = PCBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 2})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
+
+    # second one
+
+    H = PCBO().add_constraint_le_zero(
+        {(0,): 1, (1,): 1, (2,): 1, (): -2},
+        log_trick=False
+    )
+    assert H == PCBO(
+        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
+    ) ** 2
+
+    H = PCBO().add_constraint_ge_zero(
+        {(0,): -1, (1,): -1, (2,): -1, (): 2},
+        log_trick=False
+    )
+    assert H == PCBO(
+        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
+    ) ** 2
+
+    H = PCBO().add_constraint_lt_zero(
+        {(0,): 1, (1,): 1, (2,): 1, (): -3},
+        log_trick=False
+    )
+    assert H == PCBO(
+        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
+    ) ** 2
+
+    H = PCBO().add_constraint_gt_zero(
+        {(0,): -1, (1,): -1, (2,): -1, (): 3},
+        log_trick=False
+    )
+    assert H == PCBO(
+        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
+    ) ** 2
 
 
 def test_pcbo_special_constraint_eq():

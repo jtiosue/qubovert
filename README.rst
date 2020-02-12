@@ -43,14 +43,15 @@ Please see the `Repository <https://github.com/jiosue/qubovert>`_ and `Docs <htt
 
 Installation
 ------------
-`For the stable release`.
+
+For the stable release (same version as the *master* branch):
 
 .. code:: shell
 
   pip install qubovert
 
 
-To install from source:
+Or to install from source:
 
 .. code:: shell
 
@@ -86,17 +87,13 @@ Then you can use it in Python **versions 3.6 and above** with
     help(qubovert.problems.np)
     print(qubovert.problems.np.__all__)
 
-    # to see specifically the benchmarking problems:
-    help(qubovert.problems.benchmarking)
-    print(qubovert.problems.benchmarking.__all__)
-
     # etc ...
 
 
 Example of the typical workflow
 -------------------------------
 
-Create the objective function to minimize.
+**Create the binary objective function to minimize.**
 
 .. code:: python
 
@@ -143,8 +140,46 @@ Otherwise, if you have a QUSO solver (or just use ``qubovert.utils.solve_quso_br
 Each ``model_solution`` should be the same! You can test that it is the correct solution by comparing it to ``model.solve_bruteforce()``. You can also check if all of the constraints are satisfied by running ``model.is_solution_valid(model_solution)``.
 
 
+**For the second example, let's create a spin model.** The Hamiltonian is ``H``.
+
+.. code:: python
+
+    from qubovert import spin_var
+
+    z = [spin_var(i) for i in range(4)]
+    H = z[0] * z[1] * z[2] - 2 * z[1] * z[3] + sum(z) ** 2
+
+    # enforce that spin 0 and spin 2 are aligned with penalty factor 2
+    H.add_constraint_eq_zero(z[0] * z[2] - 1, lam=2)
+
+Now we can do the same that we did with the binary objective function above. If you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``):
+
+.. code:: python
+
+    from anywhere import qubo_solver
+
+    qubo = H.to_qubo()
+    qubo_energy, qubo_solution = qubo_solver(qubo)
+    H_groundstate = H.convert_solution(qubo_solution)
+    print(H_groundstate)
+
+
+Otherwise, if you have a QUSO solver (or just use ``qubovert.utils.solve_quso_bruteforce``):
+
+.. code:: python
+
+    from anywhere import quso_solver
+
+    quso = H.to_quso()
+    quso_energy, quso_solution = quso_solver(quso)
+    H_groundstate = H.convert_solution(quso_solution)
+    print(H_groundstate)
+
+
+
+
 Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
----------------------------------------------------------------
+------------------------------------------------------------
 
 See ``qubovert.__all__``.
 
@@ -155,9 +190,43 @@ See ``qubovert.__all__``.
 - PCBO: Polynomial Constrained Boolean Optimization
 - PCSO: Polynomial Constrained Spin Optimization
 
-Boolean variables are in {0, 1}, and spin variables are in {1, -1}. See the docstrings for ``qubovert.PCBO``, ``qubovert.PCSO``, ``qubovert.QUBO``, ``qubovert.QUSO``, ``qubovert.PUBO``, and ``qubovert.PUSO``.
+Boolean variables are in {0, 1}, and spin variables are in {1, -1}. See the docstrings for ``qubovert.PCBO``, ``qubovert.PCSO``, ``qubovert.QUBO``, ``qubovert.QUSO``, ``qubovert.PUBO``, and ``qubovert.PUSO``. There are many utilities in the ``utils`` library that can be helpful; see ``qubovert.utils.__all__``. We implement various utility functions, including
 
-See the following PCBO examples (much of the same functionality can be used with PCSO problems).
+- ``solve_pubo_bruteforce``,
+- ``solve_puso_bruteforce``,
+- ``pubo_value``,
+- ``puso_value``,
+- ``pubo_to_puso``,
+- ``puso_to_pubo``,
+- ``subgraph``,
+- ``normalize``,
+
+and more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
+
+We also have a ``sat`` library for boolean expressions; see ``qubovert.sat.__all__``. Consider the following 3-SAT example. We have variables ``x0, x1, x2, x3``, which we'll just label with ``0, 1, 2, 3``.
+
+.. code:: python
+
+    from qubovert.sat import AND, NOT, OR
+    from anywhere import qubo_solver
+
+    C = AND(OR(0, 1, 2), OR(NOT(0), 2, NOT(3)), OR(NOT(1), NOT(2), 3))
+
+    # C is 1 for a satisfying assignment, else 0
+    # So minimizing P will solve it.
+    P = -C
+
+    # P is a PUBO
+    Q = P.to_qubo()
+    solution = qubo_solver(Q)
+
+    print(solution)  # {0: 0, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0, 6: 0}
+    converted_sol = P.convert_solution(solution)
+    print(converted_sol) # {0: 0, 3: 0, 1: 0, 2: 1}
+
+    print(C.value(converted_sol))  # will print 1 because it satisfies C
+
+**Finally, let's look at some general examples.** See the following PCBO examples (much of the same functionality can be used with PCSO problems).
 
 .. code:: python
 
@@ -182,7 +251,7 @@ See the following PCBO examples (much of the same functionality can be used with
     # {('x0',): 1, ('x1', 'x2'): 2, (): -3, ('x2',): 1}
 
 
-Note that for large problems, it is slower to use the `boolean_var` functionality. For example, consider the following where creating `H0` is much faster than creating `H1`!
+Note that for very large problems, it is slower to use the `boolean_var` functionality. For example, consider the following where creating `H0` is much faster than creating `H1`!
 
 .. code:: python
 
@@ -352,60 +421,12 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     # 0
 
 
-Common binary optimization utilities (the ``utils`` library)
-------------------------------------------------------------
-
-See ``qubovert.utils.__all__``.
-
-We implement various utility functions, including
-
-- ``solve_pubo_bruteforce``,
-- ``solve_puso_bruteforce``,
-- ``pubo_value``,
-- ``puso_value``,
-- ``pubo_to_puso``,
-- ``puso_to_pubo``,
-- ``subgraph``,
-- ``normalize``,
-
-and more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
-
-
-Converting SAT problems (the ``sat`` library)
----------------------------------------------
-
-See ``qubovert.sat.__all__``.
-
-Consider the following 3-SAT example.
-
-.. code:: python
-
-    from qubovert.sat import AND, NOT, OR
-    from anywhere import qubo_solver
-
-    C = AND(OR(0, 1, 2), OR(NOT(0), 2, NOT(3)), OR(NOT(1), NOT(2), 3))
-
-    # C is 1 for a satisfying assignment, else 0
-    # So minimizing P will solve it.
-    P = -C
-
-    # P is a PUBO
-    Q = P.to_qubo()
-    solution = qubo_solver(Q)
-
-    print(solution)  # {0: 0, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0, 6: 0}
-    converted_sol = P.convert_solution(solution)
-    print(converted_sol) # {0: 0, 3: 0, 1: 0, 2: 1}
-
-    print(C.value(converted_sol))  # will print 1 because it satisfies C
-
-
 Convert common problems to QUBO form (the ``problems`` library)
 ---------------------------------------------------------------
 
 See ``qubovert.problems.__all__``.
 
-So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
+One of the goals of `qubovert` is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 
 
 See the following Set Cover example. All other problems can be used in a similar way.
@@ -469,10 +490,8 @@ To see problem specifics, run
     help(qubovert.problems.VertexCover)
     # etc
 
-I have very descriptive doc strings that should explain everything you need to know to use each problem class.
 
-
-References
-----------
-
-.. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers in Physics, 2:5, 2014.
+.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
+.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
+.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
+.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png

@@ -45,7 +45,7 @@ def qubo_to_quso(Q):
         info on formatting.
 
     Returns
-    ------
+    -------
     L : qubovert.QUSO or qubovert.utils.QUSOMatrix object.
         tuple of spin labels map to QUSO values. If ``Q`` is a
         ``qubovert.utils.QUBOMatrix`` object, then ``L`` will be a
@@ -124,7 +124,7 @@ def pubo_to_puso(P):
         info on formatting.
 
     Returns
-    ------
+    -------
     H : qubovert.utils.PUSOMatrix object.
         tuple of spin labels map to PUSO values. If ``P`` is a
         ``qubovert.utils.PUBOMatrix`` object, then ``H`` will be a
@@ -292,7 +292,7 @@ class Conversions:
             They should be parameters that define lagrange multipliers or
             factors in the QUBO.
 
-        Return
+        Returns
         -------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
@@ -301,7 +301,7 @@ class Conversions:
             see ``help(qubovert.utils.QUBOMatrix)``.
 
         Raises
-        -------
+        ------
         ``RecursionError`` if neither ``to_qubo`` nor ``to_quso`` are defined
         in the subclass.
 
@@ -332,7 +332,7 @@ class Conversions:
             see ``help(qubovert.utils.QUSOMatrix)``.
 
         Raises
-        -------
+        ------
         ``RecursionError`` if neither ``to_qubo`` nor ``to_quso`` are defined
         in the subclass.
 
@@ -354,7 +354,7 @@ class Conversions:
             They should be parameters that define lagrange multipliers or
             factors in the QUBO.
 
-        Return
+        Returns
         -------
         P : qubovert.utils.PUBOMatrix object.
             The upper triangular PUBO matrix, a PUBOMatrix object.
@@ -363,7 +363,7 @@ class Conversions:
             see ``help(qubovert.utils.PUBOMatrix)``.
 
         Raises
-        -------
+        ------
         ``RecursionError`` if neither ``to_pubo`` nor ``to_puso`` are defined
         in the subclass.
 
@@ -392,7 +392,7 @@ class Conversions:
             see ``help(qubovert.utils.PUSOMatrix)``.
 
         Raises
-        -------
+        ------
         ``RecursionError`` if neither ``to_pubo`` nor ``to_puso`` are defined
         in the subclass.
 
