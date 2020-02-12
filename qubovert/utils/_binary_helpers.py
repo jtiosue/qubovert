@@ -12,22 +12,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_solution_type.py.
+"""_binary_helpers.py.
 
-This file contains the function ``solution_type`` which takes in a solution and
-determines if it is known whether the solution came from a binary or spin
-formultion.
+This file contains the multiple generic helper functions.
 
 """
 
+from numpy import log2, ceil
 
-__all__ = 'solution_type',
+
+__all__ = 'solution_type', 'num_bits'
 
 
 def solution_type(solution):
     """solution_type.
 
-    Figure out if the ``solution`` is a solution to a binary or a spin model.
+    Figure out if the ``solution`` is a solution to a boolean or a spin model.
     If it cannot be determined (ie if ``solution`` is all 1s), then return
     ``None``.
 
@@ -44,13 +44,13 @@ def solution_type(solution):
     res : str.
         If it is determined that ``solution`` is the solution to a spin model,
         then ``res`` will be ``'spin'``. If it is determined that ``solution``
-        is the solution to a binary model, then `res`` will be ``'bin'``.
+        is the solution to a boolean model, then `res`` will be ``'bool'``.
         Otherwise, ``res`` will be ``None``.
 
     Examples
     --------
     >>> solution_type((0, 1, 1, 0))
-    'bin'
+    'bool'
 
     >>> solution_type((1, -1, -1, 1))
     'spin'
@@ -62,6 +62,39 @@ def solution_type(solution):
     sol = solution.values() if isinstance(solution, dict) else solution
     for v in sol:
         if v == 0:
-            return 'bin'
+            return 'bool'
         elif v == -1:
             return 'spin'
+
+
+def num_bits(val, log_trick=True):
+    """num_bits.
+
+    Find the number of bits needed to represent the value ``val``.
+
+    Parameters
+    ----------
+    val : numeric.
+    log_trick : bool (optional, defaults to True).
+        Whether or not to use a log encoding.
+
+    Return
+    ------
+    num : int.
+        The number of bits needed to encode the number ``val``.
+
+    Examples
+    --------
+    >>> num_bits(7)
+    3
+    >>> num_bits(8)
+    4
+    >>> num_bits(7, log_trick=False)
+    7
+    >>> num_bits(8, log_trick=False)
+    8
+
+    """
+    if val < 0:
+        raise ValueError("``val`` must be >= 0")
+    return int(ceil(log2(val + 1) if log_trick else val))

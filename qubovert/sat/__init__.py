@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""``sat`` is a module for converting SAT problems into QUBO/Ising form.
+"""``sat`` is a module for converting SAT problems into QUBO/QUSO form.
 
 ``sat`` is a library of ``qubovert`` for converting satisfiability problems
 into PUBOs (see ``help(qubovert.PUBO)``).

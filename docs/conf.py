@@ -165,7 +165,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'qubovert', 'qubovert Documentation',
-     author, 'qubovert', 'Convert common problems to QUBO and Ising form.',
+     author, 'qubovert', 'Convert common problems to QUBO and QUSO form.',
      'Miscellaneous'),
 ]
 

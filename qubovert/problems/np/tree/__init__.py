@@ -14,7 +14,7 @@
 
 """``tree`` contains many NP tree problems.
 
-Here we have the QUBO/Ising conversions for common tree probems,
+Here we have the QUBO/QUSO conversions for common tree probems,
 The conversions are based on [Lucas].
 
 References

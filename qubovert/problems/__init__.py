@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""``problems`` contains many problems converted to QUBO/Ising form.
+"""``problems`` contains many problems converted to QUBO/QUSO form.
 
-This module contains many all the problems that we convert to QUBO/Ising form.
+This module contains many all the problems that we convert to QUBO/QUSO form.
 We organize all the problems into categories, but we import them globally for
 user use. See the ``__all__`` value for all the problems imported. Each of the
 problems inherits from the ``Problem`` parent class, see

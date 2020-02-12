@@ -14,7 +14,7 @@
 
 """``cycles`` contains many NP cycles problems.
 
-Here we have the QUBO/Ising conversions for common cycle probems,
+Here we have the QUBO/QUSO conversions for common cycle probems,
 The conversions are based on [Lucas].
 
 References

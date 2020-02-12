@@ -17,7 +17,10 @@ Contains tests for the AlternatingSectorsChain class.
 """
 
 from qubovert.problems import AlternatingSectorsChain
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
+)
 from numpy import allclose
 from numpy.testing import assert_raises
 
@@ -84,11 +87,11 @@ def test_AlternatingSectorsChain_qubo_numvars():
     )
 
 
-# ising
+# quso
 
-def test_AlternatingSectorsChain_ising_solve():
+def test_AlternatingSectorsChain_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising(True))
+    e, sol = solve_quso_bruteforce(problem.to_quso(True))
     solution = problem.convert_solution(sol, True)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -98,7 +101,7 @@ def test_AlternatingSectorsChain_ising_solve():
 
     # not pbc
 
-    e, sol = solve_ising_bruteforce(problem.to_ising(False))
+    e, sol = solve_quso_bruteforce(problem.to_quso(False))
     solution = problem.convert_solution(sol, True)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
@@ -107,7 +110,53 @@ def test_AlternatingSectorsChain_ising_solve():
     assert allclose(e, -65)
 
 
-def test_AlternatingSectorsChain_ising_numvars():
+def test_AlternatingSectorsChain_quso_numvars():
 
-    L = problem.to_ising()
+    L = problem.to_quso()
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_AlternatingSectorsChain_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo(True))
+    solution = problem.convert_solution(sol)
+
+    assert solution == (-1,) * 12 or solution == (1,) * 12
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, -66)
+
+    # not pbc
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo(False))
+    solution = problem.convert_solution(sol)
+
+    assert solution == (-1,) * 12 or solution == (1,) * 12
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, -65)
+
+
+# puso
+
+def test_AlternatingSectorsChain_puso_solve():
+
+    e, sol = solve_puso_bruteforce(problem.to_puso(True))
+    solution = problem.convert_solution(sol, True)
+
+    assert solution == (-1,) * 12 or solution == (1,) * 12
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, -66)
+
+    # not pbc
+
+    e, sol = solve_puso_bruteforce(problem.to_puso(False))
+    solution = problem.convert_solution(sol, True)
+
+    assert solution == (-1,) * 12 or solution == (1,) * 12
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, -65)

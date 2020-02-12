@@ -18,7 +18,7 @@ Contains the QUBO class. See ``help(qubovert.QUBO)``.
 
 """
 
-from .utils import BO, QUBOMatrix, solution_type, spin_to_binary
+from .utils import BO, QUBOMatrix, PUBOMatrix, solution_type, spin_to_boolean
 
 
 __all__ = 'QUBO',
@@ -28,9 +28,9 @@ class QUBO(BO, QUBOMatrix):
     """QUBO.
 
     Class to manage converting general QUBO problems to and from their
-    QUBO and Ising formluations.
+    QUBO and QUSO formluations.
 
-    This class deals with QUBOs that have binary labels that do not range from
+    This class deals with QUBOs that have boolean labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
     ``qubovert.utils.QUBOMatrix``. Note that it is generally
     more efficient to initialize an empty QUBO object and then build the
@@ -92,7 +92,7 @@ class QUBO(BO, QUBOMatrix):
     Examples
     --------
     >>> from qubovert import QUBO
-    >>> Q = HIsing()
+    >>> Q = PUSO()
     >>> Q[('a',)] += 1
     >>> Q, Q.mapping, Q.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
@@ -108,7 +108,7 @@ class QUBO(BO, QUBOMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with QUBOs that have binary labels that do not range
+        This class deals with QUBOs that have boolean labels that do not range
         from 0 to n-1. If your labels are nonnegative integers, consider using
         ``qubovert.utils.QUBOMatrix``. Note that it is generally more efficient
         to initialize an empty QUBO object and then build the QUBO, rather than
@@ -160,6 +160,23 @@ class QUBO(BO, QUBOMatrix):
 
         return Q
 
+    def to_pubo(self):
+        """to_pubo.
+
+        Since the model is already a QUBO, ``self.to_pubo`` will simply
+        return ``qubovert.utils.PUBOMatrix(self.to_qubo())``.
+
+        Return
+        ------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        return PUBOMatrix(self.to_qubo())
+
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
@@ -169,24 +186,24 @@ class QUBO(BO, QUBOMatrix):
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
         res : dict.
-            Maps binary variable labels to their QUBO solutions values {0, 1}.
+            Maps boolean variable labels to their QUBO solutions values {0, 1}.
 
         Example
         -------
@@ -202,8 +219,8 @@ class QUBO(BO, QUBOMatrix):
         {'a': 1, 'b': 1, 'c': 0}
 
         >>> qubo = QUBO({('a',): 1, ('a', 'b'): -2, ('c',): 1})
-        >>> L = qubo.to_ising()
-        >>> solution = solve_ising(L)  # any solver you want
+        >>> L = qubo.to_quso()
+        >>> solution = solve_quso(L)  # any solver you want
         >>> solution
         [-1, -1, 1]  # or {0: -1, 1: -1, 2: 1}
         >>> sol = qubo.convert_solution(solution)
@@ -213,7 +230,7 @@ class QUBO(BO, QUBOMatrix):
         """
         sol_type = solution_type(solution)
         if sol_type == 'spin' or (sol_type is None and spin):
-            solution = spin_to_binary(solution)
+            solution = spin_to_boolean(solution)
         return {
             self._reverse_mapping[i]: solution[i]
             for i in range(self.num_binary_variables)

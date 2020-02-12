@@ -16,9 +16,9 @@
 Contains tests for the ``qubovert.sat`` library.
 """
 
-from qubovert import PUBO, binary_var, BINARY_MODELS
+from qubovert import PUBO, boolean_var, BOOLEAN_MODELS
 from qubovert.sat import ONE, NOT, AND, NAND, OR, NOR, XOR, XNOR
-from qubovert.utils import decimal_to_binary
+from qubovert.utils import decimal_to_boolean
 
 
 def test_sat_one():
@@ -29,8 +29,8 @@ def test_sat_one():
     assert f({('x', 'y'): 1}) == PUBO({('x', 'y'): 1})
 
     # testing type
-    x = binary_var(0)
-    for model in BINARY_MODELS:
+    x = boolean_var(0)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x)), model)
 
 
@@ -42,8 +42,8 @@ def test_sat_not():
     assert f({('x', 'y'): 1}) == 1 - PUBO({('x', 'y'): 1})
 
     # testing type
-    x = binary_var(0)
-    for model in BINARY_MODELS:
+    x = boolean_var(0)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x)), model)
 
 
@@ -58,15 +58,15 @@ def test_sat_and():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if all(sol):
                 assert P.value(sol) == 1
             else:
                 assert not P.value(sol)
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)
 
 
@@ -81,15 +81,15 @@ def test_sat_nand():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if all(sol):
                 assert not P.value(sol)
             else:
                 assert P.value(sol) == 1
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)
 
 
@@ -107,15 +107,15 @@ def test_sat_or():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if any(sol):
                 assert P.value(sol) == 1
             else:
                 assert not P.value(sol)
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)
 
 
@@ -135,15 +135,15 @@ def test_sat_nor():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if any(sol):
                 assert not P.value(sol)
             else:
                 assert P.value(sol) == 1
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)
 
 
@@ -161,15 +161,15 @@ def test_sat_xor():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if sum(sol) % 2 == 1:
                 assert P.value(sol) == 1
             else:
                 assert not P.value(sol)
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)
 
 
@@ -189,13 +189,13 @@ def test_sat_xnor():
     for n in range(1, 5):
         P = f(*tuple(range(n)))
         for i in range(1 << n):
-            sol = decimal_to_binary(i, n)
+            sol = decimal_to_boolean(i, n)
             if sum(sol) % 2 == 1:
                 assert not P.value(sol)
             else:
                 assert P.value(sol) == 1
 
     # testing type
-    x, y = binary_var(0), binary_var(1)
-    for model in BINARY_MODELS:
+    x, y = boolean_var(0), boolean_var(1)
+    for model in BOOLEAN_MODELS:
         assert isinstance(f(model(x), y), model)

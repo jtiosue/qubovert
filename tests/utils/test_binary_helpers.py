@@ -1,4 +1,3 @@
-
 #   Copyright 2019 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,34 +12,30 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""warn.py.
-
-This file contains warning functionality to standardize qubovert's warnings.
-
+"""
+Contains tests for functions in the _binary_helpers.py file.
 """
 
-import warnings
+from qubovert.utils import solution_type, num_bits
+from numpy.testing import assert_raises
 
 
-__all__ = 'QUBOVertWarning',
+def test_solution_type():
+
+    assert solution_type((0, 1, 1, 0)) == 'bool'
+    assert solution_type((1, -1, -1, 1)) == 'spin'
+    assert solution_type((1, 1, 1, 1)) is None
 
 
-class QUBOVertWarning(UserWarning):
-    """QUBOVertWarning.
+def test_num_bits():
 
-    Warning type to standardize qubovert's warnings. Warn with
-    ``QUBOVertWarning.warn("message")``.
+    assert num_bits(7) == 3
+    assert num_bits(8) == 4
+    assert num_bits(7, False) == 7
+    assert num_bits(8, False) == 8
 
-    """
+    with assert_raises(ValueError):
+        num_bits(-1)
 
-    @classmethod
-    def warn(cls, message):
-        r"""warn.
-
-        Parameters
-        ----------
-        message : str.
-            Message to warn with.
-
-        """
-        warnings.warn(message, cls, 3)
+    with assert_raises(ValueError):
+        num_bits(-1, False)

@@ -21,8 +21,8 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 from collections import defaultdict
 from .utils import BO, PUBOMatrix, QUBOMatrix
 from . import QUBO
-# in PUBO._reduce_degree, we use HOBO.add_constraint_AND. But HOBO inherits
-# from PUBO, so can't say `from . import HOBO` here. Instead, just import
+# in PUBO._reduce_degree, we use PCBO.add_constraint_AND. But PCBO inherits
+# from PUBO, so can't say `from . import PCBO` here. Instead, just import
 # qubovert
 import qubovert as qv
 
@@ -34,14 +34,14 @@ class PUBO(BO, PUBOMatrix):
     """PUBO.
 
     Class to manage converting general PUBO problems to and from their
-    PUBO, HIsing, QUBO, and Ising formluations. In general, this class
+    PUBO, PUSO, QUBO, and QUSO formluations. In general, this class
     deals with unconstrained optimization problems that have arbitrary degree.
-    To convert this to a QUBO (see ``to_qubo``) or Ising (``to_ising``) we have
+    To convert this to a QUBO (see ``to_qubo``) or QUSO (``to_quso``) we have
     to introduce ancilla variables. The ``convert_solution`` method deals with
     converting a solution to the problem with ancilla variables back to the
     solution to the original problem.
 
-    This class deals with PUBOs that have binary labels that do not range from
+    This class deals with PUBOs that have boolean labels that do not range from
     0 to n-1. Note that it is generally
     more efficient to initialize an empty PUBO object and then build the
     PUBO, rather than initialize a PUBO object with an already built dict.
@@ -130,7 +130,7 @@ class PUBO(BO, PUBOMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with PUBOs that have binary labels that do not range
+        This class deals with PUBOs that have boolean labels that do not range
         from 0 to n-1. Note that it is generally more efficient
         to initialize an empty PUBO object and then build the PUBO, rather than
         initialize a PUBO object with an already built dict.
@@ -182,9 +182,9 @@ class PUBO(BO, PUBOMatrix):
         """_reduce_degree.
 
         Reduce the degree of the higher order model to a degree ``deg`` model.
-        This is a private used only internally and in ``qubovert.HIsing``. See
-        ``qubovert.PUBO.to_pubo``, ``qubovert.HIsing.to_hising``,
-        ``qubovert.PUBO.to_qubo``, and ``qubovert.HIsing.to_ising`` to see
+        This is a private used only internally and in ``qubovert.PUSO``. See
+        ``qubovert.PUBO.to_pubo``, ``qubovert.PUSO.to_puso``,
+        ``qubovert.PUBO.to_qubo``, and ``qubovert.PUSO.to_quso`` to see
         an example of this function being used.
 
         The labels will be integers from 0 to n-1. We introduce ancilla
@@ -194,10 +194,10 @@ class PUBO(BO, PUBOMatrix):
 
         Parameters
         ----------
-        D : ``qubovert.utils.QUBOMatrix`` or ``qubovert.utils.IsingMatrix``.
+        D : ``qubovert.utils.QUBOMatrix`` or ``qubovert.utils.QUSOMatrix``.
             The dictionary to fill. For reducing PUBOs to QUBOs, ``D`` should
             be a ``qubovert.utils.QUBOMatrix`` object. For reducing HIsings
-            to Isings, ``D`` should be a ``qubovert.utils.IsingMatrix`` object.
+            to Isings, ``D`` should be a ``qubovert.utils.QUSOMatrix`` object.
             ``D`` should be empty to start.
         deg : int >= 2.
             The degree of the model to reduce to. If``deg`` is None, then
@@ -287,7 +287,7 @@ class PUBO(BO, PUBOMatrix):
                 # multiple times.
 
                 # enforce that z == x y
-                D += qv.HOBO().add_constraint_eq_AND(
+                D += qv.PCBO().add_constraint_eq_AND(
                     z, x, y, lam=func_lam(v)
                 )
 
@@ -406,26 +406,26 @@ class PUBO(BO, PUBOMatrix):
         Parameters
         ----------
         solution : iterable or dict.
-            The PUBO, HIsing, QUBO, or Ising solution output. The PUBO solution
+            The PUBO, PUSO, QUBO, or QUSO solution output. The PUBO solution
             output is either a list or tuple where indices specify the label of
             the variable and the element specifies whether it's 0 or 1 for PUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
-            label of the variable to is value. The QUBO/Ising solution output
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
+            label of the variable to is value. The QUBO/QUSO solution output
             includes the assignment for the ancilla variables used to reduce
             the degree of the PUBO.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
         -------
         res : dict.
-            Maps binary variable labels to their PUBO solutions values {0, 1}.
+            Maps boolean variable labels to their PUBO solutions values {0, 1}.
 
         Example
         -------
@@ -464,8 +464,8 @@ class PUBO(BO, PUBOMatrix):
         ``y = 0`` and ignore the value of ``z``.
 
         """
-        # this works for converting a solution to the pubo, qubo, hising, or
-        # ising formulations, since in the to_qubo function all ancilla
+        # this works for converting a solution to the pubo, qubo, puso, or
+        # quso formulations, since in the to_qubo function all ancilla
         # variables are labeled with integers >= self.num_binary_variables.
         return QUBO.convert_solution(self, solution, spin)
 

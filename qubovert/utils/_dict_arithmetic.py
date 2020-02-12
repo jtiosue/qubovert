@@ -20,6 +20,9 @@ other classes, such as ``qubovert.utils.QUBOMatrix`` and ``qubovert.utils.BO``.
 
 """
 
+from . import subgraph
+
+
 __all__ = 'DictArithmetic',
 
 
@@ -682,6 +685,64 @@ class DictArithmetic(dict):
         mult = value / max(abs(v) for v in self.values())
         for k in self:
             self[k] *= mult
+
+    def subgraph(self, nodes, connections=None):
+        """subgraph.
+
+        Create the subgraph of ``self`` that only includes vertices in
+        ``nodes``, and external nodes are given the values in ``connections``.
+
+        Parameters
+        ----------
+        nodes : set.
+            Nodes of ``self`` to include in the subgraph.
+        connections : dict (optional, defaults to {}).
+            For each node in ``self`` that is not in ``nodes``, we assign a
+            value given by ``connections.get(node, 0)``.
+
+        Return
+        ------
+        D : same as type(self).
+            The subgraph of ``self`` with nodes in ``nodes`` and the values of
+            the nodes not included given by ``connections``.
+
+        Notes
+        -----
+        Any offset value included in ``self`` (ie {(): 1}) will be ignored,
+        however there may be an offset in the output ``D``.
+
+        Examples
+        --------
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+        >>> )
+        >>> D = G.subgraph({0, 2}, {1: 5})
+        >>> D
+        {(0,): -17, (0, 2): -1, (): 10}
+
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+        >>> )
+        >>> D = G.subgraph({0, 2})
+        >>> D
+        {(0, 2): -1, (0,): 3}
+
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+        >>> )
+        >>> D = G.subgraph({0, 1}, {2: -10})
+        >>> D
+        {(0, 1): -4, (0,): 13, (1,): 2}
+
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+        >>> )
+        >>> D = G.subgraph({0, 1})
+        >>> D
+        {(0, 1): -4, (0,): 3, (1,): 2}
+
+        """
+        return subgraph(self, nodes, connections)
 
     def __round__(self, ndigits=None):
         """round.

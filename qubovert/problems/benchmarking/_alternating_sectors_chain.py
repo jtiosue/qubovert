@@ -18,7 +18,7 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import IsingMatrix, binary_to_spin, solution_type
+from qubovert.utils import QUSOMatrix, boolean_to_spin, solution_type
 from qubovert.problems import Problem
 
 
@@ -29,10 +29,10 @@ class AlternatingSectorsChain(Problem):
     """AlternatingSectorsChain.
 
     Class to manage converting Alternating Sectors Chain to and from its QUBO
-    and Ising formluations.
+    and QUSO formluations.
 
     The Alternating Sectors Chain problem has a solution for which
-    all the binary variable or spins are equal. It is a trivial problem,
+    all the boolean variables or spins are equal. It is a trivial problem,
     but useful for benchmarking some solvers or solving techniques.
 
     AlternatingSectorsChain inherits some methods and attributes from the
@@ -63,7 +63,7 @@ class AlternatingSectorsChain(Problem):
         """__init__.
 
         The Alternating Sectors Chain problem has a solution for which
-        all the binary variable or spins are equal. It is a trivial problem,
+        all the boolean variables or spins are equal. It is a trivial problem,
         but useful for benchmarking some solvers or solving techniques.
 
         Parameters
@@ -81,7 +81,7 @@ class AlternatingSectorsChain(Problem):
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
         >>> problem = AlternatingSectorsChain(*args)
-        >>> h, J, offset = problem.to_ising(pbc=True)
+        >>> h, J, offset = problem.to_quso(pbc=True)
         >>> h
         {}
         >>> offset
@@ -103,21 +103,21 @@ class AlternatingSectorsChain(Problem):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO and Ising use.
+        The number of binary variables that the QUBO and QUSO use.
 
         Return
         -------
         num : integer.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         return self._N
 
-    def to_ising(self, pbc=False):
-        r"""to_ising.
+    def to_quso(self, pbc=False):
+        r"""to_quso.
 
-        Create and return the alternating Sectors chain problem in Ising form
-        The J coupling matrix for the Ising will be returned as an
+        Create and return the alternating Sectors chain problem in QUSO form
+        The J coupling matrix for the QUSO will be returned as an
         uppertriangular dictionary. Thus, the problem becomes minimizing
         :math:`\sum_{i <= j} z_i z_j J_{ij} + \sum_{i} z_i h_i + offset`.
 
@@ -128,25 +128,25 @@ class AlternatingSectorsChain(Problem):
 
         Return
         -------
-        L : qubovert.utils.IsingMatrix object.
-            For most practical purposes, you can use IsingMatrix in the
+        L : qubovert.utils.QUSOMatrix object.
+            For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
-            ``help(qubovert.utils.IsingMatrix)``.
+            ``help(qubovert.utils.QUSOMatrix)``.
 
         Example
         -------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
         >>> problem = AlternatingSectorsChain(*args)
-        >>> L = problem.to_ising(pbc=True)
+        >>> L = problem.to_quso(pbc=True)
         >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1, (5, 0): 1}
 
-        >>> L = problem.to_ising(pbc=False)
+        >>> L = problem.to_quso(pbc=False)
         >>> L
         {(0, 1): 5, (1, 2): 5, (2, 3): 5, (3, 4): 1, (4, 5): 1}
 
         """
-        L = IsingMatrix()
+        L = QUSOMatrix()
 
         for q in range(self._N-1):
             L[(q, q+1)] = (
@@ -167,24 +167,24 @@ class AlternatingSectorsChain(Problem):
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
-        Convert the solution to the QUBO or Ising to the solution to the
+        Convert the solution to the QUBO or QUSO to the solution to the
         Alternating Sectors Chain problem.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -204,8 +204,8 @@ class AlternatingSectorsChain(Problem):
         if isinstance(solution, dict):
             solution = tuple(v for _, v in sorted(solution.items()))
         sol_type = solution_type(solution)
-        if sol_type == 'bin' or (sol_type is None and not spin):
-            return binary_to_spin(solution)
+        if sol_type == 'bool' or (sol_type is None and not spin):
+            return boolean_to_spin(solution)
         return solution
 
     def is_solution_valid(self, solution, spin=False):
@@ -219,18 +219,18 @@ class AlternatingSectorsChain(Problem):
         solution : iterable or dict.
             solution can be the output of
             AlternatingSectorsChain.convert_solution,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return

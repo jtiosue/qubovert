@@ -12,40 +12,40 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_isingmatrix.py.
+"""_qusomatrix.py.
 
-This file contains the IsingMatrix object.
+This file contains the QUSOMatrix object.
 
 """
 
-from . import HIsingMatrix
+from . import PUSOMatrix
 
 
-__all__ = 'IsingMatrix',
+__all__ = 'QUSOMatrix',
 
 
-class IsingMatrix(HIsingMatrix):
-    """IsingMatrix.
+class QUSOMatrix(PUSOMatrix):
+    """QUSOMatrix.
 
-    ``IsingMatrix`` inherits some methods from ``HIsingMatrix``, see
-    ``help(qubovert.utils.HIsingMatrix)``.
+    ``QUSOMatrix`` inherits some methods from ``PUSOMatrix``, see
+    ``help(qubovert.utils.PUSOMatrix)``.
 
-    A class to handle Ising matrices. It is the same thing as a dictionary
+    A class to handle QUSO matrices. It is the same thing as a dictionary
     with some methods modified. Note that each key must be a tuple integers
     >= 0.
 
     One method is that values will always default to 0. Consider the following
     example:
 
-    >>> d = IsingMatrix()
+    >>> d = QUSOMatrix()
     >>> print(d[(0,)]) # will print 0
     >>> d[(0,)] += 1
     >>> print(d) # will print {(0,): 1}
 
-    One method of IsingMatrix is that it will always keep the Ising
+    One method of QUSOMatrix is that it will always keep the QUSO
     upper triangular! Consider the following example:
 
-    >>> d = IsingMatrix()
+    >>> d = QUSOMatrix()
     >>> d[(1, 0)] += 2
     >>> print(d)
     >>> # will print {(0, 1): 2}
@@ -53,16 +53,16 @@ class IsingMatrix(HIsingMatrix):
     One method is that if we set an item to 0, it will be removed. Consider
     the following example:
 
-    >>> d = IsingMatrix()
+    >>> d = QUSOMatrix()
     >>> d[(0, 1)] += 1
     >>> d[(0, 1)] -= 1
     >>> print(d) # will print {}
 
-    One method is that if we initialize IsingMatrix with a previous dictionary
-    it will be reinitialized to ensure that the IsingMatrix is upper
+    One method is that if we initialize QUSOMatrix with a previous dictionary
+    it will be reinitialized to ensure that the QUSOMatrix is upper
     triangular and contains no zero values. Consider the following example:
 
-    >>> d = IsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0})
+    >>> d = QUSOMatrix({(0,): 1, (1, 0): 2, (2, 0): 0})
     >>> print(d) # will print {(0,): 1, (0, 1): 2}
 
     We also change the update method so that it follows all the conventions.
@@ -74,7 +74,7 @@ class IsingMatrix(HIsingMatrix):
     We also include arithmetic, addition, subtraction, scalar division,
     multiplication, and all those in place. For example,
 
-    >>> d = IsingMatrix((0,)=1, (0, 1)=-2)
+    >>> d = QUSOMatrix((0,)=1, (0, 1)=-2)
     >>> g = d + {(0,): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4
@@ -82,7 +82,7 @@ class IsingMatrix(HIsingMatrix):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    >>> d = IsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> d = QUSOMatrix({(0, 0): 1, (0, 1): -1})
     >>> print(d)
     {(): 1, (0, 1): -1}
     >>> g = {(0,): -1, (1,): 1}
@@ -90,14 +90,14 @@ class IsingMatrix(HIsingMatrix):
     >>> print(d)
     {(0,): -2, (1,): 2}
 
-    >>> d = IsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> d = QUSOMatrix({(0, 0): 1, (0, 1): -1})
     >>> print(d ** 2 == d * d)
     True
 
     Adding or subtracting constants will update the () element of the
     dict.
 
-    >>> d = IsingMatrix()
+    >>> d = QUSOMatrix()
     >>> d += 5
     >>> print(d)
     {(): 5}
@@ -106,7 +106,7 @@ class IsingMatrix(HIsingMatrix):
     careful with this, it can cause unexpected behavior if you don't know it.
     For example,
 
-    >>> d = IsingMatrix()
+    >>> d = QUSOMatrix()
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
@@ -134,24 +134,24 @@ class IsingMatrix(HIsingMatrix):
         KeyError if the key is invalid.
 
         """
-        k = HIsingMatrix.squash_key(key)
+        k = PUSOMatrix.squash_key(key)
         if len(k) > 2:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 integers "
-                "See HIsingMatrix instead.")
+                "See PUSOMatrix instead.")
         return k
 
     @property
     def h(self):
         """h.
 
-        Return a plain dictionary representing the Ising field values. Each key
+        Return a plain dictionary representing the QUSO field values. Each key
         is an integer.
 
         Returns
         -------
         h : dict.
-            Plain dictionary representing the Ising field values.
+            Plain dictionary representing the QUSO field values.
 
         """
         return {k[0]: v for k, v in self.items() if len(k) == 1}
@@ -160,13 +160,13 @@ class IsingMatrix(HIsingMatrix):
     def J(self):
         """J.
 
-        Return a plain dictionary representing the Ising coupling values. Each
+        Return a plain dictionary representing the QUSO coupling values. Each
         key is an integer.
 
         Returns
         -------
         J : dict.
-            Plain dictionary representing the Ising coupling values.
+            Plain dictionary representing the QUSO coupling values.
 
         """
         return {k: v for k, v in self.items() if len(k) == 2}

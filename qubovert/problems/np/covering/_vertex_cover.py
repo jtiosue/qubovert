@@ -19,9 +19,9 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 """
 
 # from qubovert.utils import QUBOMatrix
-from qubovert import HOBO
+from qubovert import PCBO
 from qubovert.problems import Problem
-from qubovert.utils import solution_type, spin_to_binary
+from qubovert.utils import solution_type, spin_to_boolean
 
 
 __all__ = 'VertexCover',
@@ -31,7 +31,7 @@ class VertexCover(Problem):
     """VertexCover.
 
     Class to manage converting Vertex Cover to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas]_.
+    QUSO formluations. Based on the paper hereforth designated [Lucas]_.
 
     The goal of the VertexCover problem is to find the smallest number of
     verticies that can be colored such that every edge of the graph is
@@ -132,12 +132,12 @@ class VertexCover(Problem):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO and Ising use.
+        The number of binary variables that the QUBO and QUSO use.
 
         Return
         -------
         num : integer.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         return self._N
@@ -185,14 +185,14 @@ class VertexCover(Problem):
 #            Q[(i,)] += B
 #
 #        # encode H_A, ie each edge is adjacent to at least one colored vertex.
-#        # we don't use HOBO().to_qubo because we want to keep our mapping.
+#        # we don't use PCBO().to_qubo because we want to keep our mapping.
 #        for u, v in self._edges:
 #            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
-#            Q += HOBO().OR(iu, iv, lam=A)
+#            Q += PCBO().OR(iu, iv, lam=A)
 #
 #        return Q
 
-        H = HOBO()
+        H = PCBO()
         H.set_mapping(self._vertex_to_index)
 
         # encode H_B (equation 34)
@@ -208,24 +208,24 @@ class VertexCover(Problem):
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
-        Convert the solution to the QUBO or Ising to the solution to the Vertex
+        Convert the solution to the QUBO or QUSO to the solution to the Vertex
         Cover problem.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -240,7 +240,7 @@ class VertexCover(Problem):
             solution = dict(enumerate(solution))
         sol_type = solution_type(solution)
         if sol_type == 'spin' or (sol_type is None and spin):
-            solution = spin_to_binary(solution)
+            solution = spin_to_boolean(solution)
         return set(
             self._index_to_vertex[i] for i, x in solution.items() if x
         )
@@ -255,18 +255,18 @@ class VertexCover(Problem):
         ----------
         solution : iterable or dict.
             solution can be the output of VertexCover.convert_solution,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return

@@ -13,94 +13,94 @@
 #   limitations under the License.
 
 """
-Contains tests for the QUBO/PUBO to/from Ising/HIsing functions.
+Contains tests for the QUBO/PUBO to/from QUSO/PUSO functions.
 """
 
 from qubovert.utils import (
-    qubo_to_ising, ising_to_qubo, pubo_to_hising, hising_to_pubo,
-    binary_to_spin, spin_to_binary, decimal_to_binary, decimal_to_spin,
-    qubo_to_matrix, matrix_to_qubo, binary_to_decimal, spin_to_decimal
+    qubo_to_quso, quso_to_qubo, pubo_to_puso, puso_to_pubo,
+    boolean_to_spin, spin_to_boolean, decimal_to_boolean, decimal_to_spin,
+    qubo_to_matrix, matrix_to_qubo, boolean_to_decimal, spin_to_decimal
 )
-from qubovert import QUBO, Ising, PUBO, HIsing
+from qubovert import QUBO, QUSO, PUBO, PUSO
 from sympy import Symbol
 import numpy as np
 from numpy.testing import assert_raises
 
 
-def test_qubo_to_ising_to_qubo():
+def test_qubo_to_quso_to_qubo():
 
     qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
-    assert qubo == ising_to_qubo(qubo_to_ising(qubo))
+    assert qubo == quso_to_qubo(qubo_to_quso(qubo))
 
     qubo = {('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .2, (): -2, ('2',): 1}
     # need to reformatt qubo so it is sorted with the same hash
-    assert QUBO(qubo) == ising_to_qubo(qubo_to_ising(qubo))
+    assert QUBO(qubo) == quso_to_qubo(qubo_to_quso(qubo))
 
 
-def test_ising_to_qubo_to_ising():
+def test_quso_to_qubo_to_quso():
 
-    ising = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
-    assert ising == qubo_to_ising(ising_to_qubo(ising))
+    quso = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
+    assert quso == qubo_to_quso(quso_to_qubo(quso))
 
-    ising = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2}
-    # need to reformat ising so it is sorted with the same hash
-    assert Ising(ising) == qubo_to_ising(ising_to_qubo(ising))
+    quso = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2}
+    # need to reformat quso so it is sorted with the same hash
+    assert QUSO(quso) == qubo_to_quso(quso_to_qubo(quso))
 
 
-def test_pubo_to_hising_to_pubo():
+def test_pubo_to_puso_to_pubo():
 
     pubo = {
         (0,): 1, (0, 1): 1, (1,): -1, (1, 2): .5, (): -2, (2,): 1,
         (0, 2, 3): -3, (0, 1, 2): -2
     }
-    assert pubo == hising_to_pubo(pubo_to_hising(pubo))
+    assert pubo == puso_to_pubo(pubo_to_puso(pubo))
 
     pubo = {
         ('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .5, (): -2, ('2',): 1,
         ('0', '2', 3): -3, ('0', 1, '2'): -2
     }
     # need to reformat pubo so it is sorted with the same hash
-    assert PUBO(pubo) == hising_to_pubo(pubo_to_hising(pubo))
+    assert PUBO(pubo) == puso_to_pubo(pubo_to_puso(pubo))
 
 
-def test_hising_to_pubo_to_hising():
+def test_puso_to_pubo_to_puso():
 
-    hising = {
+    puso = {
         (0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2,
         (0, 1, 2): 3, (0, 2, 3): -1
     }
-    assert hising == pubo_to_hising(hising_to_pubo(hising))
+    assert puso == pubo_to_puso(puso_to_pubo(puso))
 
-    hising = {
+    puso = {
         ('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2,
         ('0', 1, '2'): 3, ('0', '2', 3): -1
     }
     # need to reformat qubo so it is sorted with the same hash
-    assert HIsing(hising) == pubo_to_hising(hising_to_pubo(hising))
+    assert PUSO(puso) == pubo_to_puso(puso_to_pubo(puso))
 
 
-def test_qubo_to_ising_eq_pubo_to_hising():
+def test_qubo_to_quso_eq_pubo_to_puso():
 
     qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
-    assert qubo_to_ising(qubo) == pubo_to_hising(qubo)
+    assert qubo_to_quso(qubo) == pubo_to_puso(qubo)
 
 
-def test_ising_to_qubo_eq_hising_to_pubo():
+def test_quso_to_qubo_eq_puso_to_pubo():
 
-    ising = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
-    assert ising_to_qubo(ising) == hising_to_pubo(ising)
+    quso = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
+    assert quso_to_qubo(quso) == puso_to_pubo(quso)
 
 
-def test_decimal_to_binary():
+def test_decimal_to_boolean():
 
-    assert decimal_to_binary(10, 7) == (0, 0, 0, 1, 0, 1, 0)
-    assert decimal_to_binary(10) == (1, 0, 1, 0)
-
-    with assert_raises(ValueError):
-        decimal_to_binary(.5)
+    assert decimal_to_boolean(10, 7) == (0, 0, 0, 1, 0, 1, 0)
+    assert decimal_to_boolean(10) == (1, 0, 1, 0)
 
     with assert_raises(ValueError):
-        decimal_to_binary(1000, 2)
+        decimal_to_boolean(.5)
+
+    with assert_raises(ValueError):
+        decimal_to_boolean(1000, 2)
 
 
 def test_decimal_to_spin():
@@ -109,10 +109,10 @@ def test_decimal_to_spin():
     assert decimal_to_spin(10) == (-1, 1, -1, 1)
 
 
-def test_binary_to_decimal():
+def test_boolean_to_decimal():
 
     for i in range(8):
-        assert i == binary_to_decimal(decimal_to_binary(i))
+        assert i == boolean_to_decimal(decimal_to_boolean(i))
 
 
 def test_spin_to_decimal():
@@ -121,22 +121,22 @@ def test_spin_to_decimal():
         assert i == spin_to_decimal(decimal_to_spin(i))
 
 
-def test_binary_to_spin():
+def test_boolean_to_spin():
 
-    assert binary_to_spin(0) == 1
-    assert binary_to_spin(1) == -1
-    assert binary_to_spin((0, 1)) == (1, -1)
-    assert binary_to_spin([0, 1]) == [1, -1]
-    assert binary_to_spin({"a": 0, "b": 1}) == {"a": 1, "b": -1}
+    assert boolean_to_spin(0) == 1
+    assert boolean_to_spin(1) == -1
+    assert boolean_to_spin((0, 1)) == (1, -1)
+    assert boolean_to_spin([0, 1]) == [1, -1]
+    assert boolean_to_spin({"a": 0, "b": 1}) == {"a": 1, "b": -1}
 
 
-def test_spin_to_binary():
+def test_spin_to_boolean():
 
-    assert spin_to_binary(-1) == 1
-    assert spin_to_binary(1) == 0
-    assert spin_to_binary((-1, 1)) == (1, 0)
-    assert spin_to_binary([-1, 1]) == [1, 0]
-    assert spin_to_binary({"a": -1, "b": 1}) == {"a": 1, "b": 0}
+    assert spin_to_boolean(-1) == 1
+    assert spin_to_boolean(1) == 0
+    assert spin_to_boolean((-1, 1)) == (1, 0)
+    assert spin_to_boolean([-1, 1]) == [1, 0]
+    assert spin_to_boolean({"a": -1, "b": 1}) == {"a": 1, "b": 0}
 
 
 def test_matrix_to_qubo():
@@ -168,18 +168,18 @@ def test_qubo_to_matrix():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    ising = {(0,): 1.0*a, (0, 1): 1., (1,): -1.0*a,
-             (1, 2): 1., (): -2.*b, (2,): 1.0*a}
-    ising1 = qubo_to_ising(ising_to_qubo(ising))
-    ising1.simplify()
-    ising = Ising(ising)
-    ising.simplify()
-    assert ising == ising1
+    quso = {(0,): 1.0*a, (0, 1): 1., (1,): -1.0*a,
+            (1, 2): 1., (): -2.*b, (2,): 1.0*a}
+    quso1 = qubo_to_quso(quso_to_qubo(quso))
+    quso1.simplify()
+    quso = QUSO(quso)
+    quso.simplify()
+    assert quso == quso1
 
     a, b = Symbol('a'), Symbol('b')
     qubo = {(0,): 1.0*a, (0, 1): 1., (1,): -1.0*a,
             (1, 2): 1., (): -2.0*b, (2,): 1.0*a}
-    qubo1 = ising_to_qubo(qubo_to_ising(qubo))
+    qubo1 = quso_to_qubo(qubo_to_quso(qubo))
     qubo1.simplify()
     qubo = QUBO(qubo)
     qubo.simplify()

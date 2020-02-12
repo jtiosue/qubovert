@@ -1,7 +1,7 @@
 Matrix Objects
 ==============
 
-The matrix objects are for dealing with PUBOs, HIsings, QUBOs, and Isings that have integer labels. All the ``to_`` methods return matrix objects. For example, ``HOBO.to_qubo`` returns a ``QUBOMatrix`` object.
+The matrix objects are for dealing with PUBOs, PUSOs, QUBOs, and QUSOs that have integer labels. All the ``to_`` methods return matrix objects. For example, ``PCBO.to_qubo`` returns a ``QUBOMatrix`` object.
 
 Note that the ``utils`` module will not be imported with ``from qubovert import *``. You must import ``qubovert.utils`` explicitly.
 
@@ -15,10 +15,10 @@ PUBOMatrix
     :members:
 
 
-HIsingMatrix
+PUSOMatrix
 ------------
 
-.. autoclass:: qubovert.utils.HIsingMatrix
+.. autoclass:: qubovert.utils.PUSOMatrix
     :members:
 
 
@@ -29,8 +29,8 @@ QUBOMatrix
     :members:
 
 
-IsingMatrix
+QUSOMatrix
 -----------
 
-.. autoclass:: qubovert.utils.IsingMatrix
+.. autoclass:: qubovert.utils.QUSOMatrix
     :members:

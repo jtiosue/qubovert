@@ -17,7 +17,10 @@ Contains tests for the SetCover class.
 """
 
 from qubovert.problems import SetCover
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
+)
 from numpy import allclose
 
 
@@ -105,11 +108,11 @@ def test_weighted_setcover():
     assert allclose(e, 1.1)
 
 
-# ising
+# quso
 
-def test_setcover_ising_logtrick_solve():
+def test_setcover_quso_logtrick_solve():
 
-    e, sol = solve_ising_bruteforce(problem_log.to_ising())
+    e, sol = solve_quso_bruteforce(problem_log.to_quso())
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert problem_log.is_solution_valid(sol)
@@ -117,9 +120,9 @@ def test_setcover_ising_logtrick_solve():
     assert allclose(e, len(solution))
 
 
-def test_setcover_ising_solve():
+def test_setcover_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising())
+    e, sol = solve_quso_bruteforce(problem.to_quso())
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert problem.is_solution_valid(sol)
@@ -127,13 +130,37 @@ def test_setcover_ising_solve():
     assert allclose(e, len(solution))
 
 
-def test_setcover_ising_logtrick_numvars():
+def test_setcover_quso_logtrick_numvars():
 
-    L = problem_log.to_ising()
+    L = problem_log.to_quso()
     assert L.num_binary_variables == problem_log.num_binary_variables
 
 
-def test_setcover_ising_numvars():
+def test_setcover_quso_numvars():
 
-    L = problem.to_ising()
+    L = problem.to_quso()
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_setcover_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution == {0, 2}
+    assert allclose(e, len(solution))
+
+
+# puso
+
+def test_setcover_puso_solve():
+
+    e, sol = solve_puso_bruteforce(problem.to_puso())
+    solution = problem.convert_solution(sol)
+    assert problem.is_solution_valid(solution)
+    assert problem.is_solution_valid(sol)
+    assert solution == {0, 2}
+    assert allclose(e, len(solution))

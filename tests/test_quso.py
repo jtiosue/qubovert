@@ -13,24 +13,26 @@
 #   limitations under the License.
 
 """
-Contains tests for the Ising class.
+Contains tests for the QUSO class.
 """
 
-from qubovert import Ising
+from qubovert import QUSO
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce, ising_value
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
+    quso_value
 )
 from sympy import Symbol
 from numpy import allclose
 from numpy.testing import assert_raises
 
 
-problem = Ising({('a',): -1, ('b',): 2,
-                 ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
+problem = QUSO({('a',): -1, ('b',): 2,
+               ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
 solution = {'c': -1, 'b': -1, 'a': -1}
 
 
-def test_ising_qubo_solve():
+def test_quso_qubo_solve():
 
     e, sols = solve_qubo_bruteforce(problem.to_qubo())
     sol = problem.convert_solution(sols, False)
@@ -40,9 +42,9 @@ def test_ising_qubo_solve():
     assert allclose(e, -10)
 
 
-def test_ising_ising_solve():
+def test_quso_quso_solve():
 
-    e, sols = solve_ising_bruteforce(problem.to_ising())
+    e, sols = solve_quso_bruteforce(problem.to_quso())
     sol = problem.convert_solution(sols)
     assert problem.is_solution_valid(sol)
     assert problem.is_solution_valid(sols)
@@ -51,85 +53,111 @@ def test_ising_ising_solve():
 
     assert (
         problem.value(sol) ==
-        ising_value(sol, problem) ==
+        quso_value(sol, problem) ==
         e
     )
 
 
-def test_ising_bruteforce_solve():
+def test_quso_pubo_solve():
+
+    e, sols = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sols, False)
+    assert problem.is_solution_valid(sol)
+    assert problem.is_solution_valid(sols)
+    assert sol == solution
+    assert allclose(e, -10)
+
+
+def test_quso_puso_solve():
+
+    e, sols = solve_puso_bruteforce(problem.to_puso())
+    sol = problem.convert_solution(sols)
+    assert problem.is_solution_valid(sol)
+    assert problem.is_solution_valid(sols)
+    assert sol == solution
+    assert allclose(e, -10)
+
+    assert (
+        problem.value(sol) ==
+        quso_value(sol, problem) ==
+        e
+    )
+
+
+def test_quso_bruteforce_solve():
 
     assert problem.solve_bruteforce() == solution
 
 
 # testing methods
 
-def test_ising_checkkey():
+def test_quso_checkkey():
 
     with assert_raises(KeyError):
-        Ising({0: -1})
+        QUSO({0: -1})
 
     with assert_raises(KeyError):
-        Ising({(0, 1, 2): -1})
+        QUSO({(0, 1, 2): -1})
 
 
-def test_ising_default_valid():
+def test_quso_default_valid():
 
-    d = Ising()
+    d = QUSO()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
     assert d == {(): 1}
 
-    d = Ising()
+    d = QUSO()
     assert d[(0, 1)] == 0
     d[(0, 1)] += 1
     assert d == {(0, 1): 1}
 
 
-def test_ising_remove_value_when_zero():
+def test_quso_remove_value_when_zero():
 
-    d = Ising()
+    d = QUSO()
     d[(0, 1)] += 1
     d[(0, 1)] -= 1
     assert d == {}
 
 
-def test_ising_reinitialize_dictionary():
+def test_quso_reinitialize_dictionary():
 
-    d = Ising({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
+    d = QUSO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(): 1, ('1', 0): 3}, {(): 1, (0, '1'): 3})
 
 
-def test_ising_update():
+def test_quso_update():
 
-    d = Ising({('0',): 1, ('0', 1): 2})
+    d = QUSO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
     assert d in ({('0',): 1, (): -1, (1, '0'): 1},
                  {('0',): 1, (): -1, ('0', 1): 1})
 
-    d = Ising({(0, 0): 1, (0, 1): 2})
-    d.update(Ising({(1, 0): 1, (1, 1): -1}))
+    d = QUSO({(0, 0): 1, (0, 1): 2})
+    d.update(QUSO({(1, 0): 1, (1, 1): -1}))
     d -= 1
-    assert d == Ising({(0, 1): 1, (): -2})
+    assert d == QUSO({(0, 1): 1, (): -2})
 
     assert d.offset == -2
 
 
-def test_ising_num_binary_variables():
+def test_quso_num_binary_variables():
 
-    d = Ising({(0,): 1, (0, 3): 2})
+    d = QUSO({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
 
 
 def test_num_terms():
 
-    d = Ising({(0,): 1, (0, 3): 2, (0, 2): -1})
+    d = QUSO({(0,): 1, (0, 3): 2, (0, 2): -1})
     assert d.num_terms == len(d)
 
 
-def test_ising_degree():
+def test_quso_degree():
 
-    d = Ising()
+    d = QUSO()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -139,9 +167,9 @@ def test_ising_degree():
     assert d.degree == 2
 
 
-def test_ising_addition():
+def test_quso_addition():
 
-    temp = Ising({('0', '0'): 1, ('0', 1): 2})
+    temp = QUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
     temp2 = {(1, '0'): 5, (): 1, ('0',): -1}, {('0', 1): 5, (): 1, ('0',): -1}
     temp3 = {(): 1, (1, '0'): -1, ('0',): 1}, {(): 1, ('0', 1): -1, ('0',): 1}
@@ -179,12 +207,12 @@ def test_ising_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == Ising(temp3[0])*-1
+    assert g == QUSO(temp3[0])*-1
 
 
-def test_ising_multiplication():
+def test_quso_multiplication():
 
-    temp = Ising({('0', '0'): 1, ('0', 1): 2})
+    temp = QUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {(): 3, (1, '0'): 6}, {(): 3, ('0', 1): 6}
     temp2 = {(): .5, (1, '0'): 1}, {(): .5, ('0', 1): 1}
     temp3 = {(1, '0'): 1}, {('0', 1): 1}
@@ -258,9 +286,9 @@ def test_ising_multiplication():
     assert d ** 2 == d * d
     assert d ** 3 == d * d * d
 
-    # should raise a KeyError since can't fit this into Ising.
+    # should raise a KeyError since can't fit this into QUSO.
     try:
-        Ising({('0', 1): 1, ('1', 2): -1})**2
+        QUSO({('0', 1): 1, ('1', 2): -1})**2
         assert False
     except KeyError:
         pass
@@ -268,23 +296,23 @@ def test_ising_multiplication():
 
 def test_properties():
 
-    temp = Ising({('0', '0'): 1, ('0', 1): 2})
+    temp = QUSO({('0', '0'): 1, ('0', 1): 2})
     assert temp.offset == 1
 
-    d = Ising()
+    d = QUSO()
     d[(0,)] += 1
     d[(1,)] += 2
-    assert d == d.to_ising() == {(0,): 1, (1,): 2}
+    assert d == d.to_quso() == {(0,): 1, (1,): 2}
     assert d.mapping == d.reverse_mapping == {0: 0, 1: 1}
 
     d.set_mapping({1: 0, 0: 1})
-    assert d.to_ising() == {(1,): 1, (0,): 2}
+    assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
 
 def test_round():
 
-    d = Ising({(0,): 3.456, (1,): -1.53456})
+    d = QUSO({(0,): 3.456, (1,): -1.53456})
 
     assert round(d) == {(0,): 3, (1,): -2}
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
@@ -295,12 +323,12 @@ def test_round():
 def test_normalize():
 
     temp = {(0,): 4, (1,): -2}
-    d = Ising(temp)
+    d = QUSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
     temp = {(0,): -4, (1,): 2}
-    d = Ising(temp)
+    d = QUSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
@@ -308,7 +336,7 @@ def test_normalize():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    d = Ising()
+    d = QUSO()
     d[(0,)] -= a
     d[(0, 1)] += 2
     d[(1,)] += b
@@ -320,7 +348,7 @@ def test_symbols():
 
 def test_convert_solution_all_1s():
 
-    d = Ising({(0,): 1})
+    d = QUSO({(0,): 1})
     assert d.convert_solution({0: 0}) == {0: 1}
     assert d.convert_solution({0: -1}) == {0: -1}
     assert d.convert_solution({0: 1}) == {0: 1}

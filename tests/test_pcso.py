@@ -13,14 +13,14 @@
 #   limitations under the License.
 
 """
-Contains tests for the HOIO class.
+Contains tests for the PCSO class.
 """
 
-from qubovert import HOIO, spin_var, integer_var
+from qubovert import PCSO, spin_var, integer_var
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce,
-    hising_value, pubo_to_hising, binary_to_spin,
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
+    puso_value, pubo_to_puso, boolean_to_spin,
     QUBOVertWarning
 )
 from sympy import Symbol
@@ -28,7 +28,7 @@ from numpy import allclose
 from numpy.testing import assert_raises, assert_warns
 
 
-""" TESTS FOR THE METHODS THAT HOIO INHERITS FROM HISING """
+""" TESTS FOR THE METHODS THAT PCSO INHERITS FROM PUSO """
 
 
 class Problem:
@@ -54,12 +54,12 @@ class Problem:
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
         assert self.is_valid(e, sol, False)
 
-        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        e, sol = solve_quso_bruteforce(self.problem.to_quso())
         assert self.is_valid(e, sol, True)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
-            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            e, sol = solve_puso_bruteforce(self.problem.to_puso(deg))
             assert self.is_valid(e, sol, True)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
@@ -67,14 +67,14 @@ class Problem:
 
         assert (
             self.problem.value(self.solution) ==
-            hising_value(self.solution, self.problem) ==
+            puso_value(self.solution, self.problem) ==
             e
         )
 
 
-def test_hoio_on_ising():
+def test_pcso_on_quso():
 
-    problem = HOIO({('a',): -1, ('b',): 2,
+    problem = PCSO({('a',): -1, ('b',): 2,
                    ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
     solution = {'c': -1, 'b': -1, 'a': -1}
     obj = -10
@@ -82,9 +82,9 @@ def test_hoio_on_ising():
     Problem(problem, solution, obj).runtests()
 
 
-def test_hoio_on_deg_3_hising():
+def test_pcso_on_deg_3_puso():
 
-    problem = HOIO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
+    problem = PCSO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
                    (): -2, (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1})
     solution = {'c': -1, 'b': -1, 'a': -1, 0: -1, 1: -1, 2: -1}
     obj = -14
@@ -92,9 +92,9 @@ def test_hoio_on_deg_3_hising():
     Problem(problem, solution, obj).runtests()
 
 
-def test_hoio_on_deg_5_hising():
+def test_pcso_on_deg_5_puso():
 
-    problem = HOIO({
+    problem = PCSO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
         (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1
@@ -107,70 +107,70 @@ def test_hoio_on_deg_5_hising():
 
 # testing methods
 
-def test_hoio_checkkey():
+def test_pcso_checkkey():
 
     with assert_raises(KeyError):
-        HOIO({0: -1})
+        PCSO({0: -1})
 
 
-def test_ising_default_valid():
+def test_quso_default_valid():
 
-    d = HOIO()
+    d = PCSO()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
     assert d == {(): 1}
 
-    d = HOIO()
+    d = PCSO()
     assert d[(0, 1)] == 0
     d[(0, 1)] += 1
     assert d == {(0, 1): 1}
 
 
-def test_ising_remove_value_when_zero():
+def test_quso_remove_value_when_zero():
 
-    d = HOIO()
+    d = PCSO()
     d[(0, 1)] += 1
     d[(0, 1)] -= 1
     assert d == {}
 
 
-def test_ising_reinitialize_dictionary():
+def test_quso_reinitialize_dictionary():
 
-    d = HOIO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
+    d = PCSO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(): 1, ('1', 0): 3}, {(): 1, (0, '1'): 3})
 
 
-def test_ising_update():
+def test_quso_update():
 
-    d = HOIO({('0',): 1, ('0', 1): 2})
+    d = PCSO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
     assert d in ({('0',): 1, (): -1, (1, '0'): 1},
                  {('0',): 1, (): -1, ('0', 1): 1})
 
-    d = HOIO({(0, 0): 1, (0, 1): 2})
-    d.update(HOIO({(1, 0): 1, (1, 1): -1}))
+    d = PCSO({(0, 0): 1, (0, 1): 2})
+    d.update(PCSO({(1, 0): 1, (1, 1): -1}))
     d -= 1
-    assert d == HOIO({(0, 1): 1, (): -2})
+    assert d == PCSO({(0, 1): 1, (): -2})
 
     assert d.offset == -2
 
 
-def test_ising_num_binary_variables():
+def test_quso_num_binary_variables():
 
-    d = HOIO({(0,): 1, (0, 3): 2})
+    d = PCSO({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
 
 
 def test_num_terms():
 
-    d = HOIO({(0,): 1, (0, 3): 2, (0, 2): -1})
+    d = PCSO({(0,): 1, (0, 3): 2, (0, 2): -1})
     assert d.num_terms == len(d)
 
 
-def test_hoio_degree():
+def test_pcso_degree():
 
-    d = HOIO()
+    d = PCSO()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -184,9 +184,9 @@ def test_hoio_degree():
     assert d.degree == 5
 
 
-def test_ising_addition():
+def test_quso_addition():
 
-    temp = HOIO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
     temp2 = {(1, '0'): 5, (): 1, ('0',): -1}, {('0', 1): 5, (): 1, ('0',): -1}
     temp3 = {(): 1, (1, '0'): -1, ('0',): 1}, {(): 1, ('0', 1): -1, ('0',): 1}
@@ -224,12 +224,12 @@ def test_ising_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == HOIO(temp3[0])*-1
+    assert g == PCSO(temp3[0])*-1
 
 
-def test_ising_multiplication():
+def test_quso_multiplication():
 
-    temp = HOIO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {(): 3, (1, '0'): 6}, {(): 3, ('0', 1): 6}
     temp2 = {(): .5, (1, '0'): 1}, {(): .5, ('0', 1): 1}
     temp3 = {(1, '0'): 1}, {('0', 1): 1}
@@ -303,29 +303,29 @@ def test_ising_multiplication():
     assert d ** 2 == d * d
     assert d ** 3 == d * d * d
 
-    d = HOIO({('0', 1): 1, ('1', 2): -1})**2
+    d = PCSO({('0', 1): 1, ('1', 2): -1})**2
     assert d ** 4 == d * d * d * d
 
 
 def test_properties():
 
-    temp = HOIO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCSO({('0', '0'): 1, ('0', 1): 2})
     assert temp.offset == 1
 
-    d = HOIO()
+    d = PCSO()
     d[(0,)] += 1
     d[(1,)] += 2
-    assert d == d.to_ising() == {(0,): 1, (1,): 2}
+    assert d == d.to_quso() == {(0,): 1, (1,): 2}
     assert d.mapping == d.reverse_mapping == {0: 0, 1: 1}
 
     d.set_mapping({1: 0, 0: 1})
-    assert d.to_ising() == {(1,): 1, (0,): 2}
+    assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
 
 def test_round():
 
-    d = HOIO({(0,): 3.456, (1,): -1.53456})
+    d = PCSO({(0,): 3.456, (1,): -1.53456})
 
     assert round(d) == {(0,): 3, (1,): -2}
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
@@ -336,12 +336,12 @@ def test_round():
 def test_normalize():
 
     temp = {(0,): 4, (1,): -2}
-    d = HOIO(temp)
+    d = PCSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
     temp = {(0,): -4, (1,): 2}
-    d = HOIO(temp)
+    d = PCSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
@@ -349,7 +349,7 @@ def test_normalize():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    d = HOIO()
+    d = PCSO()
     d[(0,)] -= a
     d[(0, 1)] += 2
     d[(1,)] += b
@@ -368,7 +368,7 @@ def test_symbols():
 
 def test_convert_solution_all_1s():
 
-    d = HOIO({(0,): 1})
+    d = PCSO({(0,): 1})
     assert d.convert_solution({0: 0}) == {0: 1}
     assert d.convert_solution({0: -1}) == {0: -1}
     assert d.convert_solution({0: 1}) == {0: 1}
@@ -381,24 +381,24 @@ def test_spin_var():
     assert all(z[i] == {(i,): 1} for i in range(5))
     assert z[0] * z[1] * z[2] == {(0, 1, 2): 1}
     assert sum(z) == {(i,): 1 for i in range(5)}
-    assert isinstance(z[0], HOIO)
+    assert isinstance(z[0], PCSO)
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
-def test_hoio_eq_constraint():
+def test_pcso_eq_constraint():
 
     lam = Symbol('lam')
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     }))
     H.add_constraint_eq_zero(
-        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): -1}),
+        pubo_to_puso({('a',): 1, ('b',): 1, ('b', 'c'): -1}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -432,36 +432,36 @@ def test_hoio_eq_constraint():
     ))
 
 
-def test_hoio_ne_constraint_logtrick():
+def test_pcso_ne_constraint_logtrick():
 
     for i in range(1 << 4):
-        P = pubo_to_hising(integer_var('a', 4)) - i
-        H = HOIO().add_constraint_ne_zero(P)
+        P = pubo_to_puso(integer_var('a', 4)) - i
+        H = PCSO().add_constraint_ne_zero(P)
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
 
-def test_hoio_ne_constraint():
+def test_pcso_ne_constraint():
 
     for i in range(1 << 3):
-        P = pubo_to_hising(integer_var('a', 3)) - i
-        H = HOIO().add_constraint_ne_zero(P, log_trick=False)
+        P = pubo_to_puso(integer_var('a', 3)) - i
+        H = PCSO().add_constraint_ne_zero(P, log_trick=False)
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
 
-def test_hoio_lt_constraint_logtrick():
+def test_pcso_lt_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     }))
     H.add_constraint_lt_zero(
-        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
+        pubo_to_puso({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -498,18 +498,18 @@ def test_hoio_lt_constraint_logtrick():
     ))
 
 
-def test_hoio_lt_constraint():
+def test_pcso_lt_constraint():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     }))
     H.add_constraint_lt_zero(
-        pubo_to_hising({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
+        pubo_to_puso({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -520,7 +520,7 @@ def test_hoio_lt_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -546,21 +546,21 @@ def test_hoio_lt_constraint():
     ))
 
 
-def test_hoio_le_constraint_logtrick():
+def test_pcso_le_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     }))
     H.add_constraint_le_zero(
-        pubo_to_hising(
+        pubo_to_puso(
             {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3}
         ),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -597,21 +597,21 @@ def test_hoio_le_constraint_logtrick():
     ))
 
 
-def test_hoio_le_constraint():
+def test_pcso_le_constraint():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     }))
     H.add_constraint_le_zero(
-        pubo_to_hising(
+        pubo_to_puso(
             {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3}
         ),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -622,7 +622,7 @@ def test_hoio_le_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -648,18 +648,18 @@ def test_hoio_le_constraint():
     ))
 
 
-def test_hoio_gt_constraint_logtrick():
+def test_pcso_gt_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     }))
     H.add_constraint_gt_zero(
-        pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
+        pubo_to_puso({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -670,7 +670,7 @@ def test_hoio_gt_constraint_logtrick():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -696,18 +696,18 @@ def test_hoio_gt_constraint_logtrick():
     ))
 
 
-def test_hoio_gt_constraint():
+def test_pcso_gt_constraint():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     }))
     H.add_constraint_gt_zero(
-        pubo_to_hising({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
+        pubo_to_puso({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 0})
     obj = -4
 
     problem = H.subs(lam, 1)
@@ -718,7 +718,7 @@ def test_hoio_gt_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -744,21 +744,21 @@ def test_hoio_gt_constraint():
     ))
 
 
-def test_hoio_ge_constraint_logtrick():
+def test_pcso_ge_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     }))
     H.add_constraint_ge_zero(
-        pubo_to_hising(
+        pubo_to_puso(
             {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3}
         ),
         lam=lam
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -795,21 +795,21 @@ def test_hoio_ge_constraint_logtrick():
     ))
 
 
-def test_hoio_ge_constraint():
+def test_pcso_ge_constraint():
 
     lam = Symbol("lam")
 
-    H = HOIO(pubo_to_hising({
+    H = PCSO(pubo_to_puso({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     }))
     H.add_constraint_ge_zero(
-        pubo_to_hising(
+        pubo_to_puso(
             {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3}
         ),
         lam=lam, log_trick=False
     )
-    solution = binary_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
+    solution = boolean_to_spin({'c': 1, 'b': 1, 'a': 1, 'd': 0})
     obj = -8
 
     problem = H.subs(lam, .5)
@@ -820,7 +820,7 @@ def test_hoio_ge_constraint():
     ))
 
     e, sol = solve_pubo_bruteforce(problem.to_pubo())
-    sol = problem.convert_solution(sol)
+    sol = problem.convert_solution(sol, spin=False)
     sol = problem.remove_ancilla_from_solution(sol)
     assert all((
         not problem.is_solution_valid(sol),
@@ -846,43 +846,43 @@ def test_hoio_ge_constraint():
     ))
 
 
-def test_hoio_constraints_warnings():
+def test_pcso_constraints_warnings():
 
     with assert_warns(QUBOVertWarning):  # qlwayss satisfied
-        HOIO().add_constraint_eq_zero({(): 0})
+        PCSO().add_constraint_eq_zero({(): 0})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_eq_zero({(): 1, (0,): -.5})
+        PCSO().add_constraint_eq_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_eq_zero({(): -1, (0,): .5})
+        PCSO().add_constraint_eq_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_lt_zero({(): 1, (0,): -.5})
+        PCSO().add_constraint_lt_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_lt_zero({(): 1, (0,): -1})
+        PCSO().add_constraint_lt_zero({(): 1, (0,): -1})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOIO().add_constraint_lt_zero({(): -1, (0,): -.5})
+        PCSO().add_constraint_lt_zero({(): -1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_le_zero({(): 1, (0,): -.5})
+        PCSO().add_constraint_le_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOIO().add_constraint_le_zero({(): -1, (0,): -.5})
+        PCSO().add_constraint_le_zero({(): -1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_gt_zero({(): -1, (0,): .5})
+        PCSO().add_constraint_gt_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_gt_zero({(): -1, (0,): 1})
+        PCSO().add_constraint_gt_zero({(): -1, (0,): 1})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOIO().add_constraint_gt_zero({(): 1, (0,): .5})
+        PCSO().add_constraint_gt_zero({(): 1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOIO().add_constraint_ge_zero({(): -1, (0,): .5})
+        PCSO().add_constraint_ge_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOIO().add_constraint_ge_zero({(): 1, (0,): .5})
+        PCSO().add_constraint_ge_zero({(): 1, (0,): .5})

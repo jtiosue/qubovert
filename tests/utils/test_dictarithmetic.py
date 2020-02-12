@@ -195,6 +195,17 @@ def test_normalize():
     assert d == {k: v / 4 for k, v in temp.items()}
 
 
+def test_subgraph():
+
+    G = DictArithmetic({(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2})
+
+    assert G.subgraph({0, 2}, {1: 5}) == {(0,): -17, (0, 2): -1, (): 10}
+    assert G.subgraph({0, 2}) == {(0, 2): -1, (0,): 3}
+    assert G.subgraph({0, 1}, {2: -10}) == {(0, 1): -4, (0,): 13, (1,): 2}
+    assert G.subgraph({0, 1}) == {(0, 1): -4, (0,): 3, (1,): 2}
+    assert type(G.subgraph({0, 1})) == DictArithmetic
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')

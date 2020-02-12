@@ -19,7 +19,7 @@ the problem classes.
 
 """
 
-from qubovert.utils import Conversions
+from qubovert.utils import Conversions, PUBOMatrix
 
 
 __all__ = 'Problem',
@@ -28,7 +28,7 @@ __all__ = 'Problem',
 class Problem(Conversions):
     """Problem.
 
-    This acts a parent class to all the QUBO and Ising conversion problem
+    This acts a parent class to all the QUBO and QUSO conversion problem
     classes. The ``__new__`` method keeps track of the problem args. The
     ``repr`` method uses those input args, such that
     ``eval(repr(cls)) == cls``. Finally, we define a ``__eq__`` method to
@@ -36,9 +36,9 @@ class Problem(Conversions):
     implemented in child classes.
 
     Subclasses `must` define at least one of the following methods:
-        ``to_qubo``, ``to_ising``.
+        ``to_qubo``, ``to_quso``.
     If at least one of them is defined, then they will both work. The same is
-    true for ``to_pubo`` and ``to_hising``.
+    true for ``to_pubo`` and ``to_puso``.
     ``Problem`` inherits from ``Conversions``, for more details see
     ``help(qubovert.utils.Conversions)``
     """
@@ -71,13 +71,13 @@ class Problem(Conversions):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO/Ising uses. Should be
+        The number of binary variables that the QUBO/QUSO uses. Should be
         implemented in the child class.
 
         Return
         -------
         num : int.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         return self.to_qubo().num_binary_variables
@@ -155,18 +155,18 @@ class Problem(Conversions):
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool.
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -187,18 +187,18 @@ class Problem(Conversions):
         ----------
         solution : iterable or dict.
             solution can be the output of ``convert_solution``,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool.
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -215,7 +215,7 @@ class Problem(Conversions):
         Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
         PROBLEMS! This is implemented in the parent ``qubovert.utils.Problem``
         class. Some problems use a lot of slack binary variables for their
-        QUBO/Ising formulations. If this is the case, then the child class
+        QUBO/QUSO formulations. If this is the case, then the child class
         for this problem should override this method with a better bruteforce
         solver. But, for problems that do not use slack variables, this
         method will suffice. It converts the problem to QUBO, solves it with
@@ -247,3 +247,20 @@ class Problem(Conversions):
         if all_solutions:
             return [self.convert_solution(x) for x in sol]
         return self.convert_solution(sol)
+
+    def to_pubo(self, *args, **kwargs):
+        """to_pubo.
+
+        Since the model is already degree two, ``self.to_pubo`` will simply
+        return ``qubovert.utils.PUBOMatrix(self.to_qubo(*args, **kwargs))``.
+
+        Return
+        ------
+        P : qubovert.utils.PUBOMatrix object.
+            The upper triangular PUBO matrix, a PUBOMatrix object.
+            For most practical purposes, you can use PUBOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.PUBOMatrix)``.
+
+        """
+        return PUBOMatrix(self.to_qubo(*args, **kwargs))

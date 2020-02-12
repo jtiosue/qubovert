@@ -17,7 +17,10 @@ Contains tests for the BILP class.
 """
 
 from qubovert.problems import BILP
-from qubovert.utils import solve_qubo_bruteforce, solve_ising_bruteforce
+from qubovert.utils import (
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
+)
 from numpy import allclose
 from numpy.testing import assert_raises
 
@@ -78,11 +81,11 @@ def test_bilp_qubo_numvars():
     )
 
 
-# ising
+# quso
 
-def test_bilp_ising_solve():
+def test_bilp_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising())
+    e, sol = solve_quso_bruteforce(problem.to_quso())
     conv_solution = problem.convert_solution(sol)
 
     assert allclose(conv_solution, solution)
@@ -91,7 +94,33 @@ def test_bilp_ising_solve():
     assert allclose(e, 2)
 
 
-def test_bilp_ising_numvars():
+def test_bilp_quso_numvars():
 
-    L = problem.to_ising()
+    L = problem.to_quso()
     assert L.num_binary_variables == problem.num_binary_variables
+
+
+# PUBO
+
+def test_bilp_pubo_solve():
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    conv_solution = problem.convert_solution(sol)
+
+    assert allclose(conv_solution, solution)
+    assert problem.is_solution_valid(conv_solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, 2)
+
+
+# puso
+
+def test_bilp_puso_solve():
+
+    e, sol = solve_puso_bruteforce(problem.to_puso())
+    conv_solution = problem.convert_solution(sol)
+
+    assert allclose(conv_solution, solution)
+    assert problem.is_solution_valid(conv_solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, 2)

@@ -439,8 +439,8 @@ class PUBOMatrix(DictArithmetic):
         Parameters
         ----------
         x : dict or iterable.
-            Maps binary variable indices to their binary values, 0 or 1. Ie
-            ``x[i]`` must be the binary value of variable i.
+            Maps boolean variable indices to their boolean values, 0 or 1. Ie
+            ``x[i]`` must be the boolean value of variable i.
 
         Return
         -------

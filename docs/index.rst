@@ -14,14 +14,14 @@ Indices and tables
 
 .. toctree::
    :maxdepth: 2
-   :caption: Binary/Ising Optimization
+   :caption: Boolean/Spin Optimization
 
-   BO/HOBO
-   BO/HOIO
+   BO/PCBO
+   BO/PCSO
    BO/PUBO
-   BO/HIsing
+   BO/PUSO
    BO/QUBO
-   BO/Ising
+   BO/QUSO
    BO/sat
 
 

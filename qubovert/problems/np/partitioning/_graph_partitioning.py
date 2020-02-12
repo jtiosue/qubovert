@@ -19,8 +19,8 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-# from qubovert.utils import IsingMatrix
-from qubovert import HOIO
+# from qubovert.utils import QUSOMatrix
+from qubovert import PCSO
 from qubovert.problems import Problem
 
 
@@ -31,7 +31,7 @@ class GraphPartitioning(Problem):
     """GraphPartitioning.
 
     Class to manage converting (Weighted) Graph Partitioning to and from its
-    QUBO and Ising formluations. Based on the paper hereforth designated
+    QUBO and QUSO formluations. Based on the paper hereforth designated
     [Lucas].
 
     The goal of the Graph Partitioning problem is to partition the verticies
@@ -190,24 +190,24 @@ class GraphPartitioning(Problem):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO and Ising use.
+        The number of binary variables that the QUBO and QUSO use.
 
         Return
         -------
         num : integer.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         return self._N
 
-    def to_ising(self, A=None, B=1):
-        r"""to_ising.
+    def to_quso(self, A=None, B=1):
+        r"""to_quso.
 
-        Create and return the graph partitioning problem in Ising form
+        Create and return the graph partitioning problem in QUSO form
         following section 2.2 of [Lucas]. A and B are parameters to enforce
         constraints.
 
-        It is formatted such that the solution to the Ising formulation is
+        It is formatted such that the solution to the QUSO formulation is
         equal to the the total number of edges connecting the two
         partitions (or the total weight if we are solving weighted
         partitioning).
@@ -226,27 +226,27 @@ class GraphPartitioning(Problem):
 
         Return
         -------
-        L : qubovert.utils.IsingMatrix object.
-            For most practical purposes, you can use IsingMatrix in the
+        L : qubovert.utils.QUSOMatrix object.
+            For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
-            ``help(qubovert.utils.IsingMatrix)``.
+            ``help(qubovert.utils.QUSOMatrix)``.
 
         Example
         --------
         >>> problem = GraphPartitioning({(0, 1), (1, 2), (0, 3)})
-        >>> L = problem.to_ising()
+        >>> L = problem.to_quso()
 
         """
         # all naming conventions follow the paper listed in the docstring
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-#        L = IsingMatrix()
+#        L = QUSOMatrix()
 #
-#        # we don't use HOBO().to_ising because we want to keep our mapping.
+#        # we don't use PCBO().to_quso because we want to keep our mapping.
 #
 #        # encode H_A (equation 8)
-#        L += HOIO().add_constraint_eq_zero(
+#        L += PCSO().add_constraint_eq_zero(
 #            {(i,): 1 for i in range(self._N)}, lam=A)
 #
 #        # encode H_B (equation 9)
@@ -257,7 +257,7 @@ class GraphPartitioning(Problem):
 #
 #        return L
 
-        H = HOIO()
+        H = PCSO()
         H.set_mapping(self._vertex_to_index)
 
         # encode H_A (equation 8)
@@ -268,29 +268,29 @@ class GraphPartitioning(Problem):
         for e, w in self._edges.items():
             H[e] -= w * B / 2
 
-        return H.to_ising()
+        return H.to_quso()
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
-        Convert the solution to the QUBO or Ising to the solution to the
+        Convert the solution to the QUBO or QUSO to the solution to the
         Graph Partitioning problem.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
@@ -334,18 +334,18 @@ class GraphPartitioning(Problem):
         ----------
         solution : iterable or dict.
             solution can be the output of GraphPartitioning.convert_solution,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
-            binary {0, 1} formulation of the problem or the spin {1, -1}
+            boolean {0, 1} formulation of the problem or the spin {1, -1}
             formulation of the problem. This parameter usually does not matter,
             and it will be ignored if possible. The only time it is used is if
             ``solution`` contains all 1's. In this case, it is unclear whether
-            ``solution`` came from a spin or binary formulation of the
+            ``solution`` came from a spin or boolean formulation of the
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
