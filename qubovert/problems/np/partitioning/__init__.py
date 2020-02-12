@@ -14,7 +14,7 @@
 
 """``partitioning`` contains many NP partitioning problems.
 
-Here we have the QUBO/Ising conversions for common partitioning probems,
+Here we have the QUBO/QUSO conversions for common partitioning probems,
 The conversions are based on [Lucas].
 
 References

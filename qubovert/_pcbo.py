@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_hobo.py.
+"""_pcbo.py.
 
-Contains the HOBO class. See ``help(qubovert.HOBO)``.
+Contains the PCBO class. See ``help(qubovert.PCBO)``.
 
 """
 
@@ -24,20 +24,20 @@ from .sat import OR, XOR, ONE, NOT, AND
 from numpy import log2, ceil
 
 
-__all__ = 'HOBO', 'boolean_var', 'integer_var'
+__all__ = 'PCBO', 'boolean_var', 'integer_var'
 
 
 # special constraint forms
 
-def _special_constraints_eq_zero(hobo, P, lam):
+def _special_constraints_eq_zero(pcbo, P, lam):
     """_special_constraints_eq_zero.
 
     See if the constraint that ``P == 0`` matches any special forms.
 
     Parameters
     ----------
-    hobo : HOBO object.
-        The HOBO to add the constraint to.
+    pcbo : PCBO object.
+        The PCBO to add the constraint to.
     P : PUBO object.
         The PUBO constraint such that ``P == 0``.
         are present.
@@ -47,7 +47,7 @@ def _special_constraints_eq_zero(hobo, P, lam):
     Return
     ------
     success : bool.
-        True if a special constraint was found and added to ``hobo``, else
+        True if a special constraint was found and added to ``pcbo``, else
         False.
 
     """
@@ -57,7 +57,7 @@ def _special_constraints_eq_zero(hobo, P, lam):
         if v[0] == - v[1] and (len(k[0]), len(k[1])) in ((1, 2), (2, 1)):
             a, = k[0] if len(k[0]) == 1 else k[1]
             b, c = k[0] if len(k[0]) == 2 else k[1]
-            hobo += HOBO().add_constraint_eq_AND(a, b, c, lam=lam)
+            pcbo += PCBO().add_constraint_eq_AND(a, b, c, lam=lam)
             return True
 
     # if P is of the form z == 1 - x * y. ie z == NAND(x, y)
@@ -69,15 +69,15 @@ def _special_constraints_eq_zero(hobo, P, lam):
     return False
 
 
-def _special_constraints_le_zero(hobo, P, lam):
+def _special_constraints_le_zero(pcbo, P, lam):
     """_special_constraints_le_zero.
 
     See if the constraint that ``P <= 0`` matches any special forms.
 
     Parameters
     ----------
-    hobo : HOBO object.
-        The HOBO to add the constraint to.
+    pcbo : PCBO object.
+        The PCBO to add the constraint to.
     P : PUBO object.
         The PUBO constraint such that ``P <= 0``.
         are present.
@@ -87,13 +87,13 @@ def _special_constraints_le_zero(hobo, P, lam):
     Return
     ------
     success : bool.
-        True if a special constraint was found and added to ``hobo``, else
+        True if a special constraint was found and added to ``pcbo``, else
         False.
 
     """
     # if P is of the form sum(x_i) <= 1.
     if P.offset == -1 and all(x == 1 for x in (P + 1).values()):
-        hobo += lam * P * (P + 1) / 2
+        pcbo += lam * P * (P + 1) / 2
         return True
 
     return False
@@ -162,7 +162,7 @@ def _get_bounds(P, bounds):
 def boolean_var(name):
     """boolean_var.
 
-    Create a HOBO (see ``qubovert.HOBO``) from a single boolean variable.
+    Create a PCBO (see ``qubovert.PCBO``) from a single boolean variable.
 
     Parameters
     ----------
@@ -171,44 +171,44 @@ def boolean_var(name):
 
     Return
     ------
-    hobo : qubovert.HOBO object.
+    pcbo : qubovert.PCBO object.
         The model representing the boolean variable.
 
     Examples
     --------
-    >>> from qubovert import boolean_var, HOBO
+    >>> from qubovert import boolean_var, PCBO
     >>>
     >>> x0 = boolean_var("x0")
     >>> print(x0)
     {('x0',): 1}
-    >>> print(isinstance(x0, HOBO))
+    >>> print(isinstance(x0, PCBO))
     True
 
     >>> x = [boolean_var('x{}'.format(i)) for i in range(5)]
-    >>> hobo = sum(x)
-    >>> print(hobo)
+    >>> pcbo = sum(x)
+    >>> print(pcbo)
     {('x0',): 1, ('x1',): 1, ('x2',): 1, ('x3',): 1, ('x4',): 1}
-    >>> hobo **= 2
-    >>> print(hobo)
+    >>> pcbo **= 2
+    >>> print(pcbo)
     {('x0',): 1, ('x0', 'x1'): 2, ('x2', 'x0'): 2, ('x3', 'x0'): 2,
      ('x4', 'x0'): 2, ('x1',): 1, ('x2', 'x1'): 2, ('x3', 'x1'): 2,
      ('x4', 'x1'): 2, ('x2',): 1, ('x2', 'x3'): 2, ('x2', 'x4'): 2, ('x3',): 1,
      ('x4', 'x3'): 2, ('x4',): 1}
-    >>> hobo *= -1
-    >>> print(hobo.solve_bruteforce())
+    >>> pcbo *= -1
+    >>> print(pcbo.solve_bruteforce())
     {'x0': 1, 'x1': 1, 'x2': 1, 'x3': 1, 'x4': 1}
-    >>> hobo.add_constraint_eq_zero(x[0] + x[1])
-    >>> print(hobo.solve_bruteforce())
+    >>> pcbo.add_constraint_eq_zero(x[0] + x[1])
+    >>> print(pcbo.solve_bruteforce())
     {'x0': 0, 'x1': 0, 'x2': 1, 'x3': 1, 'x4': 1}
 
     """
-    return HOBO({(name,): 1})
+    return PCBO({(name,): 1})
 
 
 def integer_var(prefix, num_bits, log_trick=True):
     """integer_var.
 
-    Return a HOBO object representing an integer variable with `num_bits`
+    Return a PCBO object representing an integer variable with `num_bits`
     bits.
 
     Parameters
@@ -222,7 +222,7 @@ def integer_var(prefix, num_bits, log_trick=True):
 
     Return
     ------
-    i : qubovert.HOBO object.
+    i : qubovert.PCBO object.
 
     Example
     -------
@@ -237,7 +237,7 @@ def integer_var(prefix, num_bits, log_trick=True):
     {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
 
     """
-    var = HOBO()
+    var = PCBO()
     for i in range(num_bits):
         var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
     return var
@@ -245,14 +245,14 @@ def integer_var(prefix, num_bits, log_trick=True):
 
 # main class
 
-class HOBO(PUBO):
-    """HOBO.
+class PCBO(PUBO):
+    """PCBO.
 
-    This class deals with Higher Order Boolean Optimization problems. HOBO
-    inherits some methods and attributes from the ``PUBO`` class. See
+    This class deals with Polynomial Constrained Boolean Optimization problems.
+    PCBO inherits some methods and attributes from the ``PUBO`` class. See
     ``help(qubovert.PUBO)``.
 
-    ``HOBO`` has all the same methods as ``PUBO``, but adds some constraint
+    ``PCBO`` has all the same methods as ``PUBO``, but adds some constraint
     methods; namely
 
     - ``add_constraint_eq_zero(P, lam=1, ...)`` enforces that ``P == 0`` by
@@ -290,20 +290,20 @@ class HOBO(PUBO):
     - Variables names that begin with ``"__a"`` should not be used since they
       are used internally to deal with some ancilla variables to enforce
       constraints.
-    - The ``self.solve_bruteforce`` method will solve the HOBO ensuring that
+    - The ``self.solve_bruteforce`` method will solve the PCBO ensuring that
       all the inputted constraints are satisfied. Whereas
       ``qubovert.utils.solve_pubo_bruteforce(self)`` or
       ``qubovert.utils.solve_pubo_bruteforce(self.to_pubo())`` will solve the
-      PUBO created from the HOBO. If the inputted constraints are not enforced
+      PUBO created from the PCBO. If the inputted constraints are not enforced
       strong enough (ie too small lagrange multipliers) then these may not give
       the correct result, whereas ``self.solve_bruteforce()`` will always give
       the correct result (ie one that satisfies all the constraints).
 
     Examples
     --------
-    See ``qubovert.PUBO`` for more examples of using HOBO without constraints.
+    See ``qubovert.PUBO`` for more examples of using PCBO without constraints.
 
-    >>> H = HOBO()
+    >>> H = PCBO()
     >>> H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
     >>> H
     {('a', 1, 2): -4, (1, 2): 3, (): 1}
@@ -311,7 +311,7 @@ class HOBO(PUBO):
     >>> H
     {('a', 1, 2): -4, (1, 2): 3}
 
-    >>> H = HOBO()
+    >>> H = PCBO()
     >>>
     >>> # minimize -x_0 - x_1 - x_2
     >>> for i in (0, 1, 2):
@@ -333,23 +333,23 @@ class HOBO(PUBO):
     >>> solutions = [H.convert_solution(sol)
     >>>              for sol in Q.solve_bruteforce(all_solutions=True)]
     >>> print(solutions)
-    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the PCBO solution!
     >>>
-    >>> L = H.to_ising()
+    >>> L = H.to_quso()
     >>> solutions = [H.convert_solution(sol)
     >>>              for sol in L.solve_bruteforce(all_solutions=True)]
     >>> print(solutions)
-    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+    >>> # [{0: 0, 1: 1, 2: 0}]  # matches the PCBO solution!
 
     Enforce that c == a b
 
-    >>> H = HOBO().add_constraint_eq_AND('c', 'a', 'b')
+    >>> H = PCBO().add_constraint_eq_AND('c', 'a', 'b')
     >>> H
     {('c',): 3, ('b', 'a'): 1, ('c', 'a'): -2, ('c', 'b'): -2}
 
     >>> from any_module import qubo_solver
     >>> # or from qubovert.utils import solve_qubo_bruteforce as qubo_solver
-    >>> H = HOBO()
+    >>> H = PCBO()
     >>>
     >>> # make it favorable to AND variables a and b, and variables b and c
     >>> H.add_constraint_AND('a', 'b').add_constraint_AND('b', 'c')
@@ -379,35 +379,35 @@ class HOBO(PUBO):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with higher order boolean optimization problems.
-        Note that it is generally more efficient to initialize an empty HOBO
-        object and then build the HOBO, rather than initialize a HOBO object
+        This class deals with polynomial constrained boolean optimization.
+        Note that it is generally more efficient to initialize an empty PCBO
+        object and then build the PCBO, rather than initialize a PCBO object
         with an already built dict.
 
         Parameters
         ----------
         arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
-            the class. Alternatively, ``args[0]`` can be a HOBO object.
+            the class. Alternatively, ``args[0]`` can be a PCBO object.
 
         Examples
         -------
-        >>> hobo = HOBO()
-        >>> hobo[('a',)] += 5
-        >>> hobo[(0, 'a')] -= 2
-        >>> hobo -= 1.5
-        >>> hobo
+        >>> pcbo = PCBO()
+        >>> pcbo[('a',)] += 5
+        >>> pcbo[(0, 'a')] -= 2
+        >>> pcbo -= 1.5
+        >>> pcbo
         {('a',): 5, ('a', 0): -2, (): -1.5}
-        >>> hobo.add_constraint_eq_zero({('a',): 1}, lam=5)
-        >>> hobo
+        >>> pcbo.add_constraint_eq_zero({('a',): 1}, lam=5)
+        >>> pcbo
         {('a',): 10, ('a', 0): -2, (): -1.5}
 
-        >>> hobo = HOBO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
-        >>> hobo
+        >>> pcbo = PCBO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
+        >>> pcbo
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        # use self.__class__ here because HOIO uses this code as well.
+        # use self.__class__ here because PCSO uses this code as well.
         super(self.__class__, self).__init__(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], self.__class__):
             self._constraints = args[0].constraints
@@ -418,17 +418,17 @@ class HOBO(PUBO):
     def update(self, *args, **kwargs):
         """update.
 
-        Update the HOBO but following all the conventions of this class.
+        Update the PCBO but following all the conventions of this class.
 
         Parameters
         ----------
-        arguments : defines a dictionary or HOBO.
+        arguments : defines a dictionary or PCBO.
             Ie ``d = dict(*args, **kwargs)``.
             Each element in d will be added in place to this instance following
             all the required convensions.
 
         """
-        # use self.__class__ here because HOIO uses this code as well.
+        # use self.__class__ here because PCSO uses this code as well.
         super(self.__class__, self).update(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], self.__class__):
             for k, v in args[0]._constraints:
@@ -438,7 +438,7 @@ class HOBO(PUBO):
     def constraints(self):
         """constraints.
 
-        Return the constraints of the HOBO.
+        Return the constraints of the PCBO.
 
         Return
         ------
@@ -491,13 +491,13 @@ class HOBO(PUBO):
     def num_ancillas(self):
         """num_ancillas.
 
-        Return the number of ancilla variables introduced to the HOBO in
+        Return the number of ancilla variables introduced to the PCBO in
         order to enforce the inputted constraints.
 
         Returns
         -------
         num : int.
-            Number of ancillas in the HOBO.
+            Number of ancillas in the PCBO.
 
         """
         return self._ancilla
@@ -521,7 +521,7 @@ class HOBO(PUBO):
     def remove_ancilla_from_solution(cls, solution):
         """remove_ancilla_from_solution.
 
-        Take a solution to the HOBO and remove all the ancilla variables, (
+        Take a solution to the PCBO and remove all the ancilla variables, (
         represented by `_a` prefixes).
 
         Parameters
@@ -529,7 +529,7 @@ class HOBO(PUBO):
         solution : dict.
             Must be the solution in terms of the original variables. Thus if
             ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
             formulations, then you should first call ``self.convert_solution``.
             See ``help(self.convert_solution)``.
 
@@ -551,7 +551,7 @@ class HOBO(PUBO):
         solution : dict.
             Must be the solution in terms of the original variables. Thus if
             ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
             formulations, then you should first call ``self.convert_solution``.
             See ``help(self.convert_solution)``.
 
@@ -591,7 +591,7 @@ class HOBO(PUBO):
     def __round__(self, ndigits=None):
         """round.
 
-        Round values of the HOBO object.
+        Round values of the PCBO object.
 
         Parameters
         ----------
@@ -600,13 +600,13 @@ class HOBO(PUBO):
 
         Returns
         -------
-        res : HOBO object.
+        res : PCBO object.
             Copy of self but with each value rounded to ``ndigits`` decimal
             digits. Each value has a type according to the docstring
             specifications of ``round``, see ``help(round)``.
 
         """
-        # use self.__class__ here because HOIO uses this code as well.
+        # use self.__class__ here because PCSO uses this code as well.
         d = super(self.__class__, self).__round__(ndigits)
         d._constraints = self.constraints
         return d
@@ -625,11 +625,11 @@ class HOBO(PUBO):
 
         Returns
         -------
-        res : HOBO object.
+        res : PCBO object.
             Same as ``self`` but with all the symbols replaced with values.
 
         """
-        # use self.__class__ here because HOIO uses this code as well.
+        # use self.__class__ here because PCSO uses this code as well.
         d = super(self.__class__, self).subs(*args, **kwargs)
         d._constraints = {
             k: [P.subs(*args, **kwargs) for P in v]
@@ -664,22 +664,22 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
         The following enforces that :math:`\prod_{i=0}^{3} x_i == 0`.
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_zero({(0, 1, 2, 3): 1})
         >>> H
         {(0, 1, 2, 3): 1}
 
         The following enforces that :math:`\sum_{i=1}^{3} i x_i x_{i+1} == 0`.
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_zero({(1, 2): 1, (2, 3): 2, (3, 4): 3})
         >>> H
         {(1, 2): 1, (1, 2, 3): 4, (1, 2, 3, 4): 6,
@@ -687,7 +687,7 @@ class HOBO(PUBO):
 
         Here we show how operations can be strung together.
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_zero(
                 {(0, 1): 1}
             ).add_constraint_eq_zero(
@@ -758,8 +758,8 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -782,7 +782,7 @@ class HOBO(PUBO):
         --------
         Enforce that :math:`-x_a x_b x_c + x_a -4x_a x_b + 3x_c != 2`.
 
-        >>> H = HOBO().add_constraint_ne_zero(
+        >>> H = PCBO().add_constraint_ne_zero(
                 {('a', 'b', 'c'): -1, ('a',): 2,
                 ('a', 'b'): -4, ('c',): 3, (): -2}
             )
@@ -903,8 +903,8 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -917,7 +917,7 @@ class HOBO(PUBO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOBO()
+          >>> H = PCBO()
           >>> H.add_constraint_lt_zero({(0,): 1, (1,): 2, (2,): -.5, (): .4})
           >>> test_sol = {0: 0, 1: 0, 2: 1}
           >>> H.is_solution_valid(test_sol)
@@ -939,7 +939,7 @@ class HOBO(PUBO):
         --------
         Enforce that :math:`-x_a x_b x_c + x_a -4x_a x_b + 3x_c < 2`.
 
-        >>> H = HOBO().add_constraint_lt_zero(
+        >>> H = PCBO().add_constraint_lt_zero(
                 {('a', 'b', 'c'): -1, ('a',): 1,
                  ('a', 'b'): -4, ('c',): 3, (): -2}
             )
@@ -1014,8 +1014,8 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -1028,7 +1028,7 @@ class HOBO(PUBO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOBO()
+          >>> H = PCBO()
           >>> H.add_constraint_le_zero({(0,): 1, (1,): 2, (2,): -1.5, (): .4})
           >>> H
           {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '__a0'): 2,
@@ -1054,7 +1054,7 @@ class HOBO(PUBO):
         --------
         Enforce that :math:`-x_a x_b x_c + x_a -4x_a x_b + 3x_c \leq 2`.
 
-        >>> H = HOBO().add_constraint_le_zero(
+        >>> H = PCBO().add_constraint_le_zero(
                 {('a', 'b', 'c'): -1, ('a',): 1,
                  ('a', 'b'): -4, ('c',): 3, (): -2}
             )
@@ -1140,8 +1140,8 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -1154,7 +1154,7 @@ class HOBO(PUBO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOBO()
+          >>> H = PCBO()
           >>> H.add_constraint_gt_zero({(0,): -1, (1,): -2, (2,): .5, (): -.4})
           >>> test_sol = {0: 0, 1: 0, 2: 1}
           >>> H.is_solution_valid(test_sol)
@@ -1176,7 +1176,7 @@ class HOBO(PUBO):
         --------
         Enforce that :math:`x_a x_b x_c - x_a + 4x_a x_b - 3x_c > -2`.
 
-        >>> H = HOBO().add_constraint_gt_zero(
+        >>> H = PCBO().add_constraint_gt_zero(
                 {('a', 'b', 'c'): 1, ('a',): -1,
                  ('a', 'b'): 4, ('c',): -3, (): 2}
             )
@@ -1238,8 +1238,8 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -1252,7 +1252,7 @@ class HOBO(PUBO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOBO()
+          >>> H = PCBO()
           >>> H.add_constraint_ge_zero({(0,): -1, (1,): -2, (2,):1.5, (): -.4})
           >>> H
           {(0,): 1.7999999999999998, (0, 1): 4, (0, 2): -3.0, (0, '__a0'): 2,
@@ -1278,7 +1278,7 @@ class HOBO(PUBO):
         --------
         Enforce that :math:`x_a x_b x_c - x_a + 4x_a x_b - 3x_c \geq -2`.
 
-        >>> H = HOBO().add_constraint_ge_zero(
+        >>> H = PCBO().add_constraint_ge_zero(
                 {('a', 'b', 'c'): 1, ('a',): -1,
                  ('a', 'b'): 4, ('c',): -3, (): 2}
             )
@@ -1311,7 +1311,7 @@ class HOBO(PUBO):
     def add_constraint_eq_AND(self, a, *variables, lam=1):
         r"""add_constraint_eq_AND.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:`a = v_0 \land v_1 \land v_2 \land ...`,
         with a penalty factor
         ``lam``, where ``v_1 = variables[0]``, ``v_2 = variables[1]``, ...
@@ -1329,22 +1329,22 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_AND('a', 'b', 'c')  # enforce a == b AND c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce (a AND b AND c AND d) == 'e'
         >>> H.add_constraint_eq_AND('e', 'a', 'b', 'c', 'd')
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b, c = boolean_var('a'), boolean_var('b'), boolean_var('c')
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce that a == b AND c
         >>> H.add_constraint_eq_AND(a, b, c)
 
@@ -1372,7 +1372,7 @@ class HOBO(PUBO):
     def add_constraint_eq_OR(self, a, *variables, lam=1):
         r"""add_constraint_eq_OR.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:`v_0 \lor v_1 \lor v_2 \lor ... == a`,
         with a penalty factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ...
@@ -1390,16 +1390,16 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_OR('a', 'b', 'c')  # enforce a == b OR c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce a == b OR c OR d
         >>> H.add_constraint_eq_OR('a', 'b', 'c', 'd')
 
@@ -1414,7 +1414,7 @@ class HOBO(PUBO):
             P = a + b + c + b * c - 2 * a * (b + c)
             bounds = 0, 3
         else:
-            P = HOBO().add_constraint_NOR(*variables) - a
+            P = PCBO().add_constraint_NOR(*variables) - a
             bounds = -1, 1
 
         return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
@@ -1422,7 +1422,7 @@ class HOBO(PUBO):
     def add_constraint_eq_XOR(self, a, *variables, lam=1):
         r"""add_constraint_eq_XOR.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:`v_0 \oplus v_1 \oplus ... == a`
         with a penalty factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ...
@@ -1440,27 +1440,27 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_XOR('a', 'b', 'c')  # enforce a == b XOR c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce a == b XOR c XOR d
         >>> H.add_constraint_eq_XOR('a', 'b', 'c', 'd')
 
         """
-        P = HOBO().add_constraint_XNOR(*variables) - ONE(a)
+        P = PCBO().add_constraint_XNOR(*variables) - ONE(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_ONE(self, a, b, lam=1):
         r"""add_constraint_eq_ONE.
 
-        Add a penalty to the HOBO that enforces that :math:`a == b` with
+        Add a penalty to the PCBO that enforces that :math:`a == b` with
         a penalty factor ``lam``.
 
         Parameters
@@ -1474,18 +1474,18 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_ONE('a', 'b')  # enforce a == b
 
-        >>> from qubovert import HOBO, boolean_var
+        >>> from qubovert import PCBO, boolean_var
         >>> a, b = boolean_var('a'), boolean_var('b')
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_ONE(a, b)  # enforce a == b
 
         """
@@ -1495,7 +1495,7 @@ class HOBO(PUBO):
     def add_constraint_eq_NAND(self, a, *variables, lam=1):
         r"""add_constraint_eq_NAND.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:`\lnot (v_0 \land v_1 \land v_2 \land ...) == a`, with a
         penalty factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ...
@@ -1513,23 +1513,23 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_NAND('a', 'b', 'c')  # enforce a == b NAND c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce a == b NAND c NAND d
         >>> H.add_constraint_eq_NAND('a', 'b', 'c', 'd')
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b, c = boolean_var('a'), boolean_var('b'), boolean_var('c')
         >>> # enforce a == b NAND c
-        >>> H = HOBO().add_constraint_eq_NAND(a, b, c)
+        >>> H = PCBO().add_constraint_eq_NAND(a, b, c)
 
         """
         n = len(variables)
@@ -1548,7 +1548,7 @@ class HOBO(PUBO):
     def add_constraint_eq_NOR(self, a, *variables, lam=1):
         r"""add_constraint_eq_NOR.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:`\lnot(v_0 \lor v_1 \lor v_2 \lor ...) == a`,
         with a penalty factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ...
@@ -1566,20 +1566,20 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_NOR('a', 'b', 'c')  # enforce a == b NOR c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce a == b NOR c NOR d
         >>> H.add_constraint_eq_NOR('a', 'b', 'c', 'd')
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> # enforce a == b NOR c
         >>> a, b, c = boolean_var('a'), boolean_var('b'), boolean_var('c')
         >>> H.add_constraint_eq_NOR(a, b, c)
@@ -1595,7 +1595,7 @@ class HOBO(PUBO):
             P = 1 - a - b - c + b * c + 2 * a * (b + c)
             bounds = 0, 3
         else:
-            P = HOBO().add_constraint_OR(*variables) - a
+            P = PCBO().add_constraint_OR(*variables) - a
             bounds = -1, 1
 
         return self.add_constraint_eq_zero(P, lam=lam, bounds=bounds)
@@ -1603,7 +1603,7 @@ class HOBO(PUBO):
     def add_constraint_eq_XNOR(self, a, *variables, lam=1):
         r"""add_constraint_eq_XNOR.
 
-        Add a penalty to the HOBO that enforces that
+        Add a penalty to the PCBO that enforces that
         :math:\lnot(`v_0 \oplus v_1 \oplus ...) == a`
         with a penalty factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ...
@@ -1621,32 +1621,32 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_XNOR('a', 'b', 'c')  # enforce a == b XNOR c
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> # enforce a == b XNOR c XNOR d
         >>> H.add_constraint_eq_XNOR('a', 'b', 'c', 'd')
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b, c = boolean_var('a'), boolean_var('b'), boolean_var('c')
         >>> # enforce a == b XNOR c
-        >>> H = HOBO().add_constraint_eq_XNOR(a, b, c)
+        >>> H = PCBO().add_constraint_eq_XNOR(a, b, c)
 
         """
-        P = HOBO().add_constraint_XOR(*variables) - ONE(a)
+        P = PCBO().add_constraint_XOR(*variables) - ONE(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_NOT(self, a, b, lam=1):
         r"""NOT.
 
-        Add a penalty to the HOBO that enforces that :math:`\lnot a == b` with
+        Add a penalty to the PCBO that enforces that :math:`\lnot a == b` with
         a penalty factor ``lam``.
 
         Parameters
@@ -1660,27 +1660,27 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_eq_NOT('a', 'b')  # enforce NOT(a) == b
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> H.add_constraint_eq_NOT(a, b)  # enforce NOT(a) == b
 
         """
-        P = HOBO().add_constraint_ONE(a) - ONE(b)
+        P = PCBO().add_constraint_ONE(a) - ONE(b)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_AND(self, *variables, lam=1):
         r"""add_constraint_AND.
 
-        Add a penalty to the HOBO that is only zero when
+        Add a penalty to the PCBO that is only zero when
         :math:`a \land b \land c \land ...` is True, with a penalty factor
         ``lam``, where ``a = variables[0]``, ``b = variables[1]``, etc.
 
@@ -1695,25 +1695,25 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_AND('a', 'b')  # enforce a AND b
         >>> H
         {('b', 'a'): -1, (): 1}
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_AND('a', 'b', 'c', 'd')
         >>> # enforce a AND b AND c AND d
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a AND b
-        >>> H = HOBO().add_constraint_AND(a, b)
+        >>> H = PCBO().add_constraint_AND(a, b)
 
         """
         return self.add_constraint_ONE(AND(*variables), lam=lam)
@@ -1721,7 +1721,7 @@ class HOBO(PUBO):
     def add_constraint_OR(self, *variables, lam=1):
         r"""add_constraint_OR.
 
-        Add a penalty to the HOBO that is only nonzero when
+        Add a penalty to the PCBO that is only nonzero when
         :math:`a \lor b \lor c \lor d \lor ...` is True, with a penalty factor
         ``lam``, where ``a = variables[0]``, ``b = variables[1]``, etc.
 
@@ -1736,24 +1736,24 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_OR('a', 'b')  # enforce a OR b
         >>> H
         {('a',): -1, ('b',): -1, ('b', 'a'): 1, (): 1}
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_OR('a', 'b', 'c', 'd')  # enforce a OR b OR c OR d
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a OR b
-        >>> H = HOBO().add_constraint_OR(a, b)
+        >>> H = PCBO().add_constraint_OR(a, b)
 
         """
         P = 1 - OR(*variables)
@@ -1762,7 +1762,7 @@ class HOBO(PUBO):
     def add_constraint_XOR(self, *variables, lam=1):
         r"""add_constraint_XOR.
 
-        Add a penalty to the HOBO that is only nonzero when
+        Add a penalty to the PCBO that is only nonzero when
         :math:`v_0 \oplus v_1 \oplus ... \oplus v_n` is True, with a penalty
         factor ``lam``, where ``v_0 = variables[0]``, ``v_1 = variables[1]``,
         ..., ``v_n = variables[-1]``. See ``qubovert.sat.XOR`` for the
@@ -1779,22 +1779,22 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_XOR('a', 'b')  # enforce a XOR b
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_XOR('a', 'b', 'c')  # enforce a XOR b XOR c
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a XOR b
-        >>> H = HOBO().add_constraint_XOR(a, b)
+        >>> H = PCBO().add_constraint_XOR(a, b)
 
         """
         P = 1 - XOR(*variables)
@@ -1803,7 +1803,7 @@ class HOBO(PUBO):
     def add_constraint_ONE(self, a, lam=1):
         r"""add_constraint_ONE.
 
-        Add a penalty to the HOBO that is only nonzero when :math:`a == 1` is
+        Add a penalty to the PCBO that is only nonzero when :math:`a == 1` is
         True, with a penalty factor ``lam``.
 
         Parameters
@@ -1815,19 +1815,19 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_ONE('a')  # enforce a
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a = boolean_var('a')
         >>> # enforce a
-        >>> H = HOBO().add_constraint_ONE(a)
+        >>> H = PCBO().add_constraint_ONE(a)
 
         """
         return self.add_constraint_eq_zero(NOT(a), lam=lam, bounds=(0, 1))
@@ -1835,7 +1835,7 @@ class HOBO(PUBO):
     def add_constraint_NAND(self, *variables, lam=1):
         r"""add_constraint_NAND.
 
-        Add a penalty to the HOBO that is only zero when
+        Add a penalty to the PCBO that is only zero when
         :math:`\lnot (a \land b \land c \land ...)` is True, with a penalty
         factor ``lam``, where ``a = variables[0]``, ``b = variables[1]``, etc.
 
@@ -1850,23 +1850,23 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_NAND('a', 'b')  # enforce a NAND b
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_NAND('a', 'b', 'c', 'd')
         >>> # enforce a NAND b NAND c NAND d
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a NAND b
-        >>> H = HOBO().add_constraint_NAND(a, b)
+        >>> H = PCBO().add_constraint_NAND(a, b)
 
         """
         return self.add_constraint_NOT(AND(*variables), lam=lam)
@@ -1874,7 +1874,7 @@ class HOBO(PUBO):
     def add_constraint_NOR(self, *variables, lam=1):
         r"""add_constraint_NOR.
 
-        Add a penalty to the HOBO that is only nonzero when
+        Add a penalty to the PCBO that is only nonzero when
         :math:`\lnot(a \lor b \lor c \lor d \lor ...)` is True, with a penalty
         factor ``lam``, where ``a = variables[0]``, ``b = variables[1]``, etc.
 
@@ -1889,32 +1889,32 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_NOR('a', 'b')  # enforce a NOR b
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_NOR('a', 'b', 'c', 'd')
         >>> # enforce a NOR b NOR c NOR d
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a NOR b
-        >>> H = HOBO().add_constraint_NOR(a, b)
+        >>> H = PCBO().add_constraint_NOR(a, b)
 
         """
-        P = 1 - HOBO().add_constraint_OR(*variables)
+        P = 1 - PCBO().add_constraint_OR(*variables)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
 
     def add_constraint_XNOR(self, *variables, lam=1):
         r"""add_constraint_XNOR.
 
-        Add a penalty to the HOBO that is only nonzero when
+        Add a penalty to the PCBO that is only nonzero when
         :math:`\lnot(v_0 \oplus v_1 \oplus ... \oplus v_n)` is True, with a
         penalty  factor ``lam``, where ``v_0 = variables[0]``,
         ``v_1 = variables[1]``, ..., ``v_n = variables[-1]``. See
@@ -1932,31 +1932,31 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_XNOR('a', 'b')  # enforce a XNOR b
 
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_XNOR('a', 'b', 'c')  # enforce a XNOR b XNOR c
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> # enforce a XNOR b
-        >>> H = HOBO().add_constraint_XNOR(a, b)
+        >>> H = PCBO().add_constraint_XNOR(a, b)
 
         """
-        P = 1 - HOBO().add_constraint_XOR(*variables)
+        P = 1 - PCBO().add_constraint_XOR(*variables)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
 
     def add_constraint_NOT(self, a, lam=1):
         r"""add_constraint_NOT.
 
-        Add a penalty to the HOBO that is only nonzero when
+        Add a penalty to the PCBO that is only nonzero when
         :math:`\lnot a` is True, with a penalty factor ``lam``.
 
         Parameters
@@ -1968,21 +1968,21 @@ class HOBO(PUBO):
 
         Return
         ------
-        self : HOBO.
-            Updates the HOBO in place, but returns ``self`` so that operations
+        self : PCBO.
+            Updates the PCBO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
-        >>> H = HOBO()
+        >>> H = PCBO()
         >>> H.add_constraint_NOT('a')  # enforce not a
         >>> H
         {('a',): 1}
 
-        >>> from qubovert import boolean_var, HOBO
+        >>> from qubovert import boolean_var, PCBO
         >>> a = boolean_var('a')
         >>> # enforce not a
-        >>> H = HOBO().add_constraint_NOT(a)
+        >>> H = PCBO().add_constraint_NOT(a)
 
         """
         return self.add_constraint_eq_zero(ONE(a), lam=lam, bounds=(0, 1))

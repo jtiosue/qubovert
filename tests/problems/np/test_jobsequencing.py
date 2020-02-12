@@ -18,8 +18,8 @@ Contains tests for the JobSequencing class.
 
 from qubovert.problems import JobSequencing
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
 )
 from numpy import allclose
 
@@ -30,10 +30,10 @@ problem = JobSequencing(job_lengths, num_workers, log_trick=False)
 problem_log = JobSequencing(job_lengths, num_workers)
 Q = problem.to_qubo()
 Q_log = problem_log.to_qubo()
-L = problem.to_ising()
-L_log = problem_log.to_ising()
+L = problem.to_quso()
+L_log = problem_log.to_quso()
 P = problem.to_pubo()
-H = problem.to_hising()
+H = problem.to_puso()
 
 solutions = ({'job1', 'job3'}, {'job2'}), ({'job2'}, {'job1', 'job3'})
 obj_val = 3
@@ -112,11 +112,11 @@ def test_jobsequencing_qubo_numvars():
     )
 
 
-# ising
+# quso
 
-def test_jobsequencing_ising_logtrick_solve():
+def test_jobsequencing_quso_logtrick_solve():
 
-    e, sol = solve_ising_bruteforce(L_log)
+    e, sol = solve_quso_bruteforce(L_log)
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert problem_log.is_solution_valid(sol)
@@ -124,9 +124,9 @@ def test_jobsequencing_ising_logtrick_solve():
     assert allclose(e, obj_val)
 
 
-def test_jobsequencing_ising_solve():
+def test_jobsequencing_quso_solve():
 
-    e, sol = solve_ising_bruteforce(L)
+    e, sol = solve_quso_bruteforce(L)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert problem.is_solution_valid(sol)
@@ -134,12 +134,12 @@ def test_jobsequencing_ising_solve():
     assert allclose(e, obj_val)
 
 
-def test_jobsequencing_ising_logtrick_numvars():
+def test_jobsequencing_quso_logtrick_numvars():
 
     assert L_log.num_binary_variables == problem_log.num_binary_variables
 
 
-def test_jobsequencing_ising_numvars():
+def test_jobsequencing_quso_numvars():
 
     assert L.num_binary_variables == problem.num_binary_variables
 
@@ -156,11 +156,11 @@ def test_jobsequencing_pubo_solve():
     assert allclose(e, obj_val)
 
 
-# hising
+# puso
 
-def test_jobsequencing_hising_solve():
+def test_jobsequencing_puso_solve():
 
-    e, sol = solve_hising_bruteforce(H)
+    e, sol = solve_puso_bruteforce(H)
     solution = problem.convert_solution(sol)
     assert problem.is_solution_valid(solution)
     assert problem.is_solution_valid(sol)

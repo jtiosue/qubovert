@@ -18,8 +18,8 @@ Contains tests for the VertexCover class.
 
 from qubovert.problems import VertexCover
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
 )
 from numpy import allclose
 
@@ -67,11 +67,11 @@ def test_vertexcover_qubo_numvars():
     )
 
 
-# ising
+# quso
 
-def test_vertexcover_ising_solve():
+def test_vertexcover_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising())
+    e, sol = solve_quso_bruteforce(problem.to_quso())
     solution = problem.convert_solution(sol)
 
     assert solution == {"a", "c"}
@@ -80,9 +80,9 @@ def test_vertexcover_ising_solve():
     assert allclose(e, 2)
 
 
-def test_vertexcover_ising_numvars():
+def test_vertexcover_quso_numvars():
 
-    L = problem.to_ising()
+    L = problem.to_quso()
     assert L.num_binary_variables == problem.num_binary_variables
 
 
@@ -99,11 +99,11 @@ def test_vertexcover_pubo_solve():
     assert allclose(e, 2)
 
 
-# hising
+# puso
 
-def test_vertexcover_hising_solve():
+def test_vertexcover_puso_solve():
 
-    e, sol = solve_hising_bruteforce(problem.to_hising())
+    e, sol = solve_puso_bruteforce(problem.to_puso())
     solution = problem.convert_solution(sol)
 
     assert solution == {"a", "c"}

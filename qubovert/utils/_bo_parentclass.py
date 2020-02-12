@@ -16,7 +16,7 @@
 
 Contains the BO parent class. See ``help(qubovert.utils.BO)``. Used as a parent
 class for some Binary Optimization classes, such as ``qubovert.QUBO``,
-``qubovert.Ising``, etc.
+``qubovert.QUSO``, etc.
 
 """
 
@@ -31,7 +31,7 @@ class BO(Conversions):
     """BO.
 
     Parent class for some Binary Optimization classes, such as
-    ``qubovert.QUBO``, ``qubovert.Ising``, etc.
+    ``qubovert.QUBO``, ``qubovert.QUSO``, etc.
 
     BO inherits some methods and attributes the ``DictArithmetic`` class.
     See ``help(qubovert.utils.DictArithmetic)``.
@@ -220,7 +220,7 @@ class BO(Conversions):
 
         Overrides the dict.__setitem__ command. If `value` is equal to 0, then
         the key will be removed from the dictionary. Thus no elements in the
-        Ising dictionary will ever have zero value.
+        QUSO dictionary will ever have zero value.
 
         Parameters
         ---------

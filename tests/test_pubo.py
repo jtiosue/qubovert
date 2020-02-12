@@ -18,8 +18,8 @@ Contains tests for the PUBO class.
 
 from qubovert import PUBO
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce,
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
     pubo_value
 )
 from sympy import Symbol
@@ -50,12 +50,12 @@ class Problem:
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
         assert self.is_valid(e, sol)
 
-        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        e, sol = solve_quso_bruteforce(self.problem.to_quso())
         assert self.is_valid(e, sol)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
-            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            e, sol = solve_puso_bruteforce(self.problem.to_puso(deg))
             assert self.is_valid(e, sol)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))

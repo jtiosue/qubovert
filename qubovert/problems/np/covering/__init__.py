@@ -14,7 +14,7 @@
 
 """``covering`` contains many NP covering problems.
 
-Here we have the QUBO/Ising conversions for common covering problems.
+Here we have the QUBO/QUSO conversions for common covering problems.
 The conversions are based on [Lucas].
 
 References

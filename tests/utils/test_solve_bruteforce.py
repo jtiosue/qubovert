@@ -17,8 +17,8 @@ Contains tests for the bruteforce solvers.
 """
 
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
 )
 
 
@@ -43,17 +43,17 @@ def test_solve_qubo_bruteforce():
     )
 
 
-def test_solve_ising_bruteforce():
+def test_solve_quso_bruteforce():
 
     L = {(0, 'a'): 1, ('a', 2): 1, ('a',): -1, (2,): -2}
-    assert solve_ising_bruteforce(L) in (
+    assert solve_quso_bruteforce(L) in (
         (-3, {0: -1, 'a': 1, 2: 1}),
         (-3, {0: 1, 'a': -1, 2: 1}),
     )
 
     L = {(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25}
     assert (
-        solve_ising_bruteforce(L, True)
+        solve_quso_bruteforce(L, True)
         ==
         (1, [{0: 1, 1: 1}, {0: -1, 1: 1}, {0: -1, 1: -1}])
     )
@@ -84,13 +84,13 @@ def test_solve_pubo_bruteforce():
     )
 
 
-def test_solve_hising_bruteforce():
+def test_solve_puso_bruteforce():
 
     H = {
         (0, 'a'): 1, ('a', 2): 1, ('a',): -1, (2,): -2,
         (3, 4, 5): -1, (3,): -1, (4,): -1, (5,): -1
     }
-    assert solve_hising_bruteforce(H) in (
+    assert solve_puso_bruteforce(H) in (
         (-7, {0: -1, 'a': 1, 2: 1, 3: 1, 4: 1, 5: 1}),
         (-7, {0: 1, 'a': -1, 2: 1, 3: 1, 4: 1, 5: 1}),
     )
@@ -98,7 +98,7 @@ def test_solve_hising_bruteforce():
     H = {(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25,
          (3, 4, 5): -1, (3,): -1, (4,): -1, (5,): -1}
     assert (
-        solve_hising_bruteforce(H, True)
+        solve_puso_bruteforce(H, True)
         ==
         (-3, [{0: 1, 1: 1, 3: 1, 4: 1, 5: 1},
               {0: -1, 1: 1, 3: 1, 4: 1, 5: 1},

@@ -18,8 +18,8 @@ Contains tests for the GraphPartitioning class.
 
 from qubovert.problems import GraphPartitioning
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
 )
 from numpy import allclose
 
@@ -92,11 +92,11 @@ def test_graphpartitioning_qubo_numvars():
     )
 
 
-# ising
+# quso
 
-def test_graphpartitioning_ising_solve():
+def test_graphpartitioning_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem.to_ising())
+    e, sol = solve_quso_bruteforce(problem.to_quso())
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
@@ -104,7 +104,7 @@ def test_graphpartitioning_ising_solve():
     assert problem.is_solution_valid(sol)
     assert allclose(e, 1)
 
-    e, sol = solve_ising_bruteforce(problem_weighted.to_ising())
+    e, sol = solve_quso_bruteforce(problem_weighted.to_quso())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted
@@ -113,9 +113,9 @@ def test_graphpartitioning_ising_solve():
     assert allclose(e, 1)
 
 
-def test_graphpartitioning_ising_numvars():
+def test_graphpartitioning_quso_numvars():
 
-    L = problem.to_ising()
+    L = problem.to_quso()
     assert L.num_binary_variables == problem.num_binary_variables
 
 
@@ -140,11 +140,11 @@ def test_graphpartitioning_pubo_solve():
     assert allclose(e, 1)
 
 
-# hising
+# puso
 
-def test_graphpartitioning_hising_solve():
+def test_graphpartitioning_puso_solve():
 
-    e, sol = solve_hising_bruteforce(problem.to_hising())
+    e, sol = solve_puso_bruteforce(problem.to_puso())
     solution = problem.convert_solution(sol)
 
     assert solution in solutions
@@ -152,7 +152,7 @@ def test_graphpartitioning_hising_solve():
     assert problem.is_solution_valid(sol)
     assert allclose(e, 1)
 
-    e, sol = solve_hising_bruteforce(problem_weighted.to_hising())
+    e, sol = solve_puso_bruteforce(problem_weighted.to_puso())
     solution = problem_weighted.convert_solution(sol)
 
     assert solution in solutions_weighted

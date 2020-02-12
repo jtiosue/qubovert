@@ -28,7 +28,7 @@ class QUBO(BO, QUBOMatrix):
     """QUBO.
 
     Class to manage converting general QUBO problems to and from their
-    QUBO and Ising formluations.
+    QUBO and QUSO formluations.
 
     This class deals with QUBOs that have boolean labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
@@ -92,7 +92,7 @@ class QUBO(BO, QUBOMatrix):
     Examples
     --------
     >>> from qubovert import QUBO
-    >>> Q = HIsing()
+    >>> Q = PUSO()
     >>> Q[('a',)] += 1
     >>> Q, Q.mapping, Q.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
@@ -186,10 +186,10 @@ class QUBO(BO, QUBOMatrix):
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
@@ -219,8 +219,8 @@ class QUBO(BO, QUBOMatrix):
         {'a': 1, 'b': 1, 'c': 0}
 
         >>> qubo = QUBO({('a',): 1, ('a', 'b'): -2, ('c',): 1})
-        >>> L = qubo.to_ising()
-        >>> solution = solve_ising(L)  # any solver you want
+        >>> L = qubo.to_quso()
+        >>> solution = solve_quso(L)  # any solver you want
         >>> solution
         [-1, -1, 1]  # or {0: -1, 1: -1, 2: 1}
         >>> sol = qubo.convert_solution(solution)

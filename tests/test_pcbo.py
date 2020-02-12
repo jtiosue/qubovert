@@ -13,13 +13,13 @@
 #   limitations under the License.
 
 """
-Contains tests for the HOBO class.
+Contains tests for the PCBO class.
 """
 
-from qubovert import HOBO, boolean_var, integer_var
+from qubovert import PCBO, boolean_var, integer_var
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce,
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
     pubo_value, decimal_to_boolean, QUBOVertWarning
 )
 from sympy import Symbol
@@ -27,7 +27,7 @@ from numpy import allclose
 from numpy.testing import assert_raises, assert_warns
 
 
-""" TESTS FOR THE METHODS THAT HOBO INHERITS FROM PUBO """
+""" TESTS FOR THE METHODS THAT PCBO INHERITS FROM PUBO """
 
 
 class Problem:
@@ -53,12 +53,12 @@ class Problem:
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
         assert self.is_valid(e, sol, False)
 
-        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        e, sol = solve_quso_bruteforce(self.problem.to_quso())
         assert self.is_valid(e, sol, True)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
-            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            e, sol = solve_puso_bruteforce(self.problem.to_puso(deg))
             assert self.is_valid(e, sol, True)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
@@ -71,9 +71,9 @@ class Problem:
         )
 
 
-def test_hobo_on_qubo():
+def test_pcbo_on_qubo():
 
-    problem = HOBO({
+    problem = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     solution = {'c': 1, 'b': 1, 'a': 1}
@@ -82,9 +82,9 @@ def test_hobo_on_qubo():
     Problem(problem, solution, obj).runtests()
 
 
-def test_hobo_on_deg_3_pubo():
+def test_pcbo_on_deg_3_pubo():
 
-    problem = HOBO({
+    problem = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1
     })
@@ -94,9 +94,9 @@ def test_hobo_on_deg_3_pubo():
     Problem(problem, solution, obj).runtests()
 
 
-def test_hobo_on_deg_5_pubo():
+def test_pcbo_on_deg_5_pubo():
 
-    problem = HOBO({
+    problem = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
         (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1,
@@ -110,64 +110,64 @@ def test_hobo_on_deg_5_pubo():
 
 # testing methods
 
-def test_hobo_checkkey():
+def test_pcbo_checkkey():
 
     with assert_raises(KeyError):
-        HOBO({0: -1})
+        PCBO({0: -1})
 
 
-def test_hobo_default_valid():
+def test_pcbo_default_valid():
 
-    d = HOBO()
+    d = PCBO()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
     assert d == {(0,): 1}
 
 
-def test_hobo_remove_value_when_zero():
+def test_pcbo_remove_value_when_zero():
 
-    d = HOBO()
+    d = PCBO()
     d[(0, 0, 1, 2)] += 1
     d[(0, 1, 2)] -= 1
     assert d == {}
 
 
-def test_hobo_reinitialize_dictionary():
+def test_pcbo_reinitialize_dictionary():
 
-    d = HOBO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
+    d = PCBO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(0,): 1, ('1', 0): 3}, {(0,): 1, (0, '1'): 3})
 
 
-def test_hobo_update():
+def test_pcbo_update():
 
-    d = HOBO({('0',): 1, ('0', 1): 2})
+    d = PCBO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
     assert d in ({(1, '0'): 1, (1,): -1}, {('0', 1): 1, (1,): -1})
 
-    d = HOBO({(0, 0): 1, (0, 1): 2})
-    d.update(HOBO({(1, 0): 1, (1, 1): -1}))
+    d = PCBO({(0, 0): 1, (0, 1): 2})
+    d.update(PCBO({(1, 0): 1, (1, 1): -1}))
     d -= 1
-    assert d == HOBO({(0,): 1, (0, 1): 1, (1,): -1, (): -1})
+    assert d == PCBO({(0,): 1, (0, 1): 1, (1,): -1, (): -1})
 
     assert d.offset == -1
 
 
-def test_hobo_num_binary_variables():
+def test_pcbo_num_binary_variables():
 
-    d = HOBO({(0, 0): 1, (0, 1, 2, 3, 5): 2})
+    d = PCBO({(0, 0): 1, (0, 1, 2, 3, 5): 2})
     assert d.num_binary_variables == 5
     assert d.max_index == 4
 
 
 def test_num_terms():
 
-    d = HOBO({(0,): 1, (0, 3): 2, (0, 2): -1})
+    d = PCBO({(0,): 1, (0, 3): 2, (0, 2): -1})
     assert d.num_terms == len(d)
 
 
-def test_hobo_degree():
+def test_pcbo_degree():
 
-    d = HOBO()
+    d = PCBO()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -181,9 +181,9 @@ def test_hobo_degree():
     assert d.degree == 5
 
 
-def test_hobo_addition():
+def test_pcbo_addition():
 
-    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCBO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
     temp2 = {(1, '0'): 5}, {('0', 1): 5}
     temp3 = {('0',): 2, (1, '0'): -1}, {('0',): 2, ('0', 1): -1}
@@ -222,12 +222,12 @@ def test_hobo_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == HOBO(temp3[0])*-1
+    assert g == PCBO(temp3[0])*-1
 
 
-def test_hobo_multiplication():
+def test_pcbo_multiplication():
 
-    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCBO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): 3, (1, '0'): 6}, {('0',): 3, ('0', 1): 6}
     temp2 = {('0',): .5, (1, '0'): 1}, {('0',): .5, ('0', 1): 1}
 
@@ -302,10 +302,10 @@ def test_hobo_multiplication():
 
 def test_properties():
 
-    temp = HOBO({('0', '0'): 1, ('0', 1): 2})
+    temp = PCBO({('0', '0'): 1, ('0', 1): 2})
     assert not temp.offset
 
-    d = HOBO()
+    d = PCBO()
     d[(0,)] += 1
     d[(1,)] += 2
     assert d == d.to_qubo() == {(0,): 1, (1,): 2}
@@ -318,7 +318,7 @@ def test_properties():
 
 def test_round():
 
-    d = HOBO({(0,): 3.456, (1,): -1.53456})
+    d = PCBO({(0,): 3.456, (1,): -1.53456})
 
     assert round(d) == {(0,): 3, (1,): -2}
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
@@ -329,12 +329,12 @@ def test_round():
 def test_normalize():
 
     temp = {(0,): 4, (1,): -2}
-    d = HOBO(temp)
+    d = PCBO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
     temp = {(0,): -4, (1,): 2}
-    d = HOBO(temp)
+    d = PCBO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
@@ -342,7 +342,7 @@ def test_normalize():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    d = HOBO()
+    d = PCBO()
     d[(0,)] -= a
     d[(0, 1)] += 2
     d[(1,)] += b
@@ -356,14 +356,14 @@ def test_symbols():
     assert d.subs(a, 0) == {(0, 1): 2, (1,): b**2 + b}
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 6}
 
-    d = HOBO()
+    d = PCBO()
     d += a
     assert d.subs(a, 0) == {}
 
 
 def test_convert_solution_all_1s():
 
-    d = HOBO({(0,): 1})
+    d = PCBO({(0,): 1})
     assert d.convert_solution({0: 0}) == {0: 0}
     assert d.convert_solution({0: -1}) == {0: 1}
     assert d.convert_solution({0: 1}) == {0: 1}
@@ -376,7 +376,7 @@ def test_boolean_var():
     assert all(x[i] == {(i,): 1} for i in range(5))
     assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
     assert sum(x) == {(i,): 1 for i in range(5)}
-    assert isinstance(x[0], HOBO)
+    assert isinstance(x[0], PCBO)
 
 
 def test_integer_var():
@@ -391,11 +391,11 @@ def test_integer_var():
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
-def test_hobo_eq_constraint():
+def test_pcbo_eq_constraint():
 
     lam = Symbol('lam')
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     P.add_constraint_eq_zero(
@@ -436,29 +436,29 @@ def test_hobo_eq_constraint():
     ))
 
 
-def test_hobo_ne_constraint_logtrick():
+def test_pcbo_ne_constraint_logtrick():
 
     for i in range(1 << 4):
         P = integer_var('a', 4) - i
-        H = HOBO().add_constraint_ne_zero(P)
+        H = PCBO().add_constraint_ne_zero(P)
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
 
-def test_hobo_ne_constraint():
+def test_pcbo_ne_constraint():
 
     for i in range(1 << 3):
         P = integer_var('a', 3) - i
-        H = HOBO().add_constraint_ne_zero(P, log_trick=False)
+        H = PCBO().add_constraint_ne_zero(P, log_trick=False)
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
 
-def test_hobo_lt_constraint_logtrick():
+def test_pcbo_lt_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     P.add_constraint_lt_zero(
@@ -502,11 +502,11 @@ def test_hobo_lt_constraint_logtrick():
     ))
 
 
-def test_hobo_lt_constraint():
+def test_pcbo_lt_constraint():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     P.add_constraint_lt_zero(
@@ -550,11 +550,11 @@ def test_hobo_lt_constraint():
     ))
 
 
-def test_hobo_le_constraint_logtrick():
+def test_pcbo_le_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     })
@@ -599,11 +599,11 @@ def test_hobo_le_constraint_logtrick():
     ))
 
 
-def test_hobo_le_constraint():
+def test_pcbo_le_constraint():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     })
@@ -648,11 +648,11 @@ def test_hobo_le_constraint():
     ))
 
 
-def test_hobo_gt_constraint_logtrick():
+def test_pcbo_gt_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     P.add_constraint_gt_zero(
@@ -696,11 +696,11 @@ def test_hobo_gt_constraint_logtrick():
     ))
 
 
-def test_hobo_gt_constraint():
+def test_pcbo_gt_constraint():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
     P.add_constraint_gt_zero(
@@ -744,11 +744,11 @@ def test_hobo_gt_constraint():
     ))
 
 
-def test_hobo_ge_constraint_logtrick():
+def test_pcbo_ge_constraint_logtrick():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     })
@@ -793,11 +793,11 @@ def test_hobo_ge_constraint_logtrick():
     ))
 
 
-def test_hobo_ge_constraint():
+def test_pcbo_ge_constraint():
 
     lam = Symbol("lam")
 
-    P = HOBO({
+    P = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         ('d',): -1
     })
@@ -842,93 +842,93 @@ def test_hobo_ge_constraint():
     ))
 
 
-def test_hobo_constraints_warnings():
+def test_pcbo_constraints_warnings():
 
     with assert_warns(QUBOVertWarning):  # qlwayss satisfied
-        HOBO().add_constraint_eq_zero({(): 0})
+        PCBO().add_constraint_eq_zero({(): 0})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_eq_zero({(): 1, (0,): -.5})
+        PCBO().add_constraint_eq_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_eq_zero({(): -1, (0,): .5})
+        PCBO().add_constraint_eq_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_lt_zero({(): 1, (0,): -.5})
+        PCBO().add_constraint_lt_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_lt_zero({(): 1, (0,): -1})
+        PCBO().add_constraint_lt_zero({(): 1, (0,): -1})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOBO().add_constraint_lt_zero({(): -1, (0,): -.5})
+        PCBO().add_constraint_lt_zero({(): -1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_le_zero({(): 1, (0,): -.5})
+        PCBO().add_constraint_le_zero({(): 1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOBO().add_constraint_le_zero({(): -1, (0,): -.5})
+        PCBO().add_constraint_le_zero({(): -1, (0,): -.5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_gt_zero({(): -1, (0,): .5})
+        PCBO().add_constraint_gt_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_gt_zero({(): -1, (0,): 1})
+        PCBO().add_constraint_gt_zero({(): -1, (0,): 1})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOBO().add_constraint_gt_zero({(): 1, (0,): .5})
+        PCBO().add_constraint_gt_zero({(): 1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # not satisfiable
-        HOBO().add_constraint_ge_zero({(): -1, (0,): .5})
+        PCBO().add_constraint_ge_zero({(): -1, (0,): .5})
 
     with assert_warns(QUBOVertWarning):  # always satisfied
-        HOBO().add_constraint_ge_zero({(): 1, (0,): .5})
+        PCBO().add_constraint_ge_zero({(): 1, (0,): .5})
 
 
-def test_hobo_logic():
+def test_pcbo_logic():
 
-    H = HOBO().add_constraint_eq_NAND(
+    H = PCBO().add_constraint_eq_NAND(
         'c', 'a', 'b').add_constraint_AND('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().add_constraint_eq_OR(
+    H = PCBO().add_constraint_eq_OR(
         'c', 'a', 'b').add_constraint_NOR('a', 'b')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 0, 'c': 0}
 
-    H = HOBO().add_constraint_eq_XOR(
+    H = PCBO().add_constraint_eq_XOR(
         'c', 'a', 'b').add_constraint_XNOR(
         'a', 'b').add_constraint_ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = HOBO().add_constraint_eq_NOT('a', 'b').add_constraint_ONE('a')
+    H = PCBO().add_constraint_eq_NOT('a', 'b').add_constraint_ONE('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
 
-    H = HOBO().add_constraint_NAND('a', 'b').add_constraint_NOT(
+    H = PCBO().add_constraint_NAND('a', 'b').add_constraint_NOT(
         'a').add_constraint_OR(
         'a', 'b').add_constraint_eq_ONE('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
 
-    H = HOBO().add_constraint_XOR('a', 'b').add_constraint_eq_NOR(
+    H = PCBO().add_constraint_XOR('a', 'b').add_constraint_eq_NOR(
         'b', 'a', 'c').add_constraint_ONE('c').add_constraint_eq_ONE('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 
-    H = HOBO().add_constraint_eq_AND('c', 'a', 'b').add_constraint_eq_XNOR(
+    H = PCBO().add_constraint_eq_AND('c', 'a', 'b').add_constraint_eq_XNOR(
         'c', 'a', 'b').add_constraint_ONE('c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}
 
     # add_constraint_eq_NOR
-    H = HOBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not any(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_NOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not any(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -937,12 +937,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_NOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_NOR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not any(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_NOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_NOR(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not any(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -952,12 +952,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # add_constraint_eq_OR
-    H = HOBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert any(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_OR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if any(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -966,12 +966,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_OR(0, 1, 2)
+    H = PCBO().add_constraint_eq_OR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert any(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_OR(0, 1, 2)
+    H = PCBO().add_constraint_eq_OR(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if any(sol[i] for i in range(1, 3)) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -981,12 +981,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # add_constraint_eq_NAND
-    H = HOBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not all(sol[i] for i in range(1, 6))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_NAND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not all(sol[i] for i in range(1, 6))) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -995,12 +995,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_NAND(0, 1, 2)
+    H = PCBO().add_constraint_eq_NAND(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not all(sol[i] for i in range(1, 3))) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_NAND(0, 1, 2)
+    H = PCBO().add_constraint_eq_NAND(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not all(sol[i] for i in range(1, 3))) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1010,12 +1010,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # add_constraint_eq_AND
-    H = HOBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert all(sol[i] for i in range(1, 6)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_AND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if all(sol[i] for i in range(1, 6)) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1024,12 +1024,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_AND(0, 1, 2)
+    H = PCBO().add_constraint_eq_AND(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert all(sol[i] for i in range(1, 3)) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_AND(0, 1, 2)
+    H = PCBO().add_constraint_eq_AND(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if all(sol[i] for i in range(1, 3)) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1039,12 +1039,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # add_constraint_eq_XOR
-    H = HOBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert sum(sol[i] for i in range(1, 6)) % 2 == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_XOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if sum(sol[i] for i in range(1, 6)) % 2 == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1053,12 +1053,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_XOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_XOR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert sum(sol[i] for i in range(1, 3)) % 2 == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_XOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_XOR(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if sum(sol[i] for i in range(1, 3)) % 2 == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1068,12 +1068,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # add_constraint_eq_XNOR
-    H = HOBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_eq_XNOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if (not sum(sol[i] for i in range(1, 6)) % 2) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1082,12 +1082,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_eq_XNOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_XNOR(0, 1, 2)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]
         assert not H.value(sol)
-    H = HOBO().add_constraint_eq_XNOR(0, 1, 2)
+    H = PCBO().add_constraint_eq_XNOR(0, 1, 2)
     for sol in (decimal_to_boolean(i, 3) for i in range(1 << 3)):
         if (not sum(sol[i] for i in range(1, 3)) % 2) == sol[0]:
             assert H.is_solution_valid(sol)
@@ -1097,12 +1097,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # NOR
-    H = HOBO().add_constraint_NOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_NOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not any(sol[i] for i in range(6))
         assert not H.value(sol)
-    H = HOBO().add_constraint_NOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_NOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not any(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
@@ -1111,12 +1111,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_NOR(0, 1)
+    H = PCBO().add_constraint_NOR(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not any(sol[i] for i in range(2))
         assert not H.value(sol)
-    H = HOBO().add_constraint_NOR(0, 1)
+    H = PCBO().add_constraint_NOR(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not any(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
@@ -1126,12 +1126,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # OR
-    H = HOBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert any(sol[i] for i in range(6))
         assert not H.value(sol)
-    H = HOBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if any(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
@@ -1140,12 +1140,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_OR(0, 1)
+    H = PCBO().add_constraint_OR(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert any(sol[i] for i in range(2))
         assert not H.value(sol)
-    H = HOBO().add_constraint_OR(0, 1)
+    H = PCBO().add_constraint_OR(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if any(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
@@ -1155,12 +1155,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # NAND
-    H = HOBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not all(sol[i] for i in range(6))
         assert not H.value(sol)
-    H = HOBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not all(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
@@ -1169,12 +1169,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_NAND(0, 1)
+    H = PCBO().add_constraint_NAND(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not all(sol[i] for i in range(2))
         assert not H.value(sol)
-    H = HOBO().add_constraint_NAND(0, 1)
+    H = PCBO().add_constraint_NAND(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not all(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
@@ -1184,12 +1184,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # AND
-    H = HOBO().add_constraint_AND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_AND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert all(sol[i] for i in range(6))
         assert not H.value(sol)
-    H = HOBO().add_constraint_AND(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_AND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if all(sol[i] for i in range(6)):
             assert H.is_solution_valid(sol)
@@ -1198,12 +1198,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_AND(0, 1)
+    H = PCBO().add_constraint_AND(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert all(sol[i] for i in range(2))
         assert not H.value(sol)
-    H = HOBO().add_constraint_AND(0, 1)
+    H = PCBO().add_constraint_AND(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if all(sol[i] for i in range(2)):
             assert H.is_solution_valid(sol)
@@ -1213,12 +1213,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # XOR
-    H = HOBO().add_constraint_XOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_XOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert sum(sol[i] for i in range(6)) % 2
         assert not H.value(sol)
-    H = HOBO().add_constraint_XOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_XOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if sum(sol[i] for i in range(6)) % 2:
             assert H.is_solution_valid(sol)
@@ -1227,12 +1227,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_XOR(0, 1)
+    H = PCBO().add_constraint_XOR(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert sum(sol[i] for i in range(2)) % 2
         assert not H.value(sol)
-    H = HOBO().add_constraint_XOR(0, 1)
+    H = PCBO().add_constraint_XOR(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if sum(sol[i] for i in range(2)) % 2:
             assert H.is_solution_valid(sol)
@@ -1242,12 +1242,12 @@ def test_hobo_logic():
             assert H.value(sol)
 
     # XNOR
-    H = HOBO().add_constraint_XNOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_XNOR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not sum(sol[i] for i in range(6)) % 2
         assert not H.value(sol)
-    H = HOBO().add_constraint_XNOR(0, 1, 2, 3, 4, 5)
+    H = PCBO().add_constraint_XNOR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
         if not sum(sol[i] for i in range(6)) % 2:
             assert H.is_solution_valid(sol)
@@ -1256,12 +1256,12 @@ def test_hobo_logic():
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
 
-    H = HOBO().add_constraint_XNOR(0, 1)
+    H = PCBO().add_constraint_XNOR(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
         assert not sum(sol[i] for i in range(2)) % 2
         assert not H.value(sol)
-    H = HOBO().add_constraint_XNOR(0, 1)
+    H = PCBO().add_constraint_XNOR(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
         if not sum(sol[i] for i in range(2)) % 2:
             assert H.is_solution_valid(sol)
@@ -1271,37 +1271,37 @@ def test_hobo_logic():
             assert H.value(sol)
 
 
-def test_hobo_special_constraint_le():
+def test_pcbo_special_constraint_le():
 
-    H = HOBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2,): 1, (): -1})
+    H = PCBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2,): 1, (): -1})
     assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
 
-    H = HOBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -1})
+    H = PCBO().add_constraint_le_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -1})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
 
-    H = HOBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2,): 1, (): -2})
+    H = PCBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2,): 1, (): -2})
     assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
 
-    H = HOBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -2})
+    H = PCBO().add_constraint_lt_zero({(0,): 1, (1,): 1, (2, 3): 1, (): -2})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
 
-    H = HOBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2,): -1, (): 1})
+    H = PCBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2,): -1, (): 1})
     assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
 
-    H = HOBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 1})
+    H = PCBO().add_constraint_ge_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 1})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
 
-    H = HOBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2,): -1, (): 2})
+    H = PCBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2,): -1, (): 2})
     assert H == {(i, j): 1 for i in range(3) for j in range(i+1, 3)}
 
-    H = HOBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 2})
+    H = PCBO().add_constraint_gt_zero({(0,): -1, (1,): -1, (2, 3): -1, (): 2})
     assert H == {(0, 1): 1, (0, 2, 3): 1, (1, 2, 3): 1}
 
 
-def test_hobo_special_constraint_eq():
+def test_pcbo_special_constraint_eq():
 
     x, y, z = boolean_var('x'), boolean_var('y'), boolean_var('z')
-    H1 = HOBO().add_constraint_eq_zero(z - x * y)
-    H2 = HOBO().add_constraint_eq_zero(x * y - z)
-    H3 = HOBO().add_constraint_eq_AND(z, x, y)
+    H1 = PCBO().add_constraint_eq_zero(z - x * y)
+    H2 = PCBO().add_constraint_eq_zero(x * y - z)
+    H3 = PCBO().add_constraint_eq_AND(z, x, y)
     assert H1 == H2 == H3

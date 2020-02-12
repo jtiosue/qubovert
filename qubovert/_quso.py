@@ -12,54 +12,54 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_ising.py.
+"""_quso.py.
 
-Contains the Ising class. See ``help(qubovert.Ising)``.
+Contains the QUSO class. See ``help(qubovert.QUSO)``.
 
 """
 
 from .utils import (
-    BO, IsingMatrix, HIsingMatrix, solution_type, boolean_to_spin
+    BO, QUSOMatrix, PUSOMatrix, solution_type, boolean_to_spin
 )
 
 
-__all__ = 'Ising',
+__all__ = 'QUSO',
 
 
-class Ising(BO, IsingMatrix):
-    """Ising.
+class QUSO(BO, QUSOMatrix):
+    """QUSO.
 
-    Class to manage converting general Ising problems to and from their
-    QUBO and Ising formluations.
+    Class to manage converting general QUSO problems to and from their
+    QUBO and QUSO formluations.
 
     This class deals with Isings that have spin labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
-    ``qubovert.utils.IsingMatrix``. Note that it is generally
-    more efficient to initialize an empty Ising object and then build the
-    Ising, rather than initialize a Ising object with an already built dict.
+    ``qubovert.utils.QUSOMatrix``. Note that it is generally
+    more efficient to initialize an empty QUSO object and then build the
+    QUSO, rather than initialize a QUSO object with an already built dict.
 
-    Ising inherits some methods and attributes the ``IsingMatrix`` class. See
-    ``help(qubovert.utils.IsingMatrix)``.
+    QUSO inherits some methods and attributes the ``QUSOMatrix`` class. See
+    ``help(qubovert.utils.QUSOMatrix)``.
 
-    Ising inherits some methods and attributes the ``BO`` class. See
+    QUSO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
     Example usage
     -------------
-    >>> ising = Ising()
-    >>> ising[('a',)] += 5
-    >>> ising[(0, 'a')] -= 2
-    >>> ising -= 1.5
-    >>> ising
+    >>> quso = QUSO()
+    >>> quso[('a',)] += 5
+    >>> quso[(0, 'a')] -= 2
+    >>> quso -= 1.5
+    >>> quso
     {('a',): 5, ('a', 0): -2, (): -1.5}
 
-    >>> ising = Ising({('a',): 5, (0, 'a'): -2, (): -1.5})
-    >>> ising
+    >>> quso = QUSO({('a',): 5, (0, 'a'): -2, (): -1.5})
+    >>> quso
     {('a',): 5, ('a', 0): -2, (): -1.5}
-    >>> L = ising.to_ising()
+    >>> L = quso.to_quso()
     >>> L
     {(0,): 5, (0, 1): -2, (): -1.5}
-    >>> ising.convert_solution({0: 1, 1: 0})
+    >>> quso.convert_solution({0: 1, 1: 0})
     {'a': 1, 0: 0}
 
     Note 1
@@ -68,17 +68,17 @@ class Ising(BO, IsingMatrix):
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
 
-    >>> print(Ising({('a', 0): 1, (0, 1): -1}))
+    >>> print(QUSO({('a', 0): 1, (0, 1): -1}))
     {('a', 0): 1, (0, 1): -1}
 
     or
 
-    >>> print(Ising({('a', 0): 1, (0, 1): -1}))
+    >>> print(QUSO({('a', 0): 1, (0, 1): -1}))
     {(0, 'a'): 1, (0, 1): -1}
 
     But the following will never happen:
 
-    >>> print(Ising({('a', 0): 1, (0, 1): -1}))
+    >>> print(QUSO({('a', 0): 1, (0, 1): -1}))
     {('a', 0): 1, (1, 0): -1}
 
     Ie integers will always be correctly sorted.
@@ -89,12 +89,12 @@ class Ising(BO, IsingMatrix):
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``
     will rebuild the dictionary, resetting all of the values. See
-    ``help(Ising.refresh)``
+    ``help(QUSO.refresh)``
 
     Examples
     --------
-    >>> from qubovert import Ising
-    >>> L = Ising()
+    >>> from qubovert import QUSO
+    >>> L = QUSO()
     >>> L[('a',)] += 1
     >>> L, L.mapping, L.reverse_mapping
     {('a',): 1}, {'a': 0}, {0: 'a'}
@@ -110,11 +110,11 @@ class Ising(BO, IsingMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with Isings that have spin labels that do not range
+        This class deals with QUSOs that have spin labels that do not range
         from 0 to n-1. If your labels are nonnegative integers, consider using
-        ``qubovert.utils.IsingMatrix``. Note that it is generally more
-        efficient to initialize an empty Ising object and then build the Ising,
-        rather than initialize a Ising object with an already built dict.
+        ``qubovert.utils.QUSOMatrix``. Note that it is generally more
+        efficient to initialize an empty QUSO object and then build the QUSO,
+        rather than initialize a QUSO object with an already built dict.
 
         Parameters
         ----------
@@ -124,37 +124,37 @@ class Ising(BO, IsingMatrix):
 
         Examples
         -------
-        >>> ising = Ising()
-        >>> ising[('a',)] += 5
-        >>> ising[(0, 'a')] -= 2
-        >>> ising -= 1.5
-        >>> ising
+        >>> quso = QUSO()
+        >>> quso[('a',)] += 5
+        >>> quso[(0, 'a')] -= 2
+        >>> quso -= 1.5
+        >>> quso
         {('a',): 5, ('a', 0): -2, (): -1.5}
 
-        >>> ising = Ising({('a',): 5, (0, 'a'): -2, (): -1.5})
-        >>> ising
+        >>> quso = QUSO({('a',): 5, (0, 'a'): -2, (): -1.5})
+        >>> quso
         {('a',): 5, ('a', 0): -2, (): -1.5}
 
         """
         BO.__init__(self, *args, **kwargs)
-        IsingMatrix.__init__(self, *args, **kwargs)
+        QUSOMatrix.__init__(self, *args, **kwargs)
 
-    def to_ising(self):
-        """to_ising.
+    def to_quso(self):
+        """to_quso.
 
-        Create and return upper triangular Ising representing the problem.
+        Create and return upper triangular QUSO representing the problem.
         The labels will be integers from 0 to n-1.
 
         Return
         -------
-        L : qubovert.utils.IsingMatrix object.
-            The upper triangular Ising matrix, a IsingMatrix object.
-            For most practical purposes, you can use IsingMatrix in the
+        L : qubovert.utils.QUSOMatrix object.
+            The upper triangular QUSO matrix, a QUSOMatrix object.
+            For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.IsingMatrix)``.
+            see ``help(qubovert.utils.QUSOMatrix)``.
 
         """
-        L = IsingMatrix()
+        L = QUSOMatrix()
 
         for k, v in self.items():
             key = tuple(self._mapping[i] for i in k)
@@ -162,36 +162,36 @@ class Ising(BO, IsingMatrix):
 
         return L
 
-    def to_hising(self):
-        """to_hising.
+    def to_puso(self):
+        """to_puso.
 
-        Since the model is already a Ising, ``self.to_hising`` will simply
-        return ``qubovert.utils.HIsingMatrix(self.to_ising())``.
+        Since the model is already a QUSO, ``self.to_puso`` will simply
+        return ``qubovert.utils.PUSOMatrix(self.to_quso())``.
 
         Return
         -------
-        H : qubovert.utils.HIsingMatrix object.
-            The upper triangular HIsing matrix, a HIsingMatrix object.
-            For most practical purposes, you can use HIsingMatrix in the
+        H : qubovert.utils.PUSOMatrix object.
+            The upper triangular PUSO matrix, a PUSOMatrix object.
+            For most practical purposes, you can use PUSOMatrix in the
             same way as an ordinary dictionary. For more information,
-            see ``help(qubovert.utils.HIsingMatrix)``.
+            see ``help(qubovert.utils.PUSOMatrix)``.
 
         """
-        return HIsingMatrix(self.to_ising())
+        return PUSOMatrix(self.to_quso())
 
     def convert_solution(self, solution, spin=True):
         """convert_solution.
 
-        Convert the solution to the integer labeled Ising to the solution to
-        the originally labeled Ising.
+        Convert the solution to the integer labeled QUSO to the solution to
+        the originally labeled QUSO.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The Ising solution output
+            The QUBO or QUSO solution output. The QUSO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to True).
             `spin` indicates whether ``solution`` is the solution to the
@@ -205,27 +205,27 @@ class Ising(BO, IsingMatrix):
         Return
         -------
         res : dict.
-            Maps spin variable labels to their Ising solutions values {1, -1}.
+            Maps spin variable labels to their QUSO solutions values {1, -1}.
 
         Example
         -------
-        >>> ising = Ising({('a',): 1, ('a', 'b'): -2, ('c',): -1})
-        >>> L = ising.to_ising()
+        >>> quso = QUSO({('a',): 1, ('a', 'b'): -2, ('c',): -1})
+        >>> L = quso.to_quso()
         >>> L
         {(0,): 1, (0, 1): -2, (2,): -1}
-        >>> solution = solve_ising(L)  # any solver you want
+        >>> solution = solve_quso(L)  # any solver you want
         >>> solution
         [1, 1, -1]  # or {0: 1, 1: 1, 2: -1}
-        >>> sol = ising.convert_solution(solution)
+        >>> sol = quso.convert_solution(solution)
         >>> sol
         {'a': 1, 'b': 1, 'c': -1}
 
-        >>> ising = Ising({('a',): 1, ('a', 'b'): -2, ('c',): -1})
-        >>> L = ising.to_qubo()
-        >>> solution = solve_ising(L)  # any solver you want
+        >>> quso = QUSO({('a',): 1, ('a', 'b'): -2, ('c',): -1})
+        >>> L = quso.to_qubo()
+        >>> solution = solve_quso(L)  # any solver you want
         >>> solution
         [0, 0, 1]  # or {0: 0, 1: 0, 2: 1}
-        >>> sol = ising.convert_solution(solution)
+        >>> sol = quso.convert_solution(solution)
         >>> sol
         {'a': 1, 'b': 1, 'c': -1}
 
@@ -258,7 +258,7 @@ class Ising(BO, IsingMatrix):
         KeyError if the key is invalid.
 
         """
-        # override IsingMatrix._check_key_valid to allow for noninteger keys.
+        # override QUSOMatrix._check_key_valid to allow for noninteger keys.
         invalid = (
             not isinstance(key, tuple) or
             len(set(x for x in set(key) if key.count(x) % 2)) > 2
@@ -266,4 +266,4 @@ class Ising(BO, IsingMatrix):
         if invalid:
             raise KeyError(
                 "Key formatted incorrectly, must be tuple of <= 2 unique "
-                "element. See HIsing for arbitrary number of unique elements.")
+                "element. See PUSO for arbitrary number of unique elements.")

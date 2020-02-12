@@ -18,8 +18,8 @@ Contains tests for the NumberPartitioning class.
 
 from qubovert.problems import NumberPartitioning
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce
 )
 from numpy import allclose
 from numpy.testing import assert_raises
@@ -100,12 +100,12 @@ def test_numberpartitioning_qubo_numvars():
         Q.num_binary_variables
     )
 
-# ising
+# quso
 
 
-def test_numberpartitioning_ising_solve():
+def test_numberpartitioning_quso_solve():
 
-    e, sol = solve_ising_bruteforce(problem_withsoln.to_ising())
+    e, sol = solve_quso_bruteforce(problem_withsoln.to_quso())
     solution = problem_withsoln.convert_solution(sol)
 
     assert solution in solutions_withsoln
@@ -113,7 +113,7 @@ def test_numberpartitioning_ising_solve():
     assert problem_withsoln.is_solution_valid(sol)
     assert allclose(e, 0)
 
-    e, sol = solve_ising_bruteforce(problem_withoutsoln.to_ising())
+    e, sol = solve_quso_bruteforce(problem_withoutsoln.to_quso())
     solution = problem_withoutsoln.convert_solution(sol)
 
     assert solution in solutions_withoutsoln
@@ -122,12 +122,12 @@ def test_numberpartitioning_ising_solve():
     assert e != 0
 
 
-def test_numberpartitioning_ising_numvars():
+def test_numberpartitioning_quso_numvars():
 
-    L = problem_withsoln.to_ising()
+    L = problem_withsoln.to_quso()
     assert L.num_binary_variables == problem_withsoln.num_binary_variables
 
-    L = problem_withoutsoln.to_ising()
+    L = problem_withoutsoln.to_quso()
     assert L.num_binary_variables == problem_withoutsoln.num_binary_variables
 
 
@@ -152,12 +152,12 @@ def test_numberpartitioning_pubo_solve():
     assert e != 0
 
 
-# hising
+# puso
 
 
-def test_numberpartitioning_hising_solve():
+def test_numberpartitioning_puso_solve():
 
-    e, sol = solve_hising_bruteforce(problem_withsoln.to_hising())
+    e, sol = solve_puso_bruteforce(problem_withsoln.to_puso())
     solution = problem_withsoln.convert_solution(sol)
 
     assert solution in solutions_withsoln
@@ -165,7 +165,7 @@ def test_numberpartitioning_hising_solve():
     assert problem_withsoln.is_solution_valid(sol)
     assert allclose(e, 0)
 
-    e, sol = solve_hising_bruteforce(problem_withoutsoln.to_hising())
+    e, sol = solve_puso_bruteforce(problem_withoutsoln.to_puso())
     solution = problem_withoutsoln.convert_solution(sol)
 
     assert solution in solutions_withoutsoln

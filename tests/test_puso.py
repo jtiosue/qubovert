@@ -12,13 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-""" Contains tests for the HIsing class. """
+""" Contains tests for the PUSO class. """
 
-from qubovert import HIsing
+from qubovert import PUSO
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce,
-    hising_value
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
+    puso_value
 )
 from sympy import Symbol
 from numpy import allclose
@@ -48,12 +48,12 @@ class Problem:
         e, sol = solve_qubo_bruteforce(self.problem.to_qubo())
         assert self.is_valid(e, sol, False)
 
-        e, sol = solve_ising_bruteforce(self.problem.to_ising())
+        e, sol = solve_quso_bruteforce(self.problem.to_quso())
         assert self.is_valid(e, sol, True)
 
         for deg in (None,) + tuple(range(2, self.problem.degree + 1)):
 
-            e, sol = solve_hising_bruteforce(self.problem.to_hising(deg))
+            e, sol = solve_puso_bruteforce(self.problem.to_puso(deg))
             assert self.is_valid(e, sol, True)
 
             e, sol = solve_pubo_bruteforce(self.problem.to_pubo(deg))
@@ -61,34 +61,34 @@ class Problem:
 
         assert (
             self.problem.value(self.solution) ==
-            hising_value(self.solution, self.problem) ==
+            puso_value(self.solution, self.problem) ==
             e
         )
 
 
-def test_hising_on_ising():
+def test_puso_on_quso():
 
-    problem = HIsing({('a',): -1, ('b',): 2,
-                      ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
+    problem = PUSO({('a',): -1, ('b',): 2,
+                   ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
     solution = {'c': -1, 'b': -1, 'a': -1}
     obj = -10
 
     Problem(problem, solution, obj).runtests()
 
 
-def test_hising_on_deg_3_hising():
+def test_puso_on_deg_3_puso():
 
-    problem = HIsing({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
-                      (): -2, (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1})
+    problem = PUSO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4,
+                   (): -2, (0, 1, 2): 1, (0,): 1, (1,): 1, (2,): 1})
     solution = {'c': -1, 'b': -1, 'a': -1, 0: -1, 1: -1, 2: -1}
     obj = -14
 
     Problem(problem, solution, obj).runtests()
 
 
-def test_hising_on_deg_5_hising():
+def test_puso_on_deg_5_puso():
 
-    problem = HIsing({
+    problem = PUSO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
         (0, 1, 2): 1, (0,): -1, (1,): -2, (2,): 1, ('a', 0, 4, 'b', 'c'): -3,
         (4, 2, 3, 'a', 'b'): 2, (4, 2, 3, 'b'): -1, ('c',): 4, (3,): 1
@@ -101,70 +101,70 @@ def test_hising_on_deg_5_hising():
 
 # testing methods
 
-def test_hising_checkkey():
+def test_puso_checkkey():
 
     with assert_raises(KeyError):
-        HIsing({0: -1})
+        PUSO({0: -1})
 
 
-def test_ising_default_valid():
+def test_quso_default_valid():
 
-    d = HIsing()
+    d = PUSO()
     assert d[(0, 0)] == 0
     d[(0, 0)] += 1
     assert d == {(): 1}
 
-    d = HIsing()
+    d = PUSO()
     assert d[(0, 1)] == 0
     d[(0, 1)] += 1
     assert d == {(0, 1): 1}
 
 
-def test_ising_remove_value_when_zero():
+def test_quso_remove_value_when_zero():
 
-    d = HIsing()
+    d = PUSO()
     d[(0, 1)] += 1
     d[(0, 1)] -= 1
     assert d == {}
 
 
-def test_ising_reinitialize_dictionary():
+def test_quso_reinitialize_dictionary():
 
-    d = HIsing({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
+    d = PUSO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(): 1, ('1', 0): 3}, {(): 1, (0, '1'): 3})
 
 
-def test_ising_update():
+def test_quso_update():
 
-    d = HIsing({('0',): 1, ('0', 1): 2})
+    d = PUSO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
     assert d in ({('0',): 1, (): -1, (1, '0'): 1},
                  {('0',): 1, (): -1, ('0', 1): 1})
 
-    d = HIsing({(0, 0): 1, (0, 1): 2})
-    d.update(HIsing({(1, 0): 1, (1, 1): -1}))
+    d = PUSO({(0, 0): 1, (0, 1): 2})
+    d.update(PUSO({(1, 0): 1, (1, 1): -1}))
     d -= 1
-    assert d == HIsing({(0, 1): 1, (): -2})
+    assert d == PUSO({(0, 1): 1, (): -2})
 
     assert d.offset == -2
 
 
-def test_ising_num_binary_variables():
+def test_quso_num_binary_variables():
 
-    d = HIsing({(0,): 1, (0, 3): 2})
+    d = PUSO({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
     assert d.max_index == 1
 
 
 def test_num_terms():
 
-    d = HIsing({(0,): 1, (0, 3): 2, (0, 2): -1})
+    d = PUSO({(0,): 1, (0, 3): 2, (0, 2): -1})
     assert d.num_terms == len(d)
 
 
-def test_hising_degree():
+def test_puso_degree():
 
-    d = HIsing()
+    d = PUSO()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -178,9 +178,9 @@ def test_hising_degree():
     assert d.degree == 5
 
 
-def test_ising_addition():
+def test_quso_addition():
 
-    temp = HIsing({('0', '0'): 1, ('0', 1): 2})
+    temp = PUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
     temp2 = {(1, '0'): 5, (): 1, ('0',): -1}, {('0', 1): 5, (): 1, ('0',): -1}
     temp3 = {(): 1, (1, '0'): -1, ('0',): 1}, {(): 1, ('0', 1): -1, ('0',): 1}
@@ -218,12 +218,12 @@ def test_ising_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == HIsing(temp3[0])*-1
+    assert g == PUSO(temp3[0])*-1
 
 
-def test_ising_multiplication():
+def test_quso_multiplication():
 
-    temp = HIsing({('0', '0'): 1, ('0', 1): 2})
+    temp = PUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {(): 3, (1, '0'): 6}, {(): 3, ('0', 1): 6}
     temp2 = {(): .5, (1, '0'): 1}, {(): .5, ('0', 1): 1}
     temp3 = {(1, '0'): 1}, {('0', 1): 1}
@@ -297,29 +297,29 @@ def test_ising_multiplication():
     assert d ** 2 == d * d
     assert d ** 3 == d * d * d
 
-    d = HIsing({('0', 1): 1, ('1', 2): -1})**2
+    d = PUSO({('0', 1): 1, ('1', 2): -1})**2
     assert d ** 4 == d * d * d * d
 
 
 def test_properties():
 
-    temp = HIsing({('0', '0'): 1, ('0', 1): 2})
+    temp = PUSO({('0', '0'): 1, ('0', 1): 2})
     assert temp.offset == 1
 
-    d = HIsing()
+    d = PUSO()
     d[(0,)] += 1
     d[(1,)] += 2
-    assert d == d.to_ising() == {(0,): 1, (1,): 2}
+    assert d == d.to_quso() == {(0,): 1, (1,): 2}
     assert d.mapping == d.reverse_mapping == {0: 0, 1: 1}
 
     d.set_mapping({1: 0, 0: 1})
-    assert d.to_ising() == {(1,): 1, (0,): 2}
+    assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
 
 def test_round():
 
-    d = HIsing({(0,): 3.456, (1,): -1.53456})
+    d = PUSO({(0,): 3.456, (1,): -1.53456})
 
     assert round(d) == {(0,): 3, (1,): -2}
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
@@ -330,12 +330,12 @@ def test_round():
 def test_normalize():
 
     temp = {(0,): 4, (1,): -2}
-    d = HIsing(temp)
+    d = PUSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
     temp = {(0,): -4, (1,): 2}
-    d = HIsing(temp)
+    d = PUSO(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
@@ -343,7 +343,7 @@ def test_normalize():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    d = HIsing()
+    d = PUSO()
     d[(0,)] -= a
     d[(0, 1)] += 2
     d[(1,)] += b
@@ -355,7 +355,7 @@ def test_symbols():
 
 def test_convert_solution_all_1s():
 
-    d = HIsing({(0,): 1})
+    d = PUSO({(0,): 1})
     assert d.convert_solution({0: 0}) == {0: 1}
     assert d.convert_solution({0: -1}) == {0: -1}
     assert d.convert_solution({0: 1}) == {0: 1}

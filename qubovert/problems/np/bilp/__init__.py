@@ -14,7 +14,7 @@
 
 """``bilp`` contains common Binary Linear Integer Programming problems.
 
-Here we have the QUBO/Ising conversions for common binary integer
+Here we have the QUBO/QUSO conversions for common binary integer
 linear programming probems. The conversions are based on [Lucas]_.
 
 References

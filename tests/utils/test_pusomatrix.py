@@ -13,49 +13,35 @@
 #   limitations under the License.
 
 """
-Contains tests for the IsingMatrix object.
+Contains tests for the PUSOMatrix class.
 """
 
-from qubovert.utils import IsingMatrix
+from qubovert.utils import PUSOMatrix
 from sympy import Symbol
 from numpy import allclose
 from numpy.testing import assert_raises
 
 
-def test_checkkey():
+def test_qubo_checkkey():
 
     with assert_raises(KeyError):
-        IsingMatrix({('a',): -1})
+        PUSOMatrix({('a',): -1})
 
     with assert_raises(KeyError):
-        IsingMatrix({0: -1})
-
-    with assert_raises(KeyError):
-        IsingMatrix({(0, 1, 2): -1})
+        PUSOMatrix({0: -1})
 
 
-def test_properties():
+def test_puso_default_valid():
 
-    L = IsingMatrix()
-    L[(0,)] -= 1
-    L[(0, 1)] += 1
-    L += 2
-    assert L.offset == 2
-    assert L.h == {0: -1}
-    assert L.J == {(0, 1): 1}
-
-
-def test_ising_default_valid():
-
-    d = IsingMatrix()
+    d = PUSOMatrix()
     assert d[(0,)] == 0
     d[(0,)] += 1
     assert d == {(0,): 1}
 
 
-def test_ising_remove_value_when_zero():
+def test_puso_remove_value_when_zero():
 
-    d = IsingMatrix()
+    d = PUSOMatrix()
     d[(0,)] += 1
     d[(0,)] -= 1
     assert d == {}
@@ -66,40 +52,40 @@ def test_ising_remove_value_when_zero():
     assert d.variables == set()
 
 
-def test_ising_reinitialize_dictionary():
+def test_puso_reinitialize_dictionary():
 
-    d = IsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1})
-    assert d == {(0,): 1, (0, 1): 3}
-
-
-def test_ising_update():
-
-    d = IsingMatrix({(0,): 1, (0, 1): 2})
-    d.update({(0,): 0, (1, 0): 1, (1,): -1})
-    assert d == {(0, 1): 1, (1,): -1}
+    d = PUSOMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (0, 1): 1, (2, 0, 1): 1})
+    assert d == {(0,): 1, (0, 1): 3, (0, 1, 2): 1}
 
 
-def test_ising_num_binary_variables():
+def test_puso_update():
 
-    d = IsingMatrix({(0,): 1, (0, 3): 2})
-    assert d.num_binary_variables == 2
+    d = PUSOMatrix({(0,): 1, (0, 1): 2})
+    d.update({(0,): 0, (1, 0): 1, (1,): -1, (0, 2, 1): -1})
+    assert d == {(0, 1): 1, (1,): -1, (0, 1, 2): -1}
+
+
+def test_puso_num_binary_variables():
+
+    d = PUSOMatrix({(0,): 1, (0, 3): 2, (0, 4, 3): 3})
+    assert d.num_binary_variables == 3
 
 
 def test_num_terms():
 
-    d = IsingMatrix({(0,): 1, (0, 3): 2, (0, 2): -1})
+    d = PUSOMatrix({(0,): 1, (0, 3): 2, (0, 2): -1})
     assert d.num_terms == len(d)
 
 
-def test_ising_max_index():
+def test_puso_max_index():
 
-    d = IsingMatrix({(0,): 1, (0, 3): 2})
-    assert d.max_index == 3
+    d = PUSOMatrix({(0,): 1, (0, 3): 2, (0, 4, 3): 3})
+    assert d.max_index == 4
 
 
-def test_ising_degree():
+def test_puso_degree():
 
-    d = IsingMatrix()
+    d = PUSOMatrix()
     assert d.degree == 0
     d[(0,)] += 2
     assert d.degree == 1
@@ -107,20 +93,24 @@ def test_ising_degree():
     assert d.degree == 1
     d[(1, 2)] -= 2
     assert d.degree == 2
+    d[(0, 1, 2)] -= 1
+    assert d.degree == 3
+    d[(0, 1, 2, 4, 8)] -= 1
+    assert d.degree == 5
 
 
-def test_ising_addition():
+def test_puso_addition():
 
-    temp = IsingMatrix({(0,): 1, (0, 1): 2})
+    temp = PUSOMatrix({(0,): 1, (0, 1): 2, (2, 1, 0): -1})
     temp1 = {(0,): -1, (1, 0): 3}
-    temp2 = {(0, 1): 5}
-    temp3 = {(0,): 2, (0, 1): -1}
+    temp2 = {(0, 1): 5, (0, 1, 2): -1}
+    temp3 = {(0,): 2, (0, 1): -1, (0, 1, 2): -1}
 
     # add constant
     d = temp.copy()
     d += 5
     d[()] -= 2
-    d == {(0,): 1, (0, 1): 2, (): 3}
+    d == {(0,): 1, (0, 1): 2, (): 3, (0, 1, 2): -1}
 
     # __add__
     d = temp.copy()
@@ -150,18 +140,18 @@ def test_ising_addition():
     # __rsub__
     d = temp.copy()
     g = temp1 - d
-    assert g == IsingMatrix(temp3)*-1
+    assert g == PUSOMatrix(temp3)*-1
 
 
-def test_ising_multiplication():
+def test_puso_multiplication():
 
-    temp = IsingMatrix({(0,): 1, (0, 1): 2})
+    temp = PUSOMatrix({(0,): 1, (0, 1): 2, (0, 2, 3): 4})
     temp += 2
 
     # __mul__
     d = temp.copy()
     g = d * 3
-    assert g == {(0,): 3, (0, 1): 6, (): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
 
     d = temp.copy()
     g = d * 0
@@ -170,7 +160,7 @@ def test_ising_multiplication():
     # __imul__
     d = temp.copy()
     d *= 3
-    assert d == {(0,): 3, (0, 1): 6, (): 6}
+    assert d == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
 
     d = temp.copy()
     d *= 0
@@ -179,7 +169,7 @@ def test_ising_multiplication():
     # __rmul__
     d = temp.copy()
     g = 3 * d
-    assert g == {(0,): 3, (0, 1): 6, (): 6}
+    assert g == {(0,): 3, (0, 1): 6, (): 6, (0, 2, 3): 12}
 
     d = temp.copy()
     g = 0 * d
@@ -188,47 +178,45 @@ def test_ising_multiplication():
     # __truediv__
     d = temp.copy()
     g = d / 2
-    assert g == {(0,): .5, (0, 1): 1, (): 1}
+    assert g == {(0,): .5, (0, 1): 1, (): 1, (0, 2, 3): 2}
 
     # __itruediv__
     d = temp.copy()
     d /= 2
-    assert d == {(0,): .5, (0, 1): 1, (): 1}
+    assert d == {(0,): .5, (0, 1): 1, (): 1, (0, 2, 3): 2}
 
     # __floordiv__
     d = temp.copy()
     g = d // 2
-    assert g == {(0, 1): 1, (): 1}
+    assert g == {(0, 1): 1, (): 1, (0, 2, 3): 2}
 
     # __ifloordiv__
     d = temp.copy()
     d //= 2
-    assert d == {(0, 1): 1, (): 1}
+    assert d == {(0, 1): 1, (): 1, (0, 2, 3): 2}
 
     # __mul__ but with dict
     d = temp.copy()
     d *= {(1,): 2, (0,): -1}
-    assert d == {(): -1, (0,): 2, (1,): 2, (0, 1): 2}
+    assert d == {(0, 1): 2, (): -1, (0,): 2, (1,): 2,
+                 (0, 1, 2, 3): 8, (2, 3): -4}
 
     # __pow__
     d = temp.copy()
     d **= 2
-    assert d == {(): 9, (0,): 4, (1,): 4, (0, 1): 8}
+    assert d == {(): 25, (1,): 4, (2, 3): 8, (0,): 4,
+                 (1, 2, 3): 16, (0, 1): 8, (0, 2, 3): 16}
 
     temp = d.copy()
     assert d ** 3 == d * d * d
 
-    # should raise a KeyError since can't fit this into Ising.
-    try:
-        IsingMatrix({(0, 1): 1, (2, 3): -1})**2
-        assert False
-    except KeyError:
-        pass
+    temp = d.copy()
+    assert d ** 4 == d * d * d * d
 
 
 def test_round():
 
-    d = IsingMatrix({(0,): 3.456, (1,): -1.53456})
+    d = PUSOMatrix({(0,): 3.456, (1,): -1.53456})
 
     assert round(d) == {(0,): 3, (1,): -2}
     assert round(d, 1) == {(0,): 3.5, (1,): -1.5}
@@ -239,12 +227,12 @@ def test_round():
 def test_normalize():
 
     temp = {(0,): 4, (1,): -2}
-    d = IsingMatrix(temp)
+    d = PUSOMatrix(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
     temp = {(0,): -4, (1,): 2}
-    d = IsingMatrix(temp)
+    d = PUSOMatrix(temp)
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
@@ -252,7 +240,7 @@ def test_normalize():
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')
-    d = IsingMatrix()
+    d = PUSOMatrix()
     d[(0,)] -= a
     d[(0, 1)] += 2
     d[(1,)] += b
@@ -262,14 +250,27 @@ def test_symbols():
     assert d.subs({a: -3, b: 4}) == {(0,): 3, (0, 1): 2, (1,): 4}
 
 
-def test_isingmatrix_solve_bruteforce():
+def test_pusomatrix_solve_bruteforce():
 
-    L = IsingMatrix({(0, 1): 1, (1, 2): 1, (1,): -1, (2,): -2})
-    sol = L.solve_bruteforce()
-    assert sol in ({0: -1, 1: 1, 2: 1}, {0: 1, 1: -1, 2: 1})
-    assert allclose(L.value(sol), -3)
+    H = PUSOMatrix({
+        (0, 1): 1, (1, 2): 1, (1,): -1, (2,): -2,
+        (3, 4, 5): -1, (3,): -1, (4,): -1, (5,): -1
+    })
+    sol = H.solve_bruteforce()
+    assert sol in (
+        {0: -1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        {0: 1, 1: -1, 2: 1, 3: 1, 4: 1, 5: 1},
+    )
+    assert allclose(H.value(sol), -7)
 
-    L = IsingMatrix({(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25})
-    sols = L.solve_bruteforce(True)
-    assert sols == [{0: 1, 1: 1}, {0: -1, 1: 1}, {0: -1, 1: -1}]
-    assert all(allclose(L.value(s), 1) for s in sols)
+    H = PUSOMatrix({(0,): 0.25, (1,): -0.25, (0, 1): -0.25, (): 1.25,
+                   (3, 4, 5): -1, (3,): -1, (4,): -1, (5,): -1})
+    sols = H.solve_bruteforce(True)
+    assert (
+        sols
+        ==
+        [{0: 1, 1: 1, 3: 1, 4: 1, 5: 1},
+         {0: -1, 1: 1, 3: 1, 4: 1, 5: 1},
+         {0: -1, 1: -1, 3: 1, 4: 1, 5: 1}]
+    )
+    assert all(allclose(H.value(s), -3) for s in sols)

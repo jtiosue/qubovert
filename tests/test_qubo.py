@@ -18,8 +18,8 @@ Contains tests for the QUBO class.
 
 from qubovert import QUBO
 from qubovert.utils import (
-    solve_qubo_bruteforce, solve_ising_bruteforce,
-    solve_pubo_bruteforce, solve_hising_bruteforce,
+    solve_qubo_bruteforce, solve_quso_bruteforce,
+    solve_pubo_bruteforce, solve_puso_bruteforce,
     qubo_value
 )
 from sympy import Symbol
@@ -48,9 +48,9 @@ def test_qubo_qubo_solve():
     )
 
 
-def test_qubo_ising_solve():
+def test_qubo_quso_solve():
 
-    e, sols = solve_ising_bruteforce(problem.to_ising())
+    e, sols = solve_quso_bruteforce(problem.to_quso())
     sol = problem.convert_solution(sols)
     assert problem.is_solution_valid(sol)
     assert problem.is_solution_valid(sols)
@@ -74,9 +74,9 @@ def test_qubo_pubo_solve():
     )
 
 
-def test_qubo_hising_solve():
+def test_qubo_puso_solve():
 
-    e, sols = solve_hising_bruteforce(problem.to_hising())
+    e, sols = solve_puso_bruteforce(problem.to_puso())
     sol = problem.convert_solution(sols)
     assert problem.is_solution_valid(sol)
     assert problem.is_solution_valid(sols)

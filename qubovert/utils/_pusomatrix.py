@@ -12,50 +12,50 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_hisingmatrix.py.
+"""_pusomatrix.py.
 
-This file contains the HIsingMatrix object.
+This file contains the PUSOMatrix object.
 
 """
 
 from . import (
     PUBOMatrix, hash_function,
-    hising_value, solve_hising_bruteforce
+    puso_value, solve_puso_bruteforce
 )
 
 
-__all__ = 'HIsingMatrix',
+__all__ = 'PUSOMatrix',
 
 
-class HIsingMatrix(PUBOMatrix):
-    """HIsingMatrix.
+class PUSOMatrix(PUBOMatrix):
+    """PUSOMatrix.
 
-    ``HIsingMatrix`` inherits some methods from ``DictArithmetic``, see
+    ``PUSOMatrix`` inherits some methods from ``DictArithmetic``, see
     ``help(qubovert.utils.DictArithmetic)``.
 
-    ``HIsingMatrix`` inherits some methods from ``PUBOMatrix``, see
+    ``PUSOMatrix`` inherits some methods from ``PUBOMatrix``, see
     ``help(qubovert.utils.PUBOMatrix)``.
 
-    A class to handle HIsing matrices. It is the same thing as a dictionary
+    A class to handle PUSO matrices. It is the same thing as a dictionary
     with some methods modified. Note that each key must be a tuple of integers
     >= 0.
 
     Note that below we only consider keys that are of length 1 or 2, but they
-    can in general be arbitrarily long! See ``qubovert.utils.IsingMatrix``
+    can in general be arbitrarily long! See ``qubovert.utils.QUSOMatrix``
     for an object that restricts the length to <= 2.
 
     One method is that values will always default to 0. Consider the following
     example:
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> print(d[(0,)]) # will print 0
     >>> d[(0,)] += 1
     >>> print(d) # will print {(0,): 1}
 
-    One method of HIsingMatrix is that it will always keep the HIsing
+    One method of PUSOMatrix is that it will always keep the PUSO
     upper triangular! Consider the following example:
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> d[(1, 0)] += 2
     >>> print(d)
     >>> # will print {(0, 1): 2}
@@ -63,28 +63,28 @@ class HIsingMatrix(PUBOMatrix):
     One method is that if we set an item to 0, it will be removed. Consider
     the following example:
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> d[(0,)] += 1
     >>> d[(0,)] -= 1
     >>> print(d) # will print {}
 
-    One method is that if we initialize HIsingMatrix with a previous dictionary
-    it will be reinitialized to ensure that the HIsingMatrix is upper
+    One method is that if we initialize PUSOMatrix with a previous dictionary
+    it will be reinitialized to ensure that the PUSOMatrix is upper
     triangular and contains no zero values. Consider the following example:
 
-    >>> d = HIsingMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (2, 0, 1): 1})
+    >>> d = PUSOMatrix({(0,): 1, (1, 0): 2, (2, 0): 0, (2, 0, 1): 1})
     >>> print(d) # will print {(0,): 1, (0, 1): 2, (0, 1, 2): 1}
 
     We also change the update method so that it follows all the conventions.
 
-    >>> d = HIsingMatrix({(0,): 1, (0, 1): 2})
+    >>> d = PUSOMatrix({(0,): 1, (0, 1): 2})
     >>> d.update({(0,): 0, (1, 0): 1, (1, 2): -1})
     >>> print(d)  # will print {(0, 1): 1, (1, 2): -1}
 
     We also include arithmetic, addition, subtraction, scalar division,
     scalar multiplication, and all those in place. For example,
 
-    >>> d = HIsingMatrix((0,)=1, (0, 1)=-2)
+    >>> d = PUSOMatrix((0,)=1, (0, 1)=-2)
     >>> g = d + {(0,): -1}
     >>> print(g) # will print {(0, 1): -2}
     >>> g *= 4
@@ -92,7 +92,7 @@ class HIsingMatrix(PUBOMatrix):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    >>> d = HIsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> d = PUSOMatrix({(0, 0): 1, (0, 1): -1})
     >>> print(d)
     {(): 1, (0, 1): -1}
     >>> g = {(0,): -1, (1,): 1}
@@ -100,7 +100,7 @@ class HIsingMatrix(PUBOMatrix):
     >>> print(d)
     {(0,): -2, (1,): 2}
 
-    >>> d = HIsingMatrix({(0, 0): 1, (0, 1): -1})
+    >>> d = PUSOMatrix({(0, 0): 1, (0, 1): -1})
     >>> print(d ** 2 == d * d)
     True
 
@@ -108,7 +108,7 @@ class HIsingMatrix(PUBOMatrix):
     into its equivalent form. For example ``(0, 1, 1, 2, 2, 2)`` is equivalent
     to ``(0, 2)``. Thus,
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> d[(0, 1, 1, 2, 2, 2)] += 1
     >>> d[(0, 2)] += 2
     >>> print(d)
@@ -117,7 +117,7 @@ class HIsingMatrix(PUBOMatrix):
     Adding or subtracting constants will update the () element of the
     dict.
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> d += 5
     >>> print(d)
     {(): 5}
@@ -126,7 +126,7 @@ class HIsingMatrix(PUBOMatrix):
     careful with this, it can cause unexpected behavior if you don't know it.
     For example,
 
-    >>> d = HIsingMatrix()
+    >>> d = PUSOMatrix()
     >>> d[(0, 1)] += 2
     >>> print(d[(1, 0)])  # will print 2
 
@@ -136,8 +136,8 @@ class HIsingMatrix(PUBOMatrix):
     def squash_key(cls, key):
         """squash_key.
 
-        Will convert the input key into the standard form for HIsingMatrix /
-        IsingMatrix. It will get rid of pairs of duplicates and sort. This
+        Will convert the input key into the standard form for PUSOMatrix /
+        QUSOMatrix. It will get rid of pairs of duplicates and sort. This
         method will check to see if the input key is valid.
 
         Parameters
@@ -171,22 +171,22 @@ class HIsingMatrix(PUBOMatrix):
 
         Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
         PROBLEMS! This is the exact same as calling
-        ``qubovert.utils.solve_hising_bruteforce(self, all_solutions)[1]``.
+        ``qubovert.utils.solve_puso_bruteforce(self, all_solutions)[1]``.
 
         Parameters
         ----------
         all_solutions : bool.
             See the description of the ``all_solutions`` parameter in
-            ``qubovert.utils.solve_hising_bruteforce``.
+            ``qubovert.utils.solve_puso_bruteforce``.
 
         Return
         ------
         res : the second element of the two element tuple that is returned from
-            ``qubovert.utils.solve_hising_bruteforce``.
+            ``qubovert.utils.solve_puso_bruteforce``.
 
         """
-        return solve_hising_bruteforce(self, all_solutions,
-                                       self.is_solution_valid)[1]
+        return solve_puso_bruteforce(self, all_solutions,
+                                     self.is_solution_valid)[1]
 
     def value(self, x):
         r"""value.
@@ -194,7 +194,7 @@ class HIsingMatrix(PUBOMatrix):
         Find the value of
             :math:`\sum_{i,...,j} H_{i...j} z_{i} ... z_{j}`. Calling
             ``self.value(z)`` is the same as calling
-            ``qubovert.utils.hising_value(z, self)``.
+            ``qubovert.utils.puso_value(z, self)``.
 
         Parameters
         ----------
@@ -205,32 +205,32 @@ class HIsingMatrix(PUBOMatrix):
         Return
         -------
         value : float.
-            The value of the HIsing/Ising with the given assignment `z`.
+            The value of the PUSO/QUSO with the given assignment `z`.
 
         Example
         -------
-        >>> from qubovert.utils import IsingMatrix, HIsingMatrix
-        >>> from qubovert import Ising, HIsing
+        >>> from qubovert.utils import QUSOMatrix, PUSOMatrix
+        >>> from qubovert import QUSO, PUSO
 
-        >>> H = HIsingMatrix({(0, 1): -1, (0,): 1})
+        >>> H = PUSOMatrix({(0, 1): -1, (0,): 1})
         >>> z = {0: -1, 1: 1}
         >>> H.value(z)
         0
 
-        >>> H = HIsing({(0, 1): -1, (0,): 1})
+        >>> H = PUSO({(0, 1): -1, (0,): 1})
         >>> z = {0: -1, 1: 1}
         >>> H.value(z)
         0
 
-        >>> L = IsingMatrix({(0, 1): -1, (0,): 1})
+        >>> L = QUSOMatrix({(0, 1): -1, (0,): 1})
         >>> z = {0: -1, 1: 1}
         >>> L.value(z)
         0
 
-        >>> L = Ising({(0, 1): -1, (0,): 1})
+        >>> L = QUSO({(0, 1): -1, (0,): 1})
         >>> z = {0: -1, 1: 1}
         >>> L.value(z)
         0
 
         """
-        return hising_value(x, self)
+        return puso_value(x, self)

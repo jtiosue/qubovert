@@ -14,8 +14,8 @@
 
 """_solve_bruteforce.py.
 
-This file contains bruteforce solvers for QUBO/PUBO and Ising/HIsing, as well
-as QUBO/PUBO and HIsing objective function evaluators.
+This file contains bruteforce solvers for QUBO/PUBO and QUSO/PUSO, as well
+as QUBO/PUBO and PUSO objective function evaluators.
 
 """
 
@@ -24,9 +24,9 @@ __all__ = (
     'boolean_to_spin', 'spin_to_boolean',
     'decimal_to_spin', 'spin_to_decimal',
     'decimal_to_boolean', 'boolean_to_decimal',
-    'pubo_value', 'qubo_value', 'hising_value', 'ising_value',
+    'pubo_value', 'qubo_value', 'puso_value', 'quso_value',
     'solve_pubo_bruteforce', 'solve_qubo_bruteforce',
-    'solve_hising_bruteforce', 'solve_ising_bruteforce'
+    'solve_puso_bruteforce', 'solve_quso_bruteforce'
 )
 
 
@@ -272,8 +272,8 @@ def qubo_value(x, Q):
     return pubo_value(x, Q)
 
 
-def hising_value(z, H):
-    r"""hising_value.
+def puso_value(z, H):
+    r"""puso_value.
 
     Find the value of
         :math:`\sum_{i,...,j} H_{i...j} z_{i} ... z_{j}`.
@@ -283,19 +283,19 @@ def hising_value(z, H):
     z: dict or iterable.
         Maps variable labels to their values, 1 or -1. Ie z[i] must be the
         value of variable i.
-    H : dict, qubovert.utils.HIsingMatrix, or qubovert.HIsing object.
+    H : dict, qubovert.utils.PUSOMatrix, or qubovert.PUSO object.
         Maps spin labels to values.
 
     Return
     -------
     value : float.
-        The value of the HIsing with the given assignment `z`.
+        The value of the PUSO with the given assignment `z`.
 
     Example
     -------
     >>> H = {(0, 1): -1, (0,): 1}
     >>> z = {0: -1, 1: 1}
-    >>> hising_value(z, H)
+    >>> puso_value(z, H)
     0
 
     """
@@ -305,8 +305,8 @@ def hising_value(z, H):
     )
 
 
-def ising_value(z, L):
-    r"""ising_value.
+def quso_value(z, L):
+    r"""quso_value.
 
     Find the value of
         :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}`.
@@ -318,29 +318,29 @@ def ising_value(z, L):
     z: dict or iterable.
         Maps variable labels to their values, 1 or -1. Ie z[i] must be the
         value of variable i.
-    L : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
+    L : dict, qubovert.utils.QUSOMatrix, or qubovert.QUSO object.
         Maps spin labels to values.
 
     Return
     -------
     value : float.
-        The value of the Ising with the given assignment `z`.
+        The value of the QUSO with the given assignment `z`.
 
     Example
     -------
     >>> L = {(0, 1): -1, (0,): 1}
     >>> z = {0: -1, 1: 1}
-    >>> ising_value(z, L)
+    >>> quso_value(z, L)
     0
 
     """
-    return hising_value(z, L)
+    return puso_value(z, L)
 
 
 def _solve_bruteforce(D, all_solutions, valid, spin):
     """_solve_bruteforce.
 
-    Helper function for solve_pubo_bruteforce and solve_hising_bruteforce.
+    Helper function for solve_pubo_bruteforce and solve_puso_bruteforce.
 
     Iterate through all the possible solutions to a BO formulated problem
     and find the best one (the one that gives the minimum objective value). Do
@@ -414,7 +414,7 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
         x = {mapping[i]: v for i, v in enumerate(test_sol)}
         if not valid(x):
             continue
-        v = hising_value(x, D) if spin else pubo_value(x, D)
+        v = puso_value(x, D) if spin else pubo_value(x, D)
         if all_solutions and (best[0] is None or v <= best[0]):
             best = v, x
             all_sols.setdefault(v, []).append(x)
@@ -559,20 +559,20 @@ def solve_qubo_bruteforce(Q, all_solutions=False, valid=lambda x: True):
     return solve_pubo_bruteforce(Q, all_solutions, valid)
 
 
-def solve_hising_bruteforce(H, all_solutions=False, valid=lambda x: True):
-    """solve_hising_bruteforce.
+def solve_puso_bruteforce(H, all_solutions=False, valid=lambda x: True):
+    """solve_puso_bruteforce.
 
-    Iterate through all the possible solutions to an HIsing formulated problem
+    Iterate through all the possible solutions to an PUSO formulated problem
     and find the best one (the one that gives the minimum objective value). Do
     not use for large problem sizes! This is meant only for testing very small
     problems.
 
     Parameters
     ----------
-    H : dict, qubovert.utils.HIsingMatrix, or qubovert.HIsing object.
+    H : dict, qubovert.utils.PUSOMatrix, or qubovert.PUSO object.
         Maps spin labels to values.
     all_solutions : boolean (optional, defaults to False).
-        If all_solutions is set to True, all the best solutions to the Ising
+        If all_solutions is set to True, all the best solutions to the QUSO
         will be returned rather than just one of the best. If the problem is
         very big, then it is best if ``all_solutions`` is False, otherwise this
         function will use a lot of memory.
@@ -586,13 +586,13 @@ def solve_hising_bruteforce(H, all_solutions=False, valid=lambda x: True):
 
         if ``all_solutions`` is False:
             objective : float.
-                The best value of the HIsing.
+                The best value of the PUSO.
             solution : dict.
                 Maps the spin variable label to its solution value, {-1, 1}.
 
         if ``all_solutions`` is True:
             objective : float.
-                The best value of the HIsing.
+                The best value of the PUSO.
             solution : list of dicts.
                 Each dictionary maps the label to the value of each variable.
                 Ie each ``s`` in ``solution`` is a solution that gives the best
@@ -608,7 +608,7 @@ def solve_hising_bruteforce(H, all_solutions=False, valid=lambda x: True):
 
     Then to solve this, run
 
-    >>> obj_val, solution = solve_hising_bruteforce(H)
+    >>> obj_val, solution = solve_puso_bruteforce(H)
     >>> obj_val
     -3
     >>> solution
@@ -624,20 +624,20 @@ def solve_hising_bruteforce(H, all_solutions=False, valid=lambda x: True):
     return _solve_bruteforce(H, all_solutions, valid, True)
 
 
-def solve_ising_bruteforce(L, all_solutions=False, valid=lambda x: True):
-    """solve_ising_bruteforce.
+def solve_quso_bruteforce(L, all_solutions=False, valid=lambda x: True):
+    """solve_quso_bruteforce.
 
-    Iterate through all the possible solutions to an Ising formulated problem
+    Iterate through all the possible solutions to an QUSO formulated problem
     and find the best one (the one that gives the minimum objective value). Do
     not use for large problem sizes! This is meant only for testing very small
     problems.
 
     Parameters
     ----------
-    L : dict, qubovert.utils.IsingMatrix, or qubovert.Ising object.
+    L : dict, qubovert.utils.QUSOMatrix, or qubovert.QUSO object.
         Maps spin labels to values.
     all_solutions : boolean (optional, defaults to False).
-        If all_solutions is set to True, all the best solutions to the Ising
+        If all_solutions is set to True, all the best solutions to the QUSO
         will be returned rather than just one of the best. If the problem is
         very big, then it is best if ``all_solutions`` is False, otherwise this
         function will use a lot of memory.
@@ -651,13 +651,13 @@ def solve_ising_bruteforce(L, all_solutions=False, valid=lambda x: True):
 
         if ``all_solutions`` is False:
             objective : float.
-                The best value of the Ising.
+                The best value of the QUSO.
             solution : dict.
                 Maps the spin variable label to its solution value, {-1, 1}.
 
         if ``all_solutions`` is True:
             objective : float.
-                The best value of the HIsing.
+                The best value of the PUSO.
             solution : list of dicts.
                 Each dictionary maps the label to the value of each variable.
                 Ie each ``s`` in ``solution`` is a solution that gives the best
@@ -673,7 +673,7 @@ def solve_ising_bruteforce(L, all_solutions=False, valid=lambda x: True):
 
     Then to solve this, run
 
-    >>> obj_val, solution = solve_ising_bruteforce(L)
+    >>> obj_val, solution = solve_quso_bruteforce(L)
     >>> obj_val
     -3
     >>> solution
@@ -686,4 +686,4 @@ def solve_ising_bruteforce(L, all_solutions=False, valid=lambda x: True):
     is -1, :math:`z_2` is 1.
 
     """
-    return solve_hising_bruteforce(L, all_solutions, valid)
+    return solve_puso_bruteforce(L, all_solutions, valid)

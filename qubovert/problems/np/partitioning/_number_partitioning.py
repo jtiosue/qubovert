@@ -19,7 +19,7 @@ Contains the NumberPartitioning class. See
 
 """
 
-from qubovert.utils import IsingMatrix
+from qubovert.utils import QUSOMatrix
 from qubovert.problems import Problem
 
 
@@ -30,7 +30,7 @@ class NumberPartitioning(Problem):
     """NumberPartitioning.
 
     Class to manage converting the Number Partitioning problem to and from its
-    QUBO and Ising formluations. Based on the paper hereforth designated as
+    QUBO and QUSO formluations. Based on the paper hereforth designated as
     [Lucas].
 
     The goal of the NumberPartitioning problem is as follows (quoted from
@@ -127,22 +127,22 @@ class NumberPartitioning(Problem):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO and Ising use.
+        The number of binary variables that the QUBO and QUSO use.
 
         Return
         -------
         num : int.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         return self._N
 
-    def to_ising(self, A=1):
-        r"""to_ising.
+    def to_quso(self, A=1):
+        r"""to_quso.
 
-        Create and return the number partitioning problem in Ising form
+        Create and return the number partitioning problem in QUSO form
         following section 2.1 of [Lucas]. It is
-        the value such that the solution to the Ising formulation is 0
+        the value such that the solution to the QUSO formulation is 0
         if a valid number partitioning exists.
 
         Parameters
@@ -152,33 +152,33 @@ class NumberPartitioning(Problem):
 
         Return
         -------
-        L : qubovert.utils.IsingMatrix object.
-            For most practical purposes, you can use IsingMatrix in the
+        L : qubovert.utils.QUSOMatrix object.
+            For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
-            ``help(qubovert.utils.IsingMatrix)``.
+            ``help(qubovert.utils.QUSOMatrix)``.
 
         Example
         --------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
-        >>> L = problem.to_ising()
+        >>> L = problem.to_quso()
 
         """
-        L = IsingMatrix({(i,): self._S[i] for i in range(self._N)})
+        L = QUSOMatrix({(i,): self._S[i] for i in range(self._N)})
         return A * L * L
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
-        Convert the solution to the QUBO or Ising to the solution to the
+        Convert the solution to the QUBO or QUSO to the solution to the
         Number Partitioning problem.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
@@ -231,10 +231,10 @@ class NumberPartitioning(Problem):
         ----------
         solution : iterable or dict.
             solution can be the output of NumberPartitioning.convert_solution,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the

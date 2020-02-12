@@ -8,13 +8,13 @@ Accessed with ``qubovert.utils.function_name``.
 Conversions
 -----------
 
-.. autofunction:: qubovert.utils.pubo_to_hising
+.. autofunction:: qubovert.utils.pubo_to_puso
 
-.. autofunction:: qubovert.utils.hising_to_pubo
+.. autofunction:: qubovert.utils.puso_to_pubo
 
-.. autofunction:: qubovert.utils.qubo_to_ising
+.. autofunction:: qubovert.utils.qubo_to_quso
 
-.. autofunction:: qubovert.utils.ising_to_qubo
+.. autofunction:: qubovert.utils.quso_to_qubo
 
 .. autofunction:: qubovert.utils.matrix_to_qubo
 
@@ -38,11 +38,11 @@ Values
 
 .. autofunction:: qubovert.utils.pubo_value
 
-.. autofunction:: qubovert.utils.hising_value
+.. autofunction:: qubovert.utils.puso_value
 
 .. autofunction:: qubovert.utils.qubo_value
 
-.. autofunction:: qubovert.utils.ising_value
+.. autofunction:: qubovert.utils.quso_value
 
 
 Bruteforce Solvers
@@ -50,11 +50,11 @@ Bruteforce Solvers
 
 .. autofunction:: qubovert.utils.solve_pubo_bruteforce
 
-.. autofunction:: qubovert.utils.solve_hising_bruteforce
+.. autofunction:: qubovert.utils.solve_puso_bruteforce
 
 .. autofunction:: qubovert.utils.solve_qubo_bruteforce
 
-.. autofunction:: qubovert.utils.solve_ising_bruteforce
+.. autofunction:: qubovert.utils.solve_quso_bruteforce
 
 
 Hash

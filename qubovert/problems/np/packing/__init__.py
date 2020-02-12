@@ -14,7 +14,7 @@
 
 """``packing`` contains many NP packing problems.
 
-Here we have the QUBO/Ising conversions for common packing probems,
+Here we have the QUBO/QUSO conversions for common packing probems,
 The conversions are based on [Lucas].
 
 References

@@ -12,23 +12,23 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_hoio.py.
+"""_pcso.py.
 
-Contains the HOIO class. See ``help(qubovert.HOIO)``.
+Contains the PCSO class. See ``help(qubovert.PCSO)``.
 
 """
 
-from . import HIsing, HOBO
-from .utils import hising_to_pubo, pubo_to_hising
+from . import PUSO, PCBO
+from .utils import puso_to_pubo, pubo_to_puso
 
 
-__all__ = 'HOIO', 'spin_var'
+__all__ = 'PCSO', 'spin_var'
 
 
 def spin_var(name):
     """spin_var.
 
-    Create a HOIO (see ``qubovert.HOIO``) from a single spin variable.
+    Create a PCSO (see ``qubovert.PCSO``) from a single spin variable.
 
     Parameters
     ----------
@@ -37,71 +37,71 @@ def spin_var(name):
 
     Return
     ------
-    hoio : qubovert.HOIO object.
+    pcso : qubovert.PCSO object.
         The model representing the spin variable.
 
     Examples
     --------
-    >>> from qubovert import spin_var, HOIO
+    >>> from qubovert import spin_var, PCSO
     >>>
     >>> z0 = spin_var("z0")
     >>> print(z0)
     {('z0',): 1}
-    >>> print(isinstance(z0, HOIO))
+    >>> print(isinstance(z0, PCSO))
     True
 
     >>> z = [spin_var('z{}'.format(i)) for i in range(5)]
-    >>> hoio = sum(z)
-    >>> print(hoio)
+    >>> pcso = sum(z)
+    >>> print(pcso)
     {('z0',): 1, ('z1',): 1, ('z2',): 1, ('z3',): 1, ('z4',): 1}
-    >>> hoio **= 2
-    >>> print(hoio)
+    >>> pcso **= 2
+    >>> print(pcso)
     {(): 5, ('z0', 'z1'): 2, ('z2', 'z0'): 2, ('z3', 'z0'): 2, ('z0', 'z4'): 2,
      ('z2', 'z1'): 2, ('z3', 'z1'): 2, ('z4', 'z1'): 2, ('z3', 'z2'): 2,
      ('z2', 'z4'): 2, ('z3', 'z4'): 2}
-    >>> hoio *= -1
-    >>> print(hoio.solve_bruteforce(all_solutions=True))
+    >>> pcso *= -1
+    >>> print(pcso.solve_bruteforce(all_solutions=True))
     [{'z0': -1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
      {'z0': 1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1}]
-    >>> hoio.add_constraint_eq_zero(z[0] + z[1])
-    >>> print(hoio.solve_bruteforce(all_solutions=True))
+    >>> pcso.add_constraint_eq_zero(z[0] + z[1])
+    >>> print(pcso.solve_bruteforce(all_solutions=True))
     [{'z0': -1, 'z1': 1, 'z2': -1, 'z3': -1, 'z4': -1},
      {'z0': -1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1},
      {'z0': 1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
      {'z0': 1, 'z1': -1, 'z2': 1, 'z3': 1, 'z4': 1}]
 
     """
-    return HOIO({(name,): 1})
+    return PCSO({(name,): 1})
 
 
-def _empty_hobo(hoio):
-    """_empty_hobo.
+def _empty_pcbo(pcso):
+    """_empty_pcbo.
 
-    Create an empty HOBO whose ancilla variables begin at
-    ``hoio.num_ancillas``.
+    Create an empty PCBO whose ancilla variables begin at
+    ``pcso.num_ancillas``.
 
     Parameters
     ----------
-    hoio : HOIO object.
+    pcso : PCSO object.
 
     Return
     ------
-    hobo : HOBO object.
+    pcbo : PCBO object.
 
     """
-    h = HOBO()
-    h._ancilla = hoio._ancilla
+    h = PCBO()
+    h._ancilla = pcso._ancilla
     return h
 
 
-class HOIO(HIsing):
-    """HOBO.
+class PCSO(PUSO):
+    """PCBO.
 
-    This class deals with Higher Order Ising Optimization problems. HOIO
-    inherits some methods and attributes from the ``HIsing`` class. See
-    ``help(qubovert.HIsing)``.
+    This class deals with Polynomial Constrained Spin Optimization. PCSO
+    inherits some methods and attributes from the ``PUSO`` class. See
+    ``help(qubovert.PUSO)``.
 
-    ``HOIO`` has all the same methods as ``HIsing``, but adds some constraint
+    ``PCSO`` has all the same methods as ``PUSO``, but adds some constraint
     methods; namely
 
     - ``add_constraint_eq_zero(H, lam=1, ...)`` enforces that ``H == 0`` by
@@ -117,7 +117,7 @@ class HOIO(HIsing):
     - ``add_constraint_ge_zero(H, lam=1, ...)`` enforces that ``H >= 0`` by
       penalizing with ``lam``.
 
-    Each of these takes in a HIsing ``H`` and a lagrange multiplier ``lam``
+    Each of these takes in a PUSO ``H`` and a lagrange multiplier ``lam``
     that defaults to 1. See each of their docstrings for important details on
     their implementation.
 
@@ -126,11 +126,11 @@ class HOIO(HIsing):
     - Variables names that begin with ``"__a"`` should not be used since they
       are used internally to deal with some ancilla variables to enforce
       constraints.
-    - The ``self.solve_bruteforce`` method will solve the HOIO ensuring that
+    - The ``self.solve_bruteforce`` method will solve the PCSO ensuring that
       all the inputted constraints are satisfied. Whereas
-      ``qubovert.utils.solve_hising_bruteforce(self)`` or
-      ``qubovert.utils.solve_hising_bruteforce(self.to_pubo())`` will solve the
-      HIsing created from the HOIO. If the inputted constraints are not
+      ``qubovert.utils.solve_puso_bruteforce(self)`` or
+      ``qubovert.utils.solve_puso_bruteforce(self.to_pubo())`` will solve the
+      PUSO created from the PCSO. If the inputted constraints are not
       enforced strong enough (ie too small lagrange multipliers) then these may
       not give the correct result, whereas ``self.solve_bruteforce()`` will
       always give the correct result (ie one that satisfies all the
@@ -138,16 +138,16 @@ class HOIO(HIsing):
 
     Examples
     --------
-    See ``qubovert.HIsing`` for more examples of using HOIO without
-    constraints. See ``qubovert.HOBO`` for many constraint examples in PUBO
-    form. ``HOIO`` is the same but converting to HIsing.
+    See ``qubovert.PUSO`` for more examples of using PCSO without
+    constraints. See ``qubovert.PCBO`` for many constraint examples in PUBO
+    form. ``PCSO`` is the same but converting to PUSO.
 
-    >>> H = HOIO()
+    >>> H = PCSO()
     >>> H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
     >>> H
     {(): 6, ('a', 2): -4, ('a', 1): -4, (1, 2): 2}
 
-    >>> H = HOIO()
+    >>> H = PCSO()
     >>> H.add_constraint_eq_zero(
             {(0, 1): 1}
         ).add_constraint_lt_zero(
@@ -159,64 +159,64 @@ class HOIO(HIsing):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with higher order ising optimization problems.
-        Note that it is generally more efficient to initialize an empty HOIO
-        object and then build the HOIO, rather than initialize a HOIO object
+        This class deals with polynomial constrained spin optimization.
+        Note that it is generally more efficient to initialize an empty PCSO
+        object and then build the PCSO, rather than initialize a PCSO object
         with an already built dict.
 
         Parameters
         ----------
         arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
-            the class. Alternatively, ``args[0]`` can be a HOIO.
+            the class. Alternatively, ``args[0]`` can be a PCSO.
 
         Examples
         -------
-        >>> hoio = HOIO()
-        >>> hoio[('a',)] += 5
-        >>> hoio[(0, 'a')] -= 2
-        >>> hoio -= 1.5
-        >>> hoio
+        >>> pcso = PCSO()
+        >>> pcso[('a',)] += 5
+        >>> pcso[(0, 'a')] -= 2
+        >>> pcso -= 1.5
+        >>> pcso
         {('a',): 5, ('a', 0): -2, (): -1.5}
-        >>> hoio.add_constraint_eq_zero({('a',): 1, ('b',): 1}, lam=5)
-        >>> hoio
+        >>> pcso.add_constraint_eq_zero({('a',): 1, ('b',): 1}, lam=5)
+        >>> pcso
         {('a',): 5, ('a', 0): -2, (): 8.5, ('a', 'b'): 10}
 
-        >>> hoio = HOIO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
-        >>> hoio
+        >>> pcso = PCSO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
+        >>> pcso
         {('a',): 5, ('a', 0, 1): -2, (): -1.5}
 
         """
-        HOBO.__init__(self, *args, **kwargs)
+        PCBO.__init__(self, *args, **kwargs)
 
     def update(self, *args, **kwargs):
         """update.
 
-        Update the HOIO but following all the conventions of this class.
+        Update the PCSO but following all the conventions of this class.
 
         Parameters
         ----------
-        *args and **kwargs : defines a dictionary or HOIO.
+        *args and **kwargs : defines a dictionary or PCSO.
             Ie ``d = dict(*args, **kwargs)``.
             Each element in d will be added in place to this instance following
             all the required convensions.
 
         """
-        HOBO.update(self, *args, **kwargs)
+        PCBO.update(self, *args, **kwargs)
 
     @property
     def constraints(self):
         """constraints.
 
-        Return the constraints of the HOIO.
+        Return the constraints of the PCSO.
 
         Return
         ------
         res : dict.
             The keys of ``res`` are ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``,
-            ``'gt'``, and ``'ge'``. The values are lists of ``qubovert.HIsing``
+            ``'gt'``, and ``'ge'``. The values are lists of ``qubovert.PUSO``
             objects. For a given key, value pair ``k, v``, the ``v[i]`` element
-            represents the HIsing ``v[i]`` being
+            represents the PUSO ``v[i]`` being
             == 0 if ``k == 'eq'``, != 0 if ``k == 'ne'``,
             < 0 if ``k == 'lt'``, <= 0 if ``k == 'le'``,
             > 0 if ``k == 'gt'``, >= 0 if ``k == 'ge'``.
@@ -233,22 +233,22 @@ class HOIO(HIsing):
         ----------
         key : str.
             One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
-        constraint : qubovert.HIsing object.
+        constraint : qubovert.PUSO object.
 
         """
-        HOBO._append_constraint(self, key, constraint)
+        PCBO._append_constraint(self, key, constraint)
 
     @property
     def num_ancillas(self):
         """num_ancillas.
 
-        Return the number of ancilla variables introduced to the HOIO in
+        Return the number of ancilla variables introduced to the PCSO in
         order to enforce the inputted constraints.
 
         Returns
         -------
         num : int.
-            Number of ancillas in the HOIO.
+            Number of ancillas in the PCSO.
 
         """
         return self._ancilla
@@ -257,7 +257,7 @@ class HOIO(HIsing):
     def remove_ancilla_from_solution(cls, solution):
         """remove_ancilla_from_solution.
 
-        Take a solution to the HOIO and remove all the ancilla variables, (
+        Take a solution to the PCSO and remove all the ancilla variables, (
         represented by `_a` prefixes).
 
         Parameters
@@ -265,7 +265,7 @@ class HOIO(HIsing):
         solution : dict.
             Must be the solution in terms of the original variables. Thus if
             ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
             formulations, then you should first call ``self.convert_solution``.
             See ``help(self.convert_solution)``.
 
@@ -275,7 +275,7 @@ class HOIO(HIsing):
             The same as ``solution`` but with all the ancilla bits removed.
 
         """
-        return HOBO.remove_ancilla_from_solution(solution)
+        return PCBO.remove_ancilla_from_solution(solution)
 
     def is_solution_valid(self, solution):
         """is_solution_valid.
@@ -287,7 +287,7 @@ class HOIO(HIsing):
         solution : dict.
             Must be the solution in terms of the original variables. Thus if
             ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_hising``, or ``self.to_ising``
+            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
             formulations, then you should first call ``self.convert_solution``.
             See ``help(self.convert_solution)``.
 
@@ -297,13 +297,13 @@ class HOIO(HIsing):
             Whether or not the given solution satisfies the constraints.
 
         """
-        return HOBO.is_solution_valid(self, solution)
+        return PCBO.is_solution_valid(self, solution)
 
     # override
     def __round__(self, ndigits=None):
         """round.
 
-        Round values of the HOIO object.
+        Round values of the PCSO object.
 
         Parameters
         ----------
@@ -312,13 +312,13 @@ class HOIO(HIsing):
 
         Returns
         -------
-        res : HOIO object.
+        res : PCSO object.
             Copy of self but with each value rounded to ``ndigits`` decimal
             digits. Each value has a type according to the docstring
             specifications of ``round``, see ``help(round)``.
 
         """
-        return HOBO.__round__(self, ndigits)
+        return PCBO.__round__(self, ndigits)
 
     # override
     def subs(self, *args, **kwargs):
@@ -334,11 +334,11 @@ class HOIO(HIsing):
 
         Returns
         -------
-        res : a HOIO object.
+        res : a PCSO object.
             Same as ``self`` but with all the symbols replaced with values.
 
         """
-        return HOBO.subs(self, *args, **kwargs)
+        return PCBO.subs(self, *args, **kwargs)
 
     def add_constraint_eq_zero(self,
                                H, lam=1,
@@ -349,10 +349,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H == 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H == 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -360,7 +360,7 @@ class HOIO(HIsing):
             Langrange multiplier to penalize violations of the constraint.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they may be
+            PUSO ``H`` can take. If ``bounds`` is None, then they may be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -369,20 +369,20 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Examples
         --------
         The following enforces that :math:`\sum_{i=1}^{3} i z_i z_{i+1} == 0`.
 
-        >>> H = HOIO()
+        >>> H = PCSO()
         >>> H.add_constraint_eq_zero({(1, 2): 1, (2, 3): 2, (3, 4): 3})
 
         Here we show how operations can be strung together.
 
-        >>> H = HOIO()
+        >>> H = PCSO()
         >>> H.add_constraint_lt_zero(
                 {(0, 1): 1}
             ).add_constraint_eq_zero(
@@ -390,15 +390,15 @@ class HOIO(HIsing):
             )
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("eq", H)
 
-        h = _empty_hobo(self).add_constraint_eq_zero(
-            hising_to_pubo(H), lam=lam,
+        h = _empty_pcbo(self).add_constraint_eq_zero(
+            puso_to_pubo(H), lam=lam,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self
 
     def add_constraint_ne_zero(self,
@@ -411,10 +411,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H != 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H != 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -425,7 +425,7 @@ class HOIO(HIsing):
             constraint. See Notes below for more details.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            PUSO ``H`` can take. If ``bounds`` is None, then they will be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -434,8 +434,8 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -454,14 +454,14 @@ class HOIO(HIsing):
           bits will be used.
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("ne", H)
-        h = _empty_hobo(self).add_constraint_ne_zero(
-            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+        h = _empty_pcbo(self).add_constraint_ne_zero(
+            puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self
 
     def add_constraint_lt_zero(self,
@@ -474,10 +474,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H < 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H < 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -488,7 +488,7 @@ class HOIO(HIsing):
             constraint. See Notes below for more details.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            PUSO ``H`` can take. If ``bounds`` is None, then they will be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -497,8 +497,8 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -511,7 +511,7 @@ class HOIO(HIsing):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOIO()
+          >>> H = PCSO()
           >>> H.add_constraint_lt_zero(
           >>>     {(0,): 0.5, (): 1.65, (1,): 1.0, (2,): -0.25})
           >>> test_sol = {0: -1, 1: -1, 2: 1}
@@ -531,14 +531,14 @@ class HOIO(HIsing):
           bits will be used.
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("lt", H)
-        h = _empty_hobo(self).add_constraint_lt_zero(
-            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+        h = _empty_pcbo(self).add_constraint_lt_zero(
+            puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self
 
     def add_constraint_le_zero(self,
@@ -550,10 +550,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H <= 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H <= 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -564,7 +564,7 @@ class HOIO(HIsing):
             constraint. See Notes below for more details.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            PUSO ``H`` can take. If ``bounds`` is None, then they will be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -573,8 +573,8 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -587,7 +587,7 @@ class HOIO(HIsing):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOIO()
+          >>> H = PCSO()
           >>> H.add_constraint_le_zero(
                   {(0,): 0.5, (): 1.15, (1,): 1.0, (2,): -0.75})
           >> H
@@ -611,14 +611,14 @@ class HOIO(HIsing):
           bits will be used.
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("le", H)
-        h = _empty_hobo(self).add_constraint_le_zero(
-            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+        h = _empty_pcbo(self).add_constraint_le_zero(
+            puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self
 
     def add_constraint_gt_zero(self,
@@ -630,10 +630,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H > 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H > 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -644,7 +644,7 @@ class HOIO(HIsing):
             constraint. See Notes below for more details.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            PUSO ``H`` can take. If ``bounds`` is None, then they will be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -653,8 +653,8 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -667,7 +667,7 @@ class HOIO(HIsing):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOIO()
+          >>> H = PCSO()
           >>> H.add_constraint_gt_zero(
                   {(0,): -0.5, (): -1.65, (1,): -1.0, (2,): 0.25})
           >>> test_sol = {0: -1, 1: -1, 2: 1}
@@ -687,14 +687,14 @@ class HOIO(HIsing):
           bits will be used.
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("gt", H)
-        h = _empty_hobo(self).add_constraint_gt_zero(
-            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+        h = _empty_pcbo(self).add_constraint_gt_zero(
+            puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self
 
     def add_constraint_ge_zero(self,
@@ -706,10 +706,10 @@ class HOIO(HIsing):
 
         Parameters
         ----------
-        H : dict representing a HIsing.
-            The HIsing constraint such that H >= 0. Note that ``H`` will be
-            converted to a ``qubovert.HIsing`` object if it is not already,
-            thus it must follow the conventions, see ``help(qubovert.HIsing)``.
+        H : dict representing a PUSO.
+            The PUSO constraint such that H >= 0. Note that ``H`` will be
+            converted to a ``qubovert.PUSO`` object if it is not already,
+            thus it must follow the conventions, see ``help(qubovert.PUSO)``.
             Please note that if ``H`` contains any symbols, then ``bounds``
             must be supplied, since they cannot be determined when symbols
             are present.
@@ -720,7 +720,7 @@ class HOIO(HIsing):
             constraint. See Notes below for more details.
         bounds : two element tuple (optional, defaults to None).
             A tuple ``(min, max)``, the minimum and maximum values that the
-            HIsing ``H`` can take. If ``bounds`` is None, then they will be
+            PUSO ``H`` can take. If ``bounds`` is None, then they will be
             calculated (approximately), or if either of the elements of
             ``bounds`` is None, then that element will be calculated
             (approximately).
@@ -729,8 +729,8 @@ class HOIO(HIsing):
 
         Return
         ------
-        self : HOIO.
-            Updates the HOIO in place, but returns ``self`` so that operations
+        self : PCSO.
+            Updates the PCSO in place, but returns ``self`` so that operations
             can be strung together.
 
         Notes
@@ -743,7 +743,7 @@ class HOIO(HIsing):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = HOIO()
+          >>> H = PCSO()
           >>> H.add_constraint_ge_zero(
                   {(0,): -0.5, (): -1.15, (1,): -1.0, (2,): 0.75})
           >>> H
@@ -766,12 +766,12 @@ class HOIO(HIsing):
           bits will be used.
 
         """
-        H = HIsing(H)
+        H = PUSO(H)
         self._append_constraint("ge", H)
-        h = _empty_hobo(self).add_constraint_ge_zero(
-            hising_to_pubo(H), lam=lam, log_trick=log_trick,
+        h = _empty_pcbo(self).add_constraint_ge_zero(
+            puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_hising(h)
+        self += pubo_to_puso(h)
         return self

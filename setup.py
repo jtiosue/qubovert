@@ -35,7 +35,7 @@ setuptools.setup(
     version=__version__,
     author="Joseph T. Iosue",
     author_email="joe.iosue@yahoo.com",
-    description="A package for converting common problems to QUBO/Ising form",
+    description="A package for converting problems to boolean and spin form",
     long_description=README,
     long_description_content_type='text/x-rst',
     url="https://github.com/jiosue/qubovert",

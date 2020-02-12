@@ -93,27 +93,77 @@ Then you can use it in Python **versions 3.6 and above** with
     # etc ...
 
 
-Managing QUBO, Ising, PUBO, HIsing, HOBO, and HOIO formulations
+Example of the typical workflow
+-------------------------------
+
+Create the objective function to minimize.
+
+.. code:: python
+
+    from qubovert import boolean_var
+    from qubovert.sat import NOT
+
+    N = 10
+
+    x = {i: boolean_var('x(%d)' % i) for i in range(N)}
+
+    model = sum(NOT(x[i-1]) * x[i] for i in range(N-1))
+
+    # enforce that x_1 equals the XOR of x_3 and x_5 with a penalty factor of 3
+    model.add_constraint_eq_XOR(x[1], x[3], x[5], lam=3)
+
+    # enforce that the sum of all variables is less than 4 with a penalty factor of 5.
+    model.add_constraint_lt_zero(sum(x.values()) - 4, lam=5)
+
+
+Then, if you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``):
+
+.. code:: python
+
+    from anywhere import qubo_solver
+
+    qubo = model.to_qubo()
+    qubo_energy, qubo_solution = qubo_solver(qubo)
+    model_solution = model.convert_solution(qubo_solution)
+    print(model_solution)
+
+
+Otherwise, if you have a QUSO solver (or just use ``qubovert.utils.solve_quso_bruteforce``):
+
+.. code:: python
+
+    from anywhere import quso_solver
+
+    quso = model.to_quso()
+    quso_energy, quso_solution = quso_solver(quso)
+    model_solution = model.convert_solution(quso_solution)
+    print(model_solution)
+
+
+Each ``model_solution`` should be the same! You can test that it is the correct solution by comparing it to ``model.solve_bruteforce()``. You can also check if all of the constraints are satisfied by running ``model.is_solution_valid(model_solution)``.
+
+
+Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
 ---------------------------------------------------------------
 
 See ``qubovert.__all__``.
 
 - QUBO: Quadratic Unconstrained Boolean Optimization
-- Ising: quadratic unconstrained spin-1/2 Hamiltonian
+- QUSO: Quadratic Unconstrained Spin Optimization
 - PUBO: Polynomial Unconstrained Boolean Optimization
-- HIsing: Higher order unconstrained spin-1/2 Hamiltonian
-- HOBO: Higher Order Boolean Optimization
-- HOIO: Higher Order Ising Optimization
+- PUSO: Polynomial Unconstrained Spin Optimization
+- PCBO: Polynomial Constrained Boolean Optimization
+- PCSO: Polynomial Constrained Spin Optimization
 
-See the docstrings for ``qubovert.HOBO``, ``qubovert.HOIO``, ``qubovert.QUBO``, ``qubovert.Ising``, ``qubovert.PUBO``, and ``qubovert.HIsing``.
+Boolean variables are in {0, 1}, and spin variables are in {1, -1}. See the docstrings for ``qubovert.PCBO``, ``qubovert.PCSO``, ``qubovert.QUBO``, ``qubovert.QUSO``, ``qubovert.PUBO``, and ``qubovert.PUSO``.
 
-See the following HOBO examples (much of the same functionality can be used with HOIO problems).
+See the following PCBO examples (much of the same functionality can be used with PCSO problems).
 
 .. code:: python
 
-    from qubovert import HOBO
+    from qubovert import PCBO
 
-    H = HOBO()
+    H = PCBO()
     H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
     print(H)
     # {('a', 1, 2): -4, (1, 2): 3, (): 1}
@@ -136,9 +186,9 @@ Note that for large problems, it is slower to use the `boolean_var` functionalit
 
 .. code:: python
 
-    from qubovert import boolean_var, HOBO
+    from qubovert import boolean_var, PCBO
 
-    H0 = HOBO()
+    H0 = PCBO()
     for i in range(1000):
         H0[(i,)] += 1
 
@@ -146,11 +196,11 @@ Note that for large problems, it is slower to use the `boolean_var` functionalit
     H1 = sum(xs)
 
 
-Here we show how to solve problems with the bruteforce solver, and how to convert problems to QUBO and Ising form. You can use any QUBO/Ising solver you'd like to solve!
+Here we show how to solve problems with the bruteforce solver, and how to convert problems to QUBO and QUSO form. You can use any QUBO/QUSO solver you'd like to solve!
 
 .. code:: python
 
-    H = HOBO()
+    H = PCBO()
 
     # minimize -x_0 - x_1 - x_2
     for i in (0, 1, 2):
@@ -172,20 +222,20 @@ Here we show how to solve problems with the bruteforce solver, and how to conver
     solutions = [H.convert_solution(sol)
                  for sol in Q.solve_bruteforce(all_solutions=True)]
     print(solutions)
-    # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+    # [{0: 0, 1: 1, 2: 0}]  # matches the PCBO solution!
 
-    L = H.to_ising()
+    L = H.to_quso()
     solutions = [H.convert_solution(sol)
                  for sol in L.solve_bruteforce(all_solutions=True)]
     print(solutions)
-    # [{0: 0, 1: 1, 2: 0}]  # matches the HOBO solution!
+    # [{0: 0, 1: 1, 2: 0}]  # matches the PCBO solution!
 
 
 Here we show how to add various boolean constraints to models.
 
 .. code:: python
 
-    H = HOBO()
+    H = PCBO()
     # make it favorable to AND variables a and b, and variables b and c
     H.add_constraint_AND('a', 'b').add_constraint_AND('b', 'c')
 
@@ -245,13 +295,13 @@ Symbols can also be used, for example:
 
 .. code:: python
 
-    from qubovert import HOIO
+    from qubovert import PCSO
     from sympy import Symbol
 
     a, b = Symbol('a'), Symbol('b')
 
     # enforce that z_0 + z_1 == 0 with penalty a
-    H = HOIO().add_constraint_eq_zero({(0,): 1, (1,): 1}, lam=a)
+    H = PCSO().add_constraint_eq_zero({(0,): 1, (1,): 1}, lam=a)
     print(H)
     # {(): 2*a, (0, 1): 2*a}
     H[(0, 1)] += b
@@ -265,9 +315,9 @@ Symbols can also be used, for example:
     print(H_subs)
     # {(): 4, (0, 1): 7}
 
-Please note that ``H.mapping`` is not necessarily equal to ``H.subs(...).mapping``. Thus, when using the ``HOBO.convert_solution`` function, make sure that you use the correct ``HOBO`` instance!
+Please note that ``H.mapping`` is not necessarily equal to ``H.subs(...).mapping``. Thus, when using the ``PCBO.convert_solution`` function, make sure that you use the correct ``PCBO`` instance!
 
-The convension used is that ``()`` elements of every dictionary corresponds to offsets. Note that some QUBO solvers accept QUBOs where each key is a two element tuple (since for a QUBO ``{(0, 0): 1}`` is the same as ``{(0,): 1}``). To get this standard form from our ``QUBOMatrix`` object, just access the property ``Q``. Similar for the ``IsingMatrix``. For example:
+The convension used is that ``()`` elements of every dictionary corresponds to offsets. Note that some QUBO solvers accept QUBOs where each key is a two element tuple (since for a QUBO ``{(0, 0): 1}`` is the same as ``{(0,): 1}``). To get this standard form from our ``QUBOMatrix`` object, just access the property ``Q``. Similar for the ``QUSOMatrix``. For example:
 
 .. code:: python
 
@@ -286,8 +336,8 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
 
 .. code:: python
 
-    from qubovert.utils import IsingMatrix
-    L = IsingMatrix()
+    from qubovert.utils import QUSOMatrix
+    L = QUSOMatrix()
     L += 3
     L[(0, 1, 1)] -= 1
     L[(0, 1)] += 2
@@ -310,11 +360,11 @@ See ``qubovert.utils.__all__``.
 We implement various utility functions, including
 
 - ``solve_pubo_bruteforce``,
-- ``solve_hising_bruteforce``,
+- ``solve_puso_bruteforce``,
 - ``pubo_value``,
-- ``hising_value``,
-- ``pubo_to_hising``,
-- ``hising_to_pubo``,
+- ``puso_value``,
+- ``pubo_to_puso``,
+- ``puso_to_pubo``,
 - ``subgraph``,
 
 and more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that qubovert uses everywhere.
@@ -354,7 +404,7 @@ Convert common problems to QUBO form (the ``problems`` library)
 
 See ``qubovert.problems.__all__``.
 
-So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and Ising forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
+So far we have just implemented some of the formulations from [Lucas]_. The goal of QUBOVert is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes.
 
 
 See the following Set Cover example. All other problems can be used in a similar way.
@@ -383,22 +433,22 @@ See the following Set Cover example. All other problems can be used in a similar
     print(obj == len(solution))
     # will print True
 
-To use the Ising formulation instead:
+To use the QUSO formulation instead:
 
 .. code:: python
 
     from qubovert.problems import SetCover
-    from any_module import ising_solver
+    from any_module import quso_solver
     # or you can use my bruteforce solver...
-    # from qubovert.utils import solve_ising_bruteforce as ising_solver
+    # from qubovert.utils import solve_quso_bruteforce as quso_solver
 
     U = {"a", "b", "c", "d"}
     V = [{"a", "b"}, {"a", "c"}, {"c", "d"}]
 
     problem = SetCover(U, V)
-    L = problem.to_ising()
+    L = problem.to_quso()
 
-    obj, sol = ising_solver(L)
+    obj, sol = quso_solver(L)
 
     solution = problem.convert_solution(sol)
 

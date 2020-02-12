@@ -32,7 +32,7 @@ class SetCover(Problem):
     """SetCover.
 
     Class to manage converting (Weighted) Set Cover to and from its QUBO and
-    Ising formluations. Based on the paper hereforth designated [Lucas].
+    QUSO formluations. Based on the paper hereforth designated [Lucas].
 
     The goal of the SetCover problem is to find the smallest number of subsets
     of U in V such that union over the elements equals U. The goal of the
@@ -127,7 +127,7 @@ class SetCover(Problem):
         self._log_M = int(log2(self._M))+1
 
         # map each alpha in U to a unique integer index. used for the QUBO and
-        # ising conversions.
+        # quso conversions.
         self._alpha_to_index = {alpha: i for i, alpha in enumerate(self._U)}
 
     @property
@@ -205,12 +205,12 @@ class SetCover(Problem):
     def num_binary_variables(self):
         """num_binary_variables.
 
-        The number of binary variables that the QUBO and Ising use.
+        The number of binary variables that the QUBO and QUSO use.
 
         Return
         -------
         num :  int.
-            The number of variables in the QUBO/Ising formulation.
+            The number of variables in the QUBO/QUSO formulation.
 
         """
         if self._log_trick:
@@ -373,16 +373,16 @@ class SetCover(Problem):
     def convert_solution(self, solution, spin=False):
         """convert_solution.
 
-        Convert the solution to the QUBO or Ising to the solution to the Set
+        Convert the solution to the QUBO or QUSO to the solution to the Set
         Cover problem.
 
         Parameters
         ----------
         solution : iterable or dict.
-            The QUBO or Ising solution output. The QUBO solution output
+            The QUBO or QUSO solution output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or -1 or 1 for Ising), or it can be a dictionary that maps the
+            (or -1 or 1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
@@ -416,10 +416,10 @@ class SetCover(Problem):
         ----------
         solution : iterable or dict.
             solution can be the output of SetCover.convert_solution,
-            or the  QUBO or Ising solver output. The QUBO solution output
+            or the  QUBO or QUSO solver output. The QUBO solution output
             is either a list or tuple where indices specify the label of the
             variable and the element specifies whether it's 0 or 1 for QUBO
-            (or 1 or -1 for Ising), or it can be a dictionary that maps the
+            (or 1 or -1 for QUSO), or it can be a dictionary that maps the
             label of the variable to is value.
         spin : bool (optional, defaults to False).
             `spin` indicates whether ``solution`` is the solution to the
