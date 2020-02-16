@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ class QUBO(BO, QUBOMatrix):
             the class.
 
         Examples
-        -------
+        --------
         >>> qubo = QUBO()
         >>> qubo[('a',)] += 5
         >>> qubo[(0, 'a')] -= 2
@@ -144,7 +144,7 @@ class QUBO(BO, QUBOMatrix):
         The labels will be integers from 0 to n-1.
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -201,7 +201,7 @@ class QUBO(BO, QUBOMatrix):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : dict.
             Maps boolean variable labels to their QUBO solutions values {0, 1}.
 
@@ -228,8 +228,8 @@ class QUBO(BO, QUBOMatrix):
         {'a': 1, 'b': 1, 'c': 0}
 
         """
-        sol_type = solution_type(solution)
-        if sol_type == 'spin' or (sol_type is None and spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'spin':
             solution = spin_to_boolean(solution)
         return {
             self._reverse_mapping[i]: solution[i]
@@ -244,7 +244,7 @@ class QUBO(BO, QUBOMatrix):
         Checks to see if ``key`` is a tuple.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns

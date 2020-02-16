@@ -12,12 +12,33 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Run ``qubovert.problems.np.packing` as a module; display details."""
+"""
+Contains tests for the simulated annealing in the ``qubovert.sim`` library.
+"""
+
+from qubovert.sim import anneal_qubo, anneal_quso, anneal_pubo, anneal_puso
+from numpy.testing import assert_raises
 
 
-import qubovert
+def test_anneal_qubo():
+
+    with assert_raises(NotImplementedError):
+        anneal_qubo()
 
 
-if __name__ == "__main__":
-    if input("Display package details? [y or n] ") == "y":
-        help(qubovert.problems.np.packing)
+def test_anneal_quso():
+
+    with assert_raises(NotImplementedError):
+        anneal_quso()
+
+
+def test_anneal_pubo():
+
+    with assert_raises(NotImplementedError):
+        anneal_pubo()
+
+
+def test_anneal_puso():
+
+    with assert_raises(NotImplementedError):
+        anneal_quso()

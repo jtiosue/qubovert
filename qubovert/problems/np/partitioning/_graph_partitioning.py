@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class GraphPartitioning(Problem):
     This is 1 because there is 1 edge connecting the partitions.
 
     References
-    ---------
+    ----------
     .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
        in Physics, 2:5, 2014.
 
@@ -98,7 +98,7 @@ class GraphPartitioning(Problem):
             will be ignored.
 
         Examples
-        -------
+        --------
         >>> edges = {("a", "b"), ("a", "c")}
         >>> problem = GraphPartitioning(edges)
 
@@ -134,7 +134,7 @@ class GraphPartitioning(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         E : set of two element tuples.
             A copy of the edge set defining the Graph Partitioning problem.
 
@@ -165,7 +165,7 @@ class GraphPartitioning(Problem):
         weights.
 
         Return
-        -------
+        ------
         weights : dict.
             Keys are two element tuples, values are numbers.
 
@@ -193,7 +193,7 @@ class GraphPartitioning(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num : integer.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -225,14 +225,14 @@ class GraphPartitioning(Problem):
             section 2.2 of [Lucas].
 
         Return
-        -------
+        ------
         L : qubovert.utils.QUSOMatrix object.
             For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
             ``help(qubovert.utils.QUSOMatrix)``.
 
         Example
-        --------
+        -------
         >>> problem = GraphPartitioning({(0, 1), (1, 2), (0, 3)})
         >>> L = problem.to_quso()
 
@@ -294,7 +294,7 @@ class GraphPartitioning(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res: tuple of sets (partition1, partition2).
             partition1 : set.
                 The first partition of verticies.
@@ -349,7 +349,7 @@ class GraphPartitioning(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

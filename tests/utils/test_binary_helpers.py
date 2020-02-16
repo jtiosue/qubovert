@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,7 +24,15 @@ def test_solution_type():
 
     assert solution_type((0, 1, 1, 0)) == 'bool'
     assert solution_type((1, -1, -1, 1)) == 'spin'
-    assert solution_type((1, 1, 1, 1)) is None
+    assert solution_type((1, 1, 1, 1), 'testing') == 'testing'
+    assert solution_type((1, 1, 1, 1)) == 'bool'
+    assert solution_type((1, 1, 1, 1), 'spin') == 'spin'
+
+    assert solution_type(dict(enumerate((0, 1, 1, 0)))) == 'bool'
+    assert solution_type(dict(enumerate((1, -1, -1, 1)))) == 'spin'
+    assert solution_type(dict(enumerate((1, 1, 1, 1))), 'testing') == 'testing'
+    assert solution_type(dict(enumerate((1, 1, 1, 1)))) == 'bool'
+    assert solution_type(dict(enumerate((1, 1, 1, 1))), 'spin') == 'spin'
 
 
 def test_num_bits():

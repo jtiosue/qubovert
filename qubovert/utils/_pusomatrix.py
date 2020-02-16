@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ class PUSOMatrix(PUBOMatrix):
             value of variable i.
 
         Return
-        -------
+        ------
         value : float.
             The value of the PUSO/QUSO with the given assignment `z`.
 

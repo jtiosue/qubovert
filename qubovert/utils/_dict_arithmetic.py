@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ class DictArithmetic(dict):
         conventions set in ``__setitem__``.
 
         Parameters
-        ---------
+        ----------
         arguments : define a dictionary with ``dict(*args, **kwargs)``.
             The dictionary will be initialized to follow all the convensions of
             the class.
@@ -236,7 +236,7 @@ class DictArithmetic(dict):
         other : a DictArithmetic or dict object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self + other.
 
         Examples
@@ -259,7 +259,7 @@ class DictArithmetic(dict):
         other : a DictArithmetic or dict object, or number.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self.
 
         Examples
@@ -288,7 +288,7 @@ class DictArithmetic(dict):
         other : a DictArithetic or dict object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self - other.
 
         Examples
@@ -312,7 +312,7 @@ class DictArithmetic(dict):
         other : a DictArithmetic or dict object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, other - self.
 
         Examples
@@ -362,7 +362,7 @@ class DictArithmetic(dict):
         other : numeric or dict/DictArithmetic object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object.
 
         Example
@@ -398,7 +398,7 @@ class DictArithmetic(dict):
         other : numeric or dict/DictArithmetic object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object.
 
         Example
@@ -432,7 +432,7 @@ class DictArithmetic(dict):
         other : numeric or dict/DictArithmetic object.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self.
 
         Example
@@ -484,7 +484,7 @@ class DictArithmetic(dict):
             Integer power to raise the DictArithmetic to.
 
         Returns
-        ------
+        -------
         res : DictArithmetic.
 
         """
@@ -506,7 +506,7 @@ class DictArithmetic(dict):
             Integer power to raise the DictArithmetic to.
 
         Returns
-        ------
+        -------
         self : DictArithmetic.
 
         """
@@ -530,7 +530,7 @@ class DictArithmetic(dict):
         other : numeric.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object.
 
         Example
@@ -554,7 +554,7 @@ class DictArithmetic(dict):
         other : numeric.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self.
 
         Example
@@ -579,7 +579,7 @@ class DictArithmetic(dict):
         other : numeric.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object.
 
         Example
@@ -603,7 +603,7 @@ class DictArithmetic(dict):
         other : numeric.
 
         Return
-        -------
+        ------
         d : a DictArithmetic object, self.
 
         Example

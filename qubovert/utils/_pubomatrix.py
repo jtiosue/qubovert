@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -319,7 +319,7 @@ class PUBOMatrix(DictArithmetic):
         Checks to see if ``key`` is a tuple of non negative integers.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns
@@ -349,12 +349,12 @@ class PUBOMatrix(DictArithmetic):
         reformatted according to ``squash_key`` before indexing.
 
         Parameters
-        ---------
+        ----------
         key : tuple of integers.
             Element of the dictionary.
 
         Return
-        -------
+        ------
         value : numeric
             the value corresponding to the key if the key is in the dictionary,
             otherwise returns 0.
@@ -373,7 +373,7 @@ class PUBOMatrix(DictArithmetic):
         will be squashed, see ``squash_keys``.
 
         Parameters
-        ---------
+        ----------
         key : tuple of integers.
             Element of the dictionary.
         value : numeric.
@@ -443,7 +443,7 @@ class PUBOMatrix(DictArithmetic):
             ``x[i]`` must be the boolean value of variable i.
 
         Return
-        -------
+        ------
         value : float.
             The value of the PUBO with the given assignment `x`. Ie
 

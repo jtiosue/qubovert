@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ class BILP(Problem):
             length ``m``.
 
         Examples
-        -------
+        --------
         >>> c =
         >>> b =
         >>> S =
@@ -118,7 +118,7 @@ class BILP(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         c : numpy array.
 
         """
@@ -132,7 +132,7 @@ class BILP(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         S : numpy array.
 
         """
@@ -146,7 +146,7 @@ class BILP(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         b : numpy array.
 
         """
@@ -159,7 +159,7 @@ class BILP(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num : integer.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -185,7 +185,7 @@ class BILP(Problem):
             See section 3 of [Lucas].
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -238,13 +238,13 @@ class BILP(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : np.array.
             An array representing the :math:`\mathbf{x}` vector.
 
         """
-        sol_type = solution_type(solution)
-        if sol_type == 'spin' or (sol_type is None and spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'spin':
             solution = spin_to_boolean(solution)
         return np.array([int(bool(solution[i])) for i in range(self._N)])
 
@@ -273,7 +273,7 @@ class BILP(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

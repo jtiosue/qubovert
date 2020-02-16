@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -55,11 +55,11 @@ class Problem(Conversions):
         __init__ method.
 
         Parameters
-        ---------
+        ----------
         arguments : Defined in child classes.
 
         Return
-        -------
+        ------
         obj : instance of the child class.
 
         """
@@ -75,7 +75,7 @@ class Problem(Conversions):
         implemented in the child class.
 
         Return
-        -------
+        ------
         num : int.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -88,7 +88,7 @@ class Problem(Conversions):
         Same as __str__, but will give a truncted output.
 
         Return
-        -------
+        ------
         s : str.
 
         """
@@ -108,7 +108,7 @@ class Problem(Conversions):
         True
 
         Return
-        -------
+        ------
         s : str.
 
         """
@@ -133,7 +133,7 @@ class Problem(Conversions):
         other : an object derived from the ``Problem`` class.
 
         Return
-        -------
+        ------
         eq : boolean.
             If ``self`` and ``other`` represent the same problem.
 
@@ -170,7 +170,7 @@ class Problem(Conversions):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         Implemented in the child class.
 
         """
@@ -202,7 +202,7 @@ class Problem(Conversions):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

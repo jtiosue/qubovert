@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ class PUBO(BO, PUBOMatrix):
             the class.
 
         Examples
-        -------
+        --------
         >>> pubo = PUBO()
         >>> pubo[('a',)] += 5
         >>> pubo[(0, 'a')] -= 2
@@ -217,7 +217,7 @@ class PUBO(BO, PUBOMatrix):
             as described above, where ``lam(v) = lam``.
 
         Return
-        -------
+        ------
         None. ``D`` will be updated in place!
 
         """
@@ -337,7 +337,7 @@ class PUBO(BO, PUBOMatrix):
             ``lam(3)``.
 
         Return
-        -------
+        ------
         P : qubovert.utils.PUBOMatrix object.
             The upper triangular PUBO matrix, a PUBOMatrix object.
             For most practical purposes, you can use PUBOMatrix in the
@@ -385,7 +385,7 @@ class PUBO(BO, PUBOMatrix):
             enforced with a penalty weight ``lam(3)``.
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -423,7 +423,7 @@ class PUBO(BO, PUBOMatrix):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : dict.
             Maps boolean variable labels to their PUBO solutions values {0, 1}.
 
@@ -477,7 +477,7 @@ class PUBO(BO, PUBOMatrix):
         Checks to see if ``key`` is a tuple.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns

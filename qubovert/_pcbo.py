@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -120,6 +120,21 @@ def _special_constraints_le_zero(pcbo, P, lam, log_trick, bounds):
         diff = P_wo_offset - ancillas
         pcbo += lam * diff * diff
 
+        return True
+
+    # if P is of the form 1 <= x + y, then it is the same as OR(x, y)
+    elif (P.offset == 1 and len(P_wo_offset) == 2 and
+          set(P_wo_offset.values()) == {-1}):
+        variables = tuple(P_wo_offset.keys())
+        x, y = AND(*variables[0]), AND(*variables[1])
+        pcbo += PCBO().add_constraint_OR(x, y, lam=lam)
+        return True
+
+    # if P is of the form x <= y
+    elif not P.offset and len(P) == 2 and set(P.values()) == {1, -1}:
+        coef = {v: k for k, v in P.items()}
+        x, y = AND(*coef[1]), AND(*coef[-1])
+        pcbo += lam * x * (1 - y)
         return True
 
     return False

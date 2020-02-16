@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class AlternatingSectorsChain(Problem):
             The strength of the couples for the maximum chain.
 
         Examples
-        -------
+        --------
         >>> args = n, l, min_s, max_s = 6, 3, 1, 5
         >>> problem = AlternatingSectorsChain(*args)
         >>> h, J, offset = problem.to_quso(pbc=True)
@@ -106,7 +106,7 @@ class AlternatingSectorsChain(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num : integer.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -127,7 +127,7 @@ class AlternatingSectorsChain(Problem):
             Whether or not to use periodic boundary conditions.
 
         Return
-        -------
+        ------
         L : qubovert.utils.QUSOMatrix object.
             For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
@@ -188,7 +188,7 @@ class AlternatingSectorsChain(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : tuple.
             Value of each spin, -1 or 1.
 
@@ -203,8 +203,8 @@ class AlternatingSectorsChain(Problem):
         """
         if isinstance(solution, dict):
             solution = tuple(v for _, v in sorted(solution.items()))
-        sol_type = solution_type(solution)
-        if sol_type == 'bool' or (sol_type is None and not spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'bool':
             return boolean_to_spin(solution)
         return solution
 
@@ -234,7 +234,7 @@ class AlternatingSectorsChain(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

@@ -12,12 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Run ``qubovert.problems.np.packing` as a module; display details."""
+"""Run ``qubovert.sim`` as a module; display details."""
 
 
 import qubovert
 
 
 if __name__ == "__main__":
+    print("\n``qubovert.sim`` contains simulation methods for ``qubovert``.")
     if input("Display package details? [y or n] ") == "y":
-        help(qubovert.problems.np.packing)
+        help(qubovert.sim)

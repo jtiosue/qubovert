@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ from numpy import log2, ceil
 __all__ = 'solution_type', 'num_bits'
 
 
-def solution_type(solution):
+def solution_type(solution, default='bool'):
     """solution_type.
 
     Figure out if the ``solution`` is a solution to a boolean or a spin model.
     If it cannot be determined (ie if ``solution`` is all 1s), then return
-    ``None``.
+    ``default``.
 
     Parameters
     ----------
@@ -38,6 +38,8 @@ def solution_type(solution):
         with values. If ``solution`` is a bin type, then all the values should
         be either a 0 or 1. If ``solution`` is a spin type, then all the values
         should be either a 1 or -1.
+    default : str (optional, defaults to ``'bool'``).
+        The default answer to return if the solution type cannot be determined.
 
     Returns
     -------
@@ -45,7 +47,7 @@ def solution_type(solution):
         If it is determined that ``solution`` is the solution to a spin model,
         then ``res`` will be ``'spin'``. If it is determined that ``solution``
         is the solution to a boolean model, then `res`` will be ``'bool'``.
-        Otherwise, ``res`` will be ``None``.
+        Otherwise, ``res`` will be ``default``.
 
     Examples
     --------
@@ -55,8 +57,14 @@ def solution_type(solution):
     >>> solution_type((1, -1, -1, 1))
     'spin'
 
+    In these cases, the default is invoked.
+
     >>> solution_type((1, 1, 1, 1))
-    None
+    'bool'
+    >>> solution_type((1, 1, 1, 1), default='bool')
+    'bool'
+    >>> solution_type((1, 1, 1, 1), default=='spin')
+    'spin'
 
     """
     sol = solution.values() if isinstance(solution, dict) else solution
@@ -65,6 +73,7 @@ def solution_type(solution):
             return 'bool'
         elif v == -1:
             return 'spin'
+    return default
 
 
 def num_bits(val, log_trick=True):

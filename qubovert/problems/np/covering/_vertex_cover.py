@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class VertexCover(Problem):
             Describes edges of the graph.
 
         Examples
-        -------
+        --------
         >>> edges = {("a", "b"), ("a", "c")}
         >>> problem = VertexCover(edges)
 
@@ -105,7 +105,7 @@ class VertexCover(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         E : set of two element tuples.
             A copy of the edge set defining the Vertex Cover problem.
 
@@ -120,7 +120,7 @@ class VertexCover(Problem):
         update the instance set.
 
         Return
-        -------
+        ------
         V : set.
             A copy of the set of vertices corresponding to the edge set for the
             Vertex Cover problem.
@@ -135,7 +135,7 @@ class VertexCover(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num : integer.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -163,7 +163,7 @@ class VertexCover(Problem):
             See section 4.3 of [Lucas].
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -229,7 +229,7 @@ class VertexCover(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : set.
             A set of which verticies need to be colored. Thus, if this
             function returns {0, 2}, then this means that vertex 0 and 2
@@ -238,8 +238,8 @@ class VertexCover(Problem):
         """
         if not isinstance(solution, dict):
             solution = dict(enumerate(solution))
-        sol_type = solution_type(solution)
-        if sol_type == 'spin' or (sol_type is None and spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'spin':
             solution = spin_to_boolean(solution)
         return set(
             self._index_to_vertex[i] for i, x in solution.items() if x
@@ -270,7 +270,7 @@ class VertexCover(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

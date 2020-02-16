@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ class QUSO(BO, QUSOMatrix):
             the class.
 
         Examples
-        -------
+        --------
         >>> quso = QUSO()
         >>> quso[('a',)] += 5
         >>> quso[(0, 'a')] -= 2
@@ -146,7 +146,7 @@ class QUSO(BO, QUSOMatrix):
         The labels will be integers from 0 to n-1.
 
         Return
-        -------
+        ------
         L : qubovert.utils.QUSOMatrix object.
             The upper triangular QUSO matrix, a QUSOMatrix object.
             For most practical purposes, you can use QUSOMatrix in the
@@ -169,7 +169,7 @@ class QUSO(BO, QUSOMatrix):
         return ``qubovert.utils.PUSOMatrix(self.to_quso())``.
 
         Return
-        -------
+        ------
         H : qubovert.utils.PUSOMatrix object.
             The upper triangular PUSO matrix, a PUSOMatrix object.
             For most practical purposes, you can use PUSOMatrix in the
@@ -203,7 +203,7 @@ class QUSO(BO, QUSOMatrix):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : dict.
             Maps spin variable labels to their QUSO solutions values {1, -1}.
 
@@ -230,8 +230,8 @@ class QUSO(BO, QUSOMatrix):
         {'a': 1, 'b': 1, 'c': -1}
 
         """
-        sol_type = solution_type(solution)
-        if sol_type == 'bool' or (sol_type is None and not spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'bool':
             solution = boolean_to_spin(solution)
         return {
             self._reverse_mapping[i]: solution[i]
@@ -246,7 +246,7 @@ class QUSO(BO, QUSOMatrix):
         Checks to see if ``key`` is a tuple.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns

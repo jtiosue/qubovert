@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ __all__ = (
 )
 
 from . import sat
+from . import sim
 from . import problems
 
 BOOLEAN_MODELS = QUBO, PUBO, PCBO, utils.QUBOMatrix, utils.PUBOMatrix
