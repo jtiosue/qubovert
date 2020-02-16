@@ -1,6 +1,9 @@
 ========
 qubovert
 ========
+
+``qubovert`` is written to be the one-stop package for boolean and spin optimization problem formualation and utilities, simulated annealing of boolean and spin problems (coming soon), and Metropolis simulation of boolean and spin systems.
+
 *master branch*
 
 .. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=master
@@ -419,6 +422,34 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     # {(0, 1): 2}
     print(L.offset)
     # 0
+
+
+Simulating spin and boolean systems
+-----------------------------------
+
+We use a Metropolis algorithm to simulate spin and boolean system. Below we show an example for simulating a spin system (specifically, a 1D ferromagnetic chain). Similar functinality exists for boolean simulation with ``qubovert.sim.BooleanSimulation``.
+
+.. code:: python
+
+    import qubovert as qv
+
+    length = 50
+    spin_system = sum(
+        -qv.spin_var(i) * qv.spin_var(i+1) for i in range(length)
+    )
+
+    # initial state is all spin down
+    initial_state = {i: -1 for i in range(length)}
+    sim = qv.sim.SpinSimulation(spin_system, initial_state)
+
+    # define a schedule. here we simulate at temperature 4 for 25 time
+    # steps, then temperature 2 for 25 time steps, then temperature 1 for
+    # 10 time steps.
+    schedule = (4, 25), (2, 25), (1, 10)
+    sim.schedule_update(schedule)
+
+    print("final state", sim.state)
+    print("last 30 states", sim.get_past_states(30))
 
 
 Convert common problems to QUBO form (the ``problems`` library)
