@@ -1,5 +1,5 @@
 Quadratic Unconstrained Boolean Optimization (QUBO)
-==================================================
+===================================================
 
 Accessed with ``qubovert.QUBO``
 

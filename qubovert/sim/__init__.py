@@ -12,12 +12,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Run ``qubovert.problems.np.packing` as a module; display details."""
+"""``sim`` contains ``qubovert``'s simulation and annealing functionality.
+
+See ``__all__`` for a list of uses.
+
+"""
+
+# import order here is important!
+from ._simulations import *
+from ._anneal import *
+
+from ._simulations import __all__ as __all_sim__
+from ._anneal import __all__ as __all_anneal__
 
 
-import qubovert
+__all__ = (
+    __all_sim__ +
+    __all_anneal__
+)
 
 
-if __name__ == "__main__":
-    if input("Display package details? [y or n] ") == "y":
-        help(qubovert.problems.np.packing)
+name = "sim"

@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ class NumberPartitioning(Problem):
             partition into two partitions of equal sum.
 
         Example
-        --------
+        -------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
 
         """
@@ -116,7 +116,7 @@ class NumberPartitioning(Problem):
         list.
 
         Return
-        -------
+        ------
         S : tuple or list.
             A copy of the list of numbers defining the partitioning problem.
 
@@ -130,7 +130,7 @@ class NumberPartitioning(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num : int.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -151,14 +151,14 @@ class NumberPartitioning(Problem):
             Factor in front of objective function. See section 2.1 of [Lucas].
 
         Return
-        -------
+        ------
         L : qubovert.utils.QUSOMatrix object.
             For most practical purposes, you can use QUSOMatrix in the
             same way as an ordinary dictionary. For more information, see
             ``help(qubovert.utils.QUSOMatrix)``.
 
         Example
-        --------
+        -------
         >>> problem = NumberPartitioning([1, 2, 3, 4])
         >>> L = problem.to_quso()
 
@@ -190,7 +190,7 @@ class NumberPartitioning(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res: tuple of iterables (partition1, partition2).
             partition1 : list, tuple, or iterable.
                 The first partition. If the inputted S is a tuple, then
@@ -246,7 +246,7 @@ class NumberPartitioning(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

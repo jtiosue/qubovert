@@ -1,5 +1,5 @@
 Utility Methods
-================
+===============
 
 Note that the ``utils`` module will not be imported with ``from qubovert import *``. You must import ``qubovert.utils`` explicitly.
 
@@ -55,12 +55,6 @@ Bruteforce Solvers
 .. autofunction:: qubovert.utils.solve_qubo_bruteforce
 
 .. autofunction:: qubovert.utils.solve_quso_bruteforce
-
-
-Hash
-----
-
-.. autofunction:: qubovert.utils.hash_function
 
 
 Useful functions

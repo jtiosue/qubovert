@@ -12,34 +12,50 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""warn.py.
+"""_anneal.py.
 
-This file contains warning functionality to standardize qubovert's warnings.
+This file uses the simulation functionality to implement a simulated annealing
+algorithm.
 
 """
 
-import warnings
+from . import SpinSimulation, BooleanSimulation
 
 
-__all__ = 'QUBOVertWarning',
+__all__ = 'anneal_qubo', 'anneal_quso', 'anneal_pubo', 'anneal_puso'
 
 
-class QUBOVertWarning(UserWarning):
-    """QUBOVertWarning.
+def anneal_qubo():
+    """anneal_qubo.
 
-    Warning type to standardize qubovert's warnings. Warn with
-    ``QUBOVertWarning.warn("message")``.
+    To be implemented.
 
     """
+    raise NotImplementedError
 
-    @classmethod
-    def warn(cls, message):
-        r"""warn.
 
-        Parameters
-        ----------
-        message : str.
-            Message to warn with.
+def anneal_quso():
+    """anneal_quso.
 
-        """
-        warnings.warn(message, cls, 3)
+    To be implemented.
+
+    """
+    raise NotImplementedError
+
+
+def anneal_pubo():
+    """anneal_pubo.
+
+    To be implemented.
+
+    """
+    raise NotImplementedError
+
+
+def anneal_puso():
+    """anneal_puso.
+
+    To be implemented.
+
+    """
+    raise NotImplementedError

@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ class SetCover(Problem):
         instance U.
 
         Return
-        -------
+        ------
         U : set.
             A copy of the set of all elements.
 
@@ -153,7 +153,7 @@ class SetCover(Problem):
         instance V.
 
         Return
-        -------
+        ------
         V : iterable of sets.
             A copy of the subsets.
 
@@ -168,7 +168,7 @@ class SetCover(Problem):
         instance weights.
 
         Return
-        -------
+        ------
         weights : iterable of numbers, where ``max(weights) == 1``.
 
         """
@@ -195,7 +195,7 @@ class SetCover(Problem):
         the log trick. See [Lucas].
 
         Return
-        -------
+        ------
         log_trick : bool.
 
         """
@@ -208,7 +208,7 @@ class SetCover(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num :  int.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -224,7 +224,7 @@ class SetCover(Problem):
         exists a combination of subsets in V that cover U.
 
         Return
-        -------
+        ------
         coverable : bool.
             True if it is possible to construct a valid solution from V and U,
             False otherwise.
@@ -258,7 +258,7 @@ class SetCover(Problem):
             start looking at.
 
         Return
-        -------
+        ------
         f : filter object.
             The indices of V corresponding to subsets that contain alpha.
 
@@ -278,7 +278,7 @@ class SetCover(Problem):
             the Set Cover section in [Lucas]).
 
         Return
-        -------
+        ------
         i : int.
             Unique index of the ancilla variable.
 
@@ -308,7 +308,7 @@ class SetCover(Problem):
             See section 5.1 of [Lucas].
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -401,8 +401,8 @@ class SetCover(Problem):
             ``V[0]``, ``V[2]``, and ``V[3]``.
 
         """
-        sol_type = solution_type(solution)
-        if sol_type == 'spin' or (sol_type is None and spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'spin':
             solution = spin_to_boolean(solution)
         return set(i for i in range(self._N) if solution[i])
 
@@ -431,7 +431,7 @@ class SetCover(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 
