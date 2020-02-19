@@ -29,6 +29,7 @@ def test_annealresult():
     assert res.copy() == res
     assert res.to_boolean() == res
     assert res.to_spin() == AnnealResult({1: 1, 2: -1}, 2, True)
+    assert eval(repr(res)) == res
     str(res)
 
     res = AnnealResult({1: 1, 2: -1}, 2, True)
@@ -38,6 +39,7 @@ def test_annealresult():
     assert res.copy() == res
     assert res.to_spin() == res
     assert res.to_boolean() == AnnealResult({1: 0, 2: 1}, 2, False)
+    assert eval(repr(res)) == res
     str(res)
 
 

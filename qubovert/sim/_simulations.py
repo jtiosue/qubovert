@@ -91,13 +91,15 @@ class SpinSimulation:
         """
         # if model is a Matrix object or PUSO, etc,
         # then variables will be defined.
+        # variables must be a list so it can be used with random.choices in
+        # the update method.
         try:
-            self._variables = model.variables
+            self._variables = list(model.variables)
         except AttributeError:
             if isinstance(initial_state, dict):
-                self._variables = set(initial_state.keys())
+                self._variables = list(initial_state.keys())
             else:
-                self._variables = {v for k in model for v in k}
+                self._variables = list({v for k in model for v in k})
 
         self._initial_state = (
             initial_state.copy() if initial_state is not None else
@@ -115,6 +117,16 @@ class SpinSimulation:
         for k, c in model.items():
             for v in k:
                 self._subgraphs[v][k] = c
+
+    def __str__(self):
+        """__str__.
+
+        Return
+        ------
+        s : str.
+
+        """
+        return self.__class__.__name__ + "(memory=%d)" % self._memory
 
     @property
     def memory(self):
@@ -301,7 +313,13 @@ class SpinSimulation:
             self._add_past_state()
 
             # for i in self._variables:  # dwave does this, why?
-            for i in random.sample(self._variables, len(self._variables)):
+
+            # sample without replacement
+            # for i in random.sample(self._variables, len(self._variables)):
+
+            # sample with replacement. this is more valid because it results in
+            # a totally memoryless simulation
+            for i in random.choices(self._variables, k=len(self._variables)):
                 # the change in energy from flipping variable i is equal to
                 # -2 * (the energy of the subgraph depending on i)
                 dE = -2 * puso_value(self._state, self._subgraphs[i])

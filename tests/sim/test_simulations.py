@@ -25,6 +25,13 @@ from numpy.testing import assert_raises
 
 # spin simulation
 
+def test_spinsimulation_str():
+
+    for memory in range(5):
+        s = SpinSimulation({}, memory=memory)
+        assert str(s) == "SpinSimulation(memory=%d)" % memory
+
+
 def test_spinsimulation_set_state():
 
     ising = sum(-spin_var(i) * spin_var(i+1) for i in range(9))
@@ -115,6 +122,13 @@ def test_spinsimulation_updates():
 
 
 # boolean simulation
+
+def test_booleansimulation_str():
+
+    for memory in range(5):
+        s = BooleanSimulation({}, memory=memory)
+        assert str(s) == "BooleanSimulation(memory=%d)" % memory
+
 
 def test_booleansimulation_set_state():
 

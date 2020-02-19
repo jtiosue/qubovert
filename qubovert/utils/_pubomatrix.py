@@ -301,15 +301,14 @@ class PUBOMatrix(DictArithmetic):
         >>> (0, 2, 3, 4)
 
         """
+        # if f is not None, then it is the squashed key (see QUBOMatrix)
         f = cls._check_key_valid(key)
-        if f is not None:
-            return f
         # here we use hash because some other classes that are subclasses of
         # this class will allow elements of the key to be strings! So we want
         # to still have something consistent to sort by. But for this class,
         # it doesn't make a difference, because hash_funcition(i) == i when i
         # is an int.
-        return tuple(sorted(set(key), key=lambda x: hash_function(x)))
+        return f or tuple(sorted(set(key), key=lambda x: hash_function(x)))
 
     @staticmethod
     def _check_key_valid(key):

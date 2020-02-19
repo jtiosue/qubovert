@@ -136,8 +136,8 @@ class AnnealResult:
             return self.copy()
         return AnnealResult(boolean_to_spin(self.state), self.value, True)
 
-    def __repr__(self):
-        """__repr__.
+    def __str__(self):
+        """__str__.
 
         Return the string representation of ``self``.
 
@@ -147,6 +147,18 @@ class AnnealResult:
 
         """
         return "  state: %s\n  value: %g" % (self.state, self.value)
+
+    def __repr__(self):
+        """__repr__.
+
+        Create the representation of ``self``.
+
+        Return
+        ------
+        r : str.
+
+        """
+        return "AnnealResult(%s, %g, %s)" % (self.state, self.value, self.spin)
 
 
 class AnnealResults:
