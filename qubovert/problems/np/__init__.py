@@ -17,7 +17,7 @@
 This module contains many NP problems. We organize all the problems into
 categories. But we import them globally for user use. See the ``__all__`` value
 for all the problems imported. Most conversions to QUBO/QUSO form are based
-on [Lucas].
+on [Lucas]_.
 
 References
 ----------

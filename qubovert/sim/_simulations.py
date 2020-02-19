@@ -16,226 +16,27 @@
 
 This file contains the ``SpinSimulation`` and ``BooleanSimulation`` objects
 which deal with using a Metropolis algorithm to simulate spin and boolean
-models. Their parent class in ``BinarySimulation``, which is also in this file.
+models.
 
 """
 
-import qubovert as qv
+from qubovert.utils import (
+    puso_value, boolean_to_spin, spin_to_boolean, pubo_to_puso
+)
 import random
 from numpy import exp
 
 
-__all__ = 'BinarySimulation', 'SpinSimulation', 'BooleanSimulation'
+__all__ = 'SpinSimulation', 'BooleanSimulation'
 
 
-class BinarySimulation:
-    """BinarySimulation.
-
-    The parent class for ``SpinSimulation`` and ``BooleanSimulation``. See
-    their docstrings for more information on usage. Child classes MUST
-    implement the ``_flip_bit`` method.
-
-    """
-
-    def __init__(self, model, initial_state):
-        """__init__.
-
-        Parameters
-        ----------
-        model : A type in qubovert.BOOLEAN_MODELS or qubovert.SPIN_MODELS.
-            The model that we are simulating.
-        initial_state : dict.
-            The initial state of the system.
-
-        """
-        # keep track of the most recent states
-        self._past_states = []
-
-        # create a dictionary mapping each bit to the graph that it
-        # affects.
-        self._subgraphs = {}
-        variables = model.variables
-        for v in variables:
-            self._subgraphs[v] = type(model)(
-                {k: c for k, c in model.items() if v in k}
-            )
-
-        # make it a list so we can use random.choice later.
-        self._variables = list(variables)
-
-        self._initial_state = initial_state
-        self.set_state(initial_state)
-
-    @property
-    def state(self):
-        """state.
-
-        The current state of the system.
-
-        Returns
-        -------
-        state : dict.
-            Dictionary that maps binary labels to their values.
-
-        """
-        return self._state.copy()
-
-    def set_state(self, state):
-        """set_state.
-
-        Set the state of the system to ``state``.
-
-        Parameters
-        ----------
-        state : dict or iterable.
-            ``state`` maps the binary variable labels to their corresponding
-            values. In other words ``state[v]`` is the value of variable ``v``.
-            A value must be either 0 or 1 for a boolean system and 1 or -1 for
-            a spin system.
-
-        """
-        self._state = {v: state[v] for v in self._variables}
-
-    def reset(self):
-        """reset.
-
-        Reset the simulation back to its original state.
-
-        """
-        self._state, self._past_states = self._initial_state.copy(), []
-
-    def get_past_states(self, num_states=1000):
-        """get_past_states.
-
-        Return the previous ``num_states`` states of the system (if that many
-        exist; ``self`` only stores up the previous 1000 states).
-
-        Parameters
-        ----------
-        num_states : int (optional, defaults to 1000).
-            The number of previous update steps to include.
-
-        Returns
-        -------
-        states : list of dicts.
-            Each dict maps binary labels to their values.
-
-        """
-        return [
-            s.copy() for s in self._past_states[-num_states+1:]
-        ] + [self.state]
-
-    def _add_past_state(self, state):
-        """_add_past_state.
-
-        Add ``state`` to the ``past_states`` memory.
-
-        Parameters
-        ----------
-        state : dict.
-            Maps binary labels to their values.
-
-        """
-        self._past_states.append(state)
-        if len(self._past_states) > 1000:
-            self._past_states.pop(0)
-
-    def _flip_bit(self, bit):
-        """_flip_bit.
-
-        Flip the bit in the internal state. This should be implemented by the
-        child classes, since it depends on whether or not it is a spin or
-        boolean model.
-
-        Parameters
-        ----------
-        bit : hashable object.
-            The label of the bit to flip.
-
-        """
-        raise NotImplementedError("To be implemented in the child classes")
-
-    def update(self, T, num_updates=1, seed=None):
-        """update.
-
-        Update the simulation at temperature ``T``. Updates the internal state.
-
-        Parameters
-        ----------
-        T : number >= 0.
-            Temperature.
-        num_updates : int >= 1 (optional, defaults to 1).
-            The number of times to update the simulation at the temperature.
-        seed : number (optional, defaults to None).
-            The number to seed ``random`` with. If ``seed is None``, then
-            ``random.seed`` will not be called.
-
-        """
-        if seed is not None:
-            random.seed(seed)
-
-        if num_updates < 0:
-            raise ValueError("Cannot update a negative number of times")
-        elif num_updates > 1:
-            for _ in range(num_updates):
-                self.update(T)
-        elif num_updates == 1:
-            self._add_past_state(self.state)
-            for _ in range(len(self._variables)):
-                i = random.choice(self._variables)
-                E = self._subgraphs[i].value(self._state)
-                self._flip_bit(i)
-                E_flip = self._subgraphs[i].value(self._state)
-
-                dE = E_flip - E
-                if not (dE < 0 or (T and random.random() < exp(-dE / T))):
-                    # flip the bit back to where it was
-                    self._flip_bit(i)
-
-    def schedule_update(self, schedule, seed=None):
-        """schedule_update.
-
-        Update the simulation with a schedule.
-
-        Parameters
-        ----------
-        schedule : iteranle of tuples.
-            Each element in ``schedule`` is a pair ``(T, n)`` which designates
-            a temperature and a number of updates. See `Notes` below.
-        seed : number (optional, defaults to None).
-            The number to seed ``random`` with. If ``seed is None``, then
-            ``random.seed`` will not be called.
-
-        Notes
-        -----
-        The following two code blocks perform exactly the same thing.
-
-        >>> sim = BooleanSimulation(10)
-        >>> for T in (3, 2):
-        >>>     sim.update(T, 100)
-        >>> sim.update(1, 50)
-
-        >>> sim = BooleanSimulation(10)
-        >>> schedule = (3, 100), (2, 100), (1, 50)
-        >>> sim.schedule_update(schedule)
-
-        """
-        if seed is not None:
-            random.seed(seed)
-        for T, n in schedule:
-            self.update(T, n)
-
-
-class SpinSimulation(BinarySimulation):
+class SpinSimulation:
     """SpinSimulation.
 
     ``SpinSimulation`` uses a Metropolis algorithm to simulate a spin system.
     The spin system can be "updated" at a temperature ``T``. Thus, we can get
     an idea of the time evolution of a spin system by creating a temperature
     schedule and seeing how the system evolves.
-
-    ``SpinSimulation`` inherits from ``BinarySimulation``. See
-    ``help(qubovert.sim.BinarySimulation)`` for more details.
 
     Examples
     --------
@@ -263,47 +64,99 @@ class SpinSimulation(BinarySimulation):
 
     See Also
     --------
-    - ``qubovert.sim.BooleanSimulation``.
-    - ``qubovert.sim.BinarySimulation``.
+    ``qv.sim.BooleanSimulation``.
 
     """
 
-    def __init__(self, model, initial_state=None):
+    def __init__(self, model, initial_state=None, memory=0):
         """__init__.
 
         Parameters
         ----------
         model : dict or type in ``qubovert.SPIN_MODELS``.
-            The model the simulate.
+            The model to simulate. This should map tuples of spin variable
+            labels to their respective coefficient in the Hamiltonian. For more
+            information, see the docstrings for any of the models in
+            ``qubovert.SPIN_MODELS``.
         initial_state : dict (optional, defaults to None).
             The initial state to start the simulation in. ``initial_state``
             should map spin label names to their initial values, where each
             value is either 1 or -1. If ``initial_state`` is None, then it
             will be initialized to all 1s.
+        memory : int >= 0 (optional, defaults to 0).
+            During the simulation, we keep a list of the most recent ``memory``
+            states that the simulation was in. These can be accessed with
+            ``self.get_past_states(number_of_states)``.
 
         """
-        if not isinstance(model, qv.SPIN_MODELS):
-            model = qv.PUSO(model)
+        # if model is a Matrix object or PUSO, etc,
+        # then variables will be defined.
+        try:
+            self._variables = model.variables
+        except AttributeError:
+            if isinstance(initial_state, dict):
+                self._variables = set(initial_state.keys())
+            else:
+                self._variables = {v for k in model for v in k}
 
-        variables = model.variables
+        self._initial_state = (
+            initial_state.copy() if initial_state is not None else
+            {v: 1 for v in self._variables}
+        )
+        self.set_state(self._initial_state)
 
-        if initial_state is None:
-            initial_state = {v: 1 for v in variables}
+        # keep track of the most recent states
+        self._past_states = []
+        # how many previous states to remember
+        self._memory = memory
 
-        super().__init__(model, initial_state)
+        # create a dictionary mapping each bit to the graph that it affects.
+        self._subgraphs = {v: {} for v in self._variables}
+        for k, c in model.items():
+            for v in k:
+                self._subgraphs[v][k] = c
 
-    def _flip_bit(self, bit):
-        """_flip_bit.
+    @property
+    def memory(self):
+        """memory.
 
-        Flip the spin labeled by ``bit`` in the internal state.
-
-        Parameters
-        ----------
-        bit : hashable object.
-            The label of the spin to flip.
+        Returns
+        -------
+        memory : int >= 0 (optional, defaults to 0).
+            During the simulation, we keep a list of the most recent ``memory``
+            states that the simulation was in. These can be accessed with
+            ``self.get_past_states(number_of_states)``.
 
         """
-        self._state[bit] *= -1
+        return self._memory
+
+    @property
+    def state(self):
+        """state.
+
+        A copy of the current state of the system.
+
+        Returns
+        -------
+        state : dict.
+            Dictionary that maps spin labels to their values in {1, -1}.
+
+        """
+        return self._state.copy()
+
+    @property
+    def initial_state(self):
+        """initial_state.
+
+        A copy of the initial state of the system.
+
+        Returns
+        -------
+        initial_state : dict.
+            Dictionary that maps binary labels to their values.
+
+        """
+        return self._initial_state.copy()
 
     def set_state(self, state):
         """set_state.
@@ -318,21 +171,156 @@ class SpinSimulation(BinarySimulation):
             A value must be either 1 or -1.
 
         """
-        super().set_state(state)
+        self._state = {v: state[v] for v in self._variables}
         if any(v not in {1, -1} for v in self._state.values()):
             raise ValueError("State must contain only 1's and -1's")
 
+    def reset(self):
+        """reset.
 
-class BooleanSimulation(BinarySimulation):
+        Reset the simulation back to its original state.
+
+        """
+        self._past_states = []
+        self.set_state(self._initial_state)
+
+    def get_past_states(self, num_states=None):
+        """get_past_states.
+
+        Return the previous ``num_states`` states of the system (if that many
+        exist; ``self`` only stores up the previous ``self.memory`` states).
+
+        Parameters
+        ----------
+        num_states : int (optional, defaults to None).
+            The number of previous update steps to include. If ``num_states``
+            is None, then all the previous states in memory will be returned.
+
+        Returns
+        -------
+        states : list of dicts.
+            Each dict maps binary labels to their values.
+
+        """
+        if num_states == 1:
+            return [self.state]
+        elif num_states is None:
+            num_states = self._memory
+        return [
+            s.copy() for s in self._past_states[-num_states+1:]
+        ] + [self.state]
+
+    def _add_past_state(self):
+        """_add_past_state.
+
+        Add the current state to the ``past_states`` memory. If there is no
+        more memory left (see ``self.memory``) then remove the oldest state.
+
+        Parameters
+        ----------
+        state : dict.
+            Maps binary labels to their values.
+
+        """
+        if self._memory:
+            self._past_states.append(self.state)
+            if len(self._past_states) > self._memory:
+                self._past_states.pop(0)
+
+    def _flip_bit(self, label):
+        """_flip_bit.
+
+        Flip the spin labeled by ``label`` in the internal state.
+
+        Parameters
+        ----------
+        label : hashable object.
+            The label of the spin to flip.
+
+        """
+        self._state[label] *= -1
+
+    def schedule_update(self, schedule, seed=None):
+        """schedule_update.
+
+        Update the simulation with a schedule.
+
+        Parameters
+        ----------
+        schedule : iterable of tuples.
+            Each element in ``schedule`` is a pair ``(T, n)`` which designates
+            a temperature and a number of updates. See `Notes` below.
+        seed : number (optional, defaults to None).
+            The number to seed ``random`` with. If ``seed is None``, then
+            ``random.seed`` will not be called.
+
+        Notes
+        -----
+        The following two code blocks perform exactly the same thing.
+
+        >>> sim = SpinSimulation(10)
+        >>> for T in (3, 2):
+        >>>     sim.update(T, 100)
+        >>> sim.update(1, 50)
+
+        >>> sim = SpinSimulation(10)
+        >>> schedule = (3, 100), (2, 100), (1, 50)
+        >>> sim.schedule_update(schedule)
+
+        """
+        if seed is not None:
+            random.seed(seed)
+        for T, n in schedule:
+            self.update(T, n)
+
+    def update(self, T, num_updates=1, seed=None):
+        """update.
+
+        Update the simulation at temperature ``T``. Updates the internal state.
+
+        Parameters
+        ----------
+        T : number >= 0.
+            Temperature.
+        num_updates : int >= 1 (optional, defaults to 1).
+            The number of times to update the simulation at the temperature.
+        seed : number (optional, defaults to None).
+            The number to seed ``random`` with. If ``seed is None``, then
+            ``random.seed`` will not be called.
+
+        """
+        if seed is not None:
+            random.seed(seed)
+
+        if num_updates < 0:
+            raise ValueError("Cannot update a negative number of times")
+        elif num_updates > 1:
+            for _ in range(num_updates):
+                self.update(T)
+        elif num_updates == 1:
+            self._add_past_state()
+
+            # for i in self._variables:  # dwave does this, why?
+            for i in random.sample(self._variables, len(self._variables)):
+                # the change in energy from flipping variable i is equal to
+                # -2 * (the energy of the subgraph depending on i)
+                dE = -2 * puso_value(self._state, self._subgraphs[i])
+                if dE < 0 or (T and random.random() < exp(-dE / T)):
+                    self._flip_bit(i)
+
+
+class BooleanSimulation(SpinSimulation):
     """BooleanSimulation.
 
     ``BooleanSimulation`` uses a Metropolis algorithm to simulate a boolean
-    systems. The boolean system can be "updated" at a temperature ``T``. Thus,
+    system. The boolean system can be "updated" at a temperature ``T``. Thus,
     we can get an idea of the time evolution of a boolean system by creating a
     temperature schedule and seeing how the system evolves.
 
-    ``BooleanSimulation`` inherits from ``BinarySimulation``. See
-    ``help(qubovert.sim.BinarySimulation)`` for more details.
+    ``BooleanSimulation`` inherits from ``SpinSimulation``. In fact,
+    ``BooleanSimulation`` just deals internally with converting to and from
+    a spin system; all the simulation is done with ``SpinSimulation``. See
+    ``help(qubovert.sim.SpinSimulation)`` for more details.
 
     Examples
     --------
@@ -356,65 +344,73 @@ class BooleanSimulation(BinarySimulation):
     >>> sim.schedule_update(schedule)
     >>>
     >>> print("final state", sim.state)
-    >>> print("last 30 states", sim.get_past_states(30))
 
     See Also
     --------
-    - ``qubovert.sim.SpinSimulation``.
-    - ``qubovert.sim.BinarySimulation``.
+    ``qubovert.sim.SpinSimulation``.
 
     """
 
-    def __init__(self, model, initial_state=None):
+    def __init__(self, model, initial_state=None, memory=0):
         """__init__.
 
         Parameters
         ----------
         model : dict or type in ``qubovert.BOOLEAN_MODELS``.
-            The model the simulate.
+            The model to simulate. This should map tuples of boolean variable
+            labels to their respective coefficient in the objective function.
+            For more information, see the docstrings for any of the models in
+            ``qubovert.BOOLEAN_MODELS``.
         initial_state : dict (optional, defaults to None).
             The initial state to start the simulation in. ``initial_state``
             should map boolean label names to their initial values, where each
             value is either 0 or 1. If ``initial_state`` is None, then it
             will be initialized to all 0s.
+        memory : int >= 0 (optional, defaults to 0).
+            During the simulation, we keep a list of the most recent ``memory``
+            states that the simulation was in. These can be accessed with
+            ``self.get_past_states(number_of_states)``.
 
         """
-        if not isinstance(model, qv.BOOLEAN_MODELS):
-            model = qv.PUBO(model)
-
-        variables = model.variables
-
         if initial_state is None:
+            # if model is a Matrix object or PUBO, etc,
+            # then variables will be defined.
+            try:
+                variables = model._variables
+            except AttributeError:
+                variables = {v for k in model for v in k}
             initial_state = {v: 0 for v in variables}
+        super().__init__(pubo_to_puso(model), initial_state, memory)
 
-        super().__init__(model, initial_state)
+    @property
+    def state(self):
+        """state.
 
-    def _flip_bit(self, bit):
-        """_flip_bit.
+        A copy of the current state of the system.
 
-        Flip the boolean labeled by ``bit`` in the internal state.
-
-        Parameters
-        ----------
-        bit : hashable object.
-            The label of the boolean to flip.
+        Returns
+        -------
+        state : dict.
+            Dictionary that maps boolean labels to their values in {0, 1}.
 
         """
-        self._state[bit] = 1 - self._state[bit]
+        return spin_to_boolean(self._state)
 
     def set_state(self, state):
         """set_state.
 
-        Set the state of the boolean system to ``state``.
+        Set the state of the spin system to ``state``.
 
         Parameters
         ----------
         state : dict or iterable.
-            ``state`` maps the boolean variable labels to their corresponding
+            ``state`` maps the spin variable labels to their corresponding
             values. In other words ``state[v]`` is the value of variable ``v``.
             A value must be either 0 or 1.
 
         """
-        super().set_state(state)
-        if any(v not in {0, 1} for v in self._state.values()):
+        # if we call super then we get the wrong errors
+        state = {v: state[v] for v in self._variables}
+        if any(v not in {0, 1} for v in state.values()):
             raise ValueError("State must contain only 0's and 1's")
+        self._state = boolean_to_spin(state)

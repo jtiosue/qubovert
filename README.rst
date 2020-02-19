@@ -2,7 +2,7 @@
 qubovert
 ========
 
-``qubovert`` is written to be the one-stop package for boolean and spin optimization problem formualation and utilities, simulated annealing of boolean and spin problems (coming soon), and Metropolis simulation of boolean and spin systems.
+``qubovert`` is written to be the one-stop package for boolean and spin optimization problem formulation and utilities, simulated annealing of boolean and spin problems, and Metropolis simulation of boolean and spin systems.
 
 *master branch*
 
@@ -116,7 +116,7 @@ Example of the typical workflow
     model.add_constraint_lt_zero(sum(x.values()) - 4, lam=5)
 
 
-Then, if you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``):
+Then, if you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``, or ``qubovert.sim.anneal_qubo``):
 
 .. code:: python
 
@@ -155,7 +155,7 @@ Each ``model_solution`` should be the same! You can test that it is the correct 
     # enforce that spin 0 and spin 2 are aligned with penalty factor 2
     H.add_constraint_eq_zero(z[0] * z[2] - 1, lam=2)
 
-Now we can do the same that we did with the binary objective function above. If you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``):
+Now we can do the same that we did with the binary objective function above. If you have a QUBO solver (or just use ``qubovert.utils.solve_qubo_bruteforce``, or ``qubovert.sim.anneal_qubo``):
 
 .. code:: python
 
@@ -422,6 +422,12 @@ The convension used is that ``()`` elements of every dictionary corresponds to o
     # {(0, 1): 2}
     print(L.offset)
     # 0
+
+
+Solving models with annealing
+-----------------------------
+
+The ``anneal_qubo``, ``anneal_quso``, ``anneal_pubo``, and ``anneal_puso`` function run simulated annealing on the functions to try to find the minimum.
 
 
 Simulating spin and boolean systems

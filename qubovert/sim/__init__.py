@@ -20,14 +20,17 @@ See ``__all__`` for a list of uses.
 
 # import order here is important!
 from ._simulations import *
+from ._anneal_results import *
 from ._anneal import *
 
 from ._simulations import __all__ as __all_sim__
+from ._anneal_results import __all__ as __all_results__
 from ._anneal import __all__ as __all_anneal__
 
 
 __all__ = (
     __all_sim__ +
+    __all_results__ +
     __all_anneal__
 )
 

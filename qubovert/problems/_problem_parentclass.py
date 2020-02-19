@@ -37,6 +37,7 @@ class Problem(Conversions):
 
     Subclasses `must` define at least one of the following methods:
         ``to_qubo``, ``to_quso``.
+
     If at least one of them is defined, then they will both work. The same is
     true for ``to_pubo`` and ``to_puso``.
     ``Problem`` inherits from ``Conversions``, for more details see

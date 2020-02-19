@@ -52,8 +52,8 @@ class PUBO(BO, PUBOMatrix):
     PUBO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> pubo = PUBO()
     >>> pubo[('a',)] += 5
     >>> pubo[(0, 'a', 1)] -= 2
@@ -82,8 +82,8 @@ class PUBO(BO, PUBOMatrix):
     >>> pubo.convert_solution({0: 1, 1: 0, 2: 1, 2: 0})
     {'a': 1, 0: 0, 1: 1}
 
-    Note 1
-    ------
+    Note
+    ----
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -103,8 +103,8 @@ class PUBO(BO, PUBOMatrix):
 
     Ie integers will always be correctly sorted.
 
-    Note 2
-    ------
+    Note
+    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``
@@ -196,8 +196,8 @@ class PUBO(BO, PUBOMatrix):
         ----------
         D : ``qubovert.utils.QUBOMatrix`` or ``qubovert.utils.QUSOMatrix``.
             The dictionary to fill. For reducing PUBOs to QUBOs, ``D`` should
-            be a ``qubovert.utils.QUBOMatrix`` object. For reducing HIsings
-            to Isings, ``D`` should be a ``qubovert.utils.QUSOMatrix`` object.
+            be a ``qubovert.utils.QUBOMatrix`` object. For reducing PUSOs
+            to QUSOs, ``D`` should be a ``qubovert.utils.QUSOMatrix`` object.
             ``D`` should be empty to start.
         deg : int >= 2.
             The degree of the model to reduce to. If``deg`` is None, then

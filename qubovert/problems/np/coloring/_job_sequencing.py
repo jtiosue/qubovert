@@ -33,7 +33,8 @@ class JobSequencing(Problem):
     """JobSequencing.
 
     Class to manage converting Job Sequencing to and from its QUBO and
-    QUSO formluations. Based on the paper hereforth designated [Lucas].
+    QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated as [Lucas].
 
     The goal of the JobSequencing problem is as follows. Given workers and
     jobs, where each job has a designated length, assign each of the jobs to
@@ -67,11 +68,6 @@ class JobSequencing(Problem):
             3
         )
     True
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-        in Physics, 2:5, 2014.
 
     """
 

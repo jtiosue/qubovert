@@ -31,7 +31,8 @@ class VertexCover(Problem):
     """VertexCover.
 
     Class to manage converting Vertex Cover to and from its QUBO and
-    QUSO formluations. Based on the paper hereforth designated [Lucas]_.
+    QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated as [Lucas].
 
     The goal of the VertexCover problem is to find the smallest number of
     verticies that can be colored such that every edge of the graph is
@@ -40,8 +41,8 @@ class VertexCover(Problem):
     VertexCover inherits some methods and attributes from the Problem class.
     See ``help(qubovert.problems.Problem)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> from qubovert.problems import VertexCover
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
@@ -60,11 +61,6 @@ class VertexCover(Problem):
 
     >>> print(obj == len(solution))
     True
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-        in Physics, 2:5, 2014.
 
     """
 

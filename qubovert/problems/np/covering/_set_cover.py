@@ -32,7 +32,8 @@ class SetCover(Problem):
     """SetCover.
 
     Class to manage converting (Weighted) Set Cover to and from its QUBO and
-    QUSO formluations. Based on the paper hereforth designated [Lucas].
+    QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated as [Lucas].
 
     The goal of the SetCover problem is to find the smallest number of subsets
     of U in V such that union over the elements equals U. The goal of the
@@ -62,11 +63,6 @@ class SetCover(Problem):
     True  # since V[0] + V[2] covers all of U
     >>> print(obj == len(solution))
     True
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-        in Physics, 2:5, 2014.
 
     """
 

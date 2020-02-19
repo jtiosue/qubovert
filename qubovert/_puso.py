@@ -29,14 +29,14 @@ class PUSO(BO, PUSOMatrix):
     """PUSO.
 
     Class to manage converting general PUSO problems to and from their
-    HIing, PUBO, QUSO, and QUBO formluations. In general, this class
+    PUSO, PUBO, QUSO, and QUBO formluations. In general, this class
     deals with unconstrained optimization problems that have arbitrary degree.
     To convert this to a QUSO (see ``to_quso``) or QUBO (``to_qubo``) we have
     to introduce ancilla variables. The ``convert_solution`` method deals with
     converting a solution to the problem with ancilla variables back to the
     solution to the original problem.
 
-    This class deals with HIsings that have spin labels that do not range
+    This class deals with PUSOs that have spin labels that do not range
     from 0 to n-1. Note that it is generally
     more efficient to initialize an empty PUSO object and then build the
     PUSO, rather than initialize a PUSO object with an already built dict.
@@ -47,8 +47,8 @@ class PUSO(BO, PUSOMatrix):
     PUSO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> puso = PUSO()
     >>> puso[('a',)] += 5
     >>> puso[(0, 'a', 1)] -= 2
@@ -78,8 +78,8 @@ class PUSO(BO, PUSOMatrix):
     >>> puso.convert_solution({0: 1, 1: -1, 2: 1, 3: -1})
     {'a': 1, 0: -1, 1: 1}
 
-    Note 1
-    ------
+    Note
+    ----
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -99,8 +99,8 @@ class PUSO(BO, PUSOMatrix):
 
     Ie integers will always be correctly sorted.
 
-    Note 2
-    ------
+    Note
+    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``
@@ -126,7 +126,7 @@ class PUSO(BO, PUSOMatrix):
     def __init__(self, *args, **kwargs):
         """__init__.
 
-        This class deals with HIsings that have spin labels that do not range
+        This class deals with PUSOs that have spin labels that do not range
         from 0 to n-1. Note that it is generally more efficient to initialize
         an empty PUSO object and then build the PUSO, rather than
         initialize a PUSO object with an already built dict.

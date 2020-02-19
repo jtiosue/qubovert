@@ -30,8 +30,8 @@ class NumberPartitioning(Problem):
     """NumberPartitioning.
 
     Class to manage converting the Number Partitioning problem to and from its
-    QUBO and QUSO formluations. Based on the paper hereforth designated as
-    [Lucas].
+    QUBO and QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated as [Lucas].
 
     The goal of the NumberPartitioning problem is as follows (quoted from
     [Lucas]):
@@ -47,8 +47,8 @@ class NumberPartitioning(Problem):
     This class inherits some methods and attributes from the Problem class. For
     more info, see ``help(qubovert.problems.Problem)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> from qubovert.problems import NumberPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
@@ -67,11 +67,6 @@ class NumberPartitioning(Problem):
 
     >>> print(obj == 0)
     True  # since the solution is valid.
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-       in Physics, 2:5, 2014.
 
     """
 

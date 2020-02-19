@@ -32,7 +32,7 @@ class QUSO(BO, QUSOMatrix):
     Class to manage converting general QUSO problems to and from their
     QUBO and QUSO formluations.
 
-    This class deals with Isings that have spin labels that do not range from
+    This class deals with QUSOs that have spin labels that do not range from
     0 to n-1. If your labels are nonnegative integers, consider using
     ``qubovert.utils.QUSOMatrix``. Note that it is generally
     more efficient to initialize an empty QUSO object and then build the
@@ -44,8 +44,8 @@ class QUSO(BO, QUSOMatrix):
     QUSO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> quso = QUSO()
     >>> quso[('a',)] += 5
     >>> quso[(0, 'a')] -= 2
@@ -62,8 +62,8 @@ class QUSO(BO, QUSOMatrix):
     >>> quso.convert_solution({0: 1, 1: 0})
     {'a': 1, 0: 0}
 
-    Note 1
-    ------
+    Note
+    ----
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -83,8 +83,8 @@ class QUSO(BO, QUSOMatrix):
 
     Ie integers will always be correctly sorted.
 
-    Note 2
-    ------
+    Note
+    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``

@@ -31,8 +31,8 @@ class GraphPartitioning(Problem):
     """GraphPartitioning.
 
     Class to manage converting (Weighted) Graph Partitioning to and from its
-    QUBO and QUSO formluations. Based on the paper hereforth designated
-    [Lucas].
+    QUBO and QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated [Lucas].
 
     The goal of the Graph Partitioning problem is to partition the verticies
     of a graph into two equal subsets such that the number of edges (or the
@@ -41,8 +41,8 @@ class GraphPartitioning(Problem):
     GraphPartitioning inherits some methods and attributes from the Problem
     class. See ``help(qubovert.problems.Problem)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> from qubovert.problems import GraphPartitioning
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
@@ -67,11 +67,6 @@ class GraphPartitioning(Problem):
     1
 
     This is 1 because there is 1 edge connecting the partitions.
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-       in Physics, 2:5, 2014.
 
     """
 

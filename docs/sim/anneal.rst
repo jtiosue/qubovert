@@ -26,3 +26,25 @@ Anneal QUSO
 -----------
 
 .. autofunction:: qubovert.sim.anneal_quso
+
+
+Anneal Results
+--------------
+
+These objects are defined to deal with the output of the annealing functions.
+
+
+.. autoclass:: qubovert.sim.AnnealResults
+   :members:
+
+
+.. autoclass:: qubovert.sim.AnnealResult
+   :members:
+
+
+Anneal temperature range
+------------------------
+
+The following function is used to determine the default annealing temperatures to start and stop at for the above anneal functions if the user does not supply a range themselves.
+
+.. autofunction:: qubovert.sim.anneal_temperature_range

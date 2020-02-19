@@ -30,8 +30,8 @@ class BILP(Problem):
     r"""BILP.
 
     Class to manage converting Binary Integer Linear Programming problems to
-    and from their QUBO and QUSO formluations. Based on the paper hereforth
-    designated [Lucas]_.
+    and from their QUBO and QUSO formluations. Based on the paper "Ising
+    formulations of many NP problems", hereforth designated as [Lucas].
 
     The goal of the BILP problem is to find the minimum value of
     :math:`\mathbf{c} \cdot \mathbf{x}` subject to
@@ -42,8 +42,8 @@ class BILP(Problem):
     BILP inherits some methods and attributes from the Problem class.
     See ``help(qubovert.problems.Problem)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> from qubovert.problems import BILP
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...
@@ -65,11 +65,6 @@ class BILP(Problem):
     >>> print(obj == np.dot(c, solution))
     True
 
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-        in Physics, 2:5, 2014.
-
     """
 
     def __init__(self, c, S, b):
@@ -80,7 +75,7 @@ class BILP(Problem):
         :math:`S \mathbf{x} = \mathbf{b}`. Here :math:`\mathbf{c}`,
         :math:`\mathbf{b}`, and :math:`S` define the problem, and
         :math:`\mathbf{x}`, is a vector of boolean variables.
-        All naming conventions follow the names in the paper [Lucas]_.
+        All naming conventions follow the names in the paper [Lucas].
 
         Parameters
         ----------

@@ -18,10 +18,12 @@ Contains tests for the boolean and spin simulation functionality in the
 """
 
 from qubovert.sim import SpinSimulation, BooleanSimulation
-from qubovert import spin_var, boolean_var
-from qubovert.sat import NOT
+from qubovert import spin_var
+from qubovert.utils import boolean_to_spin, puso_to_pubo
 from numpy.testing import assert_raises
 
+
+# spin simulation
 
 def test_spinsimulation_set_state():
 
@@ -47,30 +49,6 @@ def test_spinsimulation_set_state():
     assert sim.state == {0: -1}
 
 
-def test_booleansimulation_set_state():
-
-    model = sum(-boolean_var(i) * NOT(boolean_var(i+1)) for i in range(9))
-
-    sim = BooleanSimulation(model)
-    assert sim.state == {i: 0 for i in model.variables}
-
-    sim = BooleanSimulation(model, {i: 1 for i in model.variables})
-    assert sim.state == {i: 1 for i in model.variables}
-
-    with assert_raises(ValueError):
-        sim.set_state({i: 3 for i in model.variables})
-
-    with assert_raises(ValueError):
-        BooleanSimulation(model, {i: -1 for i in model.variables})
-
-    sim = BooleanSimulation({(0,): 1})
-    with assert_raises(ValueError):
-        sim.set_state([-1])
-
-    sim.set_state([1])
-    assert sim.state == {0: 1}
-
-
 def test_spinsimulation_flip_bit():
 
     sim = SpinSimulation({(0,): 1, (1,): -1}, [1, -1])
@@ -80,21 +58,13 @@ def test_spinsimulation_flip_bit():
     assert sim.state == {0: -1, 1: 1}
 
 
-def test_booleansimulation_flip_bit():
-
-    sim = BooleanSimulation({(0,): 1, (1,): -1}, [0, 1])
-    sim._flip_bit(0)
-    assert sim.state == {0: 1, 1: 1}
-    sim._flip_bit(1)
-    assert sim.state == {0: 1, 1: 0}
-
-
 def test_spinsimulation_paststates_reset():
 
     ising = sum(-spin_var(i) * spin_var(i+1) for i in range(3))
     initial_state = {0: 1, 1: 1, 2: -1, 3: 1}
-    sim = SpinSimulation(ising, initial_state)
+    sim = SpinSimulation(ising, initial_state, 1000)
 
+    assert sim.memory == 1000
     assert sim.get_past_states() == [sim.state]
 
     states = [sim.state]
@@ -108,30 +78,7 @@ def test_spinsimulation_paststates_reset():
     assert len(sim.get_past_states()) == 1000
 
     sim.reset()
-    assert sim.state == initial_state
-    assert sim.get_past_states() == [initial_state]
-
-
-def test_booleansimulation_paststates_reset():
-
-    model = sum(-boolean_var(i) * NOT(boolean_var(i+1)) for i in range(3))
-    initial_state = {0: 0, 1: 0, 2: 1, 3: 0}
-    sim = BooleanSimulation(model, initial_state)
-
-    assert sim.get_past_states() == [sim.state]
-
-    states = [sim.state]
-    for _ in range(100):
-        sim.update(2)
-        states.append(sim.state)
-    assert states == sim.get_past_states()
-    assert states[-50:] == sim.get_past_states(50)
-
-    sim.update(2, 2000)
-    assert len(sim.get_past_states()) == 1000
-
-    sim.reset()
-    assert sim.state == initial_state
+    assert sim.state == initial_state == sim.initial_state
     assert sim.get_past_states() == [initial_state]
 
 
@@ -148,26 +95,106 @@ def test_spinsimulation_update_vs_updateschedule():
     sim.schedule_update([(4, 100), (2, 23), (5, 48)], seed=0)
     result2 = sim.state
     sim.reset()
-    sim.schedule_update([(4, 100), (2, 23), (5, 48)], seed=2)
+    sim.schedule_update([(4, 100), (2, 23), (5, 48)], seed=1)
     result3 = sim.state
     assert result1 == result2
     assert result1 != result3
 
 
-def test_booleansimulation_update_vs_updateschedule():
+def test_spinsimulation_updates():
 
-    model = sum(-boolean_var(i) * NOT(boolean_var(i+1)) for i in range(3))
-    sim = BooleanSimulation(model)
+    sim = SpinSimulation(spin_var(0))
+    state = sim.state
+    sim.update(5, 0)
+    assert sim.state == state
+    sim.schedule_update([(5, 0), (3, 0)])
+    assert sim.state == state
 
-    sim.update(4, 100, seed=0)
-    sim.update(2, 23)
-    sim.update(5, 48)
-    result1 = sim.state
+    with assert_raises(ValueError):
+        sim.update(4, -1)
+
+
+# boolean simulation
+
+def test_booleansimulation_set_state():
+
+    ising = puso_to_pubo(sum(-spin_var(i) * spin_var(i+1) for i in range(9)))
+
+    sim = BooleanSimulation(ising)
+    assert sim.state == {i: 0 for i in ising.variables}
+
+    sim = BooleanSimulation(ising, {i: 1 for i in ising.variables})
+    assert sim.state == {i: 1 for i in ising.variables}
+
+    with assert_raises(ValueError):
+        sim.set_state({i: 3 for i in ising.variables})
+
+    with assert_raises(ValueError):
+        BooleanSimulation(ising, {i: -1 for i in ising.variables})
+
+    sim = BooleanSimulation({(0,): 1})
+    with assert_raises(ValueError):
+        sim.set_state([-1])
+
+    sim.set_state([1])
+    assert sim.state == {0: 1}
+
+
+def test_booleansimulation_flip_bit():
+
+    sim = BooleanSimulation({(0,): 1, (1,): -1}, [0, 1])
+    sim._flip_bit(0)
+    assert sim.state == {0: 1, 1: 1}
+    sim._flip_bit(1)
+    assert sim.state == {0: 1, 1: 0}
+
+
+def test_booleansimulation_paststates_reset():
+
+    ising = sum(-spin_var(i) * spin_var(i+1) for i in range(3))
+    initial_state = {0: 0, 1: 0, 2: 1, 3: 0}
+    sim = BooleanSimulation(ising, initial_state, 1000)
+
+    assert sim.memory == 1000
+    assert sim.get_past_states() == [sim.state]
+
+    states = [sim.state]
+    for _ in range(100):
+        sim.update(2)
+        states.append(sim.state)
+    assert states == sim.get_past_states()
+    assert states[-50:] == sim.get_past_states(50)
+
+    sim.update(2, 2000)
+    assert len(sim.get_past_states()) == 1000
+
     sim.reset()
-    sim.schedule_update([(4, 100), (2, 23), (5, 48)], seed=0)
-    result2 = sim.state
-    sim.reset()
-    sim.schedule_update([(4, 100), (2, 23), (5, 48)], seed=2)
-    result3 = sim.state
-    assert result1 == result2
-    assert result1 != result3
+    assert sim.state == initial_state == sim.initial_state
+    assert sim.get_past_states() == [initial_state]
+
+
+def test_booleansimulation_vs_spinsimulation():
+
+    ising = sum(-spin_var(i) * spin_var(i+1) for i in range(15))
+    qubo = puso_to_pubo(ising)
+
+    schedule = [(T, 20) for T in range(3, 0, -1)]
+
+    spin = SpinSimulation(ising)
+    boolean = BooleanSimulation(qubo)
+
+    assert spin.initial_state == boolean_to_spin(boolean.initial_state)
+
+    spin.schedule_update(schedule, seed=4)
+    boolean.schedule_update(schedule, seed=4)
+    assert spin.state == boolean_to_spin(boolean.state)
+
+    initial_state = [0] * 8 + [1] * 8
+    spin = SpinSimulation(ising, boolean_to_spin(initial_state))
+    boolean = BooleanSimulation(qubo, initial_state)
+
+    assert spin.initial_state == boolean_to_spin(boolean.initial_state)
+
+    spin.schedule_update(schedule, seed=4)
+    boolean.schedule_update(schedule, seed=4)
+    assert spin.state == boolean_to_spin(boolean.state)

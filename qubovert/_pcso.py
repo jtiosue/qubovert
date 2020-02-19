@@ -196,7 +196,7 @@ class PCSO(PUSO):
 
         Parameters
         ----------
-        *args and **kwargs : defines a dictionary or PCSO.
+        ``*args/**kwargs`` : defines a dictionary or PCSO.
             Ie ``d = dict(*args, **kwargs)``.
             Each element in d will be added in place to this instance following
             all the required convensions.

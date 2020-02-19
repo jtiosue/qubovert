@@ -14,8 +14,8 @@
 
 """_normalize.py.
 
-This file contains the function to normalize QUBOs, PUBOs, Isings,
-HIsings, etc.
+This file contains the function to normalize QUBOs, PUBOs, QUSOs,
+PUSOs, etc.
 
 """
 

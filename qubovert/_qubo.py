@@ -42,8 +42,8 @@ class QUBO(BO, QUBOMatrix):
     QUBO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> qubo = QUBO()
     >>> qubo[('a',)] += 5
     >>> qubo[(0, 'a')] -= 2
@@ -60,8 +60,8 @@ class QUBO(BO, QUBOMatrix):
     >>> qubo.convert_solution({0: 1, 1: 0})
     {'a': 1, 0: 0}
 
-    Note 1
-    ------
+    Note
+    ----
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -81,8 +81,8 @@ class QUBO(BO, QUBOMatrix):
 
     Ie integers will always be correctly sorted.
 
-    Note 2
-    ------
+    Note
+    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``

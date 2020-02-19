@@ -38,8 +38,8 @@ class AlternatingSectorsChain(Problem):
     AlternatingSectorsChain inherits some methods and attributes from the
     Problem class. See ``help(qubovert.problems.Problem)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> from qubovert.problems import AlternatingSectorsChain
     >>> from any_module import qubo_solver
     >>> # or you can use my bruteforce solver...

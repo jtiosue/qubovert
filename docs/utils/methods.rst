@@ -57,6 +57,18 @@ Bruteforce Solvers
 .. autofunction:: qubovert.utils.solve_quso_bruteforce
 
 
+Approximate Extrema
+-------------------
+
+.. autofunction:: qubovert.utils.approximate_pubo_extrema
+
+.. autofunction:: qubovert.utils.approximate_puso_extrema
+
+.. autofunction:: qubovert.utils.approximate_qubo_extrema
+
+.. autofunction:: qubovert.utils.approximate_quso_extrema
+
+
 Useful functions
 ----------------
 

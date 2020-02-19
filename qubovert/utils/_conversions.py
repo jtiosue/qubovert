@@ -175,15 +175,10 @@ def pubo_to_puso(P):
                 yield key, value / 2
 
     # not isinstance! because isinstance(PUBO, PUBOMatrix) is True
-    if type(P) == PUBOMatrix:
-        H = PUSOMatrix()
-        squash_key = PUBOMatrix.squash_key
-    else:
-        H = qv.PUSO()
-        squash_key = qv.PUBO.squash_key
+    H = PUSOMatrix() if type(P) == PUBOMatrix else qv.PUSO()
 
     for k, v in P.items():
-        for key, value in generate_new_key_value(squash_key(k)):
+        for key, value in generate_new_key_value(k):
             H[key] += value * v
 
     return H
@@ -252,16 +247,11 @@ def puso_to_pubo(H):
                 yield (k[0],) + key, -2 * value
                 yield key, value
 
-    # not isinstance! because isinstance(QUSO, QUSOMatrix) is True
-    if type(H) == PUSOMatrix:
-        P = PUBOMatrix()
-        squash_key = PUSOMatrix.squash_key
-    else:
-        P = qv.PUBO()
-        squash_key = qv.PUSO.squash_key
+    # not isinstance! because isinstance(PUSO, PUSOMatrix) is True
+    P = PUBOMatrix() if type(H) == PUSOMatrix else qv.PUBO()
 
     for k, v in H.items():
-        for key, value in generate_new_key_value(squash_key(k)):
+        for key, value in generate_new_key_value(k):
             P[key] += value * v
 
     return P

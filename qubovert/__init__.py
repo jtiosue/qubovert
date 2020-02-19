@@ -57,4 +57,5 @@ from . import problems
 BOOLEAN_MODELS = QUBO, PUBO, PCBO, utils.QUBOMatrix, utils.PUBOMatrix
 SPIN_MODELS = QUSO, PUSO, PCSO, utils.QUSOMatrix, utils.PUSOMatrix
 
+
 name = "qubovert"

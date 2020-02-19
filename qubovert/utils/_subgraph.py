@@ -14,8 +14,8 @@
 
 """_subgraph.py.
 
-This file contains the function to create subgraphs of QUBOs, PUBOs, Isings,
-HIsings, etc.
+This file contains the function to create subgraphs of QUBOs, PUBOs, QUSOs,
+PUSOs, etc.
 
 """
 

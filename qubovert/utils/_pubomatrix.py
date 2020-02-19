@@ -144,7 +144,7 @@ class PUBOMatrix(DictArithmetic):
             Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """
-        self._degree, self._vars, self._num_binary_variables = 0, set(), 0
+        self._degree, self._variables, self._num_binary_variables = 0, set(), 0
         super().__init__(*args, **kwargs)
 
     def refresh(self):
@@ -227,7 +227,7 @@ class PUBOMatrix(DictArithmetic):
         res : set.
 
         """
-        return self._vars.copy()
+        return self._variables.copy()
 
     @property
     def offset(self):
@@ -272,7 +272,7 @@ class PUBOMatrix(DictArithmetic):
             then this returns None.
 
         """
-        return max(self._vars) if self._vars else None
+        return max(self._variables) if self._variables else None
 
     @classmethod
     def squash_key(cls, key):
@@ -383,8 +383,8 @@ class PUBOMatrix(DictArithmetic):
         k = self.__class__.squash_key(key)
         if value:
             self._degree = max(self._degree, len(k))
-            for i in filter(lambda x: x not in self._vars, k):
-                self._vars.add(i)
+            for i in filter(lambda x: x not in self._variables, k):
+                self._variables.add(i)
                 self._num_binary_variables += 1
         super().__setitem__(k, value)
 

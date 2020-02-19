@@ -32,7 +32,10 @@ def test_qubo_to_quso_to_qubo():
     qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
     assert qubo == quso_to_qubo(qubo_to_quso(qubo))
 
-    qubo = {('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .2, (): -2, ('2',): 1}
+    qubo = {
+        ('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .2, (): -2, ('2',): 1,
+        (0, 0): 1
+    }
     # need to reformatt qubo so it is sorted with the same hash
     assert QUBO(qubo) == quso_to_qubo(qubo_to_quso(qubo))
 
@@ -42,8 +45,8 @@ def test_quso_to_qubo_to_quso():
     quso = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
     assert quso == qubo_to_quso(quso_to_qubo(quso))
 
-    quso = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2}
-    # need to reformat quso so it is sorted with the same hash
+    quso = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2', '2'): -2}
+    # need to reformat quso so it is sorted with the same hash and squashed key
     assert QUSO(quso) == qubo_to_quso(quso_to_qubo(quso))
 
 
@@ -57,9 +60,10 @@ def test_pubo_to_puso_to_pubo():
 
     pubo = {
         ('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .5, (): -2, ('2',): 1,
-        ('0', '2', 3): -3, ('0', 1, '2'): -2
+        ('0', '2', 3): -3, ('0', 1, '2'): -2, ('0', '0', 1, '0', '2', '2'): -9,
+        (4, 2, 4, 0, 2, 0, 0): 3
     }
-    # need to reformat pubo so it is sorted with the same hash
+    # need to reformat pubo so it is sorted with the same hash and squashed key
     assert PUBO(pubo) == puso_to_pubo(pubo_to_puso(pubo))
 
 
@@ -73,7 +77,8 @@ def test_puso_to_pubo_to_puso():
 
     puso = {
         ('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2,
-        ('0', 1, '2'): 3, ('0', '2', 3): -1
+        ('0', 1, '2'): 3, ('0', '2', 3): -1,
+        ('2', 0, 0, '1', 0): -2, (0, 1, 1, 0, 3, 0, 1, 1, 3, 2, 3): -8
     }
     # need to reformat qubo so it is sorted with the same hash
     assert PUSO(puso) == pubo_to_puso(puso_to_pubo(puso))
