@@ -45,9 +45,6 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 Please see the `Repository <https://github.com/jiosue/qubovert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_.
 
 
-Table of Contents
------------------
-
 .. contents::
     :local:
     :backlinks: top
