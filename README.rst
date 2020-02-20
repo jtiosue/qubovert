@@ -121,8 +121,8 @@ Before using the bruteforce solver, always check that ``model.num_binary_variabl
     print("Constraints satisfied?", model.is_solution_valid(model_solution))
 
 
-Solving the model with ``qubovert``'s simulated annealing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Solving the model with *qubovert*'s simulated annealing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Please see the definition of PUBO in the next section. We will anneal the PUBO.
 
@@ -169,7 +169,7 @@ Solving the model with D-Wave's simulated annealer
 Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
 ------------------------------------------------------------
 
-``qubovert`` defines, among many others, the following objects.
+*qubovert* defines, among many others, the following objects.
 
 - QUBO: Quadratic Unconstrained Boolean Optimization (``qubovert.QUBO``)
 - QUSO: Quadratic Unconstrained Spin Optimization (``qubovert.QUSO``)
@@ -181,7 +181,7 @@ Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
 Each of the objects has many methods and arbitary arithmetic defined; see the docstrings of each object and the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for more info. A boolean optimization model is one whose variables can be assigned to be either 0 or 1, while a spin optimization model is one whose variables can be assigned to be either 1 or -1. The ``qubovert.boolean_var(name)`` function will create a PCBO representing the boolean variable with name ``name``. Similarly, the ``qubovert.spin_var(name)`` function will create a PCSO representing the spin variable with name ``name``.
 
 
-There are many utilities in the ``utils`` library that can be helpful. Some examples of utility functions are listed here.
+There are many utilities in the *utils* library that can be helpful. Some examples of utility functions are listed here.
 
 - ``qubovert.utils.solve_pubo_bruteforce``, solve a PUBO by iterating through all possible solutions.
 - ``qubovert.utils.solve_puso_bruteforce``, solve a PUSO by iterating through all possible solutions.
@@ -194,13 +194,13 @@ There are many utilities in the ``utils`` library that can be helpful. Some exam
 - ``qubovert.utils.subgraph``, create the subgraph of a model that only contains certain given variables.
 - ``qubovert.utils.normalize``, normalize a model such that its coefficients have a maximum absolute magnitude.
 
-See ``qubovert.utils.__all__`` for more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that ``qubovert`` uses everywhere.
+See ``qubovert.utils.__all__`` for more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that *qubovert* uses everywhere.
 
 
 The PCBO and PCSO objects have constraint methods; for example, the ``.add_constraint_le_zero`` method will enforce that an expression is less than or equal to zero by adding a penalty to the model whenever it does not. The PCBO object also has constraint methods for satisfiability expressions; for example, the ``.add_constraint_OR`` will enforce that the OR of the given boolean expression evaluates to True by adding a penalty to the model whenever it does not. See the docstrings and `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for more info.
 
 
-For more utilities on satisfiability expressions, ``qubovert`` also has a ``sat`` library; see ``qubovert.sat.__all__``. Consider the following 3-SAT example. We have variables ``x0, x1, x2, x3``, labeled by ``0, 1, 2, 3``. We can create an expression ``C`` that evaluates to 1 whenever the 3-SAT conditions are satisfied.
+For more utilities on satisfiability expressions, *qubovert* also has a *sat* library; see ``qubovert.sat.__all__``. Consider the following 3-SAT example. We have variables ``x0, x1, x2, x3``, labeled by ``0, 1, 2, 3``. We can create an expression ``C`` that evaluates to 1 whenever the 3-SAT conditions are satisfied.
 
 .. code:: python
 
@@ -348,10 +348,10 @@ We use a Metropolis algorithm to simulate spin and boolean system. Below we show
     print("last 30 states", sim.get_past_states(30))
 
 
-Convert common problems to quadratic form (the ``problems`` library)
---------------------------------------------------------------------
+Convert common problems to quadratic form (the *problems* library)
+------------------------------------------------------------------
 
-One of the goals of ``qubovert`` is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. Please see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for a few more examples as well.
+One of the goals of *qubovert* is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. Please see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for a few more examples as well.
 
 
 See the following Set Cover example.
