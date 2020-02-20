@@ -146,7 +146,9 @@ class AnnealResult:
         s : str.
 
         """
-        return "  state: %s\n  value: %g" % (self.state, self.value)
+        return "  state: %s\n  value: %g\n   spin: %s" % (
+            self.state, self.value, self.spin
+        )
 
     def __repr__(self):
         """__repr__.
@@ -158,7 +160,7 @@ class AnnealResult:
         r : str.
 
         """
-        return "AnnealResult(%s, %g, %s)" % (self.state, self.value, self.spin)
+        return "AnnealResult(state=%s, value=%g, spin=%s)" % (self.state, self.value, self.spin)
 
 
 class AnnealResults:
@@ -212,6 +214,34 @@ class AnnealResults:
 
         """
         return self._results == other._results
+
+    def __len__(self):
+        """__len__.
+
+        Return the number of samples in ``self``.
+
+        Return
+        ------
+        num : int.
+
+        """
+        return len(self._results)
+
+    def __contains__(self, other):
+        """__contains__.
+
+        Implement the ``in`` operation. See if ``other`` is in ``self``.
+
+        Parameters
+        ----------
+        other : qubovert.sim.AnnealResult object.
+
+        Returns
+        -------
+        res : bool.
+
+        """
+        return other in self._results
 
     @property
     def spin(self):
@@ -288,7 +318,7 @@ class AnnealResults:
         None.
 
         """
-        if self._best is None or result.value < self.best.value:
+        if self._best is None or result.value < self._best.value:
             self._best = result
         self._results.append(result)
 
@@ -351,7 +381,16 @@ class AnnealResults:
         s : str.
 
         """
-        s = "AnnealResults\n"
-        for r in self:
-            s += str(r) + "\n"
-        return s[:-1]
+        return "AnnealResults\n" + "\n\n".join(str(x) for x in self._results)
+
+    def __repr__(self):
+        """__repr__.
+
+        Returns the representation of the object.
+
+        Return
+        ------
+        s : str.
+
+        """
+        return "[" + ", ".join(repr(x) for x in self._results) + "]"

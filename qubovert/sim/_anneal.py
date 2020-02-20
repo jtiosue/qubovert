@@ -99,8 +99,8 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
     if not variables:
         return 0, 0
 
-    # factor = 2  # shoold be this
-    factor = 1  # seems to do better?? D-Wave neal does this.
+    factor = 2  # should be this
+    # factor = 1  # D-Wave neal does this.
 
     # calculate the approximate minimum possible change in energy by flipping
     # a single bit.
@@ -114,10 +114,9 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
 
     # now ensure that the bolzmann weight satisfy the desired probabilities.
     # ie exp(-del_energy / T) = prob
-    return (
-        -max_del_energy / np.log(start_flip_prob) if start_flip_prob else 0,
-        -min_del_energy / np.log(end_flip_prob) if end_flip_prob else 0
-    )
+    T0 = -max_del_energy / np.log(start_flip_prob) if start_flip_prob else 0
+    Tf = -min_del_energy / np.log(end_flip_prob) if end_flip_prob else 0
+    return float(T0), float(Tf)
 
 
 # annealing functions

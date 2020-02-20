@@ -57,7 +57,13 @@ def test_annealresults():
         res.add_state(*s)
         boolean_res.add_state(spin_to_boolean(s[0]), s[1])
 
+    for s in states:
+        assert AnnealResult(*s, True) in res
+        assert AnnealResult(s[0], s[1]+1, True) not in res
+
     assert res.spin
+    assert len(res) == 3
+    assert len(boolean_res) == 3
     assert res.best.state == states[2][0]
     assert res.best.value == states[2][1]
     assert res.copy() == res
@@ -66,6 +72,8 @@ def test_annealresults():
     assert boolean_res.to_spin() == res
     str(res)
     str(boolean_res)
+    repr(res)
+    repr(boolean_res)
 
     count = 0
     for s in res:
