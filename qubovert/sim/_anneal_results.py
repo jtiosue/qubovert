@@ -160,14 +160,16 @@ class AnnealResult:
         r : str.
 
         """
-        return "AnnealResult(state=%s, value=%g, spin=%s)" % (self.state, self.value, self.spin)
+        return "AnnealResult(state=%s, value=%g, spin=%s)" % (
+            self.state, self.value, self.spin
+        )
 
 
-class AnnealResults:
+class AnnealResults(list):
     """AnnealResults.
 
     An object to manage accessing the results of the simulated annealing
-    functions.
+    functions. ``AnnealResults`` is a subclass of ``list``.
 
     Let ``res`` be the output of one of the simulated annealing functions. Then
     a user can access the best result with ``res.best``. The best state will
@@ -197,51 +199,8 @@ class AnnealResults:
             model.
 
         """
-        self._spin, self._best, self._results = spin, None, []
-
-    def __eq__(self, other):
-        """__eq__.
-
-        Determine if ``self`` and ``other`` are equivalent.
-
-        Parameters
-        ----------
-        other : AnnealResults object.
-
-        Returns
-        -------
-        res : bool.
-
-        """
-        return self._results == other._results
-
-    def __len__(self):
-        """__len__.
-
-        Return the number of samples in ``self``.
-
-        Return
-        ------
-        num : int.
-
-        """
-        return len(self._results)
-
-    def __contains__(self, other):
-        """__contains__.
-
-        Implement the ``in`` operation. See if ``other`` is in ``self``.
-
-        Parameters
-        ----------
-        other : qubovert.sim.AnnealResult object.
-
-        Returns
-        -------
-        res : bool.
-
-        """
-        return other in self._results
+        super().__init__()
+        self._spin, self._best = spin, None
 
     @property
     def spin(self):
@@ -279,10 +238,7 @@ class AnnealResults:
             A deep copy of ``self``.
 
         """
-        res = AnnealResults(self._spin)
-        for r in self._results:
-            res.add_result(r.copy())
-        return res
+        return AnnealResults.from_list(self, self._spin)
 
     def add_state(self, state, value):
         """add_state.
@@ -301,10 +257,10 @@ class AnnealResults:
         None.
 
         """
-        self.add_result(AnnealResult(state, value, self._spin))
+        self.append(AnnealResult(state, value, self._spin))
 
-    def add_result(self, result):
-        """add_result.
+    def append(self, result):
+        """append.
 
         Add the result to the record.
 
@@ -320,7 +276,7 @@ class AnnealResults:
         """
         if self._best is None or result.value < self._best.value:
             self._best = result
-        self._results.append(result)
+        super().append(result)
 
     def to_boolean(self):
         """to_boolean.
@@ -334,8 +290,8 @@ class AnnealResults:
 
         """
         res = AnnealResults(False)
-        for r in self._results:
-            res.add_result(r.to_boolean())
+        for r in self:
+            res.append(r.to_boolean())
         return res
 
     def to_spin(self):
@@ -350,8 +306,8 @@ class AnnealResults:
 
         """
         res = AnnealResults(True)
-        for r in self._results:
-            res.add_result(r.to_spin())
+        for r in self:
+            res.append(r.to_spin())
         return res
 
     def sort_by_value(self):
@@ -360,16 +316,7 @@ class AnnealResults:
         Sort the results in ``self`` in increasing order of their values.
 
         """
-        self._results.sort(key=lambda x: x.value)
-
-    def __iter__(self):
-        """__iter__.
-
-        Iterate through the results in whatever order they are in. To change
-        the order, see the function ``self.sort_by_value``.
-
-        """
-        yield from self._results
+        self.sort(key=lambda x: x.value)
 
     def __str__(self):
         """__str__.
@@ -381,16 +328,86 @@ class AnnealResults:
         s : str.
 
         """
-        return "AnnealResults\n" + "\n\n".join(str(x) for x in self._results)
+        return "AnnealResults\n" + "\n\n".join(str(x) for x in self)
 
-    def __repr__(self):
-        """__repr__.
+    def __getitem__(self, index):
+        """__getitem__.
 
-        Returns the representation of the object.
+        Override ``list.__getitem__`` so that when slicing we return a
+        ``qubovert.sim.AnnealResults`` item instead of a list.
 
-        Return
-        ------
-        s : str.
+        Parameters
+        ----------
+        index : int or slice object.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
 
         """
-        return "[" + ", ".join(repr(x) for x in self._results) + "]"
+        res = super().__getitem__(index)
+        if isinstance(index, slice):
+            res = AnnealResults.from_list(res, self._spin)
+        return res
+
+    def clear(self):
+        """clear.
+
+        Override ``list.clear`` so that it also removes ``self.best``.
+
+        """
+        self._best = None
+        super().clear()
+
+    @staticmethod
+    def from_list(l, spin):
+        """from_list.
+
+        Create an ``AnnealResults`` object from a list of ``AnnealResult``
+        objects.
+
+        Parameters
+        ----------
+        l : list.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        """
+        res = AnnealResults(spin)
+        for i in l:
+            res.append(i.copy())
+        return res
+
+    def __add__(self, other):
+        """__add__.
+
+        Override ``list.__add__`` to return a ``AnnealResults`` object.
+
+        Parameters
+        ----------
+        other : qubovert.sim.AnnealResults object.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        """
+        return AnnealResults.from_list(super().__add__(other), self._spin)
+
+    def __mul__(self, other):
+        """__mul__.
+
+        Override ``list.__mul__`` to return a ``AnnealResults`` object.
+
+        Parameters
+        ----------
+        other : qubovert.sim.AnnealResults object.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        """
+        return AnnealResults.from_list(super().__mul__(other), self._spin)

@@ -51,6 +51,8 @@ def test_annealresults():
         ({0: -1, 1: -1, 'a': -1}, -3),
     ]
     sorted_states = sorted(states, key=lambda x: x[1])
+    anneal_states = [AnnealResult(*s, True) for s in states]
+    anneal_sorted_states = [AnnealResult(*s, True) for s in sorted_states]
 
     res, boolean_res = AnnealResults(True), AnnealResults(False)
     for s in states:
@@ -70,6 +72,8 @@ def test_annealresults():
     assert res.to_spin() == res
     assert res.to_boolean() == boolean_res
     assert boolean_res.to_spin() == res
+    assert res == anneal_states
+    assert boolean_res == [x.to_boolean() for x in anneal_states]
     str(res)
     str(boolean_res)
     repr(res)
@@ -80,8 +84,38 @@ def test_annealresults():
         assert s == AnnealResult(*states[count], True)
         count += 1
 
+    for i in range(3):
+        assert res[i] == anneal_states[i]
+
+    assert res[:2] == anneal_states[:2]
+    assert isinstance(res[1:3], AnnealResults)
+
     res.sort_by_value()
     count = 0
     for s in res:
         assert s == AnnealResult(*sorted_states[count], True)
         count += 1
+
+    for i in range(3):
+        assert res[i] == anneal_sorted_states[i]
+
+    assert res[:2] == anneal_sorted_states[:2]
+
+    boolean_res.sort_by_value()
+    assert res == anneal_sorted_states
+    assert boolean_res == [x.to_boolean() for x in anneal_sorted_states]
+
+    assert type(res * 2) == AnnealResults
+    assert type(res + res) == AnnealResults
+    res *= 2
+    assert type(res) == AnnealResults
+    res += res
+    assert type(res) == AnnealResults
+    res += anneal_states
+    assert type(res) == AnnealResults
+    res.extend(anneal_sorted_states)
+    assert type(res) == AnnealResults
+
+    res.clear()
+    assert res.best is None
+    assert not res

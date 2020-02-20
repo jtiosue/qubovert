@@ -53,8 +53,8 @@ def test_temperature_range():
             T0, Tf = anneal_temperature_range(
                 H, start_flip_prob, end_flip_prob, True
             )
-            assert_allclose(T0, -5 / np.log(start_flip_prob))
-            assert_allclose(Tf, -1 / np.log(end_flip_prob))
+            assert_allclose(T0, -10 / np.log(start_flip_prob))
+            assert_allclose(Tf, -2 / np.log(end_flip_prob))
 
             # boolean model
             assert_allclose(
@@ -73,10 +73,10 @@ def test_temperature_range():
                 H, start_flip_prob, end_flip_prob, True
             )
             assert_allclose(
-                T0, -9 / np.log(start_flip_prob) if start_flip_prob else 0
+                T0, -18 / np.log(start_flip_prob) if start_flip_prob else 0
             )
             assert_allclose(
-                Tf, -1 / np.log(end_flip_prob) if end_flip_prob else 0
+                Tf, -2 / np.log(end_flip_prob) if end_flip_prob else 0
             )
 
             # boolean model
