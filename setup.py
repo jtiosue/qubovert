@@ -42,7 +42,7 @@ setuptools.setup(
     long_description=README,
     long_description_content_type='text/x-rst',
     url=__sourceurl__,
-    license=__licence__,
+    license=__license__,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     test_suite="tests",
     install_requires=REQUIREMENTS,

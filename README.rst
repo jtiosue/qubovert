@@ -2,7 +2,7 @@
 qubovert
 ========
 
-*The one-stop package for formulating, simulating, and solving problems in boolean and spin form.*
+The one-stop package for formulating, simulating, and solving problems in boolean and spin form.
 
 
 *master branch*
@@ -45,7 +45,7 @@ qubovert
 Please see the `Repository <https://github.com/jiosue/qubovert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_.
 
 
-.. contents:: Table of Contents
+.. contents:: **Table of Contents**
 
 
 Installation
