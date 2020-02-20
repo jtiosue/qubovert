@@ -390,15 +390,10 @@ class BooleanSimulation(SpinSimulation):
             ``self.get_past_states(number_of_states)``.
 
         """
+        model = pubo_to_puso(model)
         if initial_state is None:
-            # if model is a Matrix object or PUBO, etc,
-            # then variables will be defined.
-            try:
-                variables = model._variables
-            except AttributeError:
-                variables = {v for k in model for v in k}
-            initial_state = {v: 0 for v in variables}
-        super().__init__(pubo_to_puso(model), initial_state, memory)
+            initial_state = {v: 0 for v in model._variables}
+        super().__init__(model, initial_state, memory)
 
     @property
     def state(self):
