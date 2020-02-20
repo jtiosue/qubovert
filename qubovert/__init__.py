@@ -19,11 +19,12 @@ have a one-to-one mapping to classical QUSO problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
 See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
 for problems defined, and ``qubovert.utils.__all__`` for some utility
-functions, and ``qubovert.sat.__all__`` for the satisfiability library.
+functions, ``qubovert.sat.__all__`` for the satisfiability library, and
+``qubovert.sim.__all__`` for the simulation and annealing library.
 
 """
 
-from ._version import __version__
+from ._version import *
 
 from . import utils
 
