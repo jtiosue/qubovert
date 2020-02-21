@@ -40,7 +40,7 @@ def test_pubo_extrema():
     assert approximate_puso_extrema({(): 4}) == (4, 4)
 
 
-def test_pubo_extrema():
+def test_qubo_extrema():
 
     P = {(0,): 1, (1,): 3, (2,): -2, (): 9}
     assert approximate_qubo_extrema(P) == (7, 13)
@@ -49,7 +49,7 @@ def test_pubo_extrema():
     assert approximate_qubo_extrema({(): 4}) == (4, 4)
 
 
-def test_pubo_extrema():
+def test_quso_extrema():
 
     P = {(0,): 1, (1,): 3, (2,): -2, (): 9}
     assert approximate_quso_extrema(P) == (3, 15)
