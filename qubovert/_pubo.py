@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ class PUBO(BO, PUBOMatrix):
     PUBO inherits some methods and attributes the ``BO`` class. See
     ``help(qubovert.utils.BO)``.
 
-    Example usage
-    -------------
+    Example
+    -------
     >>> pubo = PUBO()
     >>> pubo[('a',)] += 5
     >>> pubo[(0, 'a', 1)] -= 2
@@ -82,8 +82,8 @@ class PUBO(BO, PUBOMatrix):
     >>> pubo.convert_solution({0: 1, 1: 0, 2: 1, 2: 0})
     {'a': 1, 0: 0, 1: 1}
 
-    Note 1
-    ------
+    Note
+    ----
     Note that keys will end up sorted by their hash. Hashes will not be
     consistent across Python sessions (unless they are integers)! For example,
     both of the following can happen:
@@ -103,8 +103,8 @@ class PUBO(BO, PUBOMatrix):
 
     Ie integers will always be correctly sorted.
 
-    Note 2
-    ------
+    Note
+    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``
@@ -142,7 +142,7 @@ class PUBO(BO, PUBOMatrix):
             the class.
 
         Examples
-        -------
+        --------
         >>> pubo = PUBO()
         >>> pubo[('a',)] += 5
         >>> pubo[(0, 'a')] -= 2
@@ -196,8 +196,8 @@ class PUBO(BO, PUBOMatrix):
         ----------
         D : ``qubovert.utils.QUBOMatrix`` or ``qubovert.utils.QUSOMatrix``.
             The dictionary to fill. For reducing PUBOs to QUBOs, ``D`` should
-            be a ``qubovert.utils.QUBOMatrix`` object. For reducing HIsings
-            to Isings, ``D`` should be a ``qubovert.utils.QUSOMatrix`` object.
+            be a ``qubovert.utils.QUBOMatrix`` object. For reducing PUSOs
+            to QUSOs, ``D`` should be a ``qubovert.utils.QUSOMatrix`` object.
             ``D`` should be empty to start.
         deg : int >= 2.
             The degree of the model to reduce to. If``deg`` is None, then
@@ -217,7 +217,7 @@ class PUBO(BO, PUBOMatrix):
             as described above, where ``lam(v) = lam``.
 
         Return
-        -------
+        ------
         None. ``D`` will be updated in place!
 
         """
@@ -337,7 +337,7 @@ class PUBO(BO, PUBOMatrix):
             ``lam(3)``.
 
         Return
-        -------
+        ------
         P : qubovert.utils.PUBOMatrix object.
             The upper triangular PUBO matrix, a PUBOMatrix object.
             For most practical purposes, you can use PUBOMatrix in the
@@ -385,7 +385,7 @@ class PUBO(BO, PUBOMatrix):
             enforced with a penalty weight ``lam(3)``.
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -423,7 +423,7 @@ class PUBO(BO, PUBOMatrix):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         res : dict.
             Maps boolean variable labels to their PUBO solutions values {0, 1}.
 
@@ -477,7 +477,7 @@ class PUBO(BO, PUBOMatrix):
         Checks to see if ``key`` is a tuple.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns

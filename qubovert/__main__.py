@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,9 +20,13 @@ import qubovert
 
 if __name__ == "__main__":
     print(
-      "\n``qubovert`` version",
-      str(qubovert.__version__),
-      "is a package by Joseph Iosue, joe.iosue@yahoo.com."
+        "\n``qubovert`` version",
+        str(qubovert.__version__),
+        "is a package by",
+        qubovert.__author__ + ",",
+        qubovert.__authoremail__ + '.\n'
     )
+    print(qubovert.__description__, "\n")
+    print("LICENSE:", qubovert.__license__, "\n")
     if input("Display package details? [y or n] ") == "y":
         help(qubovert)

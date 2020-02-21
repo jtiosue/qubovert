@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -1301,37 +1301,58 @@ def test_pcbo_special_constraint_le():
 
     # second one
 
-    H = PCBO().add_constraint_le_zero(
+    desired = PCBO(
+        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
+    ) ** 2
+    H1 = PCBO().add_constraint_le_zero(
         {(0,): 1, (1,): 1, (2,): 1, (): -2},
         log_trick=False
     )
-    assert H == PCBO(
-        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
-    ) ** 2
-
-    H = PCBO().add_constraint_ge_zero(
+    H2 = PCBO().add_constraint_ge_zero(
         {(0,): -1, (1,): -1, (2,): -1, (): 2},
         log_trick=False
     )
-    assert H == PCBO(
-        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
-    ) ** 2
-
-    H = PCBO().add_constraint_lt_zero(
+    H3 = PCBO().add_constraint_lt_zero(
         {(0,): 1, (1,): 1, (2,): 1, (): -3},
         log_trick=False
     )
-    assert H == PCBO(
-        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
-    ) ** 2
-
-    H = PCBO().add_constraint_gt_zero(
+    H4 = PCBO().add_constraint_gt_zero(
         {(0,): -1, (1,): -1, (2,): -1, (): 3},
         log_trick=False
     )
-    assert H == PCBO(
-        {(0,): 1, (1,): 1, (2,): 1, ('__a0',): -1, ('__a1',): -1}
-    ) ** 2
+    assert H1 == H2 == H3 == H4 == desired
+
+    # third one
+
+    H1 = PCBO().add_constraint_le_zero({(0,): -1, (1,): -1, (): 1})
+    H2 = PCBO().add_constraint_ge_zero({(0,): 1, (1,): 1, (): -1})
+    H3 = PCBO().add_constraint_lt_zero({(0,): -1, (1,): -1})
+    H4 = PCBO().add_constraint_gt_zero({(0,): 1, (1,): 1})
+    desired = PCBO().add_constraint_OR(0, 1)
+    assert H1 == H2 == H3 == H4 == desired
+
+    H1 = PCBO().add_constraint_le_zero({(0, 1): -1, (2, 3, 4): -1, (): 1})
+    H2 = PCBO().add_constraint_ge_zero({(0, 1): 1, (2, 3, 4): 1, (): -1})
+    H3 = PCBO().add_constraint_lt_zero({(0, 1): -1, (2, 3, 4): -1})
+    H4 = PCBO().add_constraint_gt_zero({(0, 1): 1, (2, 3, 4): 1})
+    desired = PCBO().add_constraint_OR({(0, 1): 1}, {(2, 3, 4): 1})
+    assert H1 == H2 == H3 == H4 == desired
+
+    # fourth one
+
+    desired = {(0,): 1, (0, 1): -1}
+    H1 = PCBO().add_constraint_le_zero({(0,): 1, (1,): -1})
+    H2 = PCBO().add_constraint_lt_zero({(0,): 1, (1,): -1, (): -1})
+    H3 = PCBO().add_constraint_ge_zero({(0,): -1, (1,): 1})
+    H4 = PCBO().add_constraint_gt_zero({(0,): -1, (1,): 1, (): 1})
+    assert H1 == H2 == H3 == H4 == desired
+
+    desired = {(0, 1): 1, (0, 1, 2, 3, 4): -1}
+    H1 = PCBO().add_constraint_le_zero({(0, 1): 1, (2, 3, 4): -1})
+    H2 = PCBO().add_constraint_lt_zero({(0, 1): 1, (2, 3, 4): -1, (): -1})
+    H3 = PCBO().add_constraint_ge_zero({(0, 1): -1, (2, 3, 4): 1})
+    H4 = PCBO().add_constraint_gt_zero({(0, 1): -1, (2, 3, 4): 1, (): 1})
+    assert H1 == H2 == H3 == H4 == desired
 
 
 def test_pcbo_special_constraint_eq():

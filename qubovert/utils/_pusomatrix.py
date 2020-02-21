@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -155,13 +155,14 @@ class PUSOMatrix(PUBOMatrix):
         >>> (2, 3, 4)
 
         """
-        cls._check_key_valid(key)
+        # if f is not None, then it is the squashed key. See QUSOMatrix.
+        f = cls._check_key_valid(key)
         # here we use hash because some other classes that are subclasses of
         # this class will allow elements of the key to be strings! So we want
         # to still have something consistent to sort by. But for this class,
         # it doesn't make a difference, because hash_function(i) == i when i is
         # an int.
-        return tuple(sorted(
+        return f or tuple(sorted(
             (x for x in set(key) if key.count(x) % 2),
             key=lambda x: hash_function(x)
         ))
@@ -203,7 +204,7 @@ class PUSOMatrix(PUBOMatrix):
             value of variable i.
 
         Return
-        -------
+        ------
         value : float.
             The value of the PUSO/QUSO with the given assignment `z`.
 

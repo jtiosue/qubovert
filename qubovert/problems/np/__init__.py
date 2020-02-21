@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 This module contains many NP problems. We organize all the problems into
 categories. But we import them globally for user use. See the ``__all__`` value
 for all the problems imported. Most conversions to QUBO/QUSO form are based
-on [Lucas].
+on [Lucas]_.
 
 References
 ----------

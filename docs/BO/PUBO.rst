@@ -1,5 +1,5 @@
 Polynomial Unconstrained Boolean Optimization (PUBO)
-===================================================
+====================================================
 
 Accessed with ``qubovert.PUBO``
 

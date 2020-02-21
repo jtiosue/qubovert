@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ have a one-to-one mapping to classical QUSO problems, and most optimization
 problems are formatted in QUBO form when the solver is a quantum computer.
 See ``qubovert.__all__`` for useful functionality, ``qubovert.problems__all__``
 for problems defined, and ``qubovert.utils.__all__`` for some utility
-functions, and ``qubovert.sat.__all__`` for the satisfiability library.
+functions, ``qubovert.sat.__all__`` for the satisfiability library, and
+``qubovert.sim.__all__`` for the simulation and annealing library.
 
 """
 
-from ._version import __version__
+from ._version import *
 
 from . import utils
 
@@ -51,9 +52,11 @@ __all__ = (
 )
 
 from . import sat
+from . import sim
 from . import problems
 
 BOOLEAN_MODELS = QUBO, PUBO, PCBO, utils.QUBOMatrix, utils.PUBOMatrix
 SPIN_MODELS = QUSO, PUSO, PCSO, utils.QUSOMatrix, utils.PUSOMatrix
+
 
 name = "qubovert"

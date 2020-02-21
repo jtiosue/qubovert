@@ -2,7 +2,7 @@ Welcome to qubovert's documentation!
 ====================================
 
 Indices and tables
------------------
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
@@ -23,6 +23,14 @@ Indices and tables
    BO/QUBO
    BO/QUSO
    BO/sat
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Boolean/Spin Simulation
+
+   sim/simulation
+   sim/anneal
 
 
 .. toctree::

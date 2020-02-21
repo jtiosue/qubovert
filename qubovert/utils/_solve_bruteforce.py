@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ This file contains bruteforce solvers for QUBO/PUBO and QUSO/PUSO, as well
 as QUBO/PUBO and PUSO objective function evaluators.
 
 """
-
 
 __all__ = (
     'boolean_to_spin', 'spin_to_boolean',
@@ -105,8 +104,8 @@ def decimal_to_boolean(d, num_bits=None):
         Number of bits in the representation. If ``num_bits is None``, then
         the minimum number of bits required will be used.
 
-    Return
-    ------
+    Returns
+    -------
     b : tuple of length ``num_bits``.
         Each element of ``b`` is a 0 or 1.
 
@@ -140,8 +139,8 @@ def boolean_to_decimal(b):
     b : tuple or list of 0s and 1s.
         The binary bit string.
 
-    Return
-    ------
+    Returns
+    -------
     d : int.
 
     Examples
@@ -167,8 +166,8 @@ def decimal_to_spin(d, num_spins=None):
         Number of bits in the representation. If ``num_spins is None``, then
         the minimum number of bits required will be used.
 
-    Return
-    ------
+    Returns
+    -------
     b : tuple of length ``num_spins``.
         Each element of ``b`` is a 0 or 1.
 
@@ -194,8 +193,8 @@ def spin_to_decimal(b):
     b : tuple or list of 1s and -1s.
         The spin bit string.
 
-    Return
-    ------
+    Returns
+    -------
     d : int.
 
     Examples
@@ -221,7 +220,7 @@ def pubo_value(x, P):
     P : dict, qubovert.utils.PUBOMatrix, or qubovert.PUBO object.
         Maps tuples of boolean variables indices to the P value.
 
-    Return
+    Returns
     -------
     value : float.
         The value of the PUBO with the given assignment `x`. Ie
@@ -251,7 +250,7 @@ def qubo_value(x, Q):
     Q : dict or qubovert.utils.QUBOMatrix object.
         Maps tuples of boolean variables indices to the Q value.
 
-    Return
+    Returns
     -------
     value : float.
         The value of the QUBO with the given assignment `x`. Ie
@@ -286,7 +285,7 @@ def puso_value(z, H):
     H : dict, qubovert.utils.PUSOMatrix, or qubovert.PUSO object.
         Maps spin labels to values.
 
-    Return
+    Returns
     -------
     value : float.
         The value of the PUSO with the given assignment `z`.
@@ -310,6 +309,7 @@ def quso_value(z, L):
 
     Find the value of
         :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}`.
+
     The J's are encoded by keys with pairs of labels in L, and the h's are
     encoded by keys with a single label in L.
 
@@ -321,7 +321,7 @@ def quso_value(z, L):
     L : dict, qubovert.utils.QUSOMatrix, or qubovert.QUSO object.
         Maps spin labels to values.
 
-    Return
+    Returns
     -------
     value : float.
         The value of the QUSO with the given assignment `z`.
@@ -361,7 +361,7 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
     spin : bool.
         Whether we're bruteforce solving a spin model or boolean model.
 
-    Return
+    Returns
     -------
     res : tuple (objective, solution).
 
@@ -448,7 +448,7 @@ def solve_pubo_bruteforce(P, all_solutions=False, valid=lambda x: True):
         ``valid`` takes in a bitstring and outputs a boolean
         indicating whether that bitstring is a valid solutions.
 
-    Return
+    Returns
     -------
     res : tuple (objective, solution).
 
@@ -513,7 +513,7 @@ def solve_qubo_bruteforce(Q, all_solutions=False, valid=lambda x: True):
         ``valid`` takes in a bitstring and outputs a boolean
         indicating whether that bitstring is a valid solutions.
 
-    Return
+    Returns
     -------
     res : tuple (objective, solution).
 
@@ -580,7 +580,7 @@ def solve_puso_bruteforce(H, all_solutions=False, valid=lambda x: True):
         ``valid`` takes in a spinstring and outputs a boolean
         indicating whether that spinstring is a valid solutions.
 
-    Return
+    Returns
     -------
     res : tuple (objective, solution).
 
@@ -645,7 +645,7 @@ def solve_quso_bruteforce(L, all_solutions=False, valid=lambda x: True):
         ``valid`` takes in a spinstring and outputs a boolean
         indicating whether that spinstring is a valid solutions.
 
-    Return
+    Returns
     -------
     res : tuple (objective, solution).
 

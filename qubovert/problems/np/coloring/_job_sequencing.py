@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ class JobSequencing(Problem):
     """JobSequencing.
 
     Class to manage converting Job Sequencing to and from its QUBO and
-    QUSO formluations. Based on the paper hereforth designated [Lucas].
+    QUSO formluations. Based on the paper "Ising formulations of many
+    NP problems", hereforth designated as [Lucas].
 
     The goal of the JobSequencing problem is as follows. Given workers and
     jobs, where each job has a designated length, assign each of the jobs to
@@ -67,11 +68,6 @@ class JobSequencing(Problem):
             3
         )
     True
-
-    References
-    ----------
-    .. [Lucas] Andrew Lucas. Ising formulations of many np problems. Frontiers
-        in Physics, 2:5, 2014.
 
     """
 
@@ -150,7 +146,7 @@ class JobSequencing(Problem):
         A copy of the number of workers.
 
         Return
-        -------
+        ------
         num_workers : int.
             The number of workers allowed for the problem.
 
@@ -165,7 +161,7 @@ class JobSequencing(Problem):
         the log trick. See [Lucas].
 
         Return
-        -------
+        ------
         log_trick : bool.
 
         """
@@ -194,7 +190,7 @@ class JobSequencing(Problem):
         The number of binary variables that the QUBO and QUSO use.
 
         Return
-        -------
+        ------
         num :  int.
             The number of variables in the QUBO/QUSO formulation.
 
@@ -273,7 +269,7 @@ class JobSequencing(Problem):
             minimize.
 
         Return
-        -------
+        ------
         Q : qubovert.utils.QUBOMatrix object.
             The upper triangular QUBO matrix, a QUBOMatrix object.
             For most practical purposes, you can use QUBOMatrix in the
@@ -371,8 +367,8 @@ class JobSequencing(Problem):
             of the tuple is a set of jobs that are assigned to that worker.
 
         """
-        sol_type = solution_type(solution)
-        if sol_type == 'spin' or (sol_type is None and spin):
+        sol_type = solution_type(solution, 'spin' if spin else 'bool')
+        if sol_type == 'spin':
             solution = spin_to_boolean(solution)
         res = tuple(set() for _ in range(self._m))
         for worker in range(self._m):
@@ -406,7 +402,7 @@ class JobSequencing(Problem):
             problem, and we will figure it out based on the ``spin`` parameter.
 
         Return
-        -------
+        ------
         valid : boolean.
             True if the proposed solution is valid, else False.
 

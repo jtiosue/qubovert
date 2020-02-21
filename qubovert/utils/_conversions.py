@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -65,9 +65,34 @@ def qubo_to_quso(Q):
     True
 
     """
+    # could just use QUSOMatrix(pubo_to_puso(Q)), but then we spend a lot of
+    # time converting from a PUSOMatrix to QUSOMatrix, so instead we
+    # explictly write out the conversion.
+
     # not isinstance! because isinstance(QUBO, QUBOMatrix) is True
-    f = QUSOMatrix if type(Q) == QUBOMatrix else qv.QUSO
-    return f(pubo_to_puso(Q))
+    if type(Q) == QUBOMatrix:
+        L = QUSOMatrix()
+        squash_key = QUBOMatrix.squash_key
+    else:
+        L = qv.QUSO()
+        squash_key = qv.QUBO.squash_key
+
+    for kp, v in Q.items():
+        k = squash_key(kp)
+        if not k:
+            L[k] += v
+        elif len(k) == 1:
+            L[k] -= v / 2
+            L[()] += v / 2
+        elif len(k) == 2:
+            i, j = k
+            L[k] += v / 4
+            L[(i,)] -= v / 4
+            L[(j,)] -= v / 4
+            L[()] += v / 4
+        # len(k) cannot be greater than 2 because the squash_key checks
+
+    return L
 
 
 def quso_to_qubo(L):
@@ -105,9 +130,34 @@ def quso_to_qubo(L):
     True
 
     """
+    # could just use QUBOMatrix(puso_to_pubo(L)), but then we spend a lot of
+    # time converting from a PUBOMatrix to QUBOMatrix, so instead we explictly
+    # write out the conversion.
+
     # not isinstance! because isinstance(QUSO, QUSOMatrix) is True
-    f = QUBOMatrix if type(L) == QUSOMatrix else qv.QUBO
-    return f(puso_to_pubo(L))
+    if type(L) == QUSOMatrix:
+        Q = QUBOMatrix()
+        squash_key = QUSOMatrix.squash_key
+    else:
+        Q = qv.QUBO()
+        squash_key = qv.QUSO.squash_key
+
+    for kp, v in L.items():
+        k = squash_key(kp)
+        if not k:
+            Q[k] += v
+        elif len(k) == 1:
+            Q[k] -= 2 * v
+            Q[()] += v
+        elif len(k) == 2:
+            i, j = k
+            Q[k] += 4 * v
+            Q[(i,)] -= 2 * v
+            Q[(j,)] -= 2 * v
+            Q[()] += v
+        # squash key ensures that len(k) <= 2
+
+    return Q
 
 
 def pubo_to_puso(P):
@@ -175,15 +225,10 @@ def pubo_to_puso(P):
                 yield key, value / 2
 
     # not isinstance! because isinstance(PUBO, PUBOMatrix) is True
-    if type(P) == PUBOMatrix:
-        H = PUSOMatrix()
-        squash_key = PUBOMatrix.squash_key
-    else:
-        H = qv.PUSO()
-        squash_key = qv.PUBO.squash_key
+    H = PUSOMatrix() if type(P) == PUBOMatrix else qv.PUSO()
 
     for k, v in P.items():
-        for key, value in generate_new_key_value(squash_key(k)):
+        for key, value in generate_new_key_value(k):
             H[key] += value * v
 
     return H
@@ -252,16 +297,11 @@ def puso_to_pubo(H):
                 yield (k[0],) + key, -2 * value
                 yield key, value
 
-    # not isinstance! because isinstance(QUSO, QUSOMatrix) is True
-    if type(H) == PUSOMatrix:
-        P = PUBOMatrix()
-        squash_key = PUSOMatrix.squash_key
-    else:
-        P = qv.PUBO()
-        squash_key = qv.PUSO.squash_key
+    # not isinstance! because isinstance(PUSO, PUSOMatrix) is True
+    P = PUBOMatrix() if type(H) == PUSOMatrix else qv.PUBO()
 
     for k, v in H.items():
-        for key, value in generate_new_key_value(squash_key(k)):
+        for key, value in generate_new_key_value(k):
             P[key] += value * v
 
     return P

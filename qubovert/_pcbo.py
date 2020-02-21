@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Contains the PCBO class. See ``help(qubovert.PCBO)``.
 """
 
 from . import PUBO
-from .utils import QUBOVertWarning, num_bits
+from .utils import QUBOVertWarning, num_bits, approximate_pubo_extrema
 from .sat import OR, XOR, ONE, NOT, AND
 
 
@@ -122,37 +122,25 @@ def _special_constraints_le_zero(pcbo, P, lam, log_trick, bounds):
 
         return True
 
+    # if P is of the form 1 <= x + y, then it is the same as OR(x, y)
+    elif (P.offset == 1 and len(P_wo_offset) == 2 and
+          set(P_wo_offset.values()) == {-1}):
+        variables = tuple(P_wo_offset.keys())
+        x, y = AND(*variables[0]), AND(*variables[1])
+        pcbo += PCBO().add_constraint_OR(x, y, lam=lam)
+        return True
+
+    # if P is of the form x <= y
+    elif not P.offset and len(P) == 2 and set(P.values()) == {1, -1}:
+        coef = {v: k for k, v in P.items()}
+        x, y = AND(*coef[1]), AND(*coef[-1])
+        pcbo += lam * x * (1 - y)
+        return True
+
     return False
 
 
 # helpers
-
-def _pubo_value_extrema(P):
-    """_pubo_value_extrema.
-
-    Find the approximate minimum and maximum possible values that a PUBO can
-    take.
-
-    Parameters
-    ----------
-    P : PUBO object.
-
-    Return
-    ------
-    res : tuple (min, max).
-
-    """
-    offset = P.offset
-    P -= offset
-    min_, max_ = offset, offset
-    for v in P.values():
-        if v < 0:
-            min_ += v
-        elif v > 0:
-            max_ += v
-    P += offset
-    return min_, max_
-
 
 def _get_bounds(P, bounds):
     """_get_bounds.
@@ -176,11 +164,11 @@ def _get_bounds(P, bounds):
 
     """
     if bounds is None or bounds == (None, None):
-        bounds = _pubo_value_extrema(P)
+        bounds = approximate_pubo_extrema(P)
     elif bounds[0] is None:
-        bounds = _pubo_value_extrema(P)[0], bounds[1]
+        bounds = approximate_pubo_extrema(P)[0], bounds[1]
     elif bounds[1] is None:
-        bounds = bounds[0], _pubo_value_extrema(P)[1]
+        bounds = bounds[0], approximate_pubo_extrema(P)[1]
 
     return bounds
 

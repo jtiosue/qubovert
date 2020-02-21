@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ class PUBOMatrix(DictArithmetic):
             Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """
-        self._degree, self._vars, self._num_binary_variables = 0, set(), 0
+        self._degree, self._variables, self._num_binary_variables = 0, set(), 0
         super().__init__(*args, **kwargs)
 
     def refresh(self):
@@ -227,7 +227,7 @@ class PUBOMatrix(DictArithmetic):
         res : set.
 
         """
-        return self._vars.copy()
+        return self._variables.copy()
 
     @property
     def offset(self):
@@ -272,7 +272,7 @@ class PUBOMatrix(DictArithmetic):
             then this returns None.
 
         """
-        return max(self._vars) if self._vars else None
+        return max(self._variables) if self._variables else None
 
     @classmethod
     def squash_key(cls, key):
@@ -301,15 +301,14 @@ class PUBOMatrix(DictArithmetic):
         >>> (0, 2, 3, 4)
 
         """
+        # if f is not None, then it is the squashed key (see QUBOMatrix)
         f = cls._check_key_valid(key)
-        if f is not None:
-            return f
         # here we use hash because some other classes that are subclasses of
         # this class will allow elements of the key to be strings! So we want
         # to still have something consistent to sort by. But for this class,
         # it doesn't make a difference, because hash_funcition(i) == i when i
         # is an int.
-        return tuple(sorted(set(key), key=lambda x: hash_function(x)))
+        return f or tuple(sorted(set(key), key=lambda x: hash_function(x)))
 
     @staticmethod
     def _check_key_valid(key):
@@ -319,7 +318,7 @@ class PUBOMatrix(DictArithmetic):
         Checks to see if ``key`` is a tuple of non negative integers.
 
         Parameters
-        ---------
+        ----------
         key : anything, but must be a tuple to be valid.
 
         Returns
@@ -349,12 +348,12 @@ class PUBOMatrix(DictArithmetic):
         reformatted according to ``squash_key`` before indexing.
 
         Parameters
-        ---------
+        ----------
         key : tuple of integers.
             Element of the dictionary.
 
         Return
-        -------
+        ------
         value : numeric
             the value corresponding to the key if the key is in the dictionary,
             otherwise returns 0.
@@ -373,7 +372,7 @@ class PUBOMatrix(DictArithmetic):
         will be squashed, see ``squash_keys``.
 
         Parameters
-        ---------
+        ----------
         key : tuple of integers.
             Element of the dictionary.
         value : numeric.
@@ -383,8 +382,8 @@ class PUBOMatrix(DictArithmetic):
         k = self.__class__.squash_key(key)
         if value:
             self._degree = max(self._degree, len(k))
-            for i in filter(lambda x: x not in self._vars, k):
-                self._vars.add(i)
+            for i in filter(lambda x: x not in self._variables, k):
+                self._variables.add(i)
                 self._num_binary_variables += 1
         super().__setitem__(k, value)
 
@@ -443,7 +442,7 @@ class PUBOMatrix(DictArithmetic):
             ``x[i]`` must be the boolean value of variable i.
 
         Return
-        -------
+        ------
         value : float.
             The value of the PUBO with the given assignment `x`. Ie
 

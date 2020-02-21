@@ -1,4 +1,4 @@
-#   Copyright 2019 Joseph T. Iosue
+#   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ installing by source.
 """
 
 import setuptools
-from qubovert import __version__, __name__
 
 
 with open('README.rst') as f:
@@ -29,17 +28,21 @@ with open('README.rst') as f:
 with open("requirements.txt") as f:
     REQUIREMENTS = [line.strip() for line in f if line.strip()]
 
+# get __version__, __author__, etc.
+with open("qubovert/_version.py") as f:
+    exec(f.read())
+
 
 setuptools.setup(
-    name=__name__,
+    name="qubovert",
     version=__version__,
-    author="Joseph T. Iosue",
-    author_email="joe.iosue@yahoo.com",
-    description="A package for converting problems to boolean and spin form",
+    author=__author__,
+    author_email=__authoremail__,
+    description=__description__,
     long_description=README,
     long_description_content_type='text/x-rst',
-    url="https://github.com/jiosue/qubovert",
-    license="Apache Software License 2.0",
+    url=__sourceurl__,
+    license=__license__,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     test_suite="tests",
     install_requires=REQUIREMENTS,
@@ -50,7 +53,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     project_urls={
-        "Source": "https://github.com/jiosue/qubovert",
-        "Docs": "https://qubovert.readthedocs.io"
+        "Source": __sourceurl__,
+        "Docs": __docsurl__
     }
 )
