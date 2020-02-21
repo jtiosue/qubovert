@@ -101,6 +101,12 @@ def test_anneal_puso():
     with assert_warns(QUBOVertWarning):
         anneal_puso(H, temperature_range=(1, 2), schedule=[(3, 10), (2, 15)])
 
+    with assert_raises(ValueError):
+        anneal_puso(H, temperature_range=(1, 2))
+
+    with assert_raises(ValueError):
+        anneal_puso(H, schedule='something')
+
     empty_result = AnnealResults(True)
     for _ in range(4):
         empty_result.add_state({}, 2)
@@ -135,6 +141,12 @@ def test_anneal_quso():
 
     with assert_warns(QUBOVertWarning):
         anneal_quso(L, temperature_range=(1, 2), schedule=[(3, 10), (2, 15)])
+
+    with assert_raises(ValueError):
+        anneal_quso(L, temperature_range=(1, 2))
+
+    with assert_raises(ValueError):
+        anneal_quso(L, schedule='something')
 
     empty_result = AnnealResults(True)
     for _ in range(4):
@@ -171,6 +183,12 @@ def test_anneal_pubo():
     with assert_warns(QUBOVertWarning):
         anneal_pubo(P, temperature_range=(1, 2), schedule=[(3, 10), (2, 15)])
 
+    with assert_raises(ValueError):
+        anneal_pubo(P, temperature_range=(1, 2))
+
+    with assert_raises(ValueError):
+        anneal_pubo(P, schedule='something')
+
     empty_result = AnnealResults(False)
     for _ in range(4):
         empty_result.add_state({}, 2)
@@ -205,6 +223,12 @@ def test_anneal_qubo():
 
     with assert_warns(QUBOVertWarning):
         anneal_qubo(Q, temperature_range=(1, 2), schedule=[(3, 10), (2, 15)])
+
+    with assert_raises(ValueError):
+        anneal_qubo(Q, temperature_range=(1, 2))
+
+    with assert_raises(ValueError):
+        anneal_qubo(Q, schedule='something')
 
     empty_result = AnnealResults(False)
     for _ in range(4):
