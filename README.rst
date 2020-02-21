@@ -91,16 +91,20 @@ Create the boolean objective function to minimize
 
     N = 10
 
+    # create the variables
     x = {i: boolean_var('x(%d)' % i) for i in range(N)}
 
+    # minimize \sum_{i=0}^{N-1} (1-2x_{i}) x_{i+1}
     model = 0
     for i in range(N-1):
         model += (1 - 2 * x[i]) * x[i+1]
 
-    # enforce that x_1 equals the XOR of x_3 and x_5 with a penalty factor of 3
+    # subject to the constraint that x_1 equals the XOR of x_3 and x_5
+    # enforce with a penalty factor of 3
     model.add_constraint_eq_XOR(x[1], x[3], x[5], lam=3)
 
-    # enforce that the sum of all variables is less than 4 with a penalty factor of 5.
+    # subject to the constraints that the sum of all variables is less than 4
+    # enforce with a penalty factor of 5
     model.add_constraint_lt_zero(sum(x.values()) - 4, lam=5)
 
 
@@ -229,8 +233,8 @@ The basic building block of a binary optimization model is a Python dictionary. 
 
     x0, x1, x2 = boolean_var('x0'), boolean_var('x1'), boolean_var('x2')
 
-    model1 = x0 + 2 * x0 * x1 - 3 * x0 * x2 + x0 * x1 * x2
-    model2 = {(): 2, ('x0', 'x1'): 2, ('x0', 'x2'): -3, ('x0', 'x1', 'x2'): 1}
+    model1 = -1 + x0 + 2 * x0 * x1 - 3 * x0 * x2 + x0 * x1 * x2
+    model2 = {(): -1, ('x0',): 1, ('x0', 'x1'): 2, ('x0', 'x2'): -3, ('x0', 'x1', 'x2'): 1}
     model3 = PUBO(model2)
 
 
@@ -242,8 +246,8 @@ Similarly, in the below code block, ``model1``, ``model2``, and ``model3`` are e
 
     z0, z1, z2 = spin_var('z0'), spin_var('z1'), spin_var('z2')
 
-    model1 = z0 + 2 * z0 * z1 - 3 * z0 * z2 + z0 * z1 * z2
-    model2 = {(): 2, ('z0', 'z1'): 2, ('z0', 'z2'): -3, ('z0', 'z1', 'z2'): 1}
+    model1 = -1 + z0 + 2 * z0 * z1 - 3 * z0 * z2 + z0 * z1 * z2
+    model2 = {(): -1, ('z0',): 1, ('z0', 'z1'): 2, ('z0', 'z2'): -3, ('z0', 'z1', 'z2'): 1}
     model3 = PUSO(model2)
 
 
@@ -270,7 +274,7 @@ Note that constraint methods can also be strung together if you want. So we coul
     )
 
 
-The first thing you notice if you :code:`print(model.variables)` is that there are now new variables in the model called ``'__a0'`` and ``'__a1'``. These are auxillary or *ancilla* variables that are needed to enforce the constraints. The next thing to notice if you :code:`print(model.degree)` is that the model is a polynomial of degree 3. Many solvers (for example D-Wave's solvers) only solve degree 2 models. To get a QUBO or QUSO (which is a degree two model) from ``model``, simply call the ``.to_qubo`` and ``.to_quso`` methods, which will reduce the degree to 2 by introducing more variables.
+The first thing you notice if you :code:`print(model.variables)` is that there are now new variables in the model called ``'__a0'`` and ``'__a1'``. These are auxillary or *ancilla* variables that are needed to enforce the constraints. The next thing to notice if you :code:`print(model.degree)` is that the model is a polynomial of degree 3. Many solvers (for example D-Wave's solvers) only solve degree 2 models. To get a QUBO or QUSO (which are degree two modes) from ``model``, simply call the ``.to_qubo`` or ``.to_quso`` methods, which will reduce the degree to 2 by introducing more variables.
 
 .. code:: python
 
