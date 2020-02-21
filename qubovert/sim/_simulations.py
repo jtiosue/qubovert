@@ -323,7 +323,7 @@ class SpinSimulation:
                 # the change in energy from flipping variable i is equal to
                 # -2 * (the energy of the subgraph depending on i)
                 dE = -2 * puso_value(self._state, self._subgraphs[i])
-                if dE < 0 or (T and random.random() < exp(-dE / T)):
+                if dE <= 0 or (T and random.random() < exp(-dE / T)):
                     self._flip_bit(i)
 
 
