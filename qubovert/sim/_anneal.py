@@ -247,7 +247,7 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
         QUBOVertWarning.warn(
             "Both a temperature range and an explicit schedule was provided. "
             "The temperature range will be ignored and the schedule used "
-            "indstead."
+            "instead."
         )
 
     sim = SpinSimulation(H, initial_state)

@@ -846,13 +846,13 @@ class PCBO(PUBO):
             if not suppress_warnings:
                 QUBOVertWarning.warn("Constraint is always satisfied")
         elif min_val == 0:
-            return self.add_constraint_gt_zero(
+            self.add_constraint_gt_zero(
                 P, lam=lam,
                 bounds=(min_val, max_val), suppress_warnings=suppress_warnings
             )
             self._pop_constraint('gt')
         elif max_val == 0:
-            return self.add_constraint_lt_zero(
+            self.add_constraint_lt_zero(
                 P, lam=lam,
                 bounds=(min_val, max_val), suppress_warnings=suppress_warnings
             )

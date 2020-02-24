@@ -200,7 +200,7 @@ class AnnealResults(list):
 
         """
         super().__init__()
-        self._spin, self._best = spin, None
+        self._spin, self.best = spin, None
 
     @property
     def spin(self):
@@ -213,21 +213,6 @@ class AnnealResults(list):
 
         """
         return self._spin
-
-    @property
-    def best(self):
-        """best.
-
-        Return the best result.
-
-        Return
-        ------
-        best : AnealResult object.
-            Access the best ``state``  with ``self.best.state``, and its value
-            with ``self.best.value``.
-
-        """
-        return self._best
 
     def copy(self):
         """copy.
@@ -274,8 +259,8 @@ class AnnealResults(list):
         None.
 
         """
-        if self._best is None or result.value < self._best.value:
-            self._best = result
+        if self.best is None or result.value < self.best.value:
+            self.best = result
         super().append(result)
 
     def to_boolean(self):
@@ -356,7 +341,7 @@ class AnnealResults(list):
         Override ``list.clear`` so that it also removes ``self.best``.
 
         """
-        self._best = None
+        self.best = None
         super().clear()
 
     @staticmethod
@@ -379,6 +364,130 @@ class AnnealResults(list):
         for i in l:
             res.append(i.copy())
         return res
+
+    def filtered(self, func):
+        """filtered.
+
+        Return a new AnnealResults object whose elements are filtered by the
+        function ``func``. ``func`` takes in a ``qubovert.sim.AnnealResult``
+        object and returns a boolean indicating whether it should remain
+        in the filtered results.
+
+        Parameters
+        ----------
+        func : function.
+            ``func`` takes in a ``qubovert.sim.AnnealResult`` object and
+            returns a boolean indicating whether it should remain in the
+            filtered results.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        Example
+        -------
+        >>> import qubovert as qv
+        >>>
+        >>> model = qv.boolean_var(0) * qv.boolean_var(1)
+        >>> anneal_res = qv.sim.anneal_qubo(model, num_anneals=3)
+        >>>
+        >>> anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 1, 1: 0}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+        >>> filtered_anneal_res = anneal_res.filtered(
+        >>>     lambda x: x.state[0] == 0
+        >>> )
+        >>> filtered_anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+
+        """
+        return AnnealResults.from_list(
+            filter(func, self),
+            self._spin
+        )
+
+    def apply_function(self, func):
+        """apply_function.
+
+        Apply the function ``func`` to each element in ``self`` to create a
+        new version of ``self``.
+
+        Parameters
+        ----------
+        func : function.
+            ``func`` takes in a ``qubovert.sim.AnnealResult`` object and
+            returns a ``qubovert.sim.AnnealResult`` object.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        Example
+        -------
+        >>> import qubovert as qv
+        >>>
+        >>> model = qv.boolean_var('a') * qv.boolean_var('b')
+        >>> qubo = model.to_qubo()
+        >>> anneal_res = qv.sim.anneal_qubo(qubo, num_anneals=3)
+        >>> anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+        >>> new_res = anneal_res.apply_function(
+                lambda x: qv.sim.AnnealResult(
+                    model.convert_solution(x.state), x.value, x.spin
+                )
+            )
+        >>> new_res
+        [AnnealResult(state={'a': 0, 'b': 1}, value=0, spin=False),
+         AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False),
+         AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False)]
+
+        """
+        return AnnealResults.from_list(
+            [func(x) for x in self],
+            self._spin
+        )
+
+    def convert_states(self, func):
+        """convert_states.
+
+        Apply the function ``func`` to each state in ``self`` to create a
+        new version of ``self``.
+
+        Parameters
+        ----------
+        func : function.
+            ``func`` takes in a dict that maps variable names to their values,
+            and returns a dict.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        Example
+        -------
+        >>> import qubovert as qv
+        >>>
+        >>> model = qv.boolean_var('a') * qv.boolean_var('b')
+        >>> qubo = model.to_qubo()
+        >>> anneal_res = qv.sim.anneal_qubo(qubo, num_anneals=3)
+        >>> anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+        >>> new_res = anneal_res.convert_states(model.convert_solution)
+        >>> new_res
+        [AnnealResult(state={'a': 0, 'b': 1}, value=0, spin=False),
+         AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False),
+         AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False)]
+
+        """
+        return self.apply_function(
+            lambda x: AnnealResult(func(x.state), x.value, x.spin)
+        )
 
     def __add__(self, other):
         """__add__.
