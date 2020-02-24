@@ -1,0 +1,14 @@
+queries:
+  - exclude: py/import-own-module
+  - exclude: py/missing-equals
+  - exclude: py/init-calls-subclass
+
+extraction:
+  python:
+    python_setup:
+      version: 3
+    index:
+      exclude:
+        - .git
+        - docs
+        - tests

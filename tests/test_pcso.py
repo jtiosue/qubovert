@@ -322,6 +322,11 @@ def test_properties():
     assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
+    assert d.constraints == {}
+    temp = d.copy()
+    d.add_constraint_eq_zero(temp)
+    assert d.constraints == {'eq': [temp]}
+
 
 def test_round():
 

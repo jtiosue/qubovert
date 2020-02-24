@@ -119,3 +119,57 @@ def test_annealresults():
     res.clear()
     assert res.best is None
     assert not res
+
+
+def test_annealresults_filtered():
+
+    states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    filtered_states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    res = AnnealResults.from_list(states, True)
+    filtered_res = res.filtered(lambda x: x.state[0] == -1)
+    assert filtered_res == filtered_states
+
+
+def test_annealresults_apply_function():
+
+    states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    new_states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1+2, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9+2, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3+2, True)
+    ]
+    res = AnnealResults.from_list(states, True)
+    new_res = res.apply_function(
+        lambda x: AnnealResult(x.state, x.value + 2, x.spin)
+    )
+    assert new_res == new_states
+
+
+def test_annealresults_convert_states():
+
+    states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    new_states = [
+        AnnealResult({'b': -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({'b': 1, 1: 1, 'a': -1}, 9, True),
+        AnnealResult({'b': -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    res = AnnealResults.from_list(states, True)
+    new_res = res.convert_states(
+        lambda x: {k if k else 'b': v for k, v in x.items()}
+    )
+    assert new_res == new_states
