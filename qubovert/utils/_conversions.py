@@ -70,12 +70,13 @@ def qubo_to_quso(Q):
     # explictly write out the conversion.
 
     # not isinstance! because isinstance(QUBO, QUBOMatrix) is True
-    if type(Q) == QUBOMatrix:
-        L = QUSOMatrix()
-        squash_key = QUBOMatrix.squash_key
+    if type(Q) in (QUBOMatrix, qv.QUBO):
+        # key will already be squashed
+        def squash_key(k): return k
     else:
-        L = qv.QUSO()
         squash_key = qv.QUBO.squash_key
+
+    L = QUSOMatrix() if type(Q) == QUBOMatrix else qv.QUBO()
 
     for kp, v in Q.items():
         k = squash_key(kp)
@@ -135,12 +136,13 @@ def quso_to_qubo(L):
     # write out the conversion.
 
     # not isinstance! because isinstance(QUSO, QUSOMatrix) is True
-    if type(L) == QUSOMatrix:
-        Q = QUBOMatrix()
-        squash_key = QUSOMatrix.squash_key
+    if type(L) in (QUSOMatrix, qv.QUSO):
+        # key will already be squashed
+        def squash_key(k): return k
     else:
-        Q = qv.QUBO()
         squash_key = qv.QUSO.squash_key
+
+    Q = QUBOMatrix() if type(L) == QUSOMatrix else qv.QUBO()
 
     for kp, v in L.items():
         k = squash_key(kp)

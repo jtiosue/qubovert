@@ -1,7 +1,7 @@
 queries:
-  - exclude: py/import-own-module
-  - exclude: py/missing-equals
-  - exclude: py/init-calls-subclass
+  exclude: py/import-own-module
+  exclude: py/missing-equals
+  exclude: py/init-calls-subclass
 
 extraction:
   python:

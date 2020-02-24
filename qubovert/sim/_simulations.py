@@ -94,7 +94,7 @@ class SpinSimulation:
         # variables must be a list so it can be used with random.choices in
         # the update method.
         try:
-            self._variables = list(model.variables)
+            self._variables = list(model._variables)
         except AttributeError:
             if isinstance(initial_state, dict):
                 self._variables = list(initial_state.keys())

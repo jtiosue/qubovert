@@ -20,4 +20,8 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 
+omit =
+    **/__main__.py
+    setup.py
+
 ignore_errors = True

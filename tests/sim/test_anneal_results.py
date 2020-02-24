@@ -121,7 +121,7 @@ def test_annealresults():
     assert not res
 
 
-def test_annealresults_filtered():
+def test_annealresults_filter():
 
     states = [
         AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
@@ -133,7 +133,23 @@ def test_annealresults_filtered():
         AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
     ]
     res = AnnealResults.from_list(states, True)
-    filtered_res = res.filtered(lambda x: x.state[0] == -1)
+    filtered_res = res.filter(lambda x: x.state[0] == -1)
+    assert filtered_res == filtered_states
+
+
+def test_annealresults_filter_states():
+
+    states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True),
+        AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
+    ]
+    filtered_states = [
+        AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
+        AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True)
+    ]
+    res = AnnealResults.from_list(states, True)
+    filtered_res = res.filter_states(lambda x: x[1] == 1)
     assert filtered_res == filtered_states
 
 

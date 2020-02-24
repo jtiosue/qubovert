@@ -365,8 +365,8 @@ class AnnealResults(list):
             res.append(i.copy())
         return res
 
-    def filtered(self, func):
-        """filtered.
+    def filter(self, func):
+        """filter.
 
         Return a new AnnealResults object whose elements are filtered by the
         function ``func``. ``func`` takes in a ``qubovert.sim.AnnealResult``
@@ -395,7 +395,7 @@ class AnnealResults(list):
         [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
          AnnealResult(state={0: 1, 1: 0}, value=0, spin=False),
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
-        >>> filtered_anneal_res = anneal_res.filtered(
+        >>> filtered_anneal_res = anneal_res.filter(
         >>>     lambda x: x.state[0] == 0
         >>> )
         >>> filtered_anneal_res
@@ -405,6 +405,49 @@ class AnnealResults(list):
         """
         return AnnealResults.from_list(
             filter(func, self),
+            self._spin
+        )
+
+    def filter_states(self, func):
+        """filter_states.
+
+        Return a new AnnealResults object whose states are filtered by the
+        function ``func``. ``func`` takes in a ``dict`` representing a state
+        and returns a boolean indicating whether it should remain in the
+        filtered results.
+
+        Parameters
+        ----------
+        func : function.
+            ``func`` takes in a ``dict`` representing a state and
+            returns a boolean indicating whether it should remain in the
+            filtered results.
+
+        Returns
+        -------
+        res : qubovert.sim.AnnealResults object.
+
+        Example
+        -------
+        >>> import qubovert as qv
+        >>>
+        >>> model = qv.boolean_var(0) * qv.boolean_var(1)
+        >>> anneal_res = qv.sim.anneal_qubo(model, num_anneals=3)
+        >>>
+        >>> anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 1, 1: 0}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+        >>> filtered_anneal_res = anneal_res.filter_states(
+        >>>     lambda x: x[0] == 0
+        >>> )
+        >>> filtered_anneal_res
+        [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
+         AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
+
+        """
+        return AnnealResults.from_list(
+            filter(lambda x: func(x.state), self),
             self._spin
         )
 
