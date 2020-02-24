@@ -31,7 +31,7 @@ def test_pubo_extrema():
     assert approximate_pubo_extrema({(): 4}) == (4, 4)
 
 
-def test_pubo_extrema():
+def test_puso_extrema():
 
     P = {(0,): 1, (1,): 3, (2, 3, 4): -2, (): 9}
     assert approximate_puso_extrema(P) == (3, 15)
