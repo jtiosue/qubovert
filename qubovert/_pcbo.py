@@ -197,6 +197,8 @@ def boolean_var(name):
     {('x0',): 1}
     >>> print(isinstance(x0, PCBO))
     True
+    >>> print(x0.name)
+    x0
 
     >>> x = [boolean_var('x{}'.format(i)) for i in range(5)]
     >>> pcbo = sum(x)
@@ -216,7 +218,9 @@ def boolean_var(name):
     {'x0': 0, 'x1': 0, 'x2': 1, 'x3': 1, 'x4': 1}
 
     """
-    return PCBO({(name,): 1})
+    pcbo = PCBO({(name,): 1})
+    pcbo.name = name
+    return pcbo
 
 
 def integer_var(prefix, num_bits, log_trick=True):
@@ -244,6 +248,8 @@ def integer_var(prefix, num_bits, log_trick=True):
     >>> var = integer_var('a', 4)
     >>> print(var)
     {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+    >>> print(var.name)
+    a
 
     >>> from qubovert import integer_var
     >>> var = integer_var('a', 4, log_trick=False)
@@ -252,6 +258,7 @@ def integer_var(prefix, num_bits, log_trick=True):
 
     """
     var = PCBO()
+    var.name = prefix
     for i in range(num_bits):
         var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
     return var

@@ -21,6 +21,16 @@ from sympy import Symbol
 from numpy.testing import assert_raises
 
 
+def test_name():
+
+    d = DictArithmetic({(0,): 1, (1, 2): -1})
+    assert d.name is None
+    d.name = 'd'
+    assert d.name == 'd'
+    d.name = 1
+    assert d.name == 1
+
+
 def test_num_terms():
 
     d = DictArithmetic({(0,): 1, (0, 3): 2, (0, 2): -1})

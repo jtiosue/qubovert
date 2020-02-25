@@ -178,7 +178,7 @@ class PUBO(BO, PUBOMatrix):
         """
         return 1 + abs(v)
 
-    def _reduce_degree(self, D, deg, lam):
+    def _reduce_degree(self, D, deg, lam, pairs):
         """_reduce_degree.
 
         Reduce the degree of the higher order model to a degree ``deg`` model.
@@ -215,6 +215,16 @@ class PUBO(BO, PUBOMatrix):
             of ``1`` and ``2`` will be enforced with a penalty weight
             ``lam(3)``. If ``lam`` is a number of symbol, then it will be used
             as described above, where ``lam(v) = lam``.
+        pairs : set.
+            A set of tuples of variable pairs to prioritize pairing together in
+            to degree reduction. If a pair in ``pairs`` is found together in
+            the PUBO, it will be chosen as a pair to reduce to a single
+            ancilla. You should supply this parameter if you have a good idea
+            of an efficient way to reduce the degree of the PUBO. If ``pairs``
+            is None, then it will be the empty set ``set()``. In other words,
+            no variable pairs will be prioritized, and instead variable pairs
+            will be chosen to reduce to an ancilla bases solely on frequency
+            of occurrance.
 
         Return
         ------
@@ -232,6 +242,13 @@ class PUBO(BO, PUBOMatrix):
             func_lam = lam
         else:
             def func_lam(v): return lam
+
+        # map the pair variables
+        pairs = {
+            tuple(sorted(self._mapping[i] for i in p))
+            if all(i in self._mapping for i in p) else ()
+            for p in pairs or {}
+        }
 
         # determine the most common pairs
         pair_frequencies, mapped_self = defaultdict(int), {}
@@ -253,27 +270,32 @@ class PUBO(BO, PUBOMatrix):
             # find a reduction if len(key) > deg
             while len(key) > deg:
                 # find a variable pair in k that has already been reduced.
-                found = False
+                in_pairs, previously_used = False, False
                 best_pair = None, None
                 for i, x in enumerate(key[:-1]):
                     for y in key[i+1:]:
                         pair = x, y
                         if pair in reductions:
-                            found = True
+                            previously_used = True
+                            break
+                        # prioritize the pairs that the user picked.
+                        elif pair in pairs:
+                            in_pairs = True
+                            best_pair = None, pair
                             break
                         elif (best_pair[0] is None or
                               pair_frequencies[pair] > best_pair[0]):
                             best_pair = pair_frequencies[pair], pair
-                    if found:
+                    if previously_used or in_pairs:
                         break
 
-                if found:
+                if previously_used:
                     # z is the ancilla variable for this reduction
                     z = reductions[(x, y)]
                 else:
-                    # found is False so we haven't already reduced the
+                    # we haven't already reduced the
                     # variable pair (x, y), so take the pair that has the
-                    # greatest frequency
+                    # greatest frequency or that is in pairs.
                     x, y = best_pair[1]
                     z = ancilla
                     reductions[(x, y)] = z
@@ -309,7 +331,7 @@ class PUBO(BO, PUBOMatrix):
 
             D[key] += v
 
-    def to_pubo(self, deg=None, lam=None):
+    def to_pubo(self, deg=None, lam=None, pairs=None):
         """to_pubo.
 
         Create and return upper triangular degree ``deg`` PUBO representing the
@@ -335,6 +357,16 @@ class PUBO(BO, PUBOMatrix):
             order model, and then the fact that ``3`` should be the product
             of ``1`` and ``2`` will be enforced with a penalty weight
             ``lam(3)``.
+        pairs : set (optional, defaults to None).
+            A set of tuples of variable pairs to prioritize pairing together in
+            to degree reduction. If a pair in ``pairs`` is found together in
+            the PUBO, it will be chosen as a pair to reduce to a single
+            ancilla. You should supply this parameter if you have a good idea
+            of an efficient way to reduce the degree of the PUBO. If ``pairs``
+            is None, then it will be the empty set ``set()``. In other words,
+            no variable pairs will be prioritized, and instead variable pairs
+            will be chosen to reduce to an ancilla bases solely on frequency
+            of occurrance.
 
         Return
         ------
@@ -358,10 +390,10 @@ class PUBO(BO, PUBOMatrix):
 
         """
         P = PUBOMatrix()
-        self._reduce_degree(P, deg, lam)
+        self._reduce_degree(P, deg, lam, pairs)
         return P
 
-    def to_qubo(self, lam=None):
+    def to_qubo(self, lam=None, pairs=None):
         """to_qubo.
 
         Create and return upper triangular QUBO representing the problem.
@@ -383,6 +415,16 @@ class PUBO(BO, PUBOMatrix):
             may be reduced to a term ``(0, 3): 3`` for the QUBO, and then the
             fact that ``3`` should be the product of ``1`` and ``2`` will be
             enforced with a penalty weight ``lam(3)``.
+        pairs : set (optional, defaults to None).
+            A set of tuples of variable pairs to prioritize pairing together in
+            to degree reduction. If a pair in ``pairs`` is found together in
+            the PUBO, it will be chosen as a pair to reduce to a single
+            ancilla. You should supply this parameter if you have a good idea
+            of an efficient way to reduce the degree of the PUBO. If ``pairs``
+            is None, then it will be the empty set ``set()``. In other words,
+            no variable pairs will be prioritized, and instead variable pairs
+            will be chosen to reduce to an ancilla bases solely on frequency
+            of occurrance.
 
         Return
         ------
@@ -394,7 +436,7 @@ class PUBO(BO, PUBOMatrix):
 
         """
         Q = QUBOMatrix()
-        self._reduce_degree(Q, 2, lam)
+        self._reduce_degree(Q, 2, lam, pairs)
         return Q
 
     def convert_solution(self, solution, spin=False):

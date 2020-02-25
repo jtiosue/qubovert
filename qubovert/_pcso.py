@@ -49,6 +49,8 @@ def spin_var(name):
     {('z0',): 1}
     >>> print(isinstance(z0, PCSO))
     True
+    >>> print(z0.name)
+    z0
 
     >>> z = [spin_var('z{}'.format(i)) for i in range(5)]
     >>> pcso = sum(z)
@@ -71,7 +73,9 @@ def spin_var(name):
      {'z0': 1, 'z1': -1, 'z2': 1, 'z3': 1, 'z4': 1}]
 
     """
-    return PCSO({(name,): 1})
+    pcso = PCSO({(name,): 1})
+    pcso.name = name
+    return pcso
 
 
 def _empty_pcbo(pcso):

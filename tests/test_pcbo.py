@@ -382,15 +382,18 @@ def test_boolean_var():
     assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
     assert sum(x) == {(i,): 1 for i in range(5)}
     assert isinstance(x[0], PCBO)
+    assert all(x[i].name == i for i in range(5))
 
 
 def test_integer_var():
 
     var = integer_var('a', 4)
     assert var == {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+    assert var.name == 'a'
 
-    var = integer_var('a', 4, log_trick=False)
-    assert var == {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
+    var = integer_var('b', 4, log_trick=False)
+    assert var == {('b0',): 1, ('b1',): 1, ('b2',): 1, ('b3',): 1}
+    assert var.name == 'b'
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """

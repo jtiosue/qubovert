@@ -105,13 +105,22 @@ class DictArithmetic(dict):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    Finally, adding or subtracting constants will update the () element of the
+    Adding or subtracting constants will update the () element of the
     dict.
 
     >>> d = DictArithmetic()
     >>> d += 5
     >>> print(d)
     {(): 5}
+
+    You can give it a name.
+
+    >>> d = DictArithmetic()
+    >>> d.name
+    None
+    >>> d.name = 'd'
+    >>> d.name
+    'd'
 
     """
 
@@ -134,6 +143,52 @@ class DictArithmetic(dict):
 
         for key, value in _generate_key_value_pairs(*args, **kwargs):
             self[key] += value
+
+        self.name = None
+
+    @property
+    def name(self):
+        """name.
+
+        Return the name of the object.
+
+        Return
+        ------
+        name : object.
+
+        Example
+        -------
+        >>> d = DictArithmetic()
+        >>> d.name
+        None
+        >>> d.name = 'd'
+        >>> d.name
+        'd'
+
+        """
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        """name.
+
+        Set the name of the object.
+
+        Parameters
+        ----------
+        name : object.
+
+        Example
+        -------
+        >>> d = DictArithmetic()
+        >>> d.name
+        None
+        >>> d.name = 'd'
+        >>> d.name
+        'd'
+
+        """
+        self._name = name
 
     def __getitem__(self, key):
         """__getitem__.

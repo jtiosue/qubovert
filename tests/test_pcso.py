@@ -387,6 +387,7 @@ def test_spin_var():
     assert z[0] * z[1] * z[2] == {(0, 1, 2): 1}
     assert sum(z) == {(i,): 1 for i in range(5)}
     assert isinstance(z[0], PCSO)
+    assert all(z[i].name == i for i in range(5))
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """
