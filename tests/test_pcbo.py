@@ -913,19 +913,19 @@ def test_pcbo_constraints_warnings():
         PCBO().add_constraint_ge_zero({(): 1, (0,): .5})
 
     # all the same but with ignore warnings
-    PCBO().add_constraint_eq_zero({(): 0}, supress_warnings=True)
-    PCBO().add_constraint_eq_zero({(): 1, (0,): -.5}, supress_warnings=True)
-    PCBO().add_constraint_eq_zero({(): -1, (0,): .5}, supress_warnings=True)
-    PCBO().add_constraint_lt_zero({(): 1, (0,): -.5}, supress_warnings=True)
-    PCBO().add_constraint_lt_zero({(): 1, (0,): -1}, supress_warnings=True)
-    PCBO().add_constraint_lt_zero({(): -1, (0,): -.5}, supress_warnings=True)
-    PCBO().add_constraint_le_zero({(): 1, (0,): -.5}, supress_warnings=True)
-    PCBO().add_constraint_le_zero({(): -1, (0,): -.5}, supress_warnings=True)
-    PCBO().add_constraint_gt_zero({(): -1, (0,): .5}, supress_warnings=True)
-    PCBO().add_constraint_gt_zero({(): -1, (0,): 1}, supress_warnings=True)
-    PCBO().add_constraint_gt_zero({(): 1, (0,): .5}, supress_warnings=True)
-    PCBO().add_constraint_ge_zero({(): -1, (0,): .5}, supress_warnings=True)
-    PCBO().add_constraint_ge_zero({(): 1, (0,): .5}, supress_warnings=True)
+    PCBO().add_constraint_eq_zero({(): 0}, suppress_warnings=True)
+    PCBO().add_constraint_eq_zero({(): 1, (0,): -.5}, suppress_warnings=True)
+    PCBO().add_constraint_eq_zero({(): -1, (0,): .5}, suppress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): 1, (0,): -.5}, suppress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): 1, (0,): -1}, suppress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): -1, (0,): -.5}, suppress_warnings=True)
+    PCBO().add_constraint_le_zero({(): 1, (0,): -.5}, suppress_warnings=True)
+    PCBO().add_constraint_le_zero({(): -1, (0,): -.5}, suppress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): -1, (0,): .5}, suppress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): -1, (0,): 1}, suppress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): 1, (0,): .5}, suppress_warnings=True)
+    PCBO().add_constraint_ge_zero({(): -1, (0,): .5}, suppress_warnings=True)
+    PCBO().add_constraint_ge_zero({(): 1, (0,): .5}, suppress_warnings=True)
 
 
 def test_pcbo_logic():

@@ -83,7 +83,7 @@ def test_spinsimulation_paststates_reset():
 
     sim.update(2, 2000)
     assert len(sim.get_past_states()) == 1000
-    assert sim.get_past_states(1) == sim.state
+    assert sim.get_past_states(1) == [sim.state]
 
     sim.reset()
     assert sim.state == initial_state == sim.initial_state
@@ -187,7 +187,7 @@ def test_booleansimulation_paststates_reset():
         states.append(sim.state)
     assert states == sim.get_past_states()
     assert states[-50:] == sim.get_past_states(50)
-    assert sim.get_past_states(1) == sim.state
+    assert sim.get_past_states(1) == [sim.state]
 
     sim.update(2, 2000)
     assert len(sim.get_past_states()) == 1000

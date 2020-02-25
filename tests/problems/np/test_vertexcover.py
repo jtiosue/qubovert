@@ -74,7 +74,7 @@ def test_vertexcover_quso_solve():
     e, sol = solve_quso_bruteforce(problem.to_quso())
     solution = problem.convert_solution(sol)
     assert solution == problem.convert_solution(
-        [sol[i] for i in range(problem.num_binary_varibles)]
+        [sol[i] for i in range(problem.num_binary_variables)]
     )
 
     assert solution == {"a", "c"}

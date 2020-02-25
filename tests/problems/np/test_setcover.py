@@ -22,6 +22,7 @@ from qubovert.utils import (
     solve_pubo_bruteforce, solve_puso_bruteforce
 )
 from numpy import allclose
+from numpy.testing import assert_raises
 
 
 U = {"a", "b", "c", "d"}
