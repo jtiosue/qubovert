@@ -921,7 +921,9 @@ def test_pcbo_logic():
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
 
     H = PCBO().add_constraint_XOR('a', 'b').add_constraint_eq_NOR(
-        'b', 'a', 'c').add_constraint_BUFFER('c').add_constraint_eq_BUFFER('a', 'c')
+        'b', 'a', 'c').add_constraint_BUFFER(
+            'c'
+        ).add_constraint_eq_BUFFER('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 

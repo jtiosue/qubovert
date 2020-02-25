@@ -74,6 +74,8 @@ Useful functions
 
 .. autofunction:: qubovert.utils.subgraph
 
+.. autofunction:: qubovert.utils.subvalue
+
 .. autofunction:: qubovert.utils.normalize
 
 .. autofunction:: qubovert.utils.num_bits
