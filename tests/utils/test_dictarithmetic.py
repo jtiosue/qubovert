@@ -216,6 +216,13 @@ def test_subgraph():
     assert type(G.subgraph({0, 1})) == DictArithmetic
 
 
+def test_subvalue():
+
+    G = DictArithmetic({(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2})
+    assert G.subvalue({2: -3}) == {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+    assert type(G.subvalue({})) == DictArithmetic
+
+
 def test_symbols():
 
     a, b = Symbol('a'), Symbol('b')

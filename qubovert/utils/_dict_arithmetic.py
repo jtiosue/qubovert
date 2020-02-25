@@ -20,7 +20,7 @@ other classes, such as ``qubovert.utils.QUBOMatrix`` and ``qubovert.utils.BO``.
 
 """
 
-from . import subgraph
+from . import subgraph, subvalue
 
 
 __all__ = 'DictArithmetic',
@@ -798,6 +798,48 @@ class DictArithmetic(dict):
 
         """
         return subgraph(self, nodes, connections)
+
+    def subvalue(self, values):
+        """subvalue.
+
+        Replace each element in ``self`` with a value in ``values`` if it
+        exists.
+
+        Parameters
+        ----------
+        values : dict.
+            For each node ``v`` in ``self`` that is in ``values``, we replace
+            the node with ``values[v]``.
+
+        Return
+        ------
+        D : same as type(self).
+
+        Examples
+        --------
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({0: 2})
+        >>> D
+        {(1,): -6, (2,): -2, (): 8}
+
+        >>> G = DictArtihmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({2: -3})
+        >>> D
+        {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+
+        >>> G = PUBO(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({2: -3})
+        >>> D
+        {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+
+        """
+        return subvalue(values, self)
 
     def __round__(self, ndigits=None):
         """round.
