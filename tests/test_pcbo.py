@@ -906,27 +906,27 @@ def test_pcbo_logic():
 
     H = PCBO().add_constraint_eq_XOR(
         'c', 'a', 'b').add_constraint_XNOR(
-        'a', 'b').add_constraint_ONE('a')
+        'a', 'b').add_constraint_BUFFER('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 1, 'c': 0}
 
-    H = PCBO().add_constraint_eq_NOT('a', 'b').add_constraint_ONE('a')
+    H = PCBO().add_constraint_eq_NOT('a', 'b').add_constraint_BUFFER('a')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0}
 
     H = PCBO().add_constraint_NAND('a', 'b').add_constraint_NOT(
         'a').add_constraint_OR(
-        'a', 'b').add_constraint_eq_ONE('a', 'c')
+        'a', 'b').add_constraint_eq_BUFFER('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 0, 'b': 1, 'c': 0}
 
     H = PCBO().add_constraint_XOR('a', 'b').add_constraint_eq_NOR(
-        'b', 'a', 'c').add_constraint_ONE('c').add_constraint_eq_ONE('a', 'c')
+        'b', 'a', 'c').add_constraint_BUFFER('c').add_constraint_eq_BUFFER('a', 'c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'a': 1, 'b': 0, 'c': 1}
 
     H = PCBO().add_constraint_eq_AND('c', 'a', 'b').add_constraint_eq_XNOR(
-        'c', 'a', 'b').add_constraint_ONE('c')
+        'c', 'a', 'b').add_constraint_BUFFER('c')
     sols = H.solve_bruteforce(True)
     assert len(sols) == 1 and sols[0] == {'c': 1, 'a': 1, 'b': 1}
 

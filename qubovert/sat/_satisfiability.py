@@ -23,11 +23,11 @@ This file contains functions for converting SAT problems to PUBOs.
 import qubovert as qv
 
 
-__all__ = "ONE", "NOT", "AND", "NAND", "OR", "NOR", "XOR", "XNOR"
+__all__ = "BUFFER", "NOT", "AND", "NAND", "OR", "NOR", "XOR", "XNOR"
 
 
-def ONE(x):
-    """ONE.
+def BUFFER(x):
+    """BUFFER.
 
     Return the boolean expression for the buffer of ``x``.
 
@@ -45,8 +45,8 @@ def ONE(x):
 
     Example
     -------
-    >>> from qubovert.sat import ONE
-    >>> P = ONE('x')
+    >>> from qubovert.sat import BUFFER
+    >>> P = BUFFER('x')
     >>> P
     {('x',): 1}
     >>> P.value({'x': 1})
@@ -56,7 +56,7 @@ def ONE(x):
     >>> type(P)
     qubovert._pubo.PUBO
 
-    >>> P = ONE({(0, 1): 1})
+    >>> P = BUFFER({(0, 1): 1})
     >>> P
     {(0, 1): 1}
     >>> P.value({0: 0, 1: 0})
@@ -72,7 +72,7 @@ def ONE(x):
 
     >>> from qubovert import boolean_var
     >>> x = boolean_var('x')
-    >>> P = ONE(x)
+    >>> P = BUFFER(x)
     >>> P.value({'x': 1})
     1
     >>> P.value({'x': 0})
@@ -140,7 +140,7 @@ def NOT(x):
     qubovert.PCBO
 
     """
-    return 1 - ONE(x)
+    return 1 - BUFFER(x)
 
 
 def AND(*variables):
@@ -199,7 +199,7 @@ def AND(*variables):
     else:
         P = 1
         for v in variables:
-            P *= ONE(v)
+            P *= BUFFER(v)
     return P
 
 
@@ -312,8 +312,8 @@ def OR(*variables):
     if not variables:
         return qv.PUBO() + 1
     elif len(variables) == 1:
-        return ONE(variables[0])
-    x, v = OR(*variables[:-1]), ONE(variables[-1])
+        return BUFFER(variables[0])
+    x, v = OR(*variables[:-1]), BUFFER(variables[-1])
     return x + v * (1 - x)
 
 
@@ -440,8 +440,8 @@ def XOR(*variables):
     if not variables:
         return qv.PUBO() + 1
     elif len(variables) == 1:
-        return ONE(variables[0])
-    x, v = XOR(*variables[:-1]), ONE(variables[-1])
+        return BUFFER(variables[0])
+    x, v = XOR(*variables[:-1]), BUFFER(variables[-1])
     return (x - v) ** 2
 
 
