@@ -149,6 +149,12 @@ def test_matrix_to_qubo():
     matrix, qubo = [[-3, 1], [-1, 2]], {(0,): -3, (1,): 2}
     assert matrix_to_qubo(matrix) == qubo
 
+    matrix, qubo = np.array([[-3, 1], [-1, 2]]), {(0,): -3, (1,): 2}
+    assert matrix_to_qubo(matrix) == qubo
+
+    matrix, qubo = [[-3, 1], [-1, 2]], QUBOMatrix({(0,): -3, (1,): 2})
+    assert matrix_to_qubo(matrix) == qubo
+
     with assert_raises(ValueError):
         matrix_to_qubo([[1, 2, 3], [1, 0, 1]])
 
@@ -156,6 +162,24 @@ def test_matrix_to_qubo():
 def test_qubo_to_matrix():
 
     matrix, qubo = [[-3, 1], [0, 2]], {(0, 0): -3, (0, 1): 1, (1, 1): 2}
+    assert matrix == qubo_to_matrix(qubo, array=False)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
+
+    matrix = [[-3, .5], [.5, 2]]
+    assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))
+
+    matrix = np.array([[-3, 1], [0, 2]])
+    qubo = {(0, 0): -3, (0, 1): 1, (1, 1): 2}
+    assert matrix == qubo_to_matrix(qubo, array=False)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
+
+    matrix = np.array([[-3, .5], [.5, 2]])
+    assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))
+
+    matrix = [[-3, 1], [0, 2]]
+    qubo = QUBOMatrix({(0, 0): -3, (0, 1): 1, (1, 1): 2})
     assert matrix == qubo_to_matrix(qubo, array=False)
     assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
 

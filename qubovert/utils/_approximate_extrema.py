@@ -53,7 +53,7 @@ def approximate_pubo_extrema(P):
             max_ += v
         elif v < 0:
             min_ += v
-        elif v > 0:
+        else:
             max_ += v
     return min_, max_
 

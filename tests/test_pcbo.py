@@ -366,6 +366,27 @@ def test_symbols():
     assert d.subs(a, 0) == {}
 
 
+def test_init_pcbo():
+
+    P = PCBO().add_constraint_eq_zero({(0,): 1, (1,): -2}, bounds=(-1, 1))
+    d = PCBO(P)
+    assert P.constraints == d.constraints
+
+
+def test_pop_constraint():
+
+    P = PCBO().add_constraint_eq_zero(
+        {(0,): 1, (1,): -2}
+    ).add_constraint_eq_zero({(0,): 1})
+    temp = P.copy()
+    P._pop_constraint('gt')
+    assert temp.constraints == P.constraints
+    P._pop_constraint('eq')
+    assert P.constraints == {'eq': [{(0,): 1, (1,): -2}]}
+    P._pop_constraint('eq')
+    assert P.constraints == {}
+
+
 def test_convert_solution_all_1s():
 
     d = PCBO({(0,): 1})
@@ -891,6 +912,21 @@ def test_pcbo_constraints_warnings():
     with assert_warns(QUBOVertWarning):  # always satisfied
         PCBO().add_constraint_ge_zero({(): 1, (0,): .5})
 
+    # all the same but with ignore warnings
+    PCBO().add_constraint_eq_zero({(): 0}, supress_warnings=True)
+    PCBO().add_constraint_eq_zero({(): 1, (0,): -.5}, supress_warnings=True)
+    PCBO().add_constraint_eq_zero({(): -1, (0,): .5}, supress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): 1, (0,): -.5}, supress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): 1, (0,): -1}, supress_warnings=True)
+    PCBO().add_constraint_lt_zero({(): -1, (0,): -.5}, supress_warnings=True)
+    PCBO().add_constraint_le_zero({(): 1, (0,): -.5}, supress_warnings=True)
+    PCBO().add_constraint_le_zero({(): -1, (0,): -.5}, supress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): -1, (0,): .5}, supress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): -1, (0,): 1}, supress_warnings=True)
+    PCBO().add_constraint_gt_zero({(): 1, (0,): .5}, supress_warnings=True)
+    PCBO().add_constraint_ge_zero({(): -1, (0,): .5}, supress_warnings=True)
+    PCBO().add_constraint_ge_zero({(): 1, (0,): .5}, supress_warnings=True)
+
 
 def test_pcbo_logic():
 
@@ -1139,7 +1175,7 @@ def test_pcbo_logic():
     H = PCBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert any(sol[i] for i in range(6))
+        assert any([sol[i] for i in range(6)])  # list so all branches covered
         assert not H.value(sol)
     H = PCBO().add_constraint_OR(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
@@ -1153,7 +1189,7 @@ def test_pcbo_logic():
     H = PCBO().add_constraint_OR(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert any(sol[i] for i in range(2))
+        assert any([sol[i] for i in range(2)])  # list so all branches covered
         assert not H.value(sol)
     H = PCBO().add_constraint_OR(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
@@ -1168,7 +1204,8 @@ def test_pcbo_logic():
     H = PCBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert not all(sol[i] for i in range(6))
+        # list so all branches covered
+        assert not all([sol[i] for i in range(6)])
         assert not H.value(sol)
     H = PCBO().add_constraint_NAND(0, 1, 2, 3, 4, 5)
     for sol in (decimal_to_boolean(i, 6) for i in range(1 << 6)):
@@ -1182,7 +1219,8 @@ def test_pcbo_logic():
     H = PCBO().add_constraint_NAND(0, 1)
     sols = H.solve_bruteforce(True)
     for sol in sols:
-        assert not all(sol[i] for i in range(2))
+        # list so all branches covered
+        assert not all([sol[i] for i in range(2)])
         assert not H.value(sol)
     H = PCBO().add_constraint_NAND(0, 1)
     for sol in (decimal_to_boolean(i, 2) for i in range(1 << 2)):
@@ -1279,6 +1317,159 @@ def test_pcbo_logic():
         else:
             assert not H.is_solution_valid(sol)
             assert H.value(sol)
+
+
+def test_le_right_bounds():
+
+    lam = Symbol("lam")
+
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(  # one sided bounds
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3},
+        lam=lam, log_trick=False, bounds=(None, 1)
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_le_left_bounds():
+
+    lam = Symbol("lam")
+
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(  # one sided bounds
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3},
+        lam=lam, log_trick=False, bounds=(-3, None)
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_ge_bounds():
+
+    lam = Symbol("lam")
+
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_ge_zero(  # one sided bounds
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3},
+        lam=lam, log_trick=False, bounds=(-1, 3)
+    )
+    solution = {'c': 1, 'b': 1, 'a': 1, 'd': 0}
+    obj = -8
+
+    problem = P.subs(lam, .5)
+    sol = problem.remove_ancilla_from_solution(problem.solve_bruteforce())
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        not problem.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_eq_special_bounds():
+
+    P = {('a',): 1, ('a', 'b'): 1, (): -2}
+    assert PCBO().add_constraint_eq_zero(P) == -PCBO(P)
 
 
 def test_pcbo_special_constraint_le():

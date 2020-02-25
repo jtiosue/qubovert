@@ -85,13 +85,13 @@ def qubo_to_quso(Q):
         elif len(k) == 1:
             L[k] -= v / 2
             L[()] += v / 2
-        elif len(k) == 2:
+        else:
+            # len(k) must be 2 because of squash_key
             i, j = k
             L[k] += v / 4
             L[(i,)] -= v / 4
             L[(j,)] -= v / 4
             L[()] += v / 4
-        # len(k) cannot be greater than 2 because the squash_key checks
 
     return L
 
@@ -151,13 +151,13 @@ def quso_to_qubo(L):
         elif len(k) == 1:
             Q[k] -= 2 * v
             Q[()] += v
-        elif len(k) == 2:
+        else:
+            # len(k) must be 2 because of squash_key
             i, j = k
             Q[k] += 4 * v
             Q[(i,)] -= 2 * v
             Q[(j,)] -= 2 * v
             Q[()] += v
-        # squash key ensures that len(k) <= 2
 
     return Q
 

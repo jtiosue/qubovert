@@ -31,6 +31,15 @@ problem = SetCover(U, V, log_trick=False)
 problem_weighted = SetCover(U, V, weights=(.1, .2, 1))
 
 
+def test_errors():
+
+    with assert_raises(ValueError):
+        SetCover(U, V, weights=(.1, 1))
+
+    with assert_raises(ValueError):
+        SetCover(U, V, weights=(.1, 1.1))
+
+
 def test_setcover_str():
 
     assert eval(str(problem)) == problem
@@ -49,11 +58,14 @@ def test_coverable():
 
     assert problem.is_coverable()
     assert not SetCover(U, V[:-1]).is_coverable()
+    with assert_raises(ValueError):
+        SetCover(U, V[:-1]).solve_bruteforce()
 
 
 def test_setcover_bruteforce():
 
     assert problem.solve_bruteforce() == {0, 2}
+    assert problem.solve_bruteforce(True) == [{0, 2}]
 
 
 # QUBO
@@ -64,6 +76,14 @@ def test_setcover_qubo_logtrick_solve():
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert problem_log.is_solution_valid(sol)
+    assert solution == {0, 2}
+    assert allclose(e, len(solution))
+
+    p = SetCover(U, V, M=1)
+    e, sol = solve_qubo_bruteforce(p.to_qubo())
+    solution = p.convert_solution(sol)
+    assert p.is_solution_valid(solution)
+    assert p.is_solution_valid(sol)
     assert solution == {0, 2}
     assert allclose(e, len(solution))
 

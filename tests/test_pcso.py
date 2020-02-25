@@ -371,6 +371,13 @@ def test_symbols():
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 2, (): 4}
 
 
+def test_init_pcso():
+
+    H = PCSO().add_constraint_eq_zero({(0,): 1, (1,): -2}, bounds=(-1, 1))
+    d = PCSO(H)
+    assert H.constraints == d.constraints
+
+
 def test_convert_solution_all_1s():
 
     d = PCSO({(0,): 1})

@@ -81,7 +81,7 @@ class Problem(Conversions):
             The number of variables in the QUBO/QUSO formulation.
 
         """
-        return self.to_qubo().num_binary_variables
+        raise NotImplementedError("To be implemented in the child class")
 
     def __repr__(self):
         """__repr__.
@@ -175,7 +175,7 @@ class Problem(Conversions):
         Implemented in the child class.
 
         """
-        return solution
+        raise NotImplementedError("To be implemented in the child class")
 
     def is_solution_valid(self, solution, *args, **kwargs):
         """is_solution_valid.
@@ -208,7 +208,7 @@ class Problem(Conversions):
             True if the proposed solution is valid, else False.
 
         """
-        return True
+        raise NotImplementedError("To be implemented in the child class")
 
     def solve_bruteforce(self, *args, **kwargs):
         """solve_bruteforce.

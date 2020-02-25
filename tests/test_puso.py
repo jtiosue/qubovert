@@ -362,6 +362,17 @@ def test_convert_solution_all_1s():
     assert d.convert_solution({0: 1}, False) == {0: -1}
 
 
+def test_set_mapping():
+
+    d = PUSO({('a', 'b'): 1, ('a',): 2})
+    d.set_mapping({'a': 0, 'b': 2})
+    assert d.to_puso() == {(0, 2): 1, (0,): 2}
+
+    d = PUSO({('a', 'b'): 1, ('a',): 2})
+    d.set_reverse_mapping({0: 'a', 2: 'b'})
+    assert d.to_puso() == {(0, 2): 1, (0,): 2}
+
+
 def test_puso_degree_reduction_pairs():
 
     puso = pubo_to_puso({

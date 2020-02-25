@@ -54,6 +54,10 @@ def test_jobsequencing_properties():
     assert p.log_trick
     p.M
 
+    x, m = dict(enumerate((2, 1, 2))), 2
+    p = JobSequencing(x, m)
+    assert p.job_lengths == x
+
 
 def test_jobsequencing_bruteforce():
 
@@ -77,6 +81,13 @@ def test_jobsequencing_bruteforce_solve():
 def test_jobsequencing_qubo_logtrick_solve():
 
     e, sol = solve_qubo_bruteforce(Q_log)
+    solution = problem_log.convert_solution(sol)
+    assert problem_log.is_solution_valid(solution)
+    assert problem_log.is_solution_valid(sol)
+    assert solution in solutions
+    assert allclose(e, obj_val)
+
+    e, sol = solve_qubo_bruteforce(problem_log.to_qubo(3))
     solution = problem_log.convert_solution(sol)
     assert problem_log.is_solution_valid(solution)
     assert problem_log.is_solution_valid(sol)

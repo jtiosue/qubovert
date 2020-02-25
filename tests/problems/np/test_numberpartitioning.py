@@ -69,6 +69,9 @@ def test_numberpartitioning_qubo_solve():
 
     e, sol = solve_qubo_bruteforce(problem_withsoln.to_qubo())
     solution = problem_withsoln.convert_solution(sol)
+    assert solution == problem_withsoln.convert_solution(
+        [sol[i] for i in range(problem_withsoln.num_binary_variables)]
+    )
 
     assert solution in solutions_withsoln
     assert problem_withsoln.is_solution_valid(solution)

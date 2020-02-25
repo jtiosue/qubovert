@@ -278,11 +278,8 @@ def test_qubo_multiplication():
     assert d ** 3 == d * d * d
 
     # should raise a KeyError since can't fit this into QUBO.
-    try:
+    with assert_raises(KeyError):
         QUBO({('0', 1): 1, (1, 2): -1})**2
-        assert False
-    except KeyError:
-        pass
 
 
 def test_properties():
@@ -344,3 +341,14 @@ def test_convert_solution_all_1s():
     assert d.convert_solution({0: -1}) == {0: 1}
     assert d.convert_solution({0: 1}) == {0: 1}
     assert d.convert_solution({0: 1}, True) == {0: 0}
+
+
+def test_set_mapping():
+
+    d = QUBO({('a', 'b'): 1, ('a',): 2})
+    d.set_mapping({'a': 0, 'b': 2})
+    assert d.to_qubo() == {(0, 2): 1, (0,): 2}
+
+    d = QUBO({('a', 'b'): 1, ('a',): 2})
+    d.set_reverse_mapping({0: 'a', 2: 'b'})
+    assert d.to_qubo() == {(0, 2): 1, (0,): 2}

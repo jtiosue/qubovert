@@ -173,6 +173,8 @@ def test_dictarithmetic_multiplication():
     assert d == {(0, 0, 0, 0): 1, (0, 0, 0, 1): 2,
                  (0, 1, 0, 0): 2, (0, 1, 0, 1): 4}
 
+    assert temp ** 1 == temp
+
     d = temp.copy()
     assert d ** 3 == d * d * d
 

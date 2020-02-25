@@ -219,11 +219,8 @@ def test_quso_multiplication():
     assert d ** 3 == d * d * d
 
     # should raise a KeyError since can't fit this into QUSO.
-    try:
+    with assert_raises(KeyError):
         QUSOMatrix({(0, 1): 1, (2, 3): -1})**2
-        assert False
-    except KeyError:
-        pass
 
 
 def test_round():
