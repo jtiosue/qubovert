@@ -701,7 +701,7 @@ def test_pcbo_le_constraint_minval_zero():
     })
     P.add_constraint_le_zero(
         {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1},
-        lam=lam, log_trick=False
+        lam=lam
     )
     solution = {'c': 0, 'b': 0, 'a': 0, 'd': 0}
     obj = -2
@@ -722,6 +722,18 @@ def test_pcbo_le_constraint_minval_zero():
         sol == solution,
         allclose(e, obj)
     ))
+
+    lam = Symbol("lam")
+
+    P1 = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P1.add_constraint_le_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1},
+        lam=lam, log_trick=False
+    )
+    assert P == P1
 
 
 def test_pcbo_gt_constraint_logtrick():

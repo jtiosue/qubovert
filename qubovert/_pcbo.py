@@ -112,7 +112,10 @@ def _special_constraints_le_zero(pcbo, P, lam, log_trick, bounds):
 
     # if P is of the form P_wo_offset <= -P.offset and P_wo_offset is always
     # >= 0, and (important!) log_trick is False!!
-    elif not log_trick and not min_val - P.offset and P.offset <= 0:
+    elif (
+            not log_trick and not min_val - P.offset and
+            P.offset <= 0 and min_val
+    ):
         # We have that P_wo_offset <= P.offset and min(P_wo_offset) = 0. So we
         # can do a penalty lam(P_wo_offset - sum(ancillas))**2
 
@@ -1096,7 +1099,6 @@ class PCBO(PUBO):
         self._append_constraint("le", P)
 
         bounds = min_val, max_val = _get_bounds(P, bounds)
-
         if _special_constraints_le_zero(self, P, lam, log_trick, bounds):
             return self
 
