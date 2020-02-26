@@ -12,21 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""Defines the version number and details of qubovert."""
+"""
+Contains tests for the ProblemParent class.
+"""
 
-__all__ = (
-    '__version__', '__author__', '__authoremail__', '__license__',
-    '__sourceurl__', '__docsurl__', '__description__'
-)
+from qubovert.problems import Problem
 
 
-__version__ = "1.1.2"
-__author__ = "Joseph T. Iosue"
-__authoremail__ = "joe.iosue@yahoo.com"
-__license__ = "Apache Software License 2.0"
-__sourceurl__ = "https://github.com/jiosue/qubovert"
-__docsurl__ = "https://qubovert.readthedocs.io"
-__description__ = (
-    "A package for formulating, simulating, and solving "
-    "problems in boolean and spin form"
-)
+def test_problem():
+
+    assert str(Problem()) == "Problem()"

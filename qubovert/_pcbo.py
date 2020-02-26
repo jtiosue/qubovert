@@ -20,7 +20,7 @@ Contains the PCBO class. See ``help(qubovert.PCBO)``.
 
 from . import PUBO
 from .utils import QUBOVertWarning, num_bits, approximate_pubo_extrema
-from .sat import OR, XOR, ONE, NOT, AND
+from .sat import OR, XOR, BUFFER, NOT, AND
 
 
 __all__ = 'PCBO', 'boolean_var', 'integer_var'
@@ -50,14 +50,18 @@ def _special_constraints_eq_zero(pcbo, P, lam):
         False.
 
     """
+    keys, values = tuple(P.keys()), tuple(P.values())
+
     # if P is of the form z == x * y. ie z == AND(x, y)
-    if not P.offset and P.num_binary_variables == 3 and P.num_terms == 2:
-        v, k = tuple(P.values()), tuple(P.keys())
-        if v[0] == - v[1] and (len(k[0]), len(k[1])) in ((1, 2), (2, 1)):
-            a, = k[0] if len(k[0]) == 1 else k[1]
-            b, c = k[0] if len(k[0]) == 2 else k[1]
-            pcbo += PCBO().add_constraint_eq_AND(a, b, c, lam=lam)
-            return True
+    if (
+            not P.offset and P.num_binary_variables == 3 and
+            P.num_terms == 2 and values[0] == -values[1] and
+            {len(keys[0]), len(keys[1])} == {1, 2}
+    ):
+        a, = keys[0] if len(keys[0]) == 1 else keys[1]
+        b, c = keys[0] if len(keys[0]) == 2 else keys[1]
+        pcbo += PCBO().add_constraint_eq_AND(a, b, c, lam=lam)
+        return True
 
     # if P is of the form z == 1 - x * y. ie z == NAND(x, y)
 
@@ -108,7 +112,10 @@ def _special_constraints_le_zero(pcbo, P, lam, log_trick, bounds):
 
     # if P is of the form P_wo_offset <= -P.offset and P_wo_offset is always
     # >= 0, and (important!) log_trick is False!!
-    elif not log_trick and not min_val - P.offset and P.offset <= 0:
+    elif (
+            not log_trick and not min_val - P.offset and
+            P.offset <= 0 and min_val
+    ):
         # We have that P_wo_offset <= P.offset and min(P_wo_offset) = 0. So we
         # can do a penalty lam(P_wo_offset - sum(ancillas))**2
 
@@ -197,6 +204,8 @@ def boolean_var(name):
     {('x0',): 1}
     >>> print(isinstance(x0, PCBO))
     True
+    >>> print(x0.name)
+    x0
 
     >>> x = [boolean_var('x{}'.format(i)) for i in range(5)]
     >>> pcbo = sum(x)
@@ -216,7 +225,9 @@ def boolean_var(name):
     {'x0': 0, 'x1': 0, 'x2': 1, 'x3': 1, 'x4': 1}
 
     """
-    return PCBO({(name,): 1})
+    pcbo = PCBO({(name,): 1})
+    pcbo.name = name
+    return pcbo
 
 
 def integer_var(prefix, num_bits, log_trick=True):
@@ -244,6 +255,8 @@ def integer_var(prefix, num_bits, log_trick=True):
     >>> var = integer_var('a', 4)
     >>> print(var)
     {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+    >>> print(var.name)
+    a
 
     >>> from qubovert import integer_var
     >>> var = integer_var('a', 4, log_trick=False)
@@ -252,6 +265,7 @@ def integer_var(prefix, num_bits, log_trick=True):
 
     """
     var = PCBO()
+    var.name = prefix
     for i in range(num_bits):
         var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
     return var
@@ -294,8 +308,8 @@ class PCBO(PUBO):
     - ``add_constraint_eq_OR``, ``add_constraint_eq_NOR``,
     - ``add_constraint_XOR``, ``add_constraint_XNOR``,
     - ``add_constraint_eq_XOR``, ``add_constraint_eq_XNOR``,
-    - ``add_constraint_ONE``, ``add_constraint_NOT``,
-    - ``add_constraint_eq_ONE``, ``add_constraint_eq_NOT``.
+    - ``add_constraint_BUFFER``, ``add_constraint_NOT``,
+    - ``add_constraint_eq_BUFFER``, ``add_constraint_eq_NOT``.
 
     See each of their docstrings for important details on their implementation.
 
@@ -445,7 +459,7 @@ class PCBO(PUBO):
         # use self.__class__ here because PCSO uses this code as well.
         super(self.__class__, self).update(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], self.__class__):
-            for k, v in args[0]._constraints:
+            for k, v in args[0]._constraints.items():
                 self._constraints.setdefault(k, []).extend(v)
 
     @property
@@ -978,11 +992,10 @@ class PCBO(PUBO):
             if not suppress_warnings:
                 QUBOVertWarning.warn("Constraint is always satisfied")
         else:
-            if int(min_val) == min_val:
-                # copy P, don't do +=
-                P = P + 1
-                min_val += 1
-                max_val += 1
+            # copy P, don't do +=
+            P = P + 1
+            min_val += 1
+            max_val += 1
             self.add_constraint_le_zero(
                 P, lam=lam, log_trick=log_trick,
                 bounds=(min_val, max_val), suppress_warnings=True
@@ -1086,7 +1099,6 @@ class PCBO(PUBO):
         self._append_constraint("le", P)
 
         bounds = min_val, max_val = _get_bounds(P, bounds)
-
         if _special_constraints_le_zero(self, P, lam, log_trick, bounds):
             return self
 
@@ -1362,14 +1374,14 @@ class PCBO(PUBO):
         n = len(variables)
         if n < 2:
             raise ValueError("Must supply at least two variables to AND. "
-                             "See ``add_constraint_eq_ONE`` for less.")
+                             "See ``add_constraint_eq_BUFFER`` for less.")
 
-        a = ONE(a)
+        a = BUFFER(a)
         b, c = 1, 1
         for v in variables[:n // 2]:
-            b *= ONE(v)
+            b *= BUFFER(v)
         for v in variables[n // 2:]:
-            c *= ONE(v)
+            c *= BUFFER(v)
 
         P = 3 * a + b * c - 2 * a * (b + c)
 
@@ -1414,9 +1426,9 @@ class PCBO(PUBO):
         if n < 2:
             raise ValueError("Must supply at least two variables to OR.")
 
-        a = ONE(a)
+        a = BUFFER(a)
         if n == 2:
-            b, c = ONE(variables[0]), ONE(variables[1])
+            b, c = BUFFER(variables[0]), BUFFER(variables[1])
             P = a + b + c + b * c - 2 * a * (b + c)
             bounds = 0, 3
         else:
@@ -1460,11 +1472,11 @@ class PCBO(PUBO):
         >>> H.add_constraint_eq_XOR('a', 'b', 'c', 'd')
 
         """
-        P = PCBO().add_constraint_XNOR(*variables) - ONE(a)
+        P = PCBO().add_constraint_XNOR(*variables) - BUFFER(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
-    def add_constraint_eq_ONE(self, a, b, lam=1):
-        r"""add_constraint_eq_ONE.
+    def add_constraint_eq_BUFFER(self, a, b, lam=1):
+        r"""add_constraint_eq_BUFFER.
 
         Add a penalty to the PCBO that enforces that :math:`a == b` with
         a penalty factor ``lam``.
@@ -1487,15 +1499,15 @@ class PCBO(PUBO):
         Examples
         --------
         >>> H = PCBO()
-        >>> H.add_constraint_eq_ONE('a', 'b')  # enforce a == b
+        >>> H.add_constraint_eq_BUFFER('a', 'b')  # enforce a == b
 
         >>> from qubovert import PCBO, boolean_var
         >>> a, b = boolean_var('a'), boolean_var('b')
         >>> H = PCBO()
-        >>> H.add_constraint_eq_ONE(a, b)  # enforce a == b
+        >>> H.add_constraint_eq_BUFFER(a, b)  # enforce a == b
 
         """
-        P = ONE(a) - ONE(b)
+        P = BUFFER(a) - BUFFER(b)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_NAND(self, a, *variables, lam=1):
@@ -1544,9 +1556,9 @@ class PCBO(PUBO):
                              "See ``add_constraint_eq_NOT`` for less.")
         b, c = 1, 1
         for v in variables[:n // 2]:
-            b *= ONE(v)
+            b *= BUFFER(v)
         for v in variables[n // 2:]:
-            c *= ONE(v)
+            c *= BUFFER(v)
 
         P = NOT(a) * (3 - 2 * (b + c)) + b * c
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 3))
@@ -1595,9 +1607,9 @@ class PCBO(PUBO):
         if n < 2:
             raise ValueError("Must supply at least two variables to NOR.")
 
-        a = ONE(a)
+        a = BUFFER(a)
         if n == 2:
-            b, c = ONE(variables[0]), ONE(variables[1])
+            b, c = BUFFER(variables[0]), BUFFER(variables[1])
             P = 1 - a - b - c + b * c + 2 * a * (b + c)
             bounds = 0, 3
         else:
@@ -1646,7 +1658,7 @@ class PCBO(PUBO):
         >>> H = PCBO().add_constraint_eq_XNOR(a, b, c)
 
         """
-        P = PCBO().add_constraint_XOR(*variables) - ONE(a)
+        P = PCBO().add_constraint_XOR(*variables) - BUFFER(a)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_eq_NOT(self, a, b, lam=1):
@@ -1680,7 +1692,7 @@ class PCBO(PUBO):
         >>> H.add_constraint_eq_NOT(a, b)  # enforce NOT(a) == b
 
         """
-        P = PCBO().add_constraint_ONE(a) - ONE(b)
+        P = PCBO().add_constraint_BUFFER(a) - BUFFER(b)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(-1, 1))
 
     def add_constraint_AND(self, *variables, lam=1):
@@ -1722,7 +1734,7 @@ class PCBO(PUBO):
         >>> H = PCBO().add_constraint_AND(a, b)
 
         """
-        return self.add_constraint_ONE(AND(*variables), lam=lam)
+        return self.add_constraint_BUFFER(AND(*variables), lam=lam)
 
     def add_constraint_OR(self, *variables, lam=1):
         r"""add_constraint_OR.
@@ -1806,8 +1818,8 @@ class PCBO(PUBO):
         P = 1 - XOR(*variables)
         return self.add_constraint_eq_zero(P, lam=lam, bounds=(0, 1))
 
-    def add_constraint_ONE(self, a, lam=1):
-        r"""add_constraint_ONE.
+    def add_constraint_BUFFER(self, a, lam=1):
+        r"""add_constraint_BUFFER.
 
         Add a penalty to the PCBO that is only nonzero when :math:`a == 1` is
         True, with a penalty factor ``lam``.
@@ -1828,12 +1840,12 @@ class PCBO(PUBO):
         Examples
         --------
         >>> H = PCBO()
-        >>> H.add_constraint_ONE('a')  # enforce a
+        >>> H.add_constraint_BUFFER('a')  # enforce a
 
         >>> from qubovert import boolean_var, PCBO
         >>> a = boolean_var('a')
         >>> # enforce a
-        >>> H = PCBO().add_constraint_ONE(a)
+        >>> H = PCBO().add_constraint_BUFFER(a)
 
         """
         return self.add_constraint_eq_zero(NOT(a), lam=lam, bounds=(0, 1))
@@ -1991,4 +2003,4 @@ class PCBO(PUBO):
         >>> H = PCBO().add_constraint_NOT(a)
 
         """
-        return self.add_constraint_eq_zero(ONE(a), lam=lam, bounds=(0, 1))
+        return self.add_constraint_eq_zero(BUFFER(a), lam=lam, bounds=(0, 1))

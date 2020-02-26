@@ -371,6 +371,13 @@ def test_symbols():
     assert d.subs({a: 0, b: 2}) == {(0, 1): 2, (1,): 2, (): 4}
 
 
+def test_init_pcso():
+
+    H = PCSO().add_constraint_eq_zero({(0,): 1, (1,): -2}, bounds=(-1, 1))
+    d = PCSO(H)
+    assert H.constraints == d.constraints
+
+
 def test_convert_solution_all_1s():
 
     d = PCSO({(0,): 1})
@@ -387,6 +394,7 @@ def test_spin_var():
     assert z[0] * z[1] * z[2] == {(0, 1, 2): 1}
     assert sum(z) == {(i,): 1 for i in range(5)}
     assert isinstance(z[0], PCSO)
+    assert all(z[i].name == i for i in range(5))
 
 
 """ TESTS FOR THE CONSTRAINT METHODS """

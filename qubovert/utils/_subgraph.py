@@ -14,15 +14,15 @@
 
 """_subgraph.py.
 
-This file contains the function to create subgraphs of QUBOs, PUBOs, QUSOs,
-PUSOs, etc.
+This file contains the function to create subgraphs and subvalues of QUBOs,
+PUBOs, QUSOs, PUSOs, etc.
 
 """
 
 import numpy as np
 
 
-__all__ = 'subgraph',
+__all__ = 'subgraph', 'subvalue'
 
 
 def subgraph(G, nodes, connections=None):
@@ -87,6 +87,50 @@ def subgraph(G, nodes, connections=None):
         key = tuple(filter(lambda x: x in nodes, k))
         not_key = filter(lambda x: x not in nodes, k)
         value = v * np.prod([connections.get(i, 0) for i in not_key])
+        value += D.get(key, 0)
+        if value:
+            D[key] = value
+
+    return D
+
+
+def subvalue(values, G):
+    """subvalue.
+
+    Replace each element in ``G`` with a value in ``values`` if it exists.
+
+    Parameters
+    ----------
+    values : dict.
+        For each node ``v`` in ``G`` that is in ``values``, we replace the
+        node with ``values[v]``.
+    G : dict or any subclass of dict.
+        ``G`` must contain tuple keys.
+
+    Return
+    ------
+    D : same as type(G).
+
+    Examples
+    --------
+    >>> G = {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+    >>> D = subvalue({0: 2}, G)
+    >>> D
+    {(1,): -6, (2,): -2, (): 8}
+
+    >>> G = {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2}
+    >>> D = subvalue({2: -3}, G)
+    >>> D
+    {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+
+    """
+    D = type(G)()
+    for k, v in G.items():
+        if not isinstance(k, tuple):
+            raise ValueError("Keys must be tuples")
+        key = tuple(filter(lambda x: x not in values, k))
+        not_key = filter(lambda x: x in values, k)
+        value = v * np.prod([values[i] for i in not_key])
         value += D.get(key, 0)
         if value:
             D[key] = value

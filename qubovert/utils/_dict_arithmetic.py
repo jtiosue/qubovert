@@ -20,7 +20,7 @@ other classes, such as ``qubovert.utils.QUBOMatrix`` and ``qubovert.utils.BO``.
 
 """
 
-from . import subgraph
+from . import subgraph, subvalue
 
 
 __all__ = 'DictArithmetic',
@@ -105,13 +105,22 @@ class DictArithmetic(dict):
     >>> g -= {(0, 1): -8}
     >>> print(g) # will print {}
 
-    Finally, adding or subtracting constants will update the () element of the
+    Adding or subtracting constants will update the () element of the
     dict.
 
     >>> d = DictArithmetic()
     >>> d += 5
     >>> print(d)
     {(): 5}
+
+    You can give it a name.
+
+    >>> d = DictArithmetic()
+    >>> d.name
+    None
+    >>> d.name = 'd'
+    >>> d.name
+    'd'
 
     """
 
@@ -134,6 +143,52 @@ class DictArithmetic(dict):
 
         for key, value in _generate_key_value_pairs(*args, **kwargs):
             self[key] += value
+
+        self.name = None
+
+    @property
+    def name(self):
+        """name.
+
+        Return the name of the object.
+
+        Return
+        ------
+        name : object.
+
+        Example
+        -------
+        >>> d = DictArithmetic()
+        >>> d.name
+        None
+        >>> d.name = 'd'
+        >>> d.name
+        'd'
+
+        """
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        """name.
+
+        Set the name of the object.
+
+        Parameters
+        ----------
+        name : object.
+
+        Example
+        -------
+        >>> d = DictArithmetic()
+        >>> d.name
+        None
+        >>> d.name = 'd'
+        >>> d.name
+        'd'
+
+        """
+        self._name = name
 
     def __getitem__(self, key):
         """__getitem__.
@@ -743,6 +798,48 @@ class DictArithmetic(dict):
 
         """
         return subgraph(self, nodes, connections)
+
+    def subvalue(self, values):
+        """subvalue.
+
+        Replace each element in ``self`` with a value in ``values`` if it
+        exists.
+
+        Parameters
+        ----------
+        values : dict.
+            For each node ``v`` in ``self`` that is in ``values``, we replace
+            the node with ``values[v]``.
+
+        Return
+        ------
+        D : same as type(self).
+
+        Examples
+        --------
+        >>> G = DictArithmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({0: 2})
+        >>> D
+        {(1,): -6, (2,): -2, (): 8}
+
+        >>> G = DictArtihmetic(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({2: -3})
+        >>> D
+        {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+
+        >>> G = PUBO(
+        >>>     {(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2
+        >>> }
+        >>> D = G.subvalue({2: -3})
+        >>> D
+        {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+
+        """
+        return subvalue(values, self)
 
     def __round__(self, ndigits=None):
         """round.

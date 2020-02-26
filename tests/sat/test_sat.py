@@ -17,13 +17,13 @@ Contains tests for the ``qubovert.sat`` library.
 """
 
 from qubovert import PUBO, boolean_var, BOOLEAN_MODELS
-from qubovert.sat import ONE, NOT, AND, NAND, OR, NOR, XOR, XNOR
+from qubovert.sat import BUFFER, NOT, AND, NAND, OR, NOR, XOR, XNOR
 from qubovert.utils import decimal_to_boolean
 
 
 def test_sat_one():
 
-    f = ONE
+    f = BUFFER
 
     assert f('x') == {('x',): 1}
     assert f({('x', 'y'): 1}) == PUBO({('x', 'y'): 1})

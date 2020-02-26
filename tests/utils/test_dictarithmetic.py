@@ -21,6 +21,16 @@ from sympy import Symbol
 from numpy.testing import assert_raises
 
 
+def test_name():
+
+    d = DictArithmetic({(0,): 1, (1, 2): -1})
+    assert d.name is None
+    d.name = 'd'
+    assert d.name == 'd'
+    d.name = 1
+    assert d.name == 1
+
+
 def test_num_terms():
 
     d = DictArithmetic({(0,): 1, (0, 3): 2, (0, 2): -1})
@@ -163,6 +173,8 @@ def test_dictarithmetic_multiplication():
     assert d == {(0, 0, 0, 0): 1, (0, 0, 0, 1): 2,
                  (0, 1, 0, 0): 2, (0, 1, 0, 1): 4}
 
+    assert temp ** 1 == temp
+
     d = temp.copy()
     assert d ** 3 == d * d * d
 
@@ -204,6 +216,13 @@ def test_subgraph():
     assert G.subgraph({0, 1}, {2: -10}) == {(0, 1): -4, (0,): 13, (1,): 2}
     assert G.subgraph({0, 1}) == {(0, 1): -4, (0,): 3, (1,): 2}
     assert type(G.subgraph({0, 1})) == DictArithmetic
+
+
+def test_subvalue():
+
+    G = DictArithmetic({(0, 1): -4, (0, 2): -1, (0,): 3, (1,): 2, (): 2})
+    assert G.subvalue({2: -3}) == {(0, 1): -4, (0,): 6, (1,): 2, (): 2}
+    assert type(G.subvalue({})) == DictArithmetic
 
 
 def test_symbols():

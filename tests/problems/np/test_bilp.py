@@ -70,6 +70,14 @@ def test_bilp_qubo_solve():
     assert problem.is_solution_valid(sol)
     assert allclose(e, 2)
 
+    e, sol = solve_qubo_bruteforce(problem.to_qubo(10, 1))
+    conv_solution = problem.convert_solution(sol)
+
+    assert allclose(conv_solution, solution)
+    assert problem.is_solution_valid(conv_solution)
+    assert problem.is_solution_valid(sol)
+    assert allclose(e, 2)
+
 
 def test_bilp_qubo_numvars():
 

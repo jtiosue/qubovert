@@ -19,7 +19,8 @@ Contains tests for the QUBO/PUBO to/from QUSO/PUSO functions.
 from qubovert.utils import (
     qubo_to_quso, quso_to_qubo, pubo_to_puso, puso_to_pubo,
     boolean_to_spin, spin_to_boolean, decimal_to_boolean, decimal_to_spin,
-    qubo_to_matrix, matrix_to_qubo, boolean_to_decimal, spin_to_decimal
+    qubo_to_matrix, matrix_to_qubo, boolean_to_decimal, spin_to_decimal,
+    QUBOMatrix
 )
 from qubovert import QUBO, QUSO, PUBO, PUSO
 from sympy import Symbol
@@ -149,6 +150,12 @@ def test_matrix_to_qubo():
     matrix, qubo = [[-3, 1], [-1, 2]], {(0,): -3, (1,): 2}
     assert matrix_to_qubo(matrix) == qubo
 
+    matrix, qubo = np.array([[-3, 1], [-1, 2]]), {(0,): -3, (1,): 2}
+    assert matrix_to_qubo(matrix) == qubo
+
+    matrix, qubo = [[-3, 1], [-1, 2]], QUBOMatrix({(0,): -3, (1,): 2})
+    assert matrix_to_qubo(matrix) == qubo
+
     with assert_raises(ValueError):
         matrix_to_qubo([[1, 2, 3], [1, 0, 1]])
 
@@ -156,6 +163,15 @@ def test_matrix_to_qubo():
 def test_qubo_to_matrix():
 
     matrix, qubo = [[-3, 1], [0, 2]], {(0, 0): -3, (0, 1): 1, (1, 1): 2}
+    assert matrix == qubo_to_matrix(qubo, array=False)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
+
+    matrix = [[-3, .5], [.5, 2]]
+    assert matrix == qubo_to_matrix(qubo, array=False, symmetric=True)
+    assert np.all(np.array(matrix) == qubo_to_matrix(qubo, symmetric=True))
+
+    matrix = [[-3, 1], [0, 2]]
+    qubo = QUBOMatrix({(0, 0): -3, (0, 1): 1, (1, 1): 2})
     assert matrix == qubo_to_matrix(qubo, array=False)
     assert np.all(np.array(matrix) == qubo_to_matrix(qubo))
 

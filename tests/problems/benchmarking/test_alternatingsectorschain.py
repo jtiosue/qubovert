@@ -60,6 +60,7 @@ def test_AlternatingSectorsChain_qubo_solve():
 
     e, sol = solve_qubo_bruteforce(problem.to_qubo(True))
     solution = problem.convert_solution(sol)
+    assert solution == problem.convert_solution(solution, True)
 
     assert solution == (-1,) * 12 or solution == (1,) * 12
     assert problem.is_solution_valid(solution)

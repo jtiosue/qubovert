@@ -83,10 +83,19 @@ def test_spinsimulation_paststates_reset():
 
     sim.update(2, 2000)
     assert len(sim.get_past_states()) == 1000
+    assert sim.get_past_states(1) == [sim.state]
 
     sim.reset()
     assert sim.state == initial_state == sim.initial_state
     assert sim.get_past_states() == [initial_state]
+
+
+def test_spinsimulation_initialstate_variables():
+
+    ising = dict(sum(-spin_var(i) * spin_var(i+1) for i in range(3)))
+    initial_state = {0: 1, 1: 1, 2: -1, 3: 1}
+    sim = SpinSimulation(ising, initial_state)
+    assert sim._variables == list(initial_state.keys())
 
 
 def test_spinsimulation_update_vs_updateschedule():
@@ -178,6 +187,7 @@ def test_booleansimulation_paststates_reset():
         states.append(sim.state)
     assert states == sim.get_past_states()
     assert states[-50:] == sim.get_past_states(50)
+    assert sim.get_past_states(1) == [sim.state]
 
     sim.update(2, 2000)
     assert len(sim.get_past_states()) == 1000

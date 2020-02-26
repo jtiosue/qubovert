@@ -2,7 +2,7 @@ queries:
   - exclude: py/import-own-module
   - exclude: py/missing-equals
   - exclude: py/init-calls-subclass
-
+  - exclude: py/similar-function
 extraction:
   python:
     python_setup:

@@ -128,6 +128,10 @@ def test_anneal_puso():
     assert res.best.value == -30
     assert len([x for x in res]) == 4
 
+    # make sure we run branch where an explicit schedule is given and no
+    # temperature range is supplied
+    anneal_puso(H, schedule=[(3, 10), (2, 15)])
+
 
 def test_anneal_quso():
 
@@ -168,6 +172,10 @@ def test_anneal_quso():
     )
     assert res.best.value == -30
     assert len([x for x in res]) == 4
+
+    # make sure we run branch where an explicit schedule is given and no
+    # temperature range is supplied
+    anneal_quso(L, schedule=[(3, 10), (2, 15)])
 
 
 def test_anneal_pubo():
@@ -210,6 +218,10 @@ def test_anneal_pubo():
     assert res.best.value == -30
     assert len([x for x in res]) == 4
 
+    # make sure we run branch where an explicit schedule is given and no
+    # temperature range is supplied
+    anneal_pubo(P, schedule=[(3, 10), (2, 15)])
+
 
 def test_anneal_qubo():
 
@@ -250,3 +262,7 @@ def test_anneal_qubo():
     )
     assert res.best.value == -30
     assert len([x for x in res]) == 4
+
+    # make sure we run branch where an explicit schedule is given and no
+    # temperature range is supplied
+    anneal_qubo(Q, schedule=[(3, 10), (2, 15)])

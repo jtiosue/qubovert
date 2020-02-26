@@ -18,7 +18,7 @@ from qubovert import PUSO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
-    puso_value
+    puso_value, pubo_to_puso
 )
 from sympy import Symbol
 from numpy import allclose
@@ -360,3 +360,55 @@ def test_convert_solution_all_1s():
     assert d.convert_solution({0: -1}) == {0: -1}
     assert d.convert_solution({0: 1}) == {0: 1}
     assert d.convert_solution({0: 1}, False) == {0: -1}
+
+
+def test_set_mapping():
+
+    d = PUSO({('a', 'b'): 1, ('a',): 2})
+    d.set_mapping({'a': 0, 'b': 2})
+    assert d.to_puso() == {(0, 2): 1, (0,): 2}
+
+    d = PUSO({('a', 'b'): 1, ('a',): 2})
+    d.set_reverse_mapping({0: 'a', 2: 'b'})
+    assert d.to_puso() == {(0, 2): 1, (0,): 2}
+
+
+def test_puso_degree_reduction_pairs():
+
+    puso = pubo_to_puso({
+        ('x0', 'x1'): -1, ('x1',): 1, ('x1', 'x2'): -1, ('x2',): 1,
+        ('x3', 'x2'): -1, ('x3',): 1, ('x4', 'x3'): -1, ('x4',): 1,
+        ('x4', 'x5'): -1, ('x5',): 1, ('x5', 'x6'): -1, ('x6',): 1,
+        ('x7', 'x6'): -1, ('x7',): 1, ('x8', 'x7'): -1, ('x8',): 1,
+        ('x9', 'x8'): -1, ('x9',): 1
+     }) ** 2
+    pairs = {
+        ('x0', 'x1'), ('x1', 'x2'), ('x2', 'x3'), ('x3', 'x4'), ('x4', 'x5'),
+        ('x5', 'x6'), ('x6', 'x7'), ('x7', 'x8'), ('x8', 'x9')
+    }
+    quso1 = puso.to_quso()
+    quso2 = puso.to_quso(pairs=pairs)
+    assert quso1.num_binary_variables - puso.num_binary_variables > 9
+    assert quso2.num_binary_variables - puso.num_binary_variables == 9
+    qubo1 = puso.to_qubo()
+    qubo2 = puso.to_qubo(pairs=pairs)
+    assert qubo1.num_binary_variables - puso.num_binary_variables > 9
+    assert qubo2.num_binary_variables - puso.num_binary_variables == 9
+
+
+def test_puso_degree_reduction_lam():
+
+    puso = PUSO({
+        ('x0', 'x1'): -1, ('x1',): 1, ('x1', 'x2'): -1, ('x2',): 1,
+        ('x3', 'x2'): -1, ('x3',): 1, ('x4', 'x3'): -1, ('x4',): 1,
+     }) ** 2
+
+    # just make sure it runs
+    puso.to_qubo(lam=4)
+    puso.to_qubo(lam=lambda v: v)
+    puso.to_qubo(lam=Symbol('lam'))
+    puso.to_qubo(lam=lambda v: v * Symbol('lam'))
+    puso.to_quso(lam=4)
+    puso.to_quso(lam=lambda v: v)
+    puso.to_quso(lam=Symbol('lam'))
+    puso.to_quso(lam=lambda v: v * Symbol('lam'))
