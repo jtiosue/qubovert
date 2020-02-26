@@ -50,14 +50,17 @@ def _special_constraints_eq_zero(pcbo, P, lam):
         False.
 
     """
+    keys, values = tuple(P.keys()), tuple(P.values())
+
     # if P is of the form z == x * y. ie z == AND(x, y)
-    if not P.offset and P.num_binary_variables == 3 and P.num_terms == 2:
-        v, k = tuple(P.values()), tuple(P.keys())
-        if v[0] == - v[1] and tuple(sorted((len(k[0]), len(k[1])))) == (1, 2):
-            a, = k[0] if len(k[0]) == 1 else k[1]
-            b, c = k[0] if len(k[0]) == 2 else k[1]
-            pcbo += PCBO().add_constraint_eq_AND(a, b, c, lam=lam)
-            return True
+    if all((
+            not P.offset, P.num_binary_variables == 3, P.num_terms == 2,
+            values[0] == -values[1], {len(keys[0]), len(keys[1])} == {1, 2}
+    )):
+        a, = keys[0] if len(keys[0]) == 1 else keys[1]
+        b, c = keys[0] if len(keys[0]) == 2 else keys[1]
+        pcbo += PCBO().add_constraint_eq_AND(a, b, c, lam=lam)
+        return True
 
     # if P is of the form z == 1 - x * y. ie z == NAND(x, y)
 
