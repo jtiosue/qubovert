@@ -151,6 +151,13 @@ def test_pcbo_update():
 
     assert d.offset == -1
 
+    c0 = {('a',): 1, ('b',): -1}
+    c1 = {('a',): 2, ('b',): -1}
+    d0 = PCBO().add_constraint_eq_zero(c0)
+    d1 = PCBO().add_constraint_eq_zero(c1)
+    d0.update(d1)
+    assert d0.constraints['eq'] == [c0, c1]
+
 
 def test_pcbo_num_binary_variables():
 
@@ -366,13 +373,6 @@ def test_symbols():
     assert d.subs(a, 0) == {}
 
 
-def test_init_pcbo():
-
-    P = PCBO().add_constraint_eq_zero({(0,): 1, (1,): -2}, bounds=(-1, 1))
-    d = PCBO(P)
-    assert P.constraints == d.constraints
-
-
 def test_pop_constraint():
 
     P = PCBO().add_constraint_eq_zero(
@@ -481,6 +481,20 @@ def test_pcbo_ne_constraint():
         H = PCBO().add_constraint_ne_zero(P, log_trick=False)
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
+
+    with assert_warns(QUBOVertWarning):  # never satisfied
+        PCBO().add_constraint_ne_zero({})
+
+    with assert_warns(QUBOVertWarning):  # always satisfed
+        PCBO().add_constraint_ne_zero({(): 2, ('a',): -1})
+
+    with assert_warns(QUBOVertWarning):  # always satisfed
+        PCBO().add_constraint_ne_zero({(): -2, ('a',): 1})
+
+    # same as above but with suppress warnings
+    PCBO().add_constraint_ne_zero({}, suppress_warnings=True)
+    PCBO().add_constraint_ne_zero({(): 2, ('a',): -1}, suppress_warnings=True)
+    PCBO().add_constraint_ne_zero({(): -2, ('a',): 1}, suppress_warnings=True)
 
 
 def test_pcbo_lt_constraint_logtrick():
@@ -658,6 +672,39 @@ def test_pcbo_le_constraint():
         sol != solution,
         not allclose(e, obj)
     ))
+
+    problem = P.subs(lam, 10)
+    sol = problem.solve_bruteforce()
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(problem.to_pubo())
+    sol = problem.convert_solution(sol)
+    sol = problem.remove_ancilla_from_solution(sol)
+    assert all((
+        problem.is_solution_valid(sol),
+        sol == solution,
+        allclose(e, obj)
+    ))
+
+
+def test_pcbo_le_constraint_minval_zero():
+
+    lam = Symbol("lam")
+
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1},
+        lam=lam, log_trick=False
+    )
+    solution = {'c': 0, 'b': 0, 'a': 0, 'd': 0}
+    obj = -2
 
     problem = P.subs(lam, 10)
     sol = problem.solve_bruteforce()
@@ -929,6 +976,18 @@ def test_pcbo_constraints_warnings():
 
 
 def test_pcbo_logic():
+
+    with assert_raises(ValueError):
+        PCBO().add_constraint_eq_NOR('a')
+
+    with assert_raises(ValueError):
+        PCBO().add_constraint_eq_NAND('a')
+
+    with assert_raises(ValueError):
+        PCBO().add_constraint_eq_OR('a')
+
+    with assert_raises(ValueError):
+        PCBO().add_constraint_eq_AND('a')
 
     H = PCBO().add_constraint_eq_NAND(
         'c', 'a', 'b').add_constraint_AND('a', 'b')

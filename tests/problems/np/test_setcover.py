@@ -38,7 +38,7 @@ def test_errors():
         SetCover(U, V, weights=(.1, 1))
 
     with assert_raises(ValueError):
-        SetCover(U, V, weights=(.1, 1.1))
+        SetCover(U, V, weights=(.1, 1.1, .3))
 
 
 def test_setcover_str():

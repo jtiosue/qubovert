@@ -452,7 +452,7 @@ class PCBO(PUBO):
         # use self.__class__ here because PCSO uses this code as well.
         super(self.__class__, self).update(*args, **kwargs)
         if len(args) == 1 and isinstance(args[0], self.__class__):
-            for k, v in args[0]._constraints:
+            for k, v in args[0]._constraints.items():
                 self._constraints.setdefault(k, []).extend(v)
 
     @property
@@ -985,11 +985,10 @@ class PCBO(PUBO):
             if not suppress_warnings:
                 QUBOVertWarning.warn("Constraint is always satisfied")
         else:
-            if int(min_val) == min_val:
-                # copy P, don't do +=
-                P = P + 1
-                min_val += 1
-                max_val += 1
+            # copy P, don't do +=
+            P = P + 1
+            min_val += 1
+            max_val += 1
             self.add_constraint_le_zero(
                 P, lam=lam, log_trick=log_trick,
                 bounds=(min_val, max_val), suppress_warnings=True
