@@ -38,7 +38,7 @@ extensions = cythonize([
     setuptools.Extension(
         name='qubovert.sim.simulate_quso',
         sources=['./qubovert/sim/simulate_quso.pyx',
-                 './qubovert/sim/src/simulate_quso.c'],
+                 './qubovert/sim/src/_simulate_quso.c'],
         include_dirs=['./qubovert/sim/src/'],
         language='c',
     )

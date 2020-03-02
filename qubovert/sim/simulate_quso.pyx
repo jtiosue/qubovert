@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 cimport cython
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport malloc
 
 
 cdef extern from "simulate_quso.h":

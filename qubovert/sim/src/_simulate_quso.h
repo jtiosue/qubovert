@@ -1,4 +1,4 @@
-#ifndef simulate_quso
+#ifndef _simulate_quso
 #define
 void simulate_quso(
 	int len_state, int *state, double *h,
