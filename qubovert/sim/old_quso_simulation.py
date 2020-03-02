@@ -20,13 +20,20 @@ with interfacing with the C code for simulating QUSOs.
 
 """
 
-import qubovert.sim.simulate_quso as simulate_quso
+import ctypes
+import os.path
 from itertools import chain
 from qubovert import QUSO
 from qubovert.utils import QUSOMatrix
 
 
 __all__ = 'QUSOSimulation',
+
+
+_c_filename = (
+    os.path.dirname(os.path.abspath(__file__)) + os.path.sep +
+    "src/simulate_quso.so"
+)
 
 
 class QUSOSimulation:
@@ -134,7 +141,12 @@ class QUSOSimulation:
         # flatten the arrays.
         J, neighbors = list(chain(*J)), list(chain(*neighbors))
 
-        self._c_args = h, num_neighbors, neighbors, J
+        self._c_args = (
+            _create_c_array(h, True),
+            _create_c_array(num_neighbors),
+            _create_c_array(neighbors),
+            _create_c_array(J, True),
+        )
 
     def __str__(self):
         """__str__.
@@ -254,13 +266,41 @@ class QUSOSimulation:
             if n < 0:
                 raise ValueError("Cannot update a negative number of times")
 
-        # call the C function, will update self._state in place
-        simulate_quso(
+        # create the state that will be updated
+        state = _create_c_array(self._state)
+
+        # call the C function
+        self._c_simulate_quso(
             len(self._state),
-            self._state,
+            state,
             *self._c_args,
             len(Ts),
-            Ts,
-            num_updates,
+            _create_c_array(Ts, True),
+            _create_c_array(num_updates),
             seed if seed is not None else -1
         )
+
+        self._state = list(state)
+
+
+# functions to interact with the C script
+
+def _create_c_array(l, double=False):
+    """_create_c_array.
+
+    Use the standard library ``ctypes`` to create an array that can be sent
+    into the C function from the list ``l``.
+
+    Parameters
+    ----------
+    l : list.
+    double : bool (optional, defaults to False).
+        Whether the C array should be an integer or double array.
+
+    Returns
+    -------
+    arr : a ``ctypes`` array of length ``len(l)``
+
+    """
+    typ = ctypes.c_double if double else ctypes.c_int
+    return (typ * len(l))(*l)

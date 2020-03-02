@@ -32,6 +32,16 @@ with open("requirements.txt") as f:
 with open("qubovert/_version.py") as f:
     exec(f.read())
 
+# create the extension for the C file in qubovert.sim.src
+extensions = [
+    setuptools.Extension(
+        name='qubovert.sim.src.simulate_quso',
+        sources=['./qubovert/sim/simulate_quso.c',
+                 './qubovert/sim/src/simulate_quso.c'],
+        include_dirs=['./qubovert/sim/src/'],
+        language='c',
+    )
+]
 
 setuptools.setup(
     name="qubovert",
@@ -44,6 +54,7 @@ setuptools.setup(
     url=__sourceurl__,
     license=__license__,
     packages=setuptools.find_packages(exclude=("tests", "docs")),
+    ext_modules=extensions,
     test_suite="tests",
     install_requires=REQUIREMENTS,
     include_package_data=True,
