@@ -20,7 +20,7 @@ with interfacing with the C code for simulating QUSOs.
 
 """
 
-import qubovert.sim.simulate_quso as simulate_quso
+import qubovert.sim._simulate_quso as simulate_quso
 from itertools import chain
 from qubovert import QUSO
 from qubovert.utils import QUSOMatrix
@@ -254,8 +254,8 @@ class QUSOSimulation:
             if n < 0:
                 raise ValueError("Cannot update a negative number of times")
 
-        # call the C function, will update self._state in place
-        self._state = simulate_quso(
+        # call the C function,
+        self._state = simulate_quso.simulate_quso(
             len(self._state),
             self._state,
             *self._c_args,
