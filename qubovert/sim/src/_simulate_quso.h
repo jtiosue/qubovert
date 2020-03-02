@@ -5,5 +5,5 @@ void simulate_quso(
 	int *num_neighbors, int *neighbors, double *J,
 	int len_Ts, double *Ts, int *num_updates,
 	int seed
-)
+);
 #endif
