@@ -35,8 +35,8 @@ with open("qubovert/_version.py") as f:
 # create the extension for the C file in qubovert.sim.src
 extensions = [
     setuptools.Extension(
-        name='qubovert.sim.src.simulate_quso',
-        sources=['./qubovert/sim/simulate_quso.pyx',
+        name='qubovert.sim.simulate_quso',
+        sources=['./qubovert/sim/simulate_quso.c',
                  './qubovert/sim/src/simulate_quso.c'],
         include_dirs=['./qubovert/sim/src/'],
         language='c',

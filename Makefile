@@ -10,7 +10,7 @@ clean:
 install:
 	$(virtualenv_cmd) venv-dev
 	. venv-dev/bin/activate && pip install -r requirements-dev.txt
-	. venv-dev/bin/activate && pip install -e .
+	. venv-dev/bin/activate && pip install .
 
 test:
 	. venv-dev/bin/activate && python -m pydocstyle convention=numpy qubovert
