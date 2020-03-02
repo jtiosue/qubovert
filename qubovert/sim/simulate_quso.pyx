@@ -1,3 +1,4 @@
+# distutils: language=c
 #   Copyright 2020 Joseph T. Iosue
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
