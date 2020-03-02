@@ -42,13 +42,13 @@ def _simulate_quso(len_state, state, h, num_neighbors,
     cdef int *c_num_updates
     cdef int c_seed = seed
 
-    c_state = malloc(len_state * cython.sizeof(int))
-    c_h = malloc(len_state * cython.sizeof(double))
-    c_num_neighbors = malloc(len_state * cython.sizeof(int))
-    c_neighbors = malloc(len(neighbors) * cython.sizeof(int))
-    c_J = malloc(len(J) * cython.sizeof(double))
-    c_Ts = malloc(len(Ts) * cython.sizeof(double))
-    c_num_updates = malloc(len(Ts) * cython.sizeof(int))
+    c_state = <int *>malloc(len_state * cython.sizeof(int))
+    c_h = <double *>malloc(len_state * cython.sizeof(double))
+    c_num_neighbors = <int *>malloc(len_state * cython.sizeof(int))
+    c_neighbors = <int *>malloc(len(neighbors) * cython.sizeof(int))
+    c_J = <double *>malloc(len(J) * cython.sizeof(double))
+    c_Ts = <double *>malloc(len(Ts) * cython.sizeof(double))
+    c_num_updates = <int *>malloc(len(Ts) * cython.sizeof(int))
 
     for i in range(len_state):
         c_state[i] = state[i]
@@ -63,9 +63,11 @@ def _simulate_quso(len_state, state, h, num_neighbors,
 
 
     with nogil:
-        num = simulate_quso(
+        simulate_quso(
             c_len_state, c_state, c_h,
             c_num_neighbors, c_neighbors, c_J,
             c_len_Ts, c_Ts, c_num_updates,
             c_seed
         )
+
+    return [c_state[i] for i in range(len_state)]

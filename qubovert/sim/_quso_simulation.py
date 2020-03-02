@@ -255,7 +255,7 @@ class QUSOSimulation:
                 raise ValueError("Cannot update a negative number of times")
 
         # call the C function, will update self._state in place
-        simulate_quso(
+        self._state = simulate_quso(
             len(self._state),
             self._state,
             *self._c_args,
