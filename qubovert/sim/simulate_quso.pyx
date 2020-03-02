@@ -13,6 +13,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+cimport cython
+from libc.stdlib cimport malloc, free
+
+
 cdef extern from "simulate_quso.h":
     void simulate_quso(
         int len_state, int *state, double *h,
@@ -23,20 +27,40 @@ cdef extern from "simulate_quso.h":
 
 
 def _simulate_quso(len_state, state, h, num_neighbors,
-                  neighbors, J, len_Ts, Ts, num_updates, seed):
+                   neighbors, J, len_Ts, Ts, num_updates, seed):
 
 
     # convert all Python types to C
     cdef int c_len_state = len_state
-    cdef int *c_state = &state
-    cdef double *c_h = &h
-    cdef int *c_num_neighbors = &num_neighbors
-    cdef int *c_neighbors = &neighbors
-    cdef double *c_J = &J
+    cdef int *c_state
+    cdef double *c_h
+    cdef int *c_num_neighbors
+    cdef int *c_neighbors
+    cdef double *c_J
     cdef int c_len_Ts = len_Ts
-    cdef double *c_Ts = &Ts
-    cdef int *c_num_updates = &num_updates
+    cdef double *c_Ts
+    cdef int *c_num_updates
     cdef int c_seed = seed
+
+    c_state = malloc(len_state * cython.sizeof(int))
+    c_h = malloc(len_state * cython.sizeof(double))
+    c_num_neighbors = malloc(len_state * cython.sizeof(int))
+    c_neighbors = malloc(len(neighbors) * cython.sizeof(int))
+    c_J = malloc(len(J) * cython.sizeof(double))
+    c_Ts = malloc(len(Ts) * cython.sizeof(double))
+    c_num_updates = malloc(len(Ts) * cython.sizeof(int))
+
+    for i in range(len_state):
+        c_state[i] = state[i]
+        c_h[i] = h[i]
+        c_num_neighbors[i] = num_neighbors[i]
+    for i in range(len(J)):
+        c_neighbors[i] = neighbors[i]
+        c_J[i] = J[i]
+    for i in range(len_Ts):
+        c_Ts[i] = Ts[i]
+        c_num_updates[i] = num_updates[i]
+
 
     with nogil:
         num = simulate_quso(
