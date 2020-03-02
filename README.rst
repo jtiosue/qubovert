@@ -65,7 +65,7 @@ Or to install from source:
 
   git clone https://github.com/jiosue/qubovert.git
   cd qubovert
-  pip install -e .
+  pip install .
 
 
 Then you can use it in Python **versions 3.6 and above** with

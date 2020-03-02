@@ -14,16 +14,16 @@
 #   limitations under the License.
 
 cdef extern from "simulate_quso.h":
-	void simulate_quso(
-		int len_state, int *state, double *h,
-		int *num_neighbors, int *neighbors, double *J,
-		int len_Ts, double *Ts, int *num_updates,
-		int seed
-	) nogil
+    void simulate_quso(
+        int len_state, int *state, double *h,
+        int *num_neighbors, int *neighbors, double *J,
+        int len_Ts, double *Ts, int *num_updates,
+        int seed
+    ) nogil
 
 
 def simulate_quso(len_state, state, h, num_neighbors,
-	              neighbors, J, len_Ts, Ts, num_updates, seed):
+                  neighbors, J, len_Ts, Ts, num_updates, seed):
 
 
     # convert all Python types to C
@@ -40,8 +40,8 @@ def simulate_quso(len_state, state, h, num_neighbors,
 
     with nogil:
         num = simulate_quso(
-        	c_len_state, c_state, c_h,
-        	c_num_neighbors, c_neighbors, c_J,
-        	c_len_Ts, c_Ts, c_num_updates,
-        	c_seed
+            c_len_state, c_state, c_h,
+            c_num_neighbors, c_neighbors, c_J,
+            c_len_Ts, c_Ts, c_num_updates,
+            c_seed
         )
