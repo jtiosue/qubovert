@@ -10,6 +10,7 @@ DictArithmetic
 
 .. autoclass:: qubovert.utils.DictArithmetic
     :members:
+    :inherited-members:
 
 
 BO
@@ -17,6 +18,7 @@ BO
 
 .. autoclass:: qubovert.utils.BO
     :members:
+    :inherited-members:
 
 
 Conversions
@@ -24,3 +26,4 @@ Conversions
 
 .. autoclass:: qubovert.utils.Conversions
     :members:
+    :inherited-members:

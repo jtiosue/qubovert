@@ -14,3 +14,4 @@ We also discuss the ``qubovert.boolean_var`` and ``qubovert.integer_var`` functi
 
 .. autoclass:: qubovert.PCBO
     :members:
+    :inherited-members:

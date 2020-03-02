@@ -3,6 +3,9 @@ Annealing
 
 Note that the ``sim`` module will not be imported with ``from qubovert import *``. You must import ``qubovert.sim`` explicitly. Here we show some functions to use the boolean and spin simulation to run simulated annealing on the models.
 
+**Please note** that the ``qv.sim.anneal_qubo`` and ``qv.sim.anneal_quso`` functions perform much faster than the ``qv.sim.anneal_pubo`` and ``qv.sim.anneal_puso`` functions since the former are written in C and wrapped in Python. If your system has degree 2 or less, then you should use the QUBO or QUSO anneal functions!
+
+
 
 Anneal PUBO
 -----------

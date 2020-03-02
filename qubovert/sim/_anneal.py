@@ -20,9 +20,9 @@ algorithm.
 """
 
 from qubovert.utils import (
-    puso_value, pubo_to_puso, QUBOVertWarning, boolean_to_spin
+    puso_value, pubo_to_puso, qubo_to_quso, QUBOVertWarning, boolean_to_spin
 )
-from . import SpinSimulation, AnnealResults
+from . import PUSOSimulation, QUSOSimulation, AnnealResults
 import random
 import numpy as np
 
@@ -119,6 +119,139 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
     return float(T0), float(Tf)
 
 
+# main spin annealing function
+
+def _anneal_spin(model, spin_simulation, num_anneals=1,
+                 anneal_duration=1000, initial_state=None,
+                 temperature_range=None, schedule='geometric', seed=None):
+    """_anneal_spin.
+
+    Run a simulated annealing algorithm to try to find the minimum of the spin
+    model given by ``model``. ``_anneal_spin`` uses a cooling schedule with the
+    ``spin_simulation`` object. Please see all of the parameters for details.
+
+    Both ``qv.sim.anneal_puso`` and ``qv.sim.anneal_quso`` run through this
+    function. Since ``qv.sim.QUSOSimulation`` is faster than
+    ``qv.sim.PUSOSimulation``, we send in different simulation objects for
+    ``anneal_quso`` and ``anneal_puso``.
+
+    Parameters
+    ----------
+    model : dict, or any type in ``qubovert.SPIN_MODELS``.
+        Maps spin labels to their values in the Hamiltonian.
+        Please see the docstrings of any of the objects in
+        ``qubovert.SPIN_MODELS`` to see how ``H`` should be formatted.
+    spin_simulation : qv.sim.PUSOSimulation or qv.sim.QUSOSimulation object.
+        Should be a ``qv.sim.QUSOSimulation`` object if this function is called
+        from ``qv.sim.anneal_quso``, or a ``qv.sim.PUSOSimulation`` object if
+        this function is called from ``qv.sim.anneal_puso``.
+    num_anneals : int >= 1 (optional, defaults to 1).
+        The number of times to run the simulated annealing algorithm.
+    anneal_duration : int >= 1 (optional, defaults to 1000).
+        The total number of updates to the simulation during the anneal.
+        This is related to the amount of time we spend in the cooling schedule.
+        If an explicit schedule is provided, then ``anneal_duration`` will be
+        ignored.
+    initial_state : dict (optional, defaults to None).
+        The initial state to start the anneal in. ``initial_state`` must map
+        the spin label names to their values in {1, -1}. If ``initial_state``
+        is None, then a random state will be chosen to start each anneal.
+        Otherwise, ``initial_state`` will be the starting state for all of the
+        anneals.
+    temperature_range : tuple (optional, defaults to None).
+        The temperature to start and end the anneal at.
+        ``temperature = (T0, Tf)``. ``T0`` must be >= ``Tf``. To see more
+        details on picking a temperature range, please see the function
+        ``qubovert.sim.anneal_temperature_range``. If ``temperature_range`` is
+        None, then it will by default be set to
+        ``T0, Tf = qubovert.sim.anneal_temperature_range(H, spin=True)``.
+        Note that a temperature can only be zero if ``schedule`` is explicitly
+        given or if ``schedule`` is linear.
+    schedule : str or iterable of tuple (optional, defaults to ``'geometric'``)
+        What type of cooling schedule to use. If ``schedule == 'linear'``, then
+        the cooling schedule will be a linear interpolation between the values
+        in ``temperature_range``. If ``schedule == 'geometric'``, then the
+        cooling schedule will be a geometric interpolation between the values
+        in ``temperature_range``. Otherwise, you can supply an explicit
+        schedule. In this case, ``schedule`` should be an iterable of tuples,
+        where each tuple is a ``(T, n)`` pair, where ``T`` denotes the
+        temperature to update the simulation, and ``n`` denote the number of
+        times to update the simulation at that temperature. This schedule
+        will be sent directly into the
+        ``qubovert.sim.PUSOSimulation.schedule_update`` method.
+    seed : number (optional, defaults to None).
+        The number to seed Python's builtin ``random`` module with. If
+        ``seed is None``, then ``random.seed`` will not be called.
+
+    Returns
+    -------
+    res : qubovert.sim.AnnealResults object.
+        ``res`` contains information on the final states of the simulations.
+        See Examples below for an example of how to read from ``res``.
+        See ``help(qubovert.sim.AnnealResults)`` for more info.
+
+    Raises
+    ------
+    ValueError
+        If the ``schedule`` argument provided is formatted incorrectly. See the
+        Parameters section.
+    ValueError
+        If the initial temperature is less than the final temperature.
+
+    Warns
+    -----
+    qubovert.utils.QUBOVertWarning
+        If both the ``temperature_range`` and explicit ``schedule`` arguments
+        are provided.
+
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    if schedule in ('linear', 'geometric'):
+        T0, Tf = temperature_range or anneal_temperature_range(model,
+                                                               spin=True)
+        if T0 < Tf:
+            raise ValueError("The final temperature must be less than the "
+                             "initial temperature")
+
+        # in the case that H is empty or just an offset and the user didn't
+        # supply a temperature range, then T0 and Tf will be 0.
+        if temperature_range is None and T0 == Tf == 0:
+            T0 = Tf = 1
+        Ts = (
+            np.linspace(T0, Tf, anneal_duration) if schedule == 'linear' else
+            np.geomspace(T0, Tf, anneal_duration)
+        )
+        schedule = tuple((T, 1) for T in Ts)
+    elif isinstance(schedule, str):
+        raise ValueError(
+            "Invalid schedule. Must be either 'linear', 'geometric', or an "
+            "explicit temperature schedule. See the docstring for more info."
+        )
+    elif temperature_range:
+        QUBOVertWarning.warn(
+            "Both a temperature range and an explicit schedule was provided. "
+            "The temperature range will be ignored and the schedule used "
+            "instead."
+        )
+
+    sim = spin_simulation(model, initial_state)
+
+    result = AnnealResults(True)
+    for _ in range(num_anneals):
+        if initial_state is None:
+            sim.set_state({v: random.choice((-1, 1)) for v in sim._variables})
+        sim.schedule_update(
+            schedule,
+            seed=random.randint(0, 1 << 16) if seed is not None else None
+        )
+        result.add_state(sim.state, puso_value(sim._state, model))
+        sim.reset()
+
+    return result
+
+
 # annealing functions
 
 def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
@@ -127,8 +260,13 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     Run a simulated annealing algorithm to try to find the minimum of the PUSO
     given by ``H``. ``anneal_puso`` uses a cooling schedule with the
-    ``qubovert.sim.SpinSimulation`` object. Please see all of the parameters
+    ``qubovert.sim.PUSOSimulation`` object. Please see all of the parameters
     for details.
+
+    **Please note** that the ``qv.sim.anneal_quso`` function performs much
+    faster than the ``qv.sim.anneal_puso`` function since the former is written
+    in C and wrapped in Python. If your system has degree 2 or less, then you
+    should use the ``qv.sim.anneal_quso`` function!
 
     Parameters
     ----------
@@ -169,7 +307,7 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
         temperature to update the simulation, and ``n`` denote the number of
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
-        ``qubovert.sim.SpinSimulation.schedule_update`` method.
+        ``qubovert.sim.PUSOSimulation.schedule_update`` method.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -220,47 +358,10 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
     -4, {0: 1, 1: -1, 2: 1, 3: -1, 4: 1}
 
     """
-    if seed is not None:
-        random.seed(seed)
-
-    if schedule in ('linear', 'geometric'):
-        T0, Tf = temperature_range or anneal_temperature_range(H, spin=True)
-        if T0 < Tf:
-            raise ValueError("The final temperature must be less than the "
-                             "initial temperature")
-
-        # in the case that H is empty or just an offset and the user didn't
-        # supply a temperature range, then T0 and Tf will be 0.
-        if temperature_range is None and T0 == Tf == 0:
-            T0 = Tf = 1
-        Ts = (
-            np.linspace(T0, Tf, anneal_duration) if schedule == 'linear' else
-            np.geomspace(T0, Tf, anneal_duration)
-        )
-        schedule = tuple((T, 1) for T in Ts)
-    elif isinstance(schedule, str):
-        raise ValueError(
-            "Invalid schedule. Must be either 'linear', 'geometric', or an "
-            "explicit temperature schedule. See the docstring for more info."
-        )
-    elif temperature_range:
-        QUBOVertWarning.warn(
-            "Both a temperature range and an explicit schedule was provided. "
-            "The temperature range will be ignored and the schedule used "
-            "instead."
-        )
-
-    sim = SpinSimulation(H, initial_state)
-
-    result = AnnealResults(True)
-    for _ in range(num_anneals):
-        if initial_state is None:
-            sim.set_state({v: random.choice((-1, 1)) for v in sim._variables})
-        sim.schedule_update(schedule)
-        result.add_state(sim.state, puso_value(sim._state, H))
-        sim.reset()
-
-    return result
+    return _anneal_spin(
+        H, PUSOSimulation, num_anneals, anneal_duration, initial_state,
+        temperature_range, schedule, seed
+    )
 
 
 def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
@@ -269,8 +370,13 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     Run a simulated annealing algorithm to try to find the minimum of the PUBO
     given by ``P``. ``anneal_pubo`` uses a cooling schedule with the
-    ``qubovert.sim.BooleanSimulation`` object. Please see all of the parameters
+    ``qubovert.sim.PUBOSimulation`` object. Please see all of the parameters
     for details.
+
+    **Please note** that the ``qv.sim.anneal_qubo`` function performs much
+    faster than the ``qv.sim.anneal_pubo`` function since the former is written
+    in C and wrapped in Python. If your system has degree 2 or less, then you
+    should use the ``qv.sim.anneal_qubo`` function!
 
     Parameters
     ----------
@@ -309,7 +415,7 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
         temperature to update the simulation, and ``n`` denote the number of
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
-        ``qubovert.sim.BooleanSimulation.schedule_update`` method.
+        ``qubovert.sim.PUBOSimulation.schedule_update`` method.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -374,7 +480,7 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     Run a simulated annealing algorithm to try to find the minimum of the QUSO
     given by ``L``. ``anneal_quso`` uses a cooling schedule with the
-    ``qubovert.sim.SpinSimulation`` object. Please see all of the parameters
+    ``qubovert.sim.PUSOSimulation`` object. Please see all of the parameters
     for details.
 
     Parameters
@@ -414,7 +520,7 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
         temperature to update the simulation, and ``n`` denote the number of
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
-        ``qubovert.sim.SpinSimulation.schedule_update`` method.
+        ``qubovert.sim.PUSOSimulation.schedule_update`` method.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -465,9 +571,9 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
     -4, {0: 1, 1: -1, 2: 1, 3: -1, 4: 1}
 
     """
-    return anneal_puso(
-        L, num_anneals, anneal_duration,
-        initial_state, temperature_range, schedule, seed
+    return _anneal_spin(
+        L, QUSOSimulation, num_anneals, anneal_duration, initial_state,
+        temperature_range, schedule, seed
     )
 
 
@@ -477,7 +583,7 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     Run a simulated annealing algorithm to try to find the minimum of the QUBO
     given by ``Q``. ``anneal_qubo`` uses a cooling schedule with the
-    ``qubovert.sim.BooleanSimulation`` object. Please see all of the parameters
+    ``qubovert.sim.PUBOSimulation`` object. Please see all of the parameters
     for details.
 
     Parameters
@@ -517,7 +623,7 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
         temperature to update the simulation, and ``n`` denote the number of
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
-        ``qubovert.sim.BooleanSimulation.schedule_update`` method.
+        ``qubovert.sim.PUBOSimulation.schedule_update`` method.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -569,7 +675,8 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
     -4, {0: 0, 1: 1, 2: 0, 3: 1, 4: 0}
 
     """
-    return anneal_pubo(
-        Q, num_anneals, anneal_duration,
-        initial_state, temperature_range, schedule, seed
-    )
+    return anneal_quso(
+        qubo_to_quso(Q), num_anneals, anneal_duration,
+        None if initial_state is None else boolean_to_spin(initial_state),
+        temperature_range, schedule, seed
+    ).to_boolean()

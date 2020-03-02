@@ -195,6 +195,7 @@ There are many utilities in the *utils* library that can be helpful. Some exampl
 - ``qubovert.utils.approximate_pubo_extrema``, approximate the minimum and maximum values that a PUBO can take; the true extrema will lie within these bounds.
 - ``qubovert.utils.approximate_puso_extrema``, approximate the minimum and maximum values that a PUSO can take; the true extrema will lie within these bounds.
 - ``qubovert.utils.subgraph``, create the subgraph of a model that only contains certain given variables.
+- ``qubovert.utils.subvalue``, create the submodel of a model with certain values of the model replaced with values.
 - ``qubovert.utils.normalize``, normalize a model such that its coefficients have a maximum absolute magnitude.
 
 See ``qubovert.utils.__all__`` for more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that *qubovert* uses everywhere.
@@ -326,7 +327,7 @@ Now we have to convert the solution in terms of the QUBO/QUSO variables back to 
 Simulating spin and boolean systems
 -----------------------------------
 
-We use a Metropolis algorithm to simulate spin and boolean system. Below we show an example for simulating a spin system (specifically, a 1D ferromagnetic chain). Similar functinality exists for boolean simulation with ``qubovert.sim.BooleanSimulation``.
+We use a Metropolis algorithm to simulate spin and boolean system. Below we show an example for simulating a spin system (specifically, a 1D ferromagnetic chain). Similar functionality exists for QUBO, PUBO, and PUSO simulation with ``qubovert.sim.QUBOSimulation``, ``qubovert.sim.PUBOSimulation``, ``qubovert.sim.PUSOSimulation``. Please note that `QUSOSimulation`` and ``QUBOSimulation`` are much faster than ``PUSOSimulation`` and ``PUBOSimulation`` because the former are implemented in C. If you have a degree 2 or less model, use the QUBO and QUSO simulations!
 
 .. code:: python
 
@@ -339,7 +340,7 @@ We use a Metropolis algorithm to simulate spin and boolean system. Below we show
 
     # initial state is all spin down
     initial_state = {i: -1 for i in range(length)}
-    sim = qv.sim.SpinSimulation(spin_system, initial_state)
+    sim = qv.sim.QUSOSimulation(spin_system, initial_state)
 
     # define a schedule. here we simulate at temperature 4 for 25 time
     # steps, then temperature 2 for 25 time steps, then temperature 1 for
@@ -348,7 +349,6 @@ We use a Metropolis algorithm to simulate spin and boolean system. Below we show
     sim.schedule_update(schedule)
 
     print("final state", sim.state)
-    print("last 30 states", sim.get_past_states(30))
 
 
 Convert common problems to quadratic form (the *problems* library)

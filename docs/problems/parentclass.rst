@@ -6,3 +6,4 @@ Note that the ``problems`` or ``np`` modules will not be imported with ``from qu
 
 .. autoclass:: qubovert.problems.Problem
     :members:
+    :inherited-members:
