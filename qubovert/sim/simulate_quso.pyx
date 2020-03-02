@@ -28,14 +28,14 @@ def _simulate_quso(len_state, state, h, num_neighbors,
 
     # convert all Python types to C
     cdef int c_len_state = len_state
-    cdef int *c_state = state
-    cdef double *c_h = h
-    cdef int *c_num_neighbors = num_neighbors
-    cdef int *c_neighbors = neighbors
-    cdef double *c_J = J
+    cdef int *c_state = &state
+    cdef double *c_h = &h
+    cdef int *c_num_neighbors = &num_neighbors
+    cdef int *c_neighbors = &neighbors
+    cdef double *c_J = &J
     cdef int c_len_Ts = len_Ts
-    cdef double *c_Ts = Ts
-    cdef int *c_num_updates = num_updates
+    cdef double *c_Ts = &Ts
+    cdef int *c_num_updates = &num_updates
     cdef int c_seed = seed
 
     with nogil:
