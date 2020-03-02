@@ -19,10 +19,10 @@ cdef extern from "simulate_quso.h":
         int *num_neighbors, int *neighbors, double *J,
         int len_Ts, double *Ts, int *num_updates,
         int seed
-    )
+    ) nogil
 
 
-def simulate_quso(len_state, state, h, num_neighbors,
+def _simulate_quso(len_state, state, h, num_neighbors,
                   neighbors, J, len_Ts, Ts, num_updates, seed):
 
 
@@ -38,9 +38,10 @@ def simulate_quso(len_state, state, h, num_neighbors,
     cdef int *c_num_updates = &c_num_updates[0]
     cdef int c_seed = seed
 
-    num = simulate_quso(
-        c_len_state, c_state, c_h,
-        c_num_neighbors, c_neighbors, c_J,
-        c_len_Ts, c_Ts, c_num_updates,
-        c_seed
-    )
+    with nogil:
+        num = simulate_quso(
+            c_len_state, c_state, c_h,
+            c_num_neighbors, c_neighbors, c_J,
+            c_len_Ts, c_Ts, c_num_updates,
+            c_seed
+        )
