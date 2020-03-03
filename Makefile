@@ -8,17 +8,17 @@ clean:
 	rm -rf qubovert.egg-info
 
 install:
-	. $(python_cmd) -m pip install --user virtualenv
+	$(python_cmd) -m pip install --user virtualenv
 	$(virtualenv_cmd) venv
 	. venv/bin/activate && pip install --upgrade pip
 	. venv/bin/activate && pip install -e .
-	. venv-dev/bin/activate && pip install -r requirements-dev.txt
+	. venv/bin/activate && pip install -r requirements-dev.txt
 
 cython_install:
-	. $(python_cmd) -m pip install --user virtualenv
+	$(python_cmd) -m pip install --user virtualenv
 	$(virtualenv_cmd) venv
 	. venv/bin/activate && pip install --upgrade pip
-	. venv-dev/bin/activate && pip install -r requirements-dev.txt
+	. venv/bin/activate && pip install -r requirements-dev.txt
 	. venv/bin/activate && pip install -e .
 
 test:
