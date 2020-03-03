@@ -243,21 +243,10 @@ class QUSOSimulation:
         >>> sim.schedule_update(schedule)
 
         """
-        # create schedule
-        Ts, num_updates = [], []
-        for T, n in schedule:
-            Ts.append(float(T))
-            num_updates.append(n)
-            if n < 0:
-                raise ValueError("Cannot update a negative number of times")
-
-        # call the C function,
+        # call the C function
         self._state = simulate_quso(
-            len(self._state),
             self._state,
             *self._c_args,
-            len(Ts),
-            Ts,
-            num_updates,
+            schedule,
             seed if seed is not None else -1
         )

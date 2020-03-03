@@ -27,15 +27,13 @@ cdef extern from "simulate_quso.h":
     ) nogil
 
 
-def c_simulate_quso(len_state, state, h, num_neighbors,
-                    neighbors, J, len_Ts, Ts, num_updates, seed):
+def c_simulate_quso(state, h, num_neighbors,
+                    neighbors, J, schedule, seed):
     """
     Simulate a QUSO with the C source.
 
     Parameters
     ----------
-    len_state : int.
-        The length of `state`, ie the number of spin.
     state: list of ints.
         `state[i]` is the value of the ith spin, either 1 or -1.
     h : list of floats.
@@ -48,13 +46,9 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
     J : list of doubles.
         ``J[i]`` is the coupling value between spin ``k`` and 
         ``neighbors[i]``.
-    len_Ts : int.
-        length of `Ts` and the length of `num_updates`.
-    Ts : list of doubles.
-        `Ts[j]` is the jth temperature to simulate the QUSO at.
-    num_updates : list of ints. 
-        `num_updates[j]` is the number of
-        times steps to simulate the QUSO at temperature `Ts[j]`.
+    schedule : iterable of tuples.
+        Each tuple is a ``T, n`` pairs, where ``n`` is the number of time
+        steps to update the simulation at temperature ``T``.
     seed : int. 
         seeds the random number generator (we use `rand` from the C standard
         library). If `seed` is a negative integer, then we seed the random
@@ -90,35 +84,37 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
               2}`
     """
     # convert all Python types to C
-    cdef int c_len_state = len_state
+    cdef int c_len_state = len(state)
     cdef int *c_state
     cdef double *c_h
     cdef int *c_num_neighbors
     cdef int *c_neighbors
     cdef double *c_J
-    cdef int c_len_Ts = len_Ts
+    cdef int c_len_Ts = len(schedule)
     cdef double *c_Ts
     cdef int *c_num_updates
     cdef int c_seed = seed
 
-    c_state = <int *>malloc(len_state * cython.sizeof(int))
-    c_h = <double *>malloc(len_state * cython.sizeof(double))
-    c_num_neighbors = <int *>malloc(len_state * cython.sizeof(int))
+    c_state = <int *>malloc(len(state) * cython.sizeof(int))
+    c_h = <double *>malloc(len(state) * cython.sizeof(double))
+    c_num_neighbors = <int *>malloc(len(state) * cython.sizeof(int))
     c_neighbors = <int *>malloc(len(neighbors) * cython.sizeof(int))
     c_J = <double *>malloc(len(J) * cython.sizeof(double))
-    c_Ts = <double *>malloc(len(Ts) * cython.sizeof(double))
-    c_num_updates = <int *>malloc(len(Ts) * cython.sizeof(int))
+    c_Ts = <double *>malloc(len(schedule) * cython.sizeof(double))
+    c_num_updates = <int *>malloc(len(schedule) * cython.sizeof(int))
 
-    for i in range(len_state):
+    for i in range(len(state)):
         c_state[i] = state[i]
         c_h[i] = h[i]
         c_num_neighbors[i] = num_neighbors[i]
     for i in range(len(J)):
         c_neighbors[i] = neighbors[i]
         c_J[i] = J[i]
-    for i in range(len_Ts):
-        c_Ts[i] = Ts[i]
-        c_num_updates[i] = num_updates[i]
+    for i, (T, n) in enumerate(schedule):
+        c_Ts[i] = T
+        c_num_updates[i] = n
+        if n < 0:
+            raise ValueError("Cannot update a negative number of times")
 
     with nogil:
         simulate_quso(
@@ -128,7 +124,7 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
             c_seed
         )
 
-    final_state = [c_state[i] for i in range(len_state)]
+    final_state = [c_state[i] for i in range(len(state))]
     free(c_state)
     free(c_h)
     free(c_num_neighbors)
