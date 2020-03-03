@@ -2,21 +2,20 @@ environment:
 
   matrix:
 
-    - PYTHON: "C:\\Python36-x64"
+    - PYTHON: C:\\Python36-x64
+    - PYTHON: C:\Python37-x64
 
 install:
   # We need wheel installed to build wheels
-  - "%PYTHON%\\python.exe -m pip install wheel"
-  - "%PYTHON%\\python.exe -m pip install -e ."
-  - "%PYTHON%\\python.exe -m pip install -r requirements-dev.txt"
+  # - "%PYTHON%\\python.exe -m pip install wheel"
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - python -m pip install -e .
+  - python -m pip install -r requirements-dev.txt
 
 build: off
 
 test_script:
-  - "%PYTHON%\\python.exe -m pydocstyle convention=numpy qubovert"
-  - "%PYTHON%\\python.exe -m pytest --codestyle --cov=./"
-  - "%PYTHON%\\python.exe setup.py sdist bdist_wheel"
-  - "%PYTHON%\\python.exe -m twine check dist/*"
+  - runtests.bat
 
 # after_test:
   # This step builds your wheels.

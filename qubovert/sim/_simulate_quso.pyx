@@ -85,23 +85,15 @@ def c_simulate_quso(state, h, num_neighbors,
     """
     # convert all Python types to C
     cdef int c_len_state = len(state)
-    cdef int *c_state
-    cdef double *c_h
-    cdef int *c_num_neighbors
-    cdef int *c_neighbors
-    cdef double *c_J
+    cdef int *c_state = <int*>malloc(len(state) * cython.sizeof(int))
+    cdef double *c_h = <double*>malloc(len(state) * cython.sizeof(double))
+    cdef int *c_num_neighbors = <int*>malloc(len(state) * cython.sizeof(int))
+    cdef int *c_neighbors = <int*>malloc(len(neighbors) * cython.sizeof(int))
+    cdef double *c_J = <double*>malloc(len(J) * cython.sizeof(double))
     cdef int c_len_Ts = len(schedule)
-    cdef double *c_Ts
-    cdef int *c_num_updates
+    cdef double *c_Ts = <double*>malloc(len(schedule) * cython.sizeof(double))
+    cdef int *c_num_updates = <int*>malloc(len(schedule) * cython.sizeof(int))
     cdef int c_seed = seed
-
-    c_state = <int *>malloc(len(state) * cython.sizeof(int))
-    c_h = <double *>malloc(len(state) * cython.sizeof(double))
-    c_num_neighbors = <int *>malloc(len(state) * cython.sizeof(int))
-    c_neighbors = <int *>malloc(len(neighbors) * cython.sizeof(int))
-    c_J = <double *>malloc(len(J) * cython.sizeof(double))
-    c_Ts = <double *>malloc(len(schedule) * cython.sizeof(double))
-    c_num_updates = <int *>malloc(len(schedule) * cython.sizeof(int))
 
     for i in range(len(state)):
         c_state[i] = state[i]
