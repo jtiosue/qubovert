@@ -27,10 +27,68 @@ cdef extern from "simulate_quso.h":
     ) nogil
 
 
-def py_simulate_quso(len_state, state, h, num_neighbors,
-                     neighbors, J, len_Ts, Ts, num_updates, seed):
+def c_simulate_quso(len_state, state, h, num_neighbors,
+                    neighbors, J, len_Ts, Ts, num_updates, seed):
+    """
+    Simulate a QUSO with the C source.
 
+    Parameters
+    ----------
+    len_state : int.
+        The length of `state`, ie the number of spin.
+    state: list of ints.
+        `state[i]` is the value of the ith spin, either 1 or -1.
+    h : list of floats.
+        `h[i]` is the field value on spin `i`.
+    num_neighbors : list of ints. 
+        `num_neighbors[i]` is the number of neighbors that spin i has.
+    neighbors : list of ints.
+        ``neighbors[i]`` is the jth neighbor of spin ``k``, where 
+        ``j = i - num_neighbors[k-1] - num_neighbors[k-2] - ...``
+    J : list of doubles.
+        ``J[i]`` is the coupling value between spin ``k`` and 
+        ``neighbors[i]``.
+    len_Ts : int.
+        length of `Ts` and the length of `num_updates`.
+    Ts : list of doubles.
+        `Ts[j]` is the jth temperature to simulate the QUSO at.
+    num_updates : list of ints. 
+        `num_updates[j]` is the number of
+        times steps to simulate the QUSO at temperature `Ts[j]`.
+    seed : int. 
+        seeds the random number generator (we use `rand` from the C standard
+        library). If `seed` is a negative integer, then we seed the random
+        number generator with `srand(time(NULL))`. If `seed` is a nonnegative
+        integer, then we seed the random number generator with
+        `srand((unsigned int)seed)`.
 
+    Returns
+    -------
+    new_state : list of ints.
+
+    Example
+    -------
+    `neighbors` and `J` are basically flattened arrays.
+    In other words, we flatten the arrays `temp_neighbors` and
+    `temp_J`, where `temp_neighbors` points to an array where `temp_neighbors[i][j]`
+    is the jth neighbor of spin i, for j=0,...,num_neighbors[i]-1, and similarly,
+    `temp_J` points to an array where `temp_J[i][j]` is the coupling value between
+    spin i and spin `neighbors[i][j]`, for j=0,...,num_neighbors[i]-1.
+
+    A spin model such as
+        -z_0 z_1 + 2*z_1*z_2 + z_0
+    must be represented as
+        `h = {1., 0, 0}`
+        `num_neighbors = {1, 2, 1}`
+        `temp_neighbors = {{1}, {0, 2}, {1}}`
+        `temp_J = {{-1.},
+              {-1, 2},
+              {2}}`
+        `neighbors = {1, 0, 2, 1}`
+        `J = {-1.,
+              -1, 2,
+              2}`
+    """
     # convert all Python types to C
     cdef int c_len_state = len_state
     cdef int *c_state

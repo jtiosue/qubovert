@@ -138,8 +138,8 @@ void simulate_quso(
 	`state` points to an array where `state[i]` is the value of the ith
 		spin, either 1 or -1.
 	`h` points to an array where `h[i]` is the field value on spin `i`.
-	`num_neighbors` points to an array where `neighbors[i]` is the length
-		of the array `neighbors[i]`.
+	`num_neighbors` points to an array where `num_neighbors[i]` is
+		number of neighbors that spin i has.
 	`neighbors` points to an array where `neighbors[i]` is the jth neighbor of
 		spin `k`, where `j = i - num_neighbors[k-1] - num_neighbors[k-2] - ...`
 	`J` points to an array where `J[i]` is the coupling value between

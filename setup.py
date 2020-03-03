@@ -20,7 +20,6 @@ installing by source.
 """
 
 import setuptools
-from setuptools.command.build_ext import build_ext
 
 
 with open('README.rst') as f:
@@ -36,7 +35,7 @@ with open("qubovert/_version.py") as f:
 # create the extension for the C file in qubovert.sim.src
 extensions = [
     setuptools.Extension(
-        name='_simulate_quso',
+        name='qubovert.sim._simulate_quso',
         sources=['./qubovert/sim/_simulate_quso.pyx',
                  './qubovert/sim/src/simulate_quso.c'],
         include_dirs=['./qubovert/sim/src/'],
@@ -59,7 +58,6 @@ setuptools.setup(
     test_suite="tests",
     setup_requires=REQUIREMENTS,
     install_requires=REQUIREMENTS,
-    cmdclass=dict(build_ext=build_ext),
     zip_safe=False,
     include_package_data=True,
     classifiers=[
