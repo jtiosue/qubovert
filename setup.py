@@ -20,6 +20,7 @@ installing by source.
 """
 
 import setuptools
+from setuptools.command.build_ext import build_ext
 
 
 with open('README.rst') as f:
@@ -58,7 +59,7 @@ setuptools.setup(
     test_suite="tests",
     setup_requires=REQUIREMENTS,
     install_requires=REQUIREMENTS,
-    cmdclass={"build_ext": setuptools.command.build_ext.build_ext},
+    cmdclass={"build_ext": build_ext},
     zip_safe=False,
     include_package_data=True,
     classifiers=[
