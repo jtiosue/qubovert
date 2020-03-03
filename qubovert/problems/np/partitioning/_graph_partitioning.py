@@ -236,34 +236,33 @@ class GraphPartitioning(Problem):
         if A is None:
             A = min(2*self._degree, self._N) * B / 8
 
-#        L = QUSOMatrix()
-#
-#        # we don't use PCBO().to_quso because we want to keep our mapping.
-#
-#        # encode H_A (equation 8)
-#        L += PCSO().add_constraint_eq_zero(
-#            {(i,): 1 for i in range(self._N)}, lam=A)
-#
-#        # encode H_B (equation 9)
-#        L += B * sum(self._edges.values()) / 2
-#        for (u, v), w in self._edges.items():
-#            L[(self._vertex_to_index[u],
-#               self._vertex_to_index[v])] -= w * B / 2
-#
-#        return L
-
-        H = PCSO()
-        H.set_mapping(self._vertex_to_index)
+        L = QUSOMatrix()
 
         # encode H_A (equation 8)
-        H.add_constraint_eq_zero({(i,): 1 for i in self._vertices}, lam=A)
+        L += PCSO().add_constraint_eq_zero(
+            {(i,): 1 for i in range(self._N)}, lam=A)
 
         # encode H_B (equation 9)
-        H += B * sum(self._edges.values()) / 2
-        for e, w in self._edges.items():
-            H[e] -= w * B / 2
+        L += B * sum(self._edges.values()) / 2
+        for (u, v), w in self._edges.items():
+            L[(self._vertex_to_index[u],
+              self._vertex_to_index[v])] -= w * B / 2
 
-        return H.to_quso()
+        return L
+
+        # slower because we convert to PCSO and then to QUSOMatrix
+        # H = PCSO()
+        # H.set_mapping(self._vertex_to_index)
+
+        # # encode H_A (equation 8)
+        # H.add_constraint_eq_zero({(i,): 1 for i in self._vertices}, lam=A)
+
+        # # encode H_B (equation 9)
+        # H += B * sum(self._edges.values()) / 2
+        # for e, w in self._edges.items():
+        #     H[e] -= w * B / 2
+
+        # return H.to_quso()
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.
