@@ -28,7 +28,7 @@ cdef extern from "simulate_quso.h":
 
 
 def c_simulate_quso(len_state, state, h, num_neighbors,
-                    neighbors, J, len_Ts, Ts, num_updates, seed):
+                    neighbors, J, schedule, seed):
     """
     Simulate a QUSO with the C source.
 
@@ -48,13 +48,9 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
     J : list of doubles.
         ``J[i]`` is the coupling value between spin ``k`` and 
         ``neighbors[i]``.
-    len_Ts : int.
-        length of `Ts` and the length of `num_updates`.
-    Ts : list of doubles.
-        `Ts[j]` is the jth temperature to simulate the QUSO at.
-    num_updates : list of ints. 
-        `num_updates[j]` is the number of
-        times steps to simulate the QUSO at temperature `Ts[j]`.
+    schedule : iterable of tuples.
+        Each tuple is a ``T, n`` pairs, where ``n`` is the number of time
+        steps to update the simulation at temperature ``T``.
     seed : int. 
         seeds the random number generator (we use `rand` from the C standard
         library). If `seed` is a negative integer, then we seed the random
@@ -116,9 +112,11 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
     for i in range(len(J)):
         c_neighbors[i] = neighbors[i]
         c_J[i] = J[i]
-    for i in range(len_Ts):
-        c_Ts[i] = Ts[i]
-        c_num_updates[i] = num_updates[i]
+    for i, (T, n) in enumerate(schedule):
+        c_Ts[i] = T
+        c_num_updates[i] = n
+        if n < 0:
+            raise ValueError("Cannot update a negative number of times")
 
     with nogil:
         simulate_quso(
