@@ -11,9 +11,10 @@ image:
   - Ubuntu
 
 install:
-  # We need wheel installed to build wheels
   - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - make dev_install
+  - make install  # test that package installs as is
+  - make clean
+  - make cython_install  # dev_install causes some of the tests to be skipped
 
 build: off
 
