@@ -19,7 +19,7 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 
 """
 
-# from qubovert.utils import QUSOMatrix
+from qubovert.utils import QUSOMatrix
 from qubovert import PCSO
 from qubovert.problems import Problem
 
