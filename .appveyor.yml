@@ -2,9 +2,10 @@ environment:
 
   matrix:
 
-    - fast_finish: true
     - PYTHON: C:\Python36-x64
+      fast_finish: true
     - PYTHON: C:\Python37-x64
+      fast_finish: true
 
 image:
   - Visual Studio 2019
@@ -16,8 +17,6 @@ install:
   - make install  # test that package installs as is
   - make clean
   - make cython_install  # dev_install causes some of the tests to be skipped
-
-build: off
 
 test_script:
   - make test
