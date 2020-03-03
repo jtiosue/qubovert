@@ -11,6 +11,7 @@ install:
 	$(virtualenv_cmd) venv-dev
 	. venv-dev/bin/activate && pip install -r requirements-dev.txt
 	. venv-dev/bin/activate && pip install .
+	. venv-dev/bin/activate && python -c "import qubovert; qubovert.sim.QUSOSimulation({})"
 
 test:
 	. venv-dev/bin/activate && python -m pydocstyle convention=numpy qubovert
