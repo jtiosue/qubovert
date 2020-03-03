@@ -12,6 +12,12 @@ install:
 	$(virtualenv_cmd) venv
 	. venv/bin/activate && pip install --upgrade pip
 	. venv/bin/activate && pip install -e .
+
+dev_install:
+	$(python_cmd) -m pip install virtualenv
+	$(virtualenv_cmd) venv
+	. venv/bin/activate && pip install --upgrade pip
+	. venv/bin/activate && pip install -e .
 	. venv/bin/activate && pip install -r requirements-dev.txt
 
 cython_install:

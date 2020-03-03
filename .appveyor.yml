@@ -12,17 +12,24 @@ image:
 
 install:
   # We need wheel installed to build wheels
-  # - "%PYTHON%\\python.exe -m pip install wheel"
   - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - make install
+  # - make dev_install
 
 build: off
 
 test_script:
-  - make test
+  # - make test
 
-after_test:
+  - make dev_install
+  - pip uninstall -y cython
+  - make test
   - make clean
+  - make dev_install
+  - make test
+  - make clean
+
+# after_test:
+#   - make clean
 
 # on_success:
 #   - make submitcoverage
