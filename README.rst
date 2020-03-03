@@ -9,6 +9,9 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 .. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=master
     :target: https://travis-ci.com/jiosue/qubovert
     :alt: Travis-CI
+.. image:: https://ci.appveyor.com/api/projects/status/qyl71l1d0cmp9lgq/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/jiosue/qubovert
+    :alt: AppVeyor
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
@@ -24,6 +27,9 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 .. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=dev
     :target: https://travis-ci.com/jiosue/qubovert
     :alt: Travis-CI
+.. image:: https://ci.appveyor.com/api/projects/status/qyl71l1d0cmp9lgq/branch/dev?svg=true
+    :target: https://ci.appveyor.com/project/jiosue/qubovert
+    :alt: AppVeyor
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
     :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
     :alt: Documentation Status
