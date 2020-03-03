@@ -7,18 +7,16 @@ environment:
 install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install wheel"
-	- "%PYTHON%\\python.exe -m pip install -e ."
-	- "%PYTHON%\\python.exe -m pip install -r requirements-dev.txt"
+  - "%PYTHON%\\python.exe -m pip install -e ."
+  - "%PYTHON%\\python.exe -m pip install -r requirements-dev.txt"
 
 build: off
 
 test_script:
-  - "%PYTHON%\\python.exe setup.py test"
-  
   - "%PYTHON%\\python.exe -m pydocstyle convention=numpy qubovert"
-	- "%PYTHON%\\python.exe -m pytest --codestyle --cov=./"
-	- "%PYTHON%\\python.exe setup.py sdist bdist_wheel"
-	- "%PYTHON%\\python.exe -m twine check dist/*"
+  - "%PYTHON%\\python.exe -m pytest --codestyle --cov=./"
+  - "%PYTHON%\\python.exe setup.py sdist bdist_wheel"
+  - "%PYTHON%\\python.exe -m twine check dist/*"
 
 # after_test:
   # This step builds your wheels.
