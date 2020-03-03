@@ -18,7 +18,7 @@ cimport cython
 from libc.stdlib cimport malloc
 
 
-cdef extern from "_simulate_quso.h":
+cdef extern from "simulate_quso.h":
     void simulate_quso(
         int len_state, int *state, double *h,
         int *num_neighbors, int *neighbors, double *J,
@@ -27,8 +27,8 @@ cdef extern from "_simulate_quso.h":
     ) nogil
 
 
-def _simulate_quso(len_state, state, h, num_neighbors,
-                   neighbors, J, len_Ts, Ts, num_updates, seed):
+def py_simulate_quso(len_state, state, h, num_neighbors,
+                     neighbors, J, len_Ts, Ts, num_updates, seed):
 
 
     # convert all Python types to C

@@ -14,7 +14,7 @@
 
 """setup.py.
 
-Set up details for ``pip install qubovert`` or ``pip install -e .`` if
+Set up details for ``pip install qubovert`` or ``pip install .`` if
 installing by source.
 
 """
@@ -36,9 +36,9 @@ with open("qubovert/_version.py") as f:
 # create the extension for the C file in qubovert.sim.src
 extensions = [
     setuptools.Extension(
-        name='qubovert.sim._simulate_quso',
-        sources=['./qubovert/sim/_simulate_quso.pyx',
-                 './qubovert/sim/src/_simulate_quso.c'],
+        name='qubovert.sim.simulate_quso',
+        sources=['./qubovert/sim/simulate_quso.pyx',
+                 './qubovert/sim/src/simulate_quso.c'],
         include_dirs=['./qubovert/sim/src/'],
         language='c',
     )
@@ -59,7 +59,7 @@ setuptools.setup(
     test_suite="tests",
     setup_requires=REQUIREMENTS,
     install_requires=REQUIREMENTS,
-    cmdclass={"build_ext": build_ext},
+    cmdclass=dict(build_ext=build_ext),
     zip_safe=False,
     include_package_data=True,
     classifiers=[

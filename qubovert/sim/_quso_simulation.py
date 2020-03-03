@@ -20,7 +20,7 @@ with interfacing with the C code for simulating QUSOs.
 
 """
 
-from ._simulate_quso import _simulate_quso
+from .simulate_quso import py_simulate_quso as simulate_quso
 from itertools import chain
 from qubovert import QUSO
 from qubovert.utils import QUSOMatrix

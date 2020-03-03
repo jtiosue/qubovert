@@ -1,5 +1,5 @@
-#ifndef _simulate_quso_INCLUDED
-#define _simulate_quso_INCLUDED
+#ifndef simulate_quso_INCLUDED
+#define simulate_quso_INCLUDED
 void simulate_quso(
 	int len_state, int *state, double *h,
 	int *num_neighbors, int *neighbors, double *J,
