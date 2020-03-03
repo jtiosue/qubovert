@@ -124,7 +124,7 @@ def c_simulate_quso(state, h, num_neighbors,
             c_seed
         )
 
-    final_state = [c_state[i] for i in range(len_state)]
+    final_state = [c_state[i] for i in range(len(state))]
     free(c_state)
     free(c_h)
     free(c_num_neighbors)
