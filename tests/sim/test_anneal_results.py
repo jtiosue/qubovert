@@ -22,6 +22,8 @@ from qubovert.utils import spin_to_boolean
 
 def test_annealresult():
 
+    assert False
+
     res = AnnealResult({1: 0, 2: 1}, 2, False)
     assert not res.spin
     assert res.state == {1: 0, 2: 1}
