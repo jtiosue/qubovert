@@ -5,11 +5,10 @@ environment:
     - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37-x64
 
-# image:
-#   - Visual Studio 2015
-#   - Visual Studio 2017
-#   - Visual Studio 2019
-#   - Ubuntu
+image:
+  - Visual Studio 2019
+  - macos-mojave
+  - Ubuntu
 
 install:
   # We need wheel installed to build wheels
