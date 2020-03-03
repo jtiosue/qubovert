@@ -56,7 +56,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     ext_modules=extensions,
     test_suite="tests",
-    setup_requires=REQUIREMENTS,
+    setup_requires=['cython'],
     install_requires=REQUIREMENTS,
     zip_safe=False,
     include_package_data=True,
