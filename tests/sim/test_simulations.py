@@ -21,7 +21,10 @@ from qubovert.sim import (
     PUSOSimulation, PUBOSimulation, QUSOSimulation, QUBOSimulation
 )
 from qubovert import spin_var
-from qubovert.utils import boolean_to_spin, puso_to_pubo, quso_to_qubo
+from qubovert.utils import (
+    boolean_to_spin, puso_to_pubo, quso_to_qubo,
+    QUSOMatrix
+)
 from numpy.testing import assert_raises
 
 
@@ -256,10 +259,46 @@ def test_qusosimulation_set_state():
     sim.set_state([-1])
     assert sim.state == {0: -1}
 
+    # test the same but with matrix
+    ising = QUSOMatrix(
+        sum(-spin_var(i) * spin_var(i+1) for i in range(9))
+    )
+
+    sim = QUSOSimulation(ising)
+    assert sim.state == {i: 1 for i in ising.variables}
+
+    sim = QUSOSimulation(ising, {i: -1 for i in ising.variables})
+    assert sim.state == {i: -1 for i in ising.variables}
+
+    with assert_raises(ValueError):
+        sim.set_state({i: 3 for i in ising.variables})
+
+    with assert_raises(ValueError):
+        QUSOSimulation(ising, {i: 0 for i in ising.variables})
+
+    sim = QUSOSimulation({(0,): 1})
+    with assert_raises(ValueError):
+        sim.set_state([0])
+
+    sim.set_state([-1])
+    assert sim.state == {0: -1}
+
 
 def test_qusosimulation_reset():
 
     ising = sum(-spin_var(i) * spin_var(i+1) for i in range(3))
+    initial_state = {0: 1, 1: 1, 2: -1, 3: 1}
+    sim = QUSOSimulation(ising, initial_state)
+
+    sim.schedule_update([(2, 100)])
+    sim.update(2, 2000)
+    sim.reset()
+    assert sim.state == initial_state == sim.initial_state
+
+    # test the same thing but with mtrix
+    ising = QUSOMatrix(
+        sum(-spin_var(i) * spin_var(i+1) for i in range(3))
+    )
     initial_state = {0: 1, 1: 1, 2: -1, 3: 1}
     sim = QUSOSimulation(ising, initial_state)
 
@@ -300,6 +339,30 @@ def test_qubosimulation_str():
 def test_qubosimulation_set_state():
 
     ising = quso_to_qubo(sum(-spin_var(i) * spin_var(i+1) for i in range(9)))
+
+    sim = QUBOSimulation(ising)
+    assert sim.state == {i: 0 for i in ising.variables}
+
+    sim = QUBOSimulation(ising, {i: 1 for i in ising.variables})
+    assert sim.state == {i: 1 for i in ising.variables}
+
+    with assert_raises(ValueError):
+        sim.set_state({i: 3 for i in ising.variables})
+
+    with assert_raises(ValueError):
+        QUBOSimulation(ising, {i: -1 for i in ising.variables})
+
+    sim = QUBOSimulation({(0,): 1})
+    with assert_raises(ValueError):
+        sim.set_state([-1])
+
+    sim.set_state([1])
+    assert sim.state == {0: 1}
+
+    # test the same thing but wiht matrix
+    ising = quso_to_qubo(QUSOMatrix(
+        sum(-spin_var(i) * spin_var(i+1) for i in range(9))
+    ))
 
     sim = QUBOSimulation(ising)
     assert sim.state == {i: 0 for i in ising.variables}
