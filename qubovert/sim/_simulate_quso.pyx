@@ -27,15 +27,13 @@ cdef extern from "simulate_quso.h":
     ) nogil
 
 
-def c_simulate_quso(len_state, state, h, num_neighbors,
+def c_simulate_quso(state, h, num_neighbors,
                     neighbors, J, schedule, seed):
     """
     Simulate a QUSO with the C source.
 
     Parameters
     ----------
-    len_state : int.
-        The length of `state`, ie the number of spin.
     state: list of ints.
         `state[i]` is the value of the ith spin, either 1 or -1.
     h : list of floats.
@@ -86,26 +84,26 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
               2}`
     """
     # convert all Python types to C
-    cdef int c_len_state = len_state
+    cdef int c_len_state = len(state)
     cdef int *c_state
     cdef double *c_h
     cdef int *c_num_neighbors
     cdef int *c_neighbors
     cdef double *c_J
-    cdef int c_len_Ts = len_Ts
+    cdef int c_len_Ts = len(schedule)
     cdef double *c_Ts
     cdef int *c_num_updates
     cdef int c_seed = seed
 
-    c_state = <int *>malloc(len_state * cython.sizeof(int))
-    c_h = <double *>malloc(len_state * cython.sizeof(double))
-    c_num_neighbors = <int *>malloc(len_state * cython.sizeof(int))
+    c_state = <int *>malloc(len(state) * cython.sizeof(int))
+    c_h = <double *>malloc(len(state) * cython.sizeof(double))
+    c_num_neighbors = <int *>malloc(len(state) * cython.sizeof(int))
     c_neighbors = <int *>malloc(len(neighbors) * cython.sizeof(int))
     c_J = <double *>malloc(len(J) * cython.sizeof(double))
-    c_Ts = <double *>malloc(len(Ts) * cython.sizeof(double))
-    c_num_updates = <int *>malloc(len(Ts) * cython.sizeof(int))
+    c_Ts = <double *>malloc(len(schedule) * cython.sizeof(double))
+    c_num_updates = <int *>malloc(len(schedule) * cython.sizeof(int))
 
-    for i in range(len_state):
+    for i in range(len(state)):
         c_state[i] = state[i]
         c_h[i] = h[i]
         c_num_neighbors[i] = num_neighbors[i]
