@@ -58,6 +58,8 @@ setuptools.setup(
     test_suite="tests",
     setup_requires=REQUIREMENTS,
     install_requires=REQUIREMENTS,
+    cmdclass={"build_ext": setuptools.command.build_ext.build_ext},
+    zip_safe=False,
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
