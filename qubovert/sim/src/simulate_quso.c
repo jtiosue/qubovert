@@ -197,7 +197,7 @@ void simulate_quso(
         index[i] = index[i-1] + num_neighbors[i-1];
     }
 
-    double *flip_spin_dE = malloc(len_state * sizeof(int));
+    double *flip_spin_dE = malloc(len_state * sizeof(double));
     compute_flip_dE(
         flip_spin_dE,
         len_state, state, h,
