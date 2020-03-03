@@ -246,7 +246,8 @@ def _anneal_spin(model, spin_simulation, num_anneals=1,
             schedule,
             seed=random.randint(0, 1 << 16) if seed is not None else None
         )
-        result.add_state(sim.state, puso_value(sim._state, model))
+        state = sim.state
+        result.add_state(state, puso_value(state, model))
         sim.reset()
 
     return result

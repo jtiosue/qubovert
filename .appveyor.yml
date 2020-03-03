@@ -2,33 +2,28 @@ environment:
 
   matrix:
 
-    - PYTHON: C:\\Python36-x64
+    - PYTHON: C:\Python36-x64
     - PYTHON: C:\Python37-x64
+
+# image:
+#   - Visual Studio 2015
+#   - Visual Studio 2017
+#   - Visual Studio 2019
+#   - Ubuntu
 
 install:
   # We need wheel installed to build wheels
   # - "%PYTHON%\\python.exe -m pip install wheel"
-  - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - python -m pip install -e .
-  - python -m pip install -r requirements-dev.txt
+  - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - make install
 
 build: off
 
 test_script:
-  - runtests.bat
+  - make test
 
-# after_test:
-  # This step builds your wheels.
-  # Again, you only need build.cmd if you're building C extensions for
-  # 64-bit Python 3.3/3.4. And you need to use %PYTHON% to get the correct
-  # interpreter
-#  - "%PYTHON%\\python.exe setup.py bdist_wheel"
+after_test:
+  - make clean
 
-artifacts:
-  # bdist_wheel puts your built wheel in the dist directory
-  - path: dist\*
-
-#on_success:
-#  You can use this step to upload your artifacts to a public website.
-#  See Appveyor's documentation for more details. Or you can simply
-#  access your wheels from the Appveyor "artifacts" tab for your build.
+# on_success:
+#   - make submitcoverage
