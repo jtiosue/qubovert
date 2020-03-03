@@ -14,7 +14,7 @@
 
 """setup.py.
 
-Set up details for ``pip install qubovert`` or ``pip install .`` if
+Set up details for ``pip install qubovert`` or ``pip install -e .`` if
 installing by source.
 
 """

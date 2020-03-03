@@ -109,9 +109,6 @@ class QUSOSimulation:
         self.set_state(self._initial_state)
 
         # C arguments
-        c_file = ctypes.CDLL(_c_filename)
-        self._c_simulate_quso = c_file.simulate_quso
-
         # create model arrays
         h = [0.] * L.num_binary_variables
         num_neighbors = [0] * L.num_binary_variables
