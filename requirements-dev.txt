@@ -1,5 +1,5 @@
 codecov==2.0.15
-cython==0.28.5
+cython
 numpy
 pydocstyle==4.0.1
 pytest-codestyle==1.4.0

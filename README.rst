@@ -65,7 +65,7 @@ Or to install from source:
 
   git clone https://github.com/jiosue/qubovert.git
   cd qubovert
-  pip install .
+  pip install -e .
 
 
 Then you can use it in Python **versions 3.6 and above** with
@@ -73,6 +73,9 @@ Then you can use it in Python **versions 3.6 and above** with
 .. code:: python
 
     import qubovert as qv
+
+
+Note that on Windows you will need `Microsoft Visual C++ Build Tools 14 <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ installed.
 
 
 Example of the typical workflow

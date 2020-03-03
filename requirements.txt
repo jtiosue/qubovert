@@ -1,2 +1,2 @@
-cython==0.28.5
+cython
 numpy

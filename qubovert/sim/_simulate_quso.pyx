@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 cimport cython
-from libc.stdlib cimport malloc
+from libc.stdlib cimport malloc, free
 
 
 cdef extern from "simulate_quso.h":
@@ -120,7 +120,6 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
         c_Ts[i] = Ts[i]
         c_num_updates[i] = num_updates[i]
 
-
     with nogil:
         simulate_quso(
             c_len_state, c_state, c_h,
@@ -129,4 +128,12 @@ def c_simulate_quso(len_state, state, h, num_neighbors,
             c_seed
         )
 
-    return [c_state[i] for i in range(len_state)]
+    final_state = [c_state[i] for i in range(len_state)]
+    free(c_state)
+    free(c_h)
+    free(c_num_neighbors)
+    free(c_neighbors)
+    free(c_J)
+    free(c_Ts)
+    free(c_num_updates)
+    return final_state
