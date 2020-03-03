@@ -20,7 +20,6 @@ installing by source.
 """
 
 import setuptools
-from Cython.Build import cythonize
 
 
 with open('README.rst') as f:
@@ -34,7 +33,7 @@ with open("qubovert/_version.py") as f:
     exec(f.read())
 
 # create the extension for the C file in qubovert.sim.src
-extensions = cythonize([
+extensions = [
     setuptools.Extension(
         name='qubovert.sim._simulate_quso',
         sources=['./qubovert/sim/_simulate_quso.pyx',
@@ -42,7 +41,7 @@ extensions = cythonize([
         include_dirs=['./qubovert/sim/src/'],
         language='c',
     )
-], language='c')
+]
 
 setuptools.setup(
     name="qubovert",
@@ -57,6 +56,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=("tests", "docs")),
     ext_modules=extensions,
     test_suite="tests",
+    setup_requires=REQUIREMENTS,
     install_requires=REQUIREMENTS,
     include_package_data=True,
     classifiers=[
