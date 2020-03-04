@@ -16,10 +16,11 @@ install:
   - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   # - make install # test that package installs as is
   # - make clean
-  - make cython_install # dev_install causes some of the tests to be skipped
-  # - make dev_install
+  # - make cython_install # dev_install causes some of the tests to be skipped
+  - make dev_install
 
-build: off
+# build_script:
+#   - make dev_install
 
 test_script:
   - make test
