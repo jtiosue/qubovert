@@ -11,16 +11,15 @@ double rand_double() {
     /*
     Compute a random doulbe number with standard library.
     */
-    return (double)rand() / (double)(RAND_MAX + 1);
+    return (double)rand() / ((double)RAND_MAX + 1.);
 }
 
 
 int rand_int(int start, int stop) {
     // random int in [start, stop)
-    // return (int)floor(
-    //     start + rand_double() * (stop - start)
-    // );
-    return (int)(rand_double() * stop);
+    return (int)floor(
+        start + rand_double() * (stop - start)
+    );
 }
 
 
