@@ -11,7 +11,7 @@ double rand_double() {
     /*
     Compute a random doulbe number with standard library.
     */
-    return (double)rand() / (double)RAND_MAX;
+    return (double)rand() / (double)(RAND_MAX + 1);
 }
 
 
