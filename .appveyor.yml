@@ -14,16 +14,15 @@ image:
 
 install:
   - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  # - make install || exit /b %errorlevel%  # test that package installs as is
-  # - make clean || exit /b %errorlevel%
-  # - make cython_install || exit /b %errorlevel%  # dev_install causes some of the tests to be skipped
-  - make dev_install || exit /b %errorlevel%
+  # - make install # test that package installs as is
+  # - make clean
+  # - make cython_install # dev_install causes some of the tests to be skipped
+  - make dev_install
 
 build: off
 
 test_script:
-  - cmd: make test || exit /b %errorlevel%
-  - sh: make test
+  - make test
 
 after_test:
   - make clean
