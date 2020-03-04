@@ -70,6 +70,7 @@ class PUBOSimulation(PUSOSimulation):
     --------
     ``qv.sim.PUSOSimulation``, ``qv.sim.QUSOSimulation``,
     ``qv.sim.QUBOSimulation``.
+
     """
 
     def __init__(self, P, initial_state=None, memory=0):

@@ -73,8 +73,6 @@ class Problem:
 
 def test_pcbo_on_qubo():
 
-    assert 0
-
     problem = PCBO({
         ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
     })
