@@ -223,5 +223,5 @@ void simulate_quso(
             }
         }
     }
-    free(flip_spin_dE); free(index);
+    // free(flip_spin_dE); free(index);
 }
