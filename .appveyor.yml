@@ -7,21 +7,18 @@ environment:
     - PYTHON: C:\Python37-x64
       fast_finish: true
 
-# image:
-  # - Visual Studio 2019
+image:
+  - Visual Studio 2019
   # - macos-mojave
   # - Ubuntu
 
 install:
   - cmd: SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-  # - make cython_install
+  - make cython_install
   # appveyor checks that if we cythonize the pyx file then the tests pass.
   # travis-ci checks that the already cythonized .c file passes.
 
 build: false
-
-build_script:
-  - make cython_install
 
 test_script:
   - make test
