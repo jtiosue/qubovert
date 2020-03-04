@@ -13,6 +13,8 @@ python:
 
 install:
   - make dev_install
+  # appveyor checks that if we cythonize the pyx file then the tests pass.
+  # travis-ci checks that the already cythonized .c file passes.
 
 script:
   - make test
