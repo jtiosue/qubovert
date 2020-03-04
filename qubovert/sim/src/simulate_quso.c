@@ -191,13 +191,14 @@ void simulate_quso(
 
     // index[i] points to where the information for spin i starts
     // in the J and neighbor arrays.
-    int *index = malloc(len_state * sizeof(int));
+    int *index; index = (int*)malloc(len_state * sizeof(int));
     index[0] = 0;
     for(i=1; i<len_state; i++) {
         index[i] = index[i-1] + num_neighbors[i-1];
     }
 
-    double *flip_spin_dE = malloc(len_state * sizeof(double));
+    double *flip_spin_dE;
+    flip_spin_dE = (double*)malloc(len_state * sizeof(double));
     compute_flip_dE(
         flip_spin_dE,
         len_state, state, h,
