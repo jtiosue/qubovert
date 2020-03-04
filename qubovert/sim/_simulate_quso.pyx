@@ -14,7 +14,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-cimport cython
 from libc.stdlib cimport malloc, free
 
 
@@ -85,14 +84,14 @@ def c_simulate_quso(state, h, num_neighbors,
     """
     # convert all Python types to C
     cdef int c_len_state = len(state)
-    cdef int *c_state = <int*>malloc(len(state) * cython.sizeof(int))
-    cdef double *c_h = <double*>malloc(len(state) * cython.sizeof(double))
-    cdef int *c_num_neighbors = <int*>malloc(len(state) * cython.sizeof(int))
-    cdef int *c_neighbors = <int*>malloc(len(neighbors) * cython.sizeof(int))
-    cdef double *c_J = <double*>malloc(len(J) * cython.sizeof(double))
+    cdef int *c_state = <int*>malloc(len(state) * sizeof(int))
+    cdef double *c_h = <double*>malloc(len(state) * sizeof(double))
+    cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))
+    cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))
+    cdef double *c_J = <double*>malloc(len(J) * sizeof(double))
     cdef int c_len_Ts = len(schedule)
-    cdef double *c_Ts = <double*>malloc(len(schedule) * cython.sizeof(double))
-    cdef int *c_num_updates = <int*>malloc(len(schedule) * cython.sizeof(int))
+    cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
+    cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
     cdef int c_seed = seed
 
     for i in range(len(state)):
@@ -117,11 +116,11 @@ def c_simulate_quso(state, h, num_neighbors,
         )
 
     final_state = [c_state[i] for i in range(len(state))]
-    # free(c_state)
-    # free(c_h)
-    # free(c_num_neighbors)
-    # free(c_neighbors)
-    # free(c_J)
-    # free(c_Ts)
-    # free(c_num_updates)
+    free(c_state)
+    free(c_h)
+    free(c_num_neighbors)
+    free(c_neighbors)
+    free(c_J)
+    free(c_Ts)
+    free(c_num_updates)
     return final_state
