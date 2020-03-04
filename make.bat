@@ -2,6 +2,8 @@
 
 title qubovert
 
+pushd %~dp0
+
 if "%1" == "clean" (
 	deactivate
 	rmdir /S /Q venv
@@ -51,3 +53,5 @@ if "%1" == "clean" (
 	echo Invalid option; must be either clean, dev_install, cython_install,
 	echo install, test, submitcoverage, deactivate, or activate
 )
+
+popd
