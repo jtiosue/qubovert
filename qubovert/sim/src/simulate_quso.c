@@ -17,9 +17,10 @@ double rand_double() {
 
 int rand_int(int start, int stop) {
     // random int in [start, stop)
-    return (int)floor(
-        start + rand_double() * (stop - start)
-    );
+    // return (int)floor(
+    //     start + rand_double() * (stop - start)
+    // );
+    return (int)(rand_double() * stop);
 }
 
 
