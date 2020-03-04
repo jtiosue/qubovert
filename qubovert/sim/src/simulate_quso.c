@@ -206,9 +206,9 @@ void simulate_quso(
         index
     );
 
-    for(t=0; t<len_Ts; t++){
+    for(t=0; t<len_Ts; t++) {
         T = Ts[t];
-        for(_=0; _<num_updates[t]; _++){
+        for(_=0; _<num_updates[t]; _++) {
             for(__=0; __<len_state; __++) {
                 i = rand_int(0, len_state);  // pick random variable
                 dE = flip_spin_dE[i];
@@ -223,5 +223,5 @@ void simulate_quso(
             }
         }
     }
-    // free(flip_spin_dE); free(index);
+    free(flip_spin_dE); free(index);
 }
