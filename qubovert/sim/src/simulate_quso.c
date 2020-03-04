@@ -1,3 +1,4 @@
+#include "random.h"
 #include "simulate_quso.h"
 #include <stdlib.h>
 #include <math.h>
@@ -5,22 +6,6 @@
 
 // a few slight modifications and one major modification from
 // https://github.com/dwavesystems/dwave-neal/blob/master/neal/src/cpu_sa.cpp
-
-
-double rand_double() {
-    /*
-    Compute a random doulbe number with standard library.
-    */
-    return (double)rand() / ((double)RAND_MAX + 1.);
-}
-
-
-int rand_int(int start, int stop) {
-    // random int in [start, stop)
-    return (int)floor(
-        start + rand_double() * (stop - start)
-    );
-}
 
 
 void compute_flip_dE(
@@ -151,11 +136,9 @@ void simulate_quso(
         the QUSO at.
     `num_updates` points to an array where `num_updates[j]` is the number of
         times steps to simulate the QUSO at temperature `Ts[j]`.
-    `seed` seeds the random number generator (we use `rand` from the C standard
-        library). If `seed` is a negative integer, then we seed the random
-        number generator with `srand(time(NULL))`. If `seed` is a nonnegative
-        integer, then we seed the random number generator with
-        `srand((unsigned)seed)`.
+    `seed` seeds the random number generator. If `seed` is a negative integer,
+        then we seed the random number generator with `time(NULL)`. Otherwise
+        we will use `seed`.
 
     Returns
     -------
@@ -186,7 +169,11 @@ void simulate_quso(
                2}`
     */
 
-    if(seed < 0) {srand(time(NULL));} else {srand((unsigned)seed);}
+    if(seed < 0) {
+        rand_seed((unsigned int)time(NULL));
+    } else {
+        rand_seed((unsigned)seed);
+    }
 
     double T, dE;
     int t, i, _, __;

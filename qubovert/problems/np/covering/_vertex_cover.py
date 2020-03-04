@@ -90,7 +90,7 @@ class VertexCover(Problem):
         self._edges = edges.copy()
         self._vertices = {y for x in edges for y in x}
         self._vertex_to_index = {
-            x: i 
+            x: i
             for i, x in enumerate(sorted(self._vertices, key=hash_function))
         }
         self._index_to_vertex = {

@@ -49,11 +49,9 @@ def c_simulate_quso(state, h, num_neighbors,
         Each tuple is a ``T, n`` pairs, where ``n`` is the number of time
         steps to update the simulation at temperature ``T``.
     seed : int. 
-        seeds the random number generator (we use `rand` from the C standard
-        library). If `seed` is a negative integer, then we seed the random
-        number generator with `srand(time(NULL))`. If `seed` is a nonnegative
-        integer, then we seed the random number generator with
-        `srand((unsigned int)seed)`.
+        seeds the random number generator If `seed` is a negative integer,
+        then we seed the random number generator with `time(NULL)`.
+        Otherwise, we use `seed`.
 
     Returns
     -------
