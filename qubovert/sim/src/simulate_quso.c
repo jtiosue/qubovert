@@ -213,6 +213,7 @@ void simulate_quso(
         for(_=0; _<num_updates[t]; _++) {
             for(__=0; __<len_state; __++) {
                 i = rand_int(0, len_state);  // pick random variable
+                if(i < 0 || i >= len_state) {printf("%d\n", i);}
                 dE = flip_spin_dE[i];
                 if(dE <= 0 || (T > 0 && rand_double() < exp(-dE / T))) {
                     recompute_flip_dE(
