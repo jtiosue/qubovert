@@ -1,5 +1,7 @@
 @ECHO off
 
+title qubovert
+
 if "%1" == "clean" (
 	deactivate
 	rmdir /S /Q venv
