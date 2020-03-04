@@ -88,14 +88,16 @@ class QUSOSimulation:
         """
         # must use type since we don't want errors from inheritance
         if type(L) == QUSOMatrix:
+            N = L.max_index + 1
             model = L
-            self._mapping = dict(enumerate(range(L.num_binary_variables)))
+            self._mapping = dict(enumerate(range(N)))
             self._reverse_mapping = self._mapping
-            self._variables = L.variables
+            self._variables = set(self._mapping.keys())
         elif type(L) != QUSO:
             L = QUSO(L)
 
         if type(L) == QUSO:
+            N = L.num_binary_variables
             model = L.to_quso()
             self._mapping = L.mapping
             self._reverse_mapping = L.reverse_mapping
@@ -105,15 +107,13 @@ class QUSOSimulation:
             initial_state.copy() if initial_state is not None else
             {v: 1 for v in self._variables}
         )
-        self._state = [1] * L.num_binary_variables
+        self._state = [1] * N
         self.set_state(self._initial_state)
 
         # C arguments
         # create model arrays
-        h = [0.] * L.num_binary_variables
-        num_neighbors = [0] * L.num_binary_variables
-        neighbors = [[] for _ in range(L.num_binary_variables)]
-        J = [[] for _ in range(L.num_binary_variables)]
+        h, num_neighbors = [0.] * N, [0] * N
+        neighbors, J = [[] for _ in range(N)], [[] for _ in range(N)]
 
         for k, v in model.items():
             val = float(v)

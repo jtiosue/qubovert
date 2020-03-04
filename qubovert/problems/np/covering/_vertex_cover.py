@@ -18,10 +18,11 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 
-from qubovert.utils import QUBOMatrix
 from qubovert import PCBO
 from qubovert.problems import Problem
-from qubovert.utils import solution_type, spin_to_boolean
+from qubovert.utils import (
+    solution_type, spin_to_boolean, QUBOMatrix, hash_function
+)
 
 
 __all__ = 'VertexCover',
@@ -88,9 +89,13 @@ class VertexCover(Problem):
         """
         self._edges = edges.copy()
         self._vertices = {y for x in edges for y in x}
-        self._vertex_to_index = {x: i for i, x in enumerate(self._vertices)}
-        self._index_to_vertex = {i: x for x, i in
-                                 self._vertex_to_index.items()}
+        self._vertex_to_index = {
+            x: i 
+            for i, x in enumerate(sorted(self._vertices, key=hash_function))
+        }
+        self._index_to_vertex = {
+            i: x for x, i in self._vertex_to_index.items()
+        }
         self._N, self._n = len(self._vertices), len(self._edges)
 
     @property

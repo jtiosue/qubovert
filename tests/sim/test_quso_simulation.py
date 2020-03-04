@@ -154,3 +154,13 @@ def test_qusosimulation_updates():
 
     with assert_raises(ValueError):
         sim.update(4, -1)
+
+
+def test_qusosimulation_bigrun():
+
+    # test that it runs on a big problem
+    model = QUSOMatrix(
+        {(i, j): 1 for i in range(2, 200, 3) for j in range(2, 200, 2)}
+    )
+    sim = QUSOSimulation(model)
+    sim.update(3, 1000)
