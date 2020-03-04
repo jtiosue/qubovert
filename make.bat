@@ -1,6 +1,7 @@
 @ECHO off
 
 pushd %~dp0
+setlocal DisableExtensions
 
 if "%1" == "clean" (
 	deactivate
@@ -46,6 +47,8 @@ if "%1" == "clean" (
 	echo Invalid option; must be either clean, dev_install, cython_install,
 	echo install, test, submitcoverage, deactivate, or activate
 )
+
+popd
 
 goto :end
 
