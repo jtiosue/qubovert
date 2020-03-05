@@ -4,7 +4,7 @@
 {
     "distutils": {
         "depends": [
-            "qubovert\\sim\\src\\simulate_quso.h"
+            "qubovert/sim/src/simulate_quso.h"
         ],
         "include_dirs": [
             "./qubovert/sim/src/"
@@ -14,7 +14,7 @@
         "sources": [
             "./qubovert/sim/_simulate_quso.pyx",
             "./qubovert/sim/src/simulate_quso.c",
-            "./qubovert/sim/src/random.c"
+            "./qubovert/sim/src/pcg_basic.c"
         ]
     },
     "module_name": "qubovert.sim._simulate_quso"
@@ -825,7 +825,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "qubovert\\sim\\_simulate_quso.pyx",
+  "qubovert/sim/_simulate_quso.pyx",
 };
 /* NoFastGil.proto */
 #define __Pyx_PyGILState_Ensure PyGILState_Ensure
@@ -1206,7 +1206,7 @@ static const char __pyx_k_c_simulate_quso[] = "c_simulate_quso";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_qubovert_sim__simulate_quso[] = "qubovert.sim._simulate_quso";
 static const char __pyx_k_Cannot_update_a_negative_number[] = "Cannot update a negative number of times";
-static const char __pyx_k_qubovert_sim__simulate_quso_pyx[] = "qubovert\\sim\\_simulate_quso.pyx";
+static const char __pyx_k_qubovert_sim__simulate_quso_pyx[] = "qubovert/sim/_simulate_quso.pyx";
 static PyObject *__pyx_kp_u_Cannot_update_a_negative_number;
 static PyObject *__pyx_n_s_J;
 static PyObject *__pyx_n_s_T;
