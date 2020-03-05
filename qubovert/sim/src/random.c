@@ -1,10 +1,11 @@
 #include "random.h"
-#include <stdlib.h>
+#include <stdlib.h> // for srand and rand
+#include <math.h> // for floor
 
 // TODO; implement better random number generator!
 
 void rand_seed(unsigned int seed) {
-	srand(seed);
+    srand(seed);
 }
 
 
