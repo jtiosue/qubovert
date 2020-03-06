@@ -15,7 +15,7 @@
 """_anneal.py.
 
 This file uses the simulation functionality to implement a simulated annealing
-algorithm.
+algorithm for both boolean and spin models.
 
 """
 
