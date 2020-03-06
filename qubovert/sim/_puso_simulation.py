@@ -12,31 +12,32 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_simulations.py.
+"""_puso_simulation.py.
 
-This file contains the ``SpinSimulation`` and ``BooleanSimulation`` objects
-which deal with using a Metropolis algorithm to simulate spin and boolean
-models.
+This file contains the ``PUSOSimulation`` object, which deals with using a
+Metropolis algorithm to simulate PUSOs.
 
 """
 
-from qubovert.utils import (
-    puso_value, boolean_to_spin, spin_to_boolean, pubo_to_puso
-)
+from qubovert.utils import puso_value
 import random
 from numpy import exp
 
 
-__all__ = 'SpinSimulation', 'BooleanSimulation'
+__all__ = 'PUSOSimulation',
 
 
-class SpinSimulation:
-    """SpinSimulation.
+class PUSOSimulation:
+    """PUSOSimulation.
 
-    ``SpinSimulation`` uses a Metropolis algorithm to simulate a spin system.
+    ``PUSOSimulation`` uses a Metropolis algorithm to simulate a PUSO.
     The spin system can be "updated" at a temperature ``T``. Thus, we can get
     an idea of the time evolution of a spin system by creating a temperature
-    schedule and seeing how the system evolves.
+    schedule and seeing how the system evolves. Please note that the
+    ``qv.sim.QUSOSimulation`` performs the simulation much faster than the
+    ``qv.sim.PUSOSimulation`` object, but of course only works with degree 1 or
+    2 models. If your PUSO is degree two (thus a QUSO), then you should use
+    the ``QUSOSimulation`` object.
 
     Examples
     --------
@@ -46,12 +47,13 @@ class SpinSimulation:
     >>>
     >>> length = 50
     >>> spin_system = sum(
-    >>>     -qv.spin_var(i) * qv.spin_var(i+1) for i in range(length)
+    >>>     -qv.spin_var(i) * qv.spin_var(i+1) * qv.spin_var(i+2)
+    >>>     for i in range(length-2)
     >>> )
     >>>
     >>> # initial state is all spin down
     >>> initial_state = {i: -1 for i in range(length)}
-    >>> sim = qv.sim.SpinSimulation(spin_system, initial_state)
+    >>> sim = qv.sim.PUSOSimulation(spin_system, initial_state)
     >>>
     >>> # define a schedule. here we simulate at temperature 4 for 25 time
     >>> # steps, then temperature 2 for 25 time steps, then temperature 1 for
@@ -64,17 +66,18 @@ class SpinSimulation:
 
     See Also
     --------
-    ``qv.sim.BooleanSimulation``.
+    ``qv.sim.PUBOSimulation``, ``qv.sim.QUSOSimulation``,
+    ``qv.sim.QUBOSimulation``.
 
     """
 
-    def __init__(self, model, initial_state=None, memory=0):
+    def __init__(self, H, initial_state=None, memory=0):
         """__init__.
 
         Parameters
         ----------
-        model : dict or type in ``qubovert.SPIN_MODELS``.
-            The model to simulate. This should map tuples of spin variable
+        H : dict or type in ``qubovert.SPIN_MODELS``.
+            The PUSO to simulate. This should map tuples of spin variable
             labels to their respective coefficient in the Hamiltonian. For more
             information, see the docstrings for any of the models in
             ``qubovert.SPIN_MODELS``.
@@ -94,12 +97,12 @@ class SpinSimulation:
         # variables must be a list so it can be used with random.choices in
         # the update method.
         try:
-            self._variables = list(model._variables)
+            self._variables = list(H._variables)
         except AttributeError:
             if isinstance(initial_state, dict):
                 self._variables = list(initial_state.keys())
             else:
-                self._variables = list({v for k in model for v in k})
+                self._variables = list({v for k in H for v in k})
 
         self._initial_state = (
             initial_state.copy() if initial_state is not None else
@@ -114,7 +117,7 @@ class SpinSimulation:
 
         # create a dictionary mapping each bit to the graph that it affects.
         self._subgraphs = {v: {} for v in self._variables}
-        for k, c in model.items():
+        for k, c in H.items():
             for v in k:
                 self._subgraphs[v][k] = c
 
@@ -270,12 +273,12 @@ class SpinSimulation:
         -----
         The following two code blocks perform exactly the same thing.
 
-        >>> sim = SpinSimulation(10)
+        >>> sim = PUSOSimulation(10)
         >>> for T in (3, 2):
         >>>     sim.update(T, 100)
         >>> sim.update(1, 50)
 
-        >>> sim = SpinSimulation(10)
+        >>> sim = PUSOSimulation(10)
         >>> schedule = (3, 100), (2, 100), (1, 50)
         >>> sim.schedule_update(schedule)
 
@@ -325,105 +328,3 @@ class SpinSimulation:
                 dE = -2 * puso_value(self._state, self._subgraphs[i])
                 if dE <= 0 or (T and random.random() < exp(-dE / T)):
                     self._flip_bit(i)
-
-
-class BooleanSimulation(SpinSimulation):
-    """BooleanSimulation.
-
-    ``BooleanSimulation`` uses a Metropolis algorithm to simulate a boolean
-    system. The boolean system can be "updated" at a temperature ``T``. Thus,
-    we can get an idea of the time evolution of a boolean system by creating a
-    temperature schedule and seeing how the system evolves.
-
-    ``BooleanSimulation`` inherits from ``SpinSimulation``. In fact,
-    ``BooleanSimulation`` just deals internally with converting to and from
-    a spin system; all the simulation is done with ``SpinSimulation``. See
-    ``help(qubovert.sim.SpinSimulation)`` for more details.
-
-    Examples
-    --------
-    Consider the following example where we minimize an objective function.
-
-    >>> import qubovert as qv
-    >>>
-    >>> # create the objective function.
-    >>> x = [qv.boolean_var(i) for i in range(10)]
-    >>> model = sum(x)
-    >>> model.add_constraint_le_zero(x[0] + x[2] - 3 * x[5] - 1, lam=3)
-    >>>
-    >>> # initial state is all variables equal to 1
-    >>> initial_state = {i: 11 for i in range(length)}
-    >>> sim = qv.sim.BooleanSimulation(model, initial_state)
-    >>>
-    >>> # define a schedule. here we simulate at temperature 4 for 25 time
-    >>> # steps, then temperature 2 for 25 time steps, then temperature 1 for
-    >>> # 10 time steps.
-    >>> schedule = (4, 25), (2, 25), (1, 10)
-    >>> sim.schedule_update(schedule)
-    >>>
-    >>> print("final state", sim.state)
-
-    See Also
-    --------
-    ``qubovert.sim.SpinSimulation``.
-
-    """
-
-    def __init__(self, model, initial_state=None, memory=0):
-        """__init__.
-
-        Parameters
-        ----------
-        model : dict or type in ``qubovert.BOOLEAN_MODELS``.
-            The model to simulate. This should map tuples of boolean variable
-            labels to their respective coefficient in the objective function.
-            For more information, see the docstrings for any of the models in
-            ``qubovert.BOOLEAN_MODELS``.
-        initial_state : dict (optional, defaults to None).
-            The initial state to start the simulation in. ``initial_state``
-            should map boolean label names to their initial values, where each
-            value is either 0 or 1. If ``initial_state`` is None, then it
-            will be initialized to all 0s.
-        memory : int >= 0 (optional, defaults to 0).
-            During the simulation, we keep a list of the most recent ``memory``
-            states that the simulation was in. These can be accessed with
-            ``self.get_past_states(number_of_states)``.
-
-        """
-        model = pubo_to_puso(model)
-        if initial_state is None:
-            initial_state = {v: 0 for v in model._variables}
-        super().__init__(model, initial_state, memory)
-
-    @property
-    def state(self):
-        """state.
-
-        A copy of the current state of the system.
-
-        Returns
-        -------
-        state : dict.
-            Dictionary that maps boolean labels to their values in {0, 1}.
-
-        """
-        return spin_to_boolean(self._state)
-
-    def set_state(self, state):
-        """set_state.
-
-        Set the state of the spin system to ``state``.
-
-        Parameters
-        ----------
-        state : dict or iterable.
-            ``state`` maps the spin variable labels to their corresponding
-            values. In other words ``state[v]`` is the value of variable ``v``.
-            A value must be either 0 or 1.
-
-        """
-        # if we call super then we get the wrong errors
-        state = {v: state[v] for v in self._variables}
-        if any(v not in {0, 1} for v in state.values()):
-            raise ValueError("State must contain only 0's and 1's")
-        self._state = boolean_to_spin(state)

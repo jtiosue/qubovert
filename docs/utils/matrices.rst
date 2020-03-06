@@ -13,6 +13,7 @@ PUBOMatrix
 
 .. autoclass:: qubovert.utils.PUBOMatrix
     :members:
+    :inherited-members:
 
 
 PUSOMatrix
@@ -20,6 +21,7 @@ PUSOMatrix
 
 .. autoclass:: qubovert.utils.PUSOMatrix
     :members:
+    :inherited-members:
 
 
 QUBOMatrix
@@ -27,6 +29,7 @@ QUBOMatrix
 
 .. autoclass:: qubovert.utils.QUBOMatrix
     :members:
+    :inherited-members:
 
 
 QUSOMatrix
@@ -34,3 +37,4 @@ QUSOMatrix
 
 .. autoclass:: qubovert.utils.QUSOMatrix
     :members:
+    :inherited-members:

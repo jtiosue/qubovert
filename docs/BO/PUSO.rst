@@ -6,3 +6,4 @@ Accessed with ``qubovert.PUSO``
 
 .. autoclass:: qubovert.PUSO
     :members:
+    :inherited-members:

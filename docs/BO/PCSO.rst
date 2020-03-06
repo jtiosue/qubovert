@@ -11,3 +11,4 @@ We also discuss the ``qubovert.spin_var`` function here, which is just returns a
 
 .. autoclass:: qubovert.PCSO
     :members:
+    :inherited-members:

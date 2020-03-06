@@ -18,10 +18,11 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 
 """
 
-# from qubovert.utils import QUBOMatrix
 from qubovert import PCBO
 from qubovert.problems import Problem
-from qubovert.utils import solution_type, spin_to_boolean
+from qubovert.utils import (
+    solution_type, spin_to_boolean, QUBOMatrix, hash_function
+)
 
 
 __all__ = 'VertexCover',
@@ -88,9 +89,13 @@ class VertexCover(Problem):
         """
         self._edges = edges.copy()
         self._vertices = {y for x in edges for y in x}
-        self._vertex_to_index = {x: i for i, x in enumerate(self._vertices)}
-        self._index_to_vertex = {i: x for x, i in
-                                 self._vertex_to_index.items()}
+        self._vertex_to_index = {
+            x: i
+            for i, x in enumerate(sorted(self._vertices, key=hash_function))
+        }
+        self._index_to_vertex = {
+            i: x for x, i in self._vertex_to_index.items()
+        }
         self._N, self._n = len(self._vertices), len(self._edges)
 
     @property
@@ -174,32 +179,32 @@ class VertexCover(Problem):
         """
         # all naming conventions follow the paper listed in the docstring
 
-#        Q = QUBOMatrix()
-#
-#        # encode H_B (equation 34)
-#        for i in range(self._N):
-#            Q[(i,)] += B
-#
-#        # encode H_A, ie each edge is adjacent to at least one colored vertex.
-#        # we don't use PCBO().to_qubo because we want to keep our mapping.
-#        for u, v in self._edges:
-#            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
-#            Q += PCBO().OR(iu, iv, lam=A)
-#
-#        return Q
-
-        H = PCBO()
-        H.set_mapping(self._vertex_to_index)
+        Q = QUBOMatrix()
 
         # encode H_B (equation 34)
-        for v in self._vertices:
-            H[(v,)] += B
+        for i in range(self._N):
+            Q[(i,)] += B
 
         # encode H_A, ie each edge is adjacent to at least one colored vertex.
         for u, v in self._edges:
-            H.add_constraint_OR(u, v, lam=A)
+            iu, iv = self._vertex_to_index[u], self._vertex_to_index[v]
+            Q += PCBO().add_constraint_OR(iu, iv, lam=A)
 
-        return H.to_qubo()
+        return Q
+
+        # this is slower, since we create a PCBO and then a QUBOMatrix
+        # H = PCBO()
+        # H.set_mapping(self._vertex_to_index)
+
+        # # encode H_B (equation 34)
+        # for v in self._vertices:
+        #     H[(v,)] += B
+
+        # # encode H_A, ie each edge is adjacent to at least one colored vertex
+        # for u, v in self._edges:
+        #     H.add_constraint_OR(u, v, lam=A)
+
+        # return H.to_qubo()
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.

@@ -6,3 +6,4 @@ Accessed with ``qubovert.QUSO``
 
 .. autoclass:: qubovert.QUSO
     :members:
+    :inherited-members:

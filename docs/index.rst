@@ -31,8 +31,8 @@ Indices and tables
    :maxdepth: 2
    :caption: Boolean/Spin Simulation
 
-   sim/simulation
    sim/anneal
+   sim/simulation
 
 
 .. toctree::
