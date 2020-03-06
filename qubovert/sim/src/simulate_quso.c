@@ -1,11 +1,28 @@
-#include "random.h"
+#include "pcg_basic.h"
 #include "simulate_quso.h"
 #include <stdlib.h>
+#include <stdint.h>
 #include <math.h>
 #include <time.h>
 
-// a few slight modifications and one major modification from
-// https://github.com/dwavesystems/dwave-neal/blob/master/neal/src/cpu_sa.cpp
+/* 
+a few slight modifications and one major modification from
+    https://github.com/dwavesystems/dwave-neal/blob/master/neal/src/cpu_sa.cpp
+We use the minimal C random number generator from
+    http://www.pcg-random.org.
+*/
+
+
+double rand_double(pcg32_random_t *rng) {
+    // random double in [0, 1)
+    return ldexp((double)pcg32_random_r(rng), -32);
+}
+
+
+int rand_int(pcg32_random_t *rng, int stop) {
+    //random integer in [0, top)
+    return (int)pcg32_boundedrand_r(rng, stop);
+}
 
 
 void compute_flip_dE(
@@ -57,7 +74,7 @@ void compute_flip_dE(
 void recompute_flip_dE(
     int spin, double *flip_spin_dE, int *state,
     int *num_neighbors, int *neighbors, double *J,
-    int *index
+    int32_t *index
 ) {
     /*
     `flip_spin_dE` points to an array such that `flip_spin_dE[i]` is
@@ -168,11 +185,11 @@ void simulate_quso(
               -1, 2,
                2}`
     */
-
+    pcg32_random_t rng;
     if(seed < 0) {
-        rand_seed((unsigned int)time(NULL));
+        pcg32_srandom_r(&rng, (unsigned int)time(NULL), (intptr_t)&rng);
     } else {
-        rand_seed((unsigned)seed);
+        pcg32_srandom_r(&rng, (unsigned)seed, 54u);
     }
 
     double T, dE;
@@ -180,7 +197,7 @@ void simulate_quso(
 
     // index[i] points to where the information for spin i starts
     // in the J and neighbor arrays.
-    int *index; index = (int*)malloc(len_state * sizeof(int));
+    int32_t *index; index = (int32_t*)malloc(len_state * sizeof(int32_t));
     index[0] = 0;
     for(i=1; i<len_state; i++) {
         index[i] = index[i-1] + num_neighbors[i-1];
@@ -199,9 +216,9 @@ void simulate_quso(
         T = Ts[t];
         for(_=0; _<num_updates[t]; _++) {
             for(__=0; __<len_state; __++) {
-                i = rand_int(0, len_state);  // pick random variable
+                i = rand_int(&rng, len_state);  // pick random variable
                 dE = flip_spin_dE[i];
-                if(dE <= 0 || (T > 0 && rand_double() < exp(-dE / T))) {
+                if(dE <= 0 || (T > 0 && rand_double(&rng) < exp(-dE / T))) {
                     recompute_flip_dE(
                         i, flip_spin_dE, state,
                         num_neighbors, neighbors, J,

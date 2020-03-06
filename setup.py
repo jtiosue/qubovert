@@ -46,7 +46,7 @@ extensions = cythonize([
         name='qubovert.sim._simulate_quso',
         sources=['./qubovert/sim/_simulate_quso' + ext,
                  './qubovert/sim/src/simulate_quso.c',
-                 './qubovert/sim/src/random.c'],
+                 './qubovert/sim/src/pcg_basic.c'],
         include_dirs=['./qubovert/sim/src/'],
         language='c'
     )
