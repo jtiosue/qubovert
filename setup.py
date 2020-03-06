@@ -20,6 +20,7 @@ installing by source.
 """
 
 import setuptools
+from setuptools.command.build_ext import build_ext
 
 try:
     from Cython.Build import cythonize
@@ -67,6 +68,7 @@ setuptools.setup(
     test_suite="tests",
     install_requires=REQUIREMENTS,
     zip_safe=False,
+    cmdclass=dict(build_ext=build_ext),
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
