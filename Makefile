@@ -34,4 +34,4 @@ test:
 	. venv/bin/activate && python -m twine check dist/*
 
 submitcoverage:
-	python -m codecov
+	. venv/bin/activate && python -m codecov
