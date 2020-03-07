@@ -1,3 +1,3 @@
-include README.rst LICENSE
+include README.rst LICENSE requirements.txt
 recursive-include qubovert/sim/src *.h *.c
 recursive-include qubovert *.pyx *.c
