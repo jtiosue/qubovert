@@ -123,7 +123,8 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
 
 def _anneal_spin(model, spin_simulation, num_anneals=1,
                  anneal_duration=1000, initial_state=None,
-                 temperature_range=None, schedule='geometric', seed=None):
+                 temperature_range=None, schedule='geometric',
+                 in_order=True, seed=None):
     """_anneal_spin.
 
     Run a simulated annealing algorithm to try to find the minimum of the spin
@@ -179,6 +180,11 @@ def _anneal_spin(model, spin_simulation, num_anneals=1,
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
         ``qubovert.sim.PUSOSimulation.schedule_update`` method.
+    in_order : bool (optional, defaults to True).
+        Whether to iterate through the variables in order or randomly
+        during an update step. When ``in_order`` is False, the simulation
+        is more physically realistic, but when using the simulation for
+        annealing, often it is better to have ``in_order = True``.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -243,7 +249,7 @@ def _anneal_spin(model, spin_simulation, num_anneals=1,
         if initial_state is None:
             sim.set_state({v: random.choice((-1, 1)) for v in sim._variables})
         sim.schedule_update(
-            schedule,
+            schedule, in_order=in_order,
             seed=random.randint(0, 1 << 16) if seed is not None else None
         )
         state = sim.state
@@ -256,7 +262,8 @@ def _anneal_spin(model, spin_simulation, num_anneals=1,
 # annealing functions
 
 def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
-                temperature_range=None, schedule='geometric', seed=None):
+                temperature_range=None, schedule='geometric',
+                in_order=True, seed=None):
     """anneal_puso.
 
     Run a simulated annealing algorithm to try to find the minimum of the PUSO
@@ -309,6 +316,11 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
         ``qubovert.sim.PUSOSimulation.schedule_update`` method.
+    in_order : bool (optional, defaults to True).
+        Whether to iterate through the variables in order or randomly
+        during an update step. When ``in_order`` is False, the simulation
+        is more physically realistic, but when using the simulation for
+        annealing, often it is better to have ``in_order = True``.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -361,12 +373,13 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
     """
     return _anneal_spin(
         H, PUSOSimulation, num_anneals, anneal_duration, initial_state,
-        temperature_range, schedule, seed
+        temperature_range, schedule, in_order, seed
     )
 
 
 def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
-                temperature_range=None, schedule='geometric', seed=None):
+                temperature_range=None, schedule='geometric',
+                in_order=True, seed=None):
     """anneal_pubo.
 
     Run a simulated annealing algorithm to try to find the minimum of the PUBO
@@ -417,6 +430,11 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
         ``qubovert.sim.PUBOSimulation.schedule_update`` method.
+    in_order : bool (optional, defaults to True).
+        Whether to iterate through the variables in order or randomly
+        during an update step. When ``in_order`` is False, the simulation
+        is more physically realistic, but when using the simulation for
+        annealing, often it is better to have ``in_order = True``.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -471,12 +489,13 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
     return anneal_puso(
         pubo_to_puso(P), num_anneals, anneal_duration,
         None if initial_state is None else boolean_to_spin(initial_state),
-        temperature_range, schedule, seed
+        temperature_range, schedule, in_order, seed
     ).to_boolean()
 
 
 def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
-                temperature_range=None, schedule='geometric', seed=None):
+                temperature_range=None, schedule='geometric',
+                in_order=True, seed=None):
     """anneal_quso.
 
     Run a simulated annealing algorithm to try to find the minimum of the QUSO
@@ -522,6 +541,11 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
         ``qubovert.sim.PUSOSimulation.schedule_update`` method.
+    in_order : bool (optional, defaults to True).
+        Whether to iterate through the variables in order or randomly
+        during an update step. When ``in_order`` is False, the simulation
+        is more physically realistic, but when using the simulation for
+        annealing, often it is better to have ``in_order = True``.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -574,12 +598,13 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
     """
     return _anneal_spin(
         L, QUSOSimulation, num_anneals, anneal_duration, initial_state,
-        temperature_range, schedule, seed
+        temperature_range, schedule, in_order, seed
     )
 
 
 def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
-                temperature_range=None, schedule='geometric', seed=None):
+                temperature_range=None, schedule='geometric',
+                in_order=True, seed=None):
     """anneal_qubo.
 
     Run a simulated annealing algorithm to try to find the minimum of the QUBO
@@ -625,6 +650,11 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
         times to update the simulation at that temperature. This schedule
         will be sent directly into the
         ``qubovert.sim.PUBOSimulation.schedule_update`` method.
+    in_order : bool (optional, defaults to True).
+        Whether to iterate through the variables in order or randomly
+        during an update step. When ``in_order`` is False, the simulation
+        is more physically realistic, but when using the simulation for
+        annealing, often it is better to have ``in_order = True``.
     seed : number (optional, defaults to None).
         The number to seed Python's builtin ``random`` module with. If
         ``seed is None``, then ``random.seed`` will not be called.
@@ -679,5 +709,5 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
     return anneal_quso(
         qubo_to_quso(Q), num_anneals, anneal_duration,
         None if initial_state is None else boolean_to_spin(initial_state),
-        temperature_range, schedule, seed
+        temperature_range, schedule, in_order, seed
     ).to_boolean()

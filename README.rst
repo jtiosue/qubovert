@@ -6,12 +6,9 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 
 *master branch*
 
-.. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=master
-    :target: https://travis-ci.com/jiosue/qubovert
-    :alt: Travis-CI
-.. image:: https://ci.appveyor.com/api/projects/status/qyl71l1d0cmp9lgq/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/jiosue/qubovert
-    :alt: AppVeyor
+.. image:: https://github.com/jiosue/qubovert/workflows/build/badge.svg?branch=master
+    :target: https://github.com/jiosue/qubovert/actions/
+    :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
     :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
@@ -24,12 +21,9 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 
 *dev branch*
 
-.. image:: https://travis-ci.com/jiosue/qubovert.svg?branch=dev
-    :target: https://travis-ci.com/jiosue/qubovert
-    :alt: Travis-CI
-.. image:: https://ci.appveyor.com/api/projects/status/qyl71l1d0cmp9lgq/branch/dev?svg=true
-    :target: https://ci.appveyor.com/project/jiosue/qubovert
-    :alt: AppVeyor
+.. image:: https://github.com/jiosue/qubovert/workflows/build/badge.svg?branch=dev
+    :target: https://github.com/jiosue/qubovert/actions/
+    :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
     :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
     :alt: Documentation Status
@@ -81,7 +75,7 @@ Then you can use it in Python **versions 3.6 and above** with
     import qubovert as qv
 
 
-Note that on Windows you will need `Microsoft Visual C++ Build Tools 14 <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ installed.
+Note that to install from source on Windows you will need `Microsoft Visual C++ Build Tools 14 <https://visualstudio.microsoft.com/visual-cpp-build-tools/>`_ installed.
 
 
 Example of the typical workflow

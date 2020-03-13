@@ -242,20 +242,32 @@ class PUSOSimulation:
             if len(self._past_states) > self._memory:
                 self._past_states.pop(0)
 
-    def _flip_bit(self, label):
-        """_flip_bit.
+    def update(self, T, num_updates=1, in_order=False, seed=None):
+        """update.
 
-        Flip the spin labeled by ``label`` in the internal state.
+        Update the simulation at temperature ``T``. Updates the internal state.
 
         Parameters
         ----------
-        label : hashable object.
-            The label of the spin to flip.
+        T : number >= 0.
+            Temperature.
+        num_updates : int >= 1 (optional, defaults to 1).
+            The number of times to update the simulation at the temperature.
+        in_order : bool (optional, defaults to False).
+            Whether to iterate through the variables in order or randomly
+            during an update step. When ``in_order`` is False, the simulation
+            is more physically realistic, but when using the Simulation for
+            annealing, often it is better to have ``in_order = True``.
+        seed : number (optional, defaults to None).
+            The number to seed ``random`` with. If ``seed is None``, then
+            ``random.seed`` will not be called.
 
         """
-        self._state[label] *= -1
+        # self.schedule_update is much faster when it is self-contained, e.g.
+        # never calls self.update. That's why we format it this way.
+        self.schedule_update([(T, num_updates)], in_order, seed)
 
-    def schedule_update(self, schedule, seed=None):
+    def schedule_update(self, schedule, in_order=False, seed=None):
         """schedule_update.
 
         Update the simulation with a schedule.
@@ -265,6 +277,11 @@ class PUSOSimulation:
         schedule : iterable of tuples.
             Each element in ``schedule`` is a pair ``(T, n)`` which designates
             a temperature and a number of updates. See `Notes` below.
+        in_order : bool (optional, defaults to False).
+            Whether to iterate through the variables in order or randomly
+            during an update step. When ``in_order`` is False, the simulation
+            is more physically realistic, but when using the Simulation for
+            annealing, often it is better to have ``in_order = True``.
         seed : number (optional, defaults to None).
             The number to seed ``random`` with. If ``seed is None``, then
             ``random.seed`` will not be called.
@@ -285,46 +302,21 @@ class PUSOSimulation:
         """
         if seed is not None:
             random.seed(seed)
+
         for T, n in schedule:
-            self.update(T, n)
+            if n < 0:
+                raise ValueError("Cannot update a negative number of times")
+            for _ in range(n):
+                self._add_past_state()
 
-    def update(self, T, num_updates=1, seed=None):
-        """update.
+                vars_to_update = (
+                    self._variables if in_order else
+                    random.choices(self._variables, k=len(self._variables))
+                )
 
-        Update the simulation at temperature ``T``. Updates the internal state.
-
-        Parameters
-        ----------
-        T : number >= 0.
-            Temperature.
-        num_updates : int >= 1 (optional, defaults to 1).
-            The number of times to update the simulation at the temperature.
-        seed : number (optional, defaults to None).
-            The number to seed ``random`` with. If ``seed is None``, then
-            ``random.seed`` will not be called.
-
-        """
-        if seed is not None:
-            random.seed(seed)
-
-        if num_updates < 0:
-            raise ValueError("Cannot update a negative number of times")
-        elif num_updates > 1:
-            for _ in range(num_updates):
-                self.update(T)
-        elif num_updates == 1:
-            self._add_past_state()
-
-            # for i in self._variables:  # dwave does this, why?
-
-            # sample without replacement
-            # for i in random.sample(self._variables, len(self._variables)):
-
-            # sample with replacement. this is more valid because it results in
-            # a totally memoryless simulation
-            for i in random.choices(self._variables, k=len(self._variables)):
-                # the change in energy from flipping variable i is equal to
-                # -2 * (the energy of the subgraph depending on i)
-                dE = -2 * puso_value(self._state, self._subgraphs[i])
-                if dE <= 0 or (T and random.random() < exp(-dE / T)):
-                    self._flip_bit(i)
+                for i in vars_to_update:
+                    # the change in energy from flipping variable i is equal
+                    # to -2 * (the energy of the subgraph depending on i)
+                    dE = -2 * puso_value(self._state, self._subgraphs[i])
+                    if dE <= 0 or (T and random.random() < exp(-dE / T)):
+                        self._state[i] *= -1

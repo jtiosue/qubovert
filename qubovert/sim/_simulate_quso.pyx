@@ -22,13 +22,14 @@ cdef extern from "simulate_quso.h":
         int len_state, int *state, double *h,
         int *num_neighbors, int *neighbors, double *J,
         int len_Ts, double *Ts, int *num_updates,
-        int seed
+        int in_order, int seed
     ) nogil
 
 
 def c_simulate_quso(state, h, num_neighbors,
-                    neighbors, J, schedule, seed):
-    """
+                    neighbors, J, schedule, in_order, seed):
+    """c_simulate_quso.
+
     Simulate a QUSO with the C source.
 
     Parameters
@@ -37,18 +38,22 @@ def c_simulate_quso(state, h, num_neighbors,
         `state[i]` is the value of the ith spin, either 1 or -1.
     h : list of floats.
         `h[i]` is the field value on spin `i`.
-    num_neighbors : list of ints. 
+    num_neighbors : list of ints.
         `num_neighbors[i]` is the number of neighbors that spin i has.
     neighbors : list of ints.
-        ``neighbors[i]`` is the jth neighbor of spin ``k``, where 
+        ``neighbors[i]`` is the jth neighbor of spin ``k``, where
         ``j = i - num_neighbors[k-1] - num_neighbors[k-2] - ...``
     J : list of doubles.
-        ``J[i]`` is the coupling value between spin ``k`` and 
+        ``J[i]`` is the coupling value between spin ``k`` and
         ``neighbors[i]``.
     schedule : iterable of tuples.
         Each tuple is a ``T, n`` pairs, where ``n`` is the number of time
         steps to update the simulation at temperature ``T``.
-    seed : int. 
+    in_order : bool.
+        ``in_order`` indicates whether to iterate through the variables in
+        order ``in_order=true`` or randomly ``in_order=false`` during an
+        update step.
+    seed : int.
         seeds the random number generator If `seed` is a negative integer,
         then we seed the random number generator with `time(NULL)`.
         Otherwise, we use `seed`.
@@ -61,9 +66,10 @@ def c_simulate_quso(state, h, num_neighbors,
     -------
     `neighbors` and `J` are basically flattened arrays.
     In other words, we flatten the arrays `temp_neighbors` and
-    `temp_J`, where `temp_neighbors` points to an array where `temp_neighbors[i][j]`
-    is the jth neighbor of spin i, for j=0,...,num_neighbors[i]-1, and similarly,
-    `temp_J` points to an array where `temp_J[i][j]` is the coupling value between
+    `temp_J`, where `temp_neighbors` points to an array where
+    `temp_neighbors[i][j]` is the jth neighbor of spin i,
+    for j=0,...,num_neighbors[i]-1, and similarly, `temp_J` points to an array
+    where `temp_J[i][j]` is the coupling value between
     spin i and spin `neighbors[i][j]`, for j=0,...,num_neighbors[i]-1.
 
     A spin model such as
@@ -90,6 +96,7 @@ def c_simulate_quso(state, h, num_neighbors,
     cdef int c_len_Ts = len(schedule)
     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
+    cdef int c_in_order = int(in_order)
     cdef int c_seed = seed
 
     for i in range(len(state)):
@@ -110,7 +117,7 @@ def c_simulate_quso(state, h, num_neighbors,
             c_len_state, c_state, c_h,
             c_num_neighbors, c_neighbors, c_J,
             c_len_Ts, c_Ts, c_num_updates,
-            c_seed
+            c_in_order, c_seed
         )
 
     final_state = [c_state[i] for i in range(len(state))]

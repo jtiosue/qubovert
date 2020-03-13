@@ -1192,10 +1192,12 @@ static const char __pyx_k_state[] = "state";
 static const char __pyx_k_c_seed[] = "c_seed";
 static const char __pyx_k_c_state[] = "c_state";
 static const char __pyx_k_c_len_Ts[] = "c_len_Ts";
+static const char __pyx_k_in_order[] = "in_order";
 static const char __pyx_k_schedule[] = "schedule";
 static const char __pyx_k_enumerate[] = "enumerate";
 static const char __pyx_k_neighbors[] = "neighbors";
 static const char __pyx_k_ValueError[] = "ValueError";
+static const char __pyx_k_c_in_order[] = "c_in_order";
 static const char __pyx_k_c_len_state[] = "c_len_state";
 static const char __pyx_k_c_neighbors[] = "c_neighbors";
 static const char __pyx_k_final_state[] = "final_state";
@@ -1214,6 +1216,7 @@ static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_c_J;
 static PyObject *__pyx_n_s_c_Ts;
 static PyObject *__pyx_n_s_c_h;
+static PyObject *__pyx_n_s_c_in_order;
 static PyObject *__pyx_n_s_c_len_Ts;
 static PyObject *__pyx_n_s_c_len_state;
 static PyObject *__pyx_n_s_c_neighbors;
@@ -1227,6 +1230,7 @@ static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_final_state;
 static PyObject *__pyx_n_s_h;
 static PyObject *__pyx_n_s_i;
+static PyObject *__pyx_n_s_in_order;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_n;
 static PyObject *__pyx_n_s_name;
@@ -1239,7 +1243,7 @@ static PyObject *__pyx_n_s_schedule;
 static PyObject *__pyx_n_s_seed;
 static PyObject *__pyx_n_s_state;
 static PyObject *__pyx_n_s_test;
-static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_state, PyObject *__pyx_v_h, PyObject *__pyx_v_num_neighbors, PyObject *__pyx_v_neighbors, PyObject *__pyx_v_J, PyObject *__pyx_v_schedule, PyObject *__pyx_v_seed); /* proto */
+static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_state, PyObject *__pyx_v_h, PyObject *__pyx_v_num_neighbors, PyObject *__pyx_v_neighbors, PyObject *__pyx_v_J, PyObject *__pyx_v_schedule, PyObject *__pyx_v_in_order, PyObject *__pyx_v_seed); /* proto */
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_tuple_;
@@ -1251,13 +1255,13 @@ static PyObject *__pyx_codeobj__3;
  * 
  * 
  * def c_simulate_quso(state, h, num_neighbors,             # <<<<<<<<<<<<<<
- *                     neighbors, J, schedule, seed):
- *     """
+ *                     neighbors, J, schedule, in_order, seed):
+ *     """c_simulate_quso.
  */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_8qubovert_3sim_14_simulate_quso_c_simulate_quso[] = "\n    Simulate a QUSO with the C source.\n\n    Parameters\n    ----------\n    state: list of ints.\n        `state[i]` is the value of the ith spin, either 1 or -1.\n    h : list of floats.\n        `h[i]` is the field value on spin `i`.\n    num_neighbors : list of ints. \n        `num_neighbors[i]` is the number of neighbors that spin i has.\n    neighbors : list of ints.\n        ``neighbors[i]`` is the jth neighbor of spin ``k``, where \n        ``j = i - num_neighbors[k-1] - num_neighbors[k-2] - ...``\n    J : list of doubles.\n        ``J[i]`` is the coupling value between spin ``k`` and \n        ``neighbors[i]``.\n    schedule : iterable of tuples.\n        Each tuple is a ``T, n`` pairs, where ``n`` is the number of time\n        steps to update the simulation at temperature ``T``.\n    seed : int. \n        seeds the random number generator If `seed` is a negative integer,\n        then we seed the random number generator with `time(NULL)`.\n        Otherwise, we use `seed`.\n\n    Returns\n    -------\n    new_state : list of ints.\n\n    Example\n    -------\n    `neighbors` and `J` are basically flattened arrays.\n    In other words, we flatten the arrays `temp_neighbors` and\n    `temp_J`, where `temp_neighbors` points to an array where `temp_neighbors[i][j]`\n    is the jth neighbor of spin i, for j=0,...,num_neighbors[i]-1, and similarly,\n    `temp_J` points to an array where `temp_J[i][j]` is the coupling value between\n    spin i and spin `neighbors[i][j]`, for j=0,...,num_neighbors[i]-1.\n\n    A spin model such as\n        -z_0 z_1 + 2*z_1*z_2 + z_0\n    must be represented as\n        `h = {1., 0, 0}`\n        `num_neighbors = {1, 2, 1}`\n        `temp_neighbors = {{1}, {0, 2}, {1}}`\n        `temp_J = {{-1.},\n              {-1, 2},\n              {2}}`\n        `neighbors = {1, 0, 2, 1}`\n        `J = {-1.,\n              -1, 2,\n              2}`\n    ";
+static char __pyx_doc_8qubovert_3sim_14_simulate_quso_c_simulate_quso[] = "c_simulate_quso.\n\n    Simulate a QUSO with the C source.\n\n    Parameters\n    ----------\n    state: list of ints.\n        `state[i]` is the value of the ith spin, either 1 or -1.\n    h : list of floats.\n        `h[i]` is the field value on spin `i`.\n    num_neighbors : list of ints.\n        `num_neighbors[i]` is the number of neighbors that spin i has.\n    neighbors : list of ints.\n        ``neighbors[i]`` is the jth neighbor of spin ``k``, where\n        ``j = i - num_neighbors[k-1] - num_neighbors[k-2] - ...``\n    J : list of doubles.\n        ``J[i]`` is the coupling value between spin ``k`` and\n        ``neighbors[i]``.\n    schedule : iterable of tuples.\n        Each tuple is a ``T, n`` pairs, where ``n`` is the number of time\n        steps to update the simulation at temperature ``T``.\n    in_order : bool.\n        ``in_order`` indicates whether to iterate through the variables in\n        order ``in_order=true`` or randomly ``in_order=false`` during an\n        update step.\n    seed : int.\n        seeds the random number generator If `seed` is a negative integer,\n        then we seed the random number generator with `time(NULL)`.\n        Otherwise, we use `seed`.\n\n    Returns\n    -------\n    new_state : list of ints.\n\n    Example\n    -------\n    `neighbors` and `J` are basically flattened arrays.\n    In other words, we flatten the arrays `temp_neighbors` and\n    `temp_J`, where `temp_neighbors` points to an array where\n    `temp_neighbors[i][j]` is the jth neighbor of spin i,\n    for j=0,...,num_neighbors[i]-1, and similarly, `temp_J` points to an array\n    where `temp_J[i][j]` is the coupling value between\n    spin i and spin `neighbors[i][j]`, for j=0,...,num_neighbors[i]-1.\n\n    A spin model such as\n        -z_0 z_1 + 2*z_1*z_2 + z_0\n    must be represented as\n        `h = {1., 0, 0}`\n        `num_neighbors = {1, 2, 1}`\n        `temp_neighbors = {{1}, {0, 2}, {1}}`\n        `temp_J = {{-1.},\n              {-1, 2},""\n              {2}}`\n        `neighbors = {1, 0, 2, 1}`\n        `J = {-1.,\n              -1, 2,\n              2}`\n    ";
 static PyMethodDef __pyx_mdef_8qubovert_3sim_14_simulate_quso_1c_simulate_quso = {"c_simulate_quso", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso, METH_VARARGS|METH_KEYWORDS, __pyx_doc_8qubovert_3sim_14_simulate_quso_c_simulate_quso};
 static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_state = 0;
@@ -1266,17 +1270,20 @@ static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObj
   PyObject *__pyx_v_neighbors = 0;
   PyObject *__pyx_v_J = 0;
   PyObject *__pyx_v_schedule = 0;
+  PyObject *__pyx_v_in_order = 0;
   PyObject *__pyx_v_seed = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("c_simulate_quso (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_state,&__pyx_n_s_h,&__pyx_n_s_num_neighbors,&__pyx_n_s_neighbors,&__pyx_n_s_J,&__pyx_n_s_schedule,&__pyx_n_s_seed,0};
-    PyObject* values[7] = {0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_state,&__pyx_n_s_h,&__pyx_n_s_num_neighbors,&__pyx_n_s_neighbors,&__pyx_n_s_J,&__pyx_n_s_schedule,&__pyx_n_s_in_order,&__pyx_n_s_seed,0};
+    PyObject* values[8] = {0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
+        CYTHON_FALLTHROUGH;
         case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
         CYTHON_FALLTHROUGH;
         case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
@@ -1303,43 +1310,49 @@ static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObj
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_h)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 1); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 1); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_num_neighbors)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 2); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 2); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_neighbors)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 3); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 3); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_J)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 4); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 4); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_schedule)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 5); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 5); __PYX_ERR(0, 29, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_seed)) != 0)) kw_args--;
+        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_in_order)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, 6); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 6); __PYX_ERR(0, 29, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  7:
+        if (likely((values[7] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_seed)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, 7); __PYX_ERR(0, 29, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "c_simulate_quso") < 0)) __PYX_ERR(0, 29, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 7) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 8) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -1349,6 +1362,7 @@ static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObj
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
       values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
       values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
+      values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
     }
     __pyx_v_state = values[0];
     __pyx_v_h = values[1];
@@ -1356,24 +1370,25 @@ static PyObject *__pyx_pw_8qubovert_3sim_14_simulate_quso_1c_simulate_quso(PyObj
     __pyx_v_neighbors = values[3];
     __pyx_v_J = values[4];
     __pyx_v_schedule = values[5];
-    __pyx_v_seed = values[6];
+    __pyx_v_in_order = values[6];
+    __pyx_v_seed = values[7];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 7, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 29, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("c_simulate_quso", 1, 8, 8, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 29, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("qubovert.sim._simulate_quso.c_simulate_quso", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(__pyx_self, __pyx_v_state, __pyx_v_h, __pyx_v_num_neighbors, __pyx_v_neighbors, __pyx_v_J, __pyx_v_schedule, __pyx_v_seed);
+  __pyx_r = __pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(__pyx_self, __pyx_v_state, __pyx_v_h, __pyx_v_num_neighbors, __pyx_v_neighbors, __pyx_v_J, __pyx_v_schedule, __pyx_v_in_order, __pyx_v_seed);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_state, PyObject *__pyx_v_h, PyObject *__pyx_v_num_neighbors, PyObject *__pyx_v_neighbors, PyObject *__pyx_v_J, PyObject *__pyx_v_schedule, PyObject *__pyx_v_seed) {
+static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_state, PyObject *__pyx_v_h, PyObject *__pyx_v_num_neighbors, PyObject *__pyx_v_neighbors, PyObject *__pyx_v_J, PyObject *__pyx_v_schedule, PyObject *__pyx_v_in_order, PyObject *__pyx_v_seed) {
   int __pyx_v_c_len_state;
   int *__pyx_v_c_state;
   double *__pyx_v_c_h;
@@ -1383,6 +1398,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
   int __pyx_v_c_len_Ts;
   double *__pyx_v_c_Ts;
   int *__pyx_v_c_num_updates;
+  int __pyx_v_c_in_order;
   int __pyx_v_c_seed;
   PyObject *__pyx_v_i = NULL;
   PyObject *__pyx_v_T = NULL;
@@ -1392,8 +1408,8 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   Py_ssize_t __pyx_t_1;
-  int __pyx_t_2;
-  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
   PyObject *__pyx_t_4 = NULL;
   PyObject *(*__pyx_t_5)(PyObject *);
   Py_ssize_t __pyx_t_6;
@@ -1407,154 +1423,167 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
   Py_ssize_t __pyx_t_14;
   __Pyx_RefNannySetupContext("c_simulate_quso", 0);
 
-  /* "qubovert/sim/_simulate_quso.pyx":84
+  /* "qubovert/sim/_simulate_quso.pyx":90
  *     """
  *     # convert all Python types to C
  *     cdef int c_len_state = len(state)             # <<<<<<<<<<<<<<
  *     cdef int *c_state = <int*>malloc(len(state) * sizeof(int))
  *     cdef double *c_h = <double*>malloc(len(state) * sizeof(double))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 90, __pyx_L1_error)
   __pyx_v_c_len_state = __pyx_t_1;
 
-  /* "qubovert/sim/_simulate_quso.pyx":85
+  /* "qubovert/sim/_simulate_quso.pyx":91
  *     # convert all Python types to C
  *     cdef int c_len_state = len(state)
  *     cdef int *c_state = <int*>malloc(len(state) * sizeof(int))             # <<<<<<<<<<<<<<
  *     cdef double *c_h = <double*>malloc(len(state) * sizeof(double))
  *     cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 91, __pyx_L1_error)
   __pyx_v_c_state = ((int *)malloc((__pyx_t_1 * (sizeof(int)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":86
+  /* "qubovert/sim/_simulate_quso.pyx":92
  *     cdef int c_len_state = len(state)
  *     cdef int *c_state = <int*>malloc(len(state) * sizeof(int))
  *     cdef double *c_h = <double*>malloc(len(state) * sizeof(double))             # <<<<<<<<<<<<<<
  *     cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))
  *     cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 92, __pyx_L1_error)
   __pyx_v_c_h = ((double *)malloc((__pyx_t_1 * (sizeof(double)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":87
+  /* "qubovert/sim/_simulate_quso.pyx":93
  *     cdef int *c_state = <int*>malloc(len(state) * sizeof(int))
  *     cdef double *c_h = <double*>malloc(len(state) * sizeof(double))
  *     cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))             # <<<<<<<<<<<<<<
  *     cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))
  *     cdef double *c_J = <double*>malloc(len(J) * sizeof(double))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 93, __pyx_L1_error)
   __pyx_v_c_num_neighbors = ((int *)malloc((__pyx_t_1 * (sizeof(int)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":88
+  /* "qubovert/sim/_simulate_quso.pyx":94
  *     cdef double *c_h = <double*>malloc(len(state) * sizeof(double))
  *     cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))
  *     cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))             # <<<<<<<<<<<<<<
  *     cdef double *c_J = <double*>malloc(len(J) * sizeof(double))
  *     cdef int c_len_Ts = len(schedule)
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_neighbors); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_neighbors); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 94, __pyx_L1_error)
   __pyx_v_c_neighbors = ((int *)malloc((__pyx_t_1 * (sizeof(int)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":89
+  /* "qubovert/sim/_simulate_quso.pyx":95
  *     cdef int *c_num_neighbors = <int*>malloc(len(state) * sizeof(int))
  *     cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))
  *     cdef double *c_J = <double*>malloc(len(J) * sizeof(double))             # <<<<<<<<<<<<<<
  *     cdef int c_len_Ts = len(schedule)
  *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_J); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_J); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 95, __pyx_L1_error)
   __pyx_v_c_J = ((double *)malloc((__pyx_t_1 * (sizeof(double)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":90
+  /* "qubovert/sim/_simulate_quso.pyx":96
  *     cdef int *c_neighbors = <int*>malloc(len(neighbors) * sizeof(int))
  *     cdef double *c_J = <double*>malloc(len(J) * sizeof(double))
  *     cdef int c_len_Ts = len(schedule)             # <<<<<<<<<<<<<<
  *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
  *     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 90, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 96, __pyx_L1_error)
   __pyx_v_c_len_Ts = __pyx_t_1;
 
-  /* "qubovert/sim/_simulate_quso.pyx":91
+  /* "qubovert/sim/_simulate_quso.pyx":97
  *     cdef double *c_J = <double*>malloc(len(J) * sizeof(double))
  *     cdef int c_len_Ts = len(schedule)
  *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))             # <<<<<<<<<<<<<<
  *     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
- *     cdef int c_seed = seed
+ *     cdef int c_in_order = int(in_order)
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 97, __pyx_L1_error)
   __pyx_v_c_Ts = ((double *)malloc((__pyx_t_1 * (sizeof(double)))));
 
-  /* "qubovert/sim/_simulate_quso.pyx":92
+  /* "qubovert/sim/_simulate_quso.pyx":98
  *     cdef int c_len_Ts = len(schedule)
  *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
  *     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))             # <<<<<<<<<<<<<<
+ *     cdef int c_in_order = int(in_order)
+ *     cdef int c_seed = seed
+ */
+  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 98, __pyx_L1_error)
+  __pyx_v_c_num_updates = ((int *)malloc((__pyx_t_1 * (sizeof(int)))));
+
+  /* "qubovert/sim/_simulate_quso.pyx":99
+ *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
+ *     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
+ *     cdef int c_in_order = int(in_order)             # <<<<<<<<<<<<<<
  *     cdef int c_seed = seed
  * 
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_schedule); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 92, __pyx_L1_error)
-  __pyx_v_c_num_updates = ((int *)malloc((__pyx_t_1 * (sizeof(int)))));
+  __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_v_in_order); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_v_c_in_order = __pyx_t_3;
 
-  /* "qubovert/sim/_simulate_quso.pyx":93
- *     cdef double *c_Ts = <double*>malloc(len(schedule) * sizeof(double))
+  /* "qubovert/sim/_simulate_quso.pyx":100
  *     cdef int *c_num_updates = <int*>malloc(len(schedule) * sizeof(int))
+ *     cdef int c_in_order = int(in_order)
  *     cdef int c_seed = seed             # <<<<<<<<<<<<<<
  * 
  *     for i in range(len(state)):
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_seed); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L1_error)
-  __pyx_v_c_seed = __pyx_t_2;
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_seed); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
+  __pyx_v_c_seed = __pyx_t_3;
 
-  /* "qubovert/sim/_simulate_quso.pyx":95
+  /* "qubovert/sim/_simulate_quso.pyx":102
  *     cdef int c_seed = seed
  * 
  *     for i in range(len(state)):             # <<<<<<<<<<<<<<
  *         c_state[i] = state[i]
  *         c_h[i] = h[i]
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 95, __pyx_L1_error)
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (likely(PyList_CheckExact(__pyx_t_4)) || PyTuple_CheckExact(__pyx_t_4)) {
-    __pyx_t_3 = __pyx_t_4; __Pyx_INCREF(__pyx_t_3); __pyx_t_1 = 0;
+    __pyx_t_2 = __pyx_t_4; __Pyx_INCREF(__pyx_t_2); __pyx_t_1 = 0;
     __pyx_t_5 = NULL;
   } else {
-    __pyx_t_1 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_1 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_5 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 102, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   for (;;) {
     if (likely(!__pyx_t_5)) {
-      if (likely(PyList_CheckExact(__pyx_t_3))) {
-        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_3)) break;
+      if (likely(PyList_CheckExact(__pyx_t_2))) {
+        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 102, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
-        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
+        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 102, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
     } else {
-      __pyx_t_4 = __pyx_t_5(__pyx_t_3);
+      __pyx_t_4 = __pyx_t_5(__pyx_t_2);
       if (unlikely(!__pyx_t_4)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 95, __pyx_L1_error)
+          else __PYX_ERR(0, 102, __pyx_L1_error)
         }
         break;
       }
@@ -1563,49 +1592,49 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "qubovert/sim/_simulate_quso.pyx":96
+    /* "qubovert/sim/_simulate_quso.pyx":103
  * 
  *     for i in range(len(state)):
  *         c_state[i] = state[i]             # <<<<<<<<<<<<<<
  *         c_h[i] = h[i]
  *         c_num_neighbors[i] = num_neighbors[i]
  */
-    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_state, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_state, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    (__pyx_v_c_state[__pyx_t_6]) = __pyx_t_2;
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+    (__pyx_v_c_state[__pyx_t_6]) = __pyx_t_3;
 
-    /* "qubovert/sim/_simulate_quso.pyx":97
+    /* "qubovert/sim/_simulate_quso.pyx":104
  *     for i in range(len(state)):
  *         c_state[i] = state[i]
  *         c_h[i] = h[i]             # <<<<<<<<<<<<<<
  *         c_num_neighbors[i] = num_neighbors[i]
  *     for i in range(len(J)):
  */
-    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_h, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_h, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
     (__pyx_v_c_h[__pyx_t_6]) = __pyx_t_7;
 
-    /* "qubovert/sim/_simulate_quso.pyx":98
+    /* "qubovert/sim/_simulate_quso.pyx":105
  *         c_state[i] = state[i]
  *         c_h[i] = h[i]
  *         c_num_neighbors[i] = num_neighbors[i]             # <<<<<<<<<<<<<<
  *     for i in range(len(J)):
  *         c_neighbors[i] = neighbors[i]
  */
-    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_num_neighbors, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 98, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_num_neighbors, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 105, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L1_error)
-    (__pyx_v_c_num_neighbors[__pyx_t_6]) = __pyx_t_2;
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
+    (__pyx_v_c_num_neighbors[__pyx_t_6]) = __pyx_t_3;
 
-    /* "qubovert/sim/_simulate_quso.pyx":95
+    /* "qubovert/sim/_simulate_quso.pyx":102
  *     cdef int c_seed = seed
  * 
  *     for i in range(len(state)):             # <<<<<<<<<<<<<<
@@ -1613,56 +1642,56 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  *         c_h[i] = h[i]
  */
   }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "qubovert/sim/_simulate_quso.pyx":99
+  /* "qubovert/sim/_simulate_quso.pyx":106
  *         c_h[i] = h[i]
  *         c_num_neighbors[i] = num_neighbors[i]
  *     for i in range(len(J)):             # <<<<<<<<<<<<<<
  *         c_neighbors[i] = neighbors[i]
  *         c_J[i] = J[i]
  */
-  __pyx_t_1 = PyObject_Length(__pyx_v_J); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 99, __pyx_L1_error)
-  __pyx_t_3 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(__pyx_v_J); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_t_2 = PyInt_FromSsize_t(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (likely(PyList_CheckExact(__pyx_t_4)) || PyTuple_CheckExact(__pyx_t_4)) {
-    __pyx_t_3 = __pyx_t_4; __Pyx_INCREF(__pyx_t_3); __pyx_t_1 = 0;
+    __pyx_t_2 = __pyx_t_4; __Pyx_INCREF(__pyx_t_2); __pyx_t_1 = 0;
     __pyx_t_5 = NULL;
   } else {
-    __pyx_t_1 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 99, __pyx_L1_error)
+    __pyx_t_1 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_5 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 106, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   for (;;) {
     if (likely(!__pyx_t_5)) {
-      if (likely(PyList_CheckExact(__pyx_t_3))) {
-        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_3)) break;
+      if (likely(PyList_CheckExact(__pyx_t_2))) {
+        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 106, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
-        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
+        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_1); __Pyx_INCREF(__pyx_t_4); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 106, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_3, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 106, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
     } else {
-      __pyx_t_4 = __pyx_t_5(__pyx_t_3);
+      __pyx_t_4 = __pyx_t_5(__pyx_t_2);
       if (unlikely(!__pyx_t_4)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 99, __pyx_L1_error)
+          else __PYX_ERR(0, 106, __pyx_L1_error)
         }
         break;
       }
@@ -1671,35 +1700,35 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
     __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "qubovert/sim/_simulate_quso.pyx":100
+    /* "qubovert/sim/_simulate_quso.pyx":107
  *         c_num_neighbors[i] = num_neighbors[i]
  *     for i in range(len(J)):
  *         c_neighbors[i] = neighbors[i]             # <<<<<<<<<<<<<<
  *         c_J[i] = J[i]
  *     for i, (T, n) in enumerate(schedule):
  */
-    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_neighbors, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_neighbors, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
-    (__pyx_v_c_neighbors[__pyx_t_6]) = __pyx_t_2;
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
+    (__pyx_v_c_neighbors[__pyx_t_6]) = __pyx_t_3;
 
-    /* "qubovert/sim/_simulate_quso.pyx":101
+    /* "qubovert/sim/_simulate_quso.pyx":108
  *     for i in range(len(J)):
  *         c_neighbors[i] = neighbors[i]
  *         c_J[i] = J[i]             # <<<<<<<<<<<<<<
  *     for i, (T, n) in enumerate(schedule):
  *         c_Ts[i] = T
  */
-    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_J, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_v_J, __pyx_v_i); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L1_error)
     (__pyx_v_c_J[__pyx_t_6]) = __pyx_t_7;
 
-    /* "qubovert/sim/_simulate_quso.pyx":99
+    /* "qubovert/sim/_simulate_quso.pyx":106
  *         c_h[i] = h[i]
  *         c_num_neighbors[i] = num_neighbors[i]
  *     for i in range(len(J)):             # <<<<<<<<<<<<<<
@@ -1707,9 +1736,9 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  *         c_J[i] = J[i]
  */
   }
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "qubovert/sim/_simulate_quso.pyx":102
+  /* "qubovert/sim/_simulate_quso.pyx":109
  *         c_neighbors[i] = neighbors[i]
  *         c_J[i] = J[i]
  *     for i, (T, n) in enumerate(schedule):             # <<<<<<<<<<<<<<
@@ -1717,31 +1746,31 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  *         c_num_updates[i] = n
  */
   __Pyx_INCREF(__pyx_int_0);
-  __pyx_t_3 = __pyx_int_0;
+  __pyx_t_2 = __pyx_int_0;
   if (likely(PyList_CheckExact(__pyx_v_schedule)) || PyTuple_CheckExact(__pyx_v_schedule)) {
     __pyx_t_4 = __pyx_v_schedule; __Pyx_INCREF(__pyx_t_4); __pyx_t_1 = 0;
     __pyx_t_5 = NULL;
   } else {
-    __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_schedule); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
+    __pyx_t_1 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_schedule); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 102, __pyx_L1_error)
+    __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 109, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_5)) {
       if (likely(PyList_CheckExact(__pyx_t_4))) {
         if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_8); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 102, __pyx_L1_error)
+        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_8); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 109, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       } else {
         if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_8); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 102, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_1); __Pyx_INCREF(__pyx_t_8); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 109, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       }
@@ -1751,7 +1780,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 102, __pyx_L1_error)
+          else __PYX_ERR(0, 109, __pyx_L1_error)
         }
         break;
       }
@@ -1763,7 +1792,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       if (unlikely(size != 2)) {
         if (size > 2) __Pyx_RaiseTooManyValuesError(2);
         else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 102, __pyx_L1_error)
+        __PYX_ERR(0, 109, __pyx_L1_error)
       }
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
       if (likely(PyTuple_CheckExact(sequence))) {
@@ -1776,15 +1805,15 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       __Pyx_INCREF(__pyx_t_9);
       __Pyx_INCREF(__pyx_t_10);
       #else
-      __pyx_t_9 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 102, __pyx_L1_error)
+      __pyx_t_9 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 109, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
-      __pyx_t_10 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 102, __pyx_L1_error)
+      __pyx_t_10 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 109, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       #endif
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     } else {
       Py_ssize_t index = -1;
-      __pyx_t_11 = PyObject_GetIter(__pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 102, __pyx_L1_error)
+      __pyx_t_11 = PyObject_GetIter(__pyx_t_8); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 109, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_t_12 = Py_TYPE(__pyx_t_11)->tp_iternext;
@@ -1792,7 +1821,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       __Pyx_GOTREF(__pyx_t_9);
       index = 1; __pyx_t_10 = __pyx_t_12(__pyx_t_11); if (unlikely(!__pyx_t_10)) goto __pyx_L9_unpacking_failed;
       __Pyx_GOTREF(__pyx_t_10);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 2) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
+      if (__Pyx_IternextUnpackEndCheck(__pyx_t_12(__pyx_t_11), 2) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
       __pyx_t_12 = NULL;
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       goto __pyx_L10_unpacking_done;
@@ -1800,69 +1829,69 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       __pyx_t_12 = NULL;
       if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 102, __pyx_L1_error)
+      __PYX_ERR(0, 109, __pyx_L1_error)
       __pyx_L10_unpacking_done:;
     }
     __Pyx_XDECREF_SET(__pyx_v_T, __pyx_t_9);
     __pyx_t_9 = 0;
     __Pyx_XDECREF_SET(__pyx_v_n, __pyx_t_10);
     __pyx_t_10 = 0;
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_3);
-    __pyx_t_8 = __Pyx_PyInt_AddObjC(__pyx_t_3, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_t_2);
+    __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_2);
+    __pyx_t_8 = __Pyx_PyInt_AddObjC(__pyx_t_2, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_3);
-    __pyx_t_3 = __pyx_t_8;
+    __Pyx_DECREF(__pyx_t_2);
+    __pyx_t_2 = __pyx_t_8;
     __pyx_t_8 = 0;
 
-    /* "qubovert/sim/_simulate_quso.pyx":103
+    /* "qubovert/sim/_simulate_quso.pyx":110
  *         c_J[i] = J[i]
  *     for i, (T, n) in enumerate(schedule):
  *         c_Ts[i] = T             # <<<<<<<<<<<<<<
  *         c_num_updates[i] = n
  *         if n < 0:
  */
-    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_T); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_T); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
     (__pyx_v_c_Ts[__pyx_t_6]) = __pyx_t_7;
 
-    /* "qubovert/sim/_simulate_quso.pyx":104
+    /* "qubovert/sim/_simulate_quso.pyx":111
  *     for i, (T, n) in enumerate(schedule):
  *         c_Ts[i] = T
  *         c_num_updates[i] = n             # <<<<<<<<<<<<<<
  *         if n < 0:
  *             raise ValueError("Cannot update a negative number of times")
  */
-    __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
-    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
-    (__pyx_v_c_num_updates[__pyx_t_6]) = __pyx_t_2;
+    __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_n); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_6 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
+    (__pyx_v_c_num_updates[__pyx_t_6]) = __pyx_t_3;
 
-    /* "qubovert/sim/_simulate_quso.pyx":105
+    /* "qubovert/sim/_simulate_quso.pyx":112
  *         c_Ts[i] = T
  *         c_num_updates[i] = n
  *         if n < 0:             # <<<<<<<<<<<<<<
  *             raise ValueError("Cannot update a negative number of times")
  * 
  */
-    __pyx_t_8 = PyObject_RichCompare(__pyx_v_n, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 105, __pyx_L1_error)
-    __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_8 = PyObject_RichCompare(__pyx_v_n, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_8); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 112, __pyx_L1_error)
+    __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_8); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(0, 112, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     if (unlikely(__pyx_t_13)) {
 
-      /* "qubovert/sim/_simulate_quso.pyx":106
+      /* "qubovert/sim/_simulate_quso.pyx":113
  *         c_num_updates[i] = n
  *         if n < 0:
  *             raise ValueError("Cannot update a negative number of times")             # <<<<<<<<<<<<<<
  * 
  *     with nogil:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 106, __pyx_L1_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __PYX_ERR(0, 106, __pyx_L1_error)
+      __PYX_ERR(0, 113, __pyx_L1_error)
 
-      /* "qubovert/sim/_simulate_quso.pyx":105
+      /* "qubovert/sim/_simulate_quso.pyx":112
  *         c_Ts[i] = T
  *         c_num_updates[i] = n
  *         if n < 0:             # <<<<<<<<<<<<<<
@@ -1871,7 +1900,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
     }
 
-    /* "qubovert/sim/_simulate_quso.pyx":102
+    /* "qubovert/sim/_simulate_quso.pyx":109
  *         c_neighbors[i] = neighbors[i]
  *         c_J[i] = J[i]
  *     for i, (T, n) in enumerate(schedule):             # <<<<<<<<<<<<<<
@@ -1880,9 +1909,9 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "qubovert/sim/_simulate_quso.pyx":108
+  /* "qubovert/sim/_simulate_quso.pyx":115
  *             raise ValueError("Cannot update a negative number of times")
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1897,17 +1926,17 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       #endif
       /*try:*/ {
 
-        /* "qubovert/sim/_simulate_quso.pyx":109
+        /* "qubovert/sim/_simulate_quso.pyx":116
  * 
  *     with nogil:
  *         simulate_quso(             # <<<<<<<<<<<<<<
  *             c_len_state, c_state, c_h,
  *             c_num_neighbors, c_neighbors, c_J,
  */
-        simulate_quso(__pyx_v_c_len_state, __pyx_v_c_state, __pyx_v_c_h, __pyx_v_c_num_neighbors, __pyx_v_c_neighbors, __pyx_v_c_J, __pyx_v_c_len_Ts, __pyx_v_c_Ts, __pyx_v_c_num_updates, __pyx_v_c_seed);
+        simulate_quso(__pyx_v_c_len_state, __pyx_v_c_state, __pyx_v_c_h, __pyx_v_c_num_neighbors, __pyx_v_c_neighbors, __pyx_v_c_J, __pyx_v_c_len_Ts, __pyx_v_c_Ts, __pyx_v_c_num_updates, __pyx_v_c_in_order, __pyx_v_c_seed);
       }
 
-      /* "qubovert/sim/_simulate_quso.pyx":108
+      /* "qubovert/sim/_simulate_quso.pyx":115
  *             raise ValueError("Cannot update a negative number of times")
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1926,7 +1955,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
       }
   }
 
-  /* "qubovert/sim/_simulate_quso.pyx":116
+  /* "qubovert/sim/_simulate_quso.pyx":123
  *         )
  * 
  *     final_state = [c_state[i] for i in range(len(state))]             # <<<<<<<<<<<<<<
@@ -1934,22 +1963,22 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  *     free(c_h)
  */
   { /* enter inner scope */
-    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_t_2 = PyList_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyObject_Length(__pyx_v_state); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 123, __pyx_L1_error)
     __pyx_t_6 = __pyx_t_1;
     for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_6; __pyx_t_14+=1) {
       __pyx_7genexpr__pyx_v_i = __pyx_t_14;
-      __pyx_t_4 = __Pyx_PyInt_From_int((__pyx_v_c_state[__pyx_7genexpr__pyx_v_i])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 116, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyInt_From_int((__pyx_v_c_state[__pyx_7genexpr__pyx_v_i])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 116, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_2, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
   } /* exit inner scope */
-  __pyx_v_final_state = ((PyObject*)__pyx_t_3);
-  __pyx_t_3 = 0;
+  __pyx_v_final_state = ((PyObject*)__pyx_t_2);
+  __pyx_t_2 = 0;
 
-  /* "qubovert/sim/_simulate_quso.pyx":117
+  /* "qubovert/sim/_simulate_quso.pyx":124
  * 
  *     final_state = [c_state[i] for i in range(len(state))]
  *     free(c_state)             # <<<<<<<<<<<<<<
@@ -1958,7 +1987,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_state);
 
-  /* "qubovert/sim/_simulate_quso.pyx":118
+  /* "qubovert/sim/_simulate_quso.pyx":125
  *     final_state = [c_state[i] for i in range(len(state))]
  *     free(c_state)
  *     free(c_h)             # <<<<<<<<<<<<<<
@@ -1967,7 +1996,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_h);
 
-  /* "qubovert/sim/_simulate_quso.pyx":119
+  /* "qubovert/sim/_simulate_quso.pyx":126
  *     free(c_state)
  *     free(c_h)
  *     free(c_num_neighbors)             # <<<<<<<<<<<<<<
@@ -1976,7 +2005,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_num_neighbors);
 
-  /* "qubovert/sim/_simulate_quso.pyx":120
+  /* "qubovert/sim/_simulate_quso.pyx":127
  *     free(c_h)
  *     free(c_num_neighbors)
  *     free(c_neighbors)             # <<<<<<<<<<<<<<
@@ -1985,7 +2014,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_neighbors);
 
-  /* "qubovert/sim/_simulate_quso.pyx":121
+  /* "qubovert/sim/_simulate_quso.pyx":128
  *     free(c_num_neighbors)
  *     free(c_neighbors)
  *     free(c_J)             # <<<<<<<<<<<<<<
@@ -1994,7 +2023,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_J);
 
-  /* "qubovert/sim/_simulate_quso.pyx":122
+  /* "qubovert/sim/_simulate_quso.pyx":129
  *     free(c_neighbors)
  *     free(c_J)
  *     free(c_Ts)             # <<<<<<<<<<<<<<
@@ -2003,7 +2032,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_Ts);
 
-  /* "qubovert/sim/_simulate_quso.pyx":123
+  /* "qubovert/sim/_simulate_quso.pyx":130
  *     free(c_J)
  *     free(c_Ts)
  *     free(c_num_updates)             # <<<<<<<<<<<<<<
@@ -2011,7 +2040,7 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  */
   free(__pyx_v_c_num_updates);
 
-  /* "qubovert/sim/_simulate_quso.pyx":124
+  /* "qubovert/sim/_simulate_quso.pyx":131
  *     free(c_Ts)
  *     free(c_num_updates)
  *     return final_state             # <<<<<<<<<<<<<<
@@ -2025,13 +2054,13 @@ static PyObject *__pyx_pf_8qubovert_3sim_14_simulate_quso_c_simulate_quso(CYTHON
  * 
  * 
  * def c_simulate_quso(state, h, num_neighbors,             # <<<<<<<<<<<<<<
- *                     neighbors, J, schedule, seed):
- *     """
+ *                     neighbors, J, schedule, in_order, seed):
+ *     """c_simulate_quso.
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
@@ -2102,6 +2131,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_c_J, __pyx_k_c_J, sizeof(__pyx_k_c_J), 0, 0, 1, 1},
   {&__pyx_n_s_c_Ts, __pyx_k_c_Ts, sizeof(__pyx_k_c_Ts), 0, 0, 1, 1},
   {&__pyx_n_s_c_h, __pyx_k_c_h, sizeof(__pyx_k_c_h), 0, 0, 1, 1},
+  {&__pyx_n_s_c_in_order, __pyx_k_c_in_order, sizeof(__pyx_k_c_in_order), 0, 0, 1, 1},
   {&__pyx_n_s_c_len_Ts, __pyx_k_c_len_Ts, sizeof(__pyx_k_c_len_Ts), 0, 0, 1, 1},
   {&__pyx_n_s_c_len_state, __pyx_k_c_len_state, sizeof(__pyx_k_c_len_state), 0, 0, 1, 1},
   {&__pyx_n_s_c_neighbors, __pyx_k_c_neighbors, sizeof(__pyx_k_c_neighbors), 0, 0, 1, 1},
@@ -2115,6 +2145,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_final_state, __pyx_k_final_state, sizeof(__pyx_k_final_state), 0, 0, 1, 1},
   {&__pyx_n_s_h, __pyx_k_h, sizeof(__pyx_k_h), 0, 0, 1, 1},
   {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
+  {&__pyx_n_s_in_order, __pyx_k_in_order, sizeof(__pyx_k_in_order), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_n, __pyx_k_n, sizeof(__pyx_k_n), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
@@ -2130,9 +2161,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 95, __pyx_L1_error)
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 102, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 113, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -2142,14 +2173,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "qubovert/sim/_simulate_quso.pyx":106
+  /* "qubovert/sim/_simulate_quso.pyx":113
  *         c_num_updates[i] = n
  *         if n < 0:
  *             raise ValueError("Cannot update a negative number of times")             # <<<<<<<<<<<<<<
  * 
  *     with nogil:
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Cannot_update_a_negative_number); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Cannot_update_a_negative_number); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 113, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
@@ -2157,13 +2188,13 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  * def c_simulate_quso(state, h, num_neighbors,             # <<<<<<<<<<<<<<
- *                     neighbors, J, schedule, seed):
- *     """
+ *                     neighbors, J, schedule, in_order, seed):
+ *     """c_simulate_quso.
  */
-  __pyx_tuple__2 = PyTuple_Pack(22, __pyx_n_s_state, __pyx_n_s_h, __pyx_n_s_num_neighbors, __pyx_n_s_neighbors, __pyx_n_s_J, __pyx_n_s_schedule, __pyx_n_s_seed, __pyx_n_s_c_len_state, __pyx_n_s_c_state, __pyx_n_s_c_h, __pyx_n_s_c_num_neighbors, __pyx_n_s_c_neighbors, __pyx_n_s_c_J, __pyx_n_s_c_len_Ts, __pyx_n_s_c_Ts, __pyx_n_s_c_num_updates, __pyx_n_s_c_seed, __pyx_n_s_i, __pyx_n_s_T, __pyx_n_s_n, __pyx_n_s_final_state, __pyx_n_s_i); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(24, __pyx_n_s_state, __pyx_n_s_h, __pyx_n_s_num_neighbors, __pyx_n_s_neighbors, __pyx_n_s_J, __pyx_n_s_schedule, __pyx_n_s_in_order, __pyx_n_s_seed, __pyx_n_s_c_len_state, __pyx_n_s_c_state, __pyx_n_s_c_h, __pyx_n_s_c_num_neighbors, __pyx_n_s_c_neighbors, __pyx_n_s_c_J, __pyx_n_s_c_len_Ts, __pyx_n_s_c_Ts, __pyx_n_s_c_num_updates, __pyx_n_s_c_in_order, __pyx_n_s_c_seed, __pyx_n_s_i, __pyx_n_s_T, __pyx_n_s_n, __pyx_n_s_final_state, __pyx_n_s_i); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(7, 0, 22, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_qubovert_sim__simulate_quso_pyx, __pyx_n_s_c_simulate_quso, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(8, 0, 24, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_qubovert_sim__simulate_quso_pyx, __pyx_n_s_c_simulate_quso, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -2445,8 +2476,8 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  * def c_simulate_quso(state, h, num_neighbors,             # <<<<<<<<<<<<<<
- *                     neighbors, J, schedule, seed):
- *     """
+ *                     neighbors, J, schedule, in_order, seed):
+ *     """c_simulate_quso.
  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8qubovert_3sim_14_simulate_quso_1c_simulate_quso, NULL, __pyx_n_s_qubovert_sim__simulate_quso); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

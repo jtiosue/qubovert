@@ -1,3 +1,17 @@
+//   Copyright 2020 Joseph T. Iosue
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
 #include "pcg_basic.h"
 #include "simulate_quso.h"
 #include <stdlib.h>
@@ -5,7 +19,7 @@
 #include <math.h>
 #include <time.h>
 
-/* 
+/*
 a few slight modifications and one major modification from
     https://github.com/dwavesystems/dwave-neal/blob/master/neal/src/cpu_sa.cpp
 We use the minimal C random number generator from
@@ -131,7 +145,7 @@ void simulate_quso(
     int len_state, int *state, double *h,
     int *num_neighbors, int *neighbors, double *J,
     int len_Ts, double *Ts, int *num_updates,
-    int seed
+    int in_order, int seed
 ) {
     /*
     Simulate a QUSO.
@@ -153,6 +167,8 @@ void simulate_quso(
         the QUSO at.
     `num_updates` points to an array where `num_updates[j]` is the number of
         times steps to simulate the QUSO at temperature `Ts[j]`.
+    `in_order` indicates whether to iterate through the variables in order
+        `in_order=1` or randomly `in_order=0` during an update step.
     `seed` seeds the random number generator. If `seed` is a negative integer,
         then we seed the random number generator with `time(NULL)`. Otherwise
         we will use `seed`.
@@ -193,7 +209,7 @@ void simulate_quso(
     }
 
     double T, dE;
-    int t, i, _, __;
+    int t, i, j, _;
 
     // index[i] points to where the information for spin i starts
     // in the J and neighbor arrays.
@@ -215,8 +231,8 @@ void simulate_quso(
     for(t=0; t<len_Ts; t++) {
         T = Ts[t];
         for(_=0; _<num_updates[t]; _++) {
-            for(__=0; __<len_state; __++) {
-                i = rand_int(&rng, len_state);  // pick random variable
+            for(j=0; j<len_state; j++) {
+                i = in_order ? j : rand_int(&rng, len_state);
                 dE = flip_spin_dE[i];
                 if(dE <= 0 || (T > 0 && rand_double(&rng) < exp(-dE / T))) {
                     recompute_flip_dE(

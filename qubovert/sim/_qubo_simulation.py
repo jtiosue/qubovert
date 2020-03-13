@@ -19,7 +19,9 @@ Metropolis algorithm to simulate QUBOs.
 
 """
 
-from qubovert.utils import qubo_to_quso, spin_to_boolean, boolean_to_spin
+from qubovert.utils import (
+    qubo_to_quso, spin_to_boolean, boolean_to_spin, QUSOMatrix
+)
 from . import QUSOSimulation
 
 
@@ -88,7 +90,12 @@ class QUBOSimulation(QUSOSimulation):
         """
         model = qubo_to_quso(Q)
         if initial_state is None:
-            initial_state = {v: 0 for v in model._variables}
+            var = (
+                range(model.max_index + 1)
+                if type(model) == QUSOMatrix
+                else model._variables
+            )
+            initial_state = {v: 0 for v in var}
         super().__init__(model, initial_state)
 
     @property

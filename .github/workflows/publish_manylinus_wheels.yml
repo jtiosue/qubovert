@@ -1,0 +1,33 @@
+name: Upload Python Package - Many Linux
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        make cython_install
+    - name: Build manylinux Python wheels
+      uses: RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64
+      with:
+        python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38'
+        system-packages: 'lrzip-devel zlib-devel'
+        package-path: ''
+        pip-wheel-args: '--no-deps'
+    - name: Publish wheels to PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        make upload_manylinux_pypi

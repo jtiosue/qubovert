@@ -197,7 +197,7 @@ class QUSOSimulation:
         """
         self.set_state(self._initial_state)
 
-    def update(self, T, num_updates=1, seed=None):
+    def update(self, T, num_updates=1, in_order=False, seed=None):
         """update.
 
         Update the simulation at temperature ``T``. Updates the internal state.
@@ -208,13 +208,18 @@ class QUSOSimulation:
             Temperature.
         num_updates : int >= 1 (optional, defaults to 1).
             The number of times to update the simulation at the temperature.
+        in_order : bool (optional, defaults to False).
+            Whether to iterate through the variables in order or randomly
+            during an update step. When ``in_order`` is False, the simulation
+            is more physically realistic, but when using the Simulation for
+            annealing, often it is better to have ``in_order = True``.
         seed : number (optional, defaults to None).
             The number to seed ``random`` with.
 
         """
-        self.schedule_update([(T, num_updates)], seed)
+        self.schedule_update([(T, num_updates)], in_order, seed)
 
-    def schedule_update(self, schedule, seed=None):
+    def schedule_update(self, schedule, in_order=False, seed=None):
         """schedule_update.
 
         Update the simulation with a schedule. This function wraps the C
@@ -225,6 +230,11 @@ class QUSOSimulation:
         schedule : iterable of tuples.
             Each element in ``schedule`` is a pair ``(T, n)`` which designates
             a temperature and a number of updates. See `Notes` below.
+        in_order : bool (optional, defaults to False).
+            Whether to iterate through the variables in order or randomly
+            during an update step. When ``in_order`` is False, the simulation
+            is more physically realistic, but when using the Simulation for
+            annealing, often it is better to have ``in_order = True``.
         seed : number (optional, defaults to None).
             The number to seed ``random`` with.
 
@@ -245,8 +255,7 @@ class QUSOSimulation:
         """
         # call the C function
         self._state = simulate_quso(
-            self._state,
-            *self._c_args,
-            schedule,
+            self._state, *self._c_args,
+            schedule, in_order,
             seed if seed is not None else -1
         )

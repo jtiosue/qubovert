@@ -53,15 +53,6 @@ def test_pusosimulation_set_state():
     assert sim.state == {0: -1}
 
 
-def test_pusosimulation_flip_bit():
-
-    sim = PUSOSimulation({(0,): 1, (1,): -1}, [1, -1])
-    sim._flip_bit(0)
-    assert sim.state == {0: -1, 1: -1}
-    sim._flip_bit(1)
-    assert sim.state == {0: -1, 1: 1}
-
-
 def test_pusosimulation_paststates_reset():
 
     ising = sum(-spin_var(i) * spin_var(i+1) for i in range(3))
@@ -125,3 +116,5 @@ def test_pusosimulation_updates():
 
     with assert_raises(ValueError):
         sim.update(4, -1)
+
+    sim.update(4, 4, in_order=True)

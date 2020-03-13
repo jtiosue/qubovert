@@ -164,3 +164,4 @@ def test_qusosimulation_bigrun():
     )
     sim = QUSOSimulation(model)
     sim.update(3, 1000)
+    sim.update(3, 1000, in_order=True)
