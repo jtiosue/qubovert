@@ -20,7 +20,7 @@ __all__ = (
 )
 
 
-__version__ = "1.1.6"
+__version__ = "1.1.7"
 __author__ = "Joseph T. Iosue"
 __authoremail__ = "joe.iosue@yahoo.com"
 __license__ = "Apache Software License 2.0"
