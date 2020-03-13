@@ -54,15 +54,6 @@ def test_pubosimulation_set_state():
     assert sim.state == {0: 1}
 
 
-def test_pubosimulation_flip_bit():
-
-    sim = PUBOSimulation({(0,): 1, (1,): -1}, [0, 1])
-    sim._flip_bit(0)
-    assert sim.state == {0: 1, 1: 1}
-    sim._flip_bit(1)
-    assert sim.state == {0: 1, 1: 0}
-
-
 def test_pubosimulation_paststates_reset():
 
     ising = sum(-spin_var(i) * spin_var(i+1) for i in range(3))

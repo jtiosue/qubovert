@@ -19,7 +19,9 @@ Contains tests for the PUSOSimulation functionality in the
 
 from qubovert.sim import QUSOSimulation, QUBOSimulation
 from qubovert import spin_var, QUBO
-from qubovert.utils import boolean_to_spin, quso_to_qubo, QUSOMatrix
+from qubovert.utils import (
+    boolean_to_spin, quso_to_qubo, QUSOMatrix, QUBOMatrix
+)
 from numpy.testing import assert_raises
 
 
@@ -136,3 +138,14 @@ def test_qubosimulation_vs_qusosimulation():
     spin.schedule_update(schedule, seed=4)
     boolean.schedule_update(schedule, seed=4)
     assert spin.state == boolean_to_spin(boolean.state)
+
+
+def test_qubosimulation_bigrun():
+
+    # test that it runs on a big problem
+    model = QUBOMatrix(
+        {(i, j): 1 for i in range(2, 200, 3) for j in range(2, 200, 2)}
+    )
+    sim = QUBOSimulation(model)
+    sim.update(3, 1000)
+    sim.update(3, 1000, in_order=True)

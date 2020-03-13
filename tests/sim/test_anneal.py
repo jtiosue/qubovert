@@ -128,6 +128,14 @@ def test_anneal_puso():
     assert res.best.value == -30
     assert len([x for x in res]) == 4
 
+    # check to see if we find the groundstate of same but out of order
+    res = anneal_puso(H, num_anneals=4, in_order=False, seed=0)
+    assert res.best.state in (
+        dict(enumerate([1]*31)), dict(enumerate([-1]*31))
+    )
+    assert res.best.value == -30
+    assert len([x for x in res]) == 4
+
     # make sure we run branch where an explicit schedule is given and no
     # temperature range is supplied
     anneal_puso(H, schedule=[(3, 10), (2, 15)])
@@ -167,6 +175,14 @@ def test_anneal_quso():
     # check to see if we find the groundstate of a simple but largeish model.
     L = {(i, i+1): -1 for i in range(30)}
     res = anneal_quso(L, num_anneals=4, seed=0)
+    assert res.best.state in (
+        dict(enumerate([1]*31)), dict(enumerate([-1]*31))
+    )
+    assert res.best.value == -30
+    assert len([x for x in res]) == 4
+
+    # check to see if we find the groundstate of a sane but out of order
+    res = anneal_quso(L, num_anneals=4, in_order=False, seed=0)
     assert res.best.state in (
         dict(enumerate([1]*31)), dict(enumerate([-1]*31))
     )
@@ -218,6 +234,14 @@ def test_anneal_pubo():
     assert res.best.value == -30
     assert len([x for x in res]) == 4
 
+    # check to see if we find the groundstate of same but out of order
+    res = anneal_pubo(P, num_anneals=4, in_order=False, seed=0)
+    assert res.best.state in (
+        dict(enumerate([0]*31)), dict(enumerate([1]*31))
+    )
+    assert res.best.value == -30
+    assert len([x for x in res]) == 4
+
     # make sure we run branch where an explicit schedule is given and no
     # temperature range is supplied
     anneal_pubo(P, schedule=[(3, 10), (2, 15)])
@@ -257,6 +281,14 @@ def test_anneal_qubo():
     # check to see if we find the groundstate of a simple but largeish model.
     Q = quso_to_qubo({(i, i+1): -1 for i in range(30)})
     res = anneal_qubo(Q, num_anneals=4, seed=0)
+    assert res.best.state in (
+        dict(enumerate([0]*31)), dict(enumerate([1]*31))
+    )
+    assert res.best.value == -30
+    assert len([x for x in res]) == 4
+
+    # check to see if we find the groundstate of the same but out of order
+    res = anneal_qubo(Q, num_anneals=4, in_order=False, seed=0)
     assert res.best.state in (
         dict(enumerate([0]*31)), dict(enumerate([1]*31))
     )
