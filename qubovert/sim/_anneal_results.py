@@ -480,7 +480,7 @@ class AnnealResults(list):
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
         >>> new_res = anneal_res.apply_function(
                 lambda x: qv.sim.AnnealResult(
-                    model.convert_state(x.state), x.value, x.spin
+                    model.convert_solution(x.state), x.value, x.spin
                 )
             )
         >>> new_res
@@ -521,7 +521,7 @@ class AnnealResults(list):
         [AnnealResult(state={0: 0, 1: 1}, value=0, spin=False),
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False),
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
-        >>> new_res = anneal_res.convert_states(model.convert_state)
+        >>> new_res = anneal_res.convert_states(model.convert_solution)
         >>> new_res
         [AnnealResult(state={'a': 0, 'b': 1}, value=0, spin=False),
          AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False),
