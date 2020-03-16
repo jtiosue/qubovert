@@ -34,4 +34,6 @@ __all__ = (
     __all_np__ + __all_benchmarking__
 )
 
+del __all_np__, __all_benchmarking__
+
 name = "problems"

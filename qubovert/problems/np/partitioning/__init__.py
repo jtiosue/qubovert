@@ -35,4 +35,6 @@ __all__ = (
     __all_gp__
 )
 
+del __all_np__, __all_gp__
+
 name = "partitioning"

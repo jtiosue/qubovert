@@ -35,4 +35,6 @@ __all__ = (
     __all_vc__
 )
 
+del __all_sc__, __all_vc__
+
 name = "covering"
