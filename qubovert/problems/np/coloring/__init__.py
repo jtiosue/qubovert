@@ -32,4 +32,6 @@ __all__ = (
     __all_js__
 )
 
+del __all_js__
+
 name = "coloring"

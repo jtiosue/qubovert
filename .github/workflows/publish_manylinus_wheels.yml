@@ -17,7 +17,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        make cython_install
+        make dev_install
     - name: Build manylinux Python wheels
       uses: RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64
       with:

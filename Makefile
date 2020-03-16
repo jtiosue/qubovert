@@ -16,11 +16,6 @@ dev_install:
 	$(pip_cmd) install -e .
 	$(pip_cmd) install -r requirements-dev.txt
 
-cython_install:
-	$(pip_cmd) install --upgrade pip
-	$(pip_cmd) install -r requirements-dev.txt
-	$(pip_cmd) install -e .
-
 test:
 	$(python_cmd) -m pydocstyle convention=numpy qubovert
 	$(python_cmd) -m pytest --codestyle --cov=./ --cov-report=xml

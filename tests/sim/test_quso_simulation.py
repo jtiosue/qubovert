@@ -151,9 +151,8 @@ def test_qusosimulation_updates():
     assert sim.state == state
     sim.schedule_update([(5, 0), (3, 0)])
     assert sim.state == state
-
-    with assert_raises(ValueError):
-        sim.update(4, -1)
+    sim.update(4, -1)
+    assert sim.state == state
 
 
 def test_qusosimulation_bigrun():

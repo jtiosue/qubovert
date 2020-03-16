@@ -35,13 +35,12 @@ from ._anneal import __all__ as __all_anneal__
 
 
 __all__ = (
-    __all_pusosim__ +
-    __all_pubosim__ +
-    __all_qusosim__ +
-    __all_qubosim__ +
-    __all_results__ +
-    __all_anneal__
+    __all_pusosim__ + __all_pubosim__ + __all_qusosim__ + __all_qubosim__ +
+    __all_results__ + __all_anneal__
 )
+
+del __all_pusosim__, __all_pubosim__, __all_qusosim__, __all_qubosim__
+del __all_results__, __all_anneal__
 
 
 name = "sim"

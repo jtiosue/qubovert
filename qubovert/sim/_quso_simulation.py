@@ -253,9 +253,10 @@ class QUSOSimulation:
         >>> sim.schedule_update(schedule)
 
         """
+
         # call the C function
         self._state = simulate_quso(
             self._state, *self._c_args,
-            schedule, in_order,
+            *zip(*schedule), int(in_order),
             seed if seed is not None else -1
         )

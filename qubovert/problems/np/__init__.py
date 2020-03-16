@@ -47,4 +47,7 @@ __all__ = (
     __all_packing__ + __all_partitioning__ + __all_tree__
 )
 
+del __all_bilp__, __all_coloring__, __all_covering__, __all_cycles__
+del __all_packing__, __all_partitioning__, __all_tree__
+
 name = "np"

@@ -304,8 +304,6 @@ class PUSOSimulation:
             random.seed(seed)
 
         for T, n in schedule:
-            if n < 0:
-                raise ValueError("Cannot update a negative number of times")
             for _ in range(n):
                 self._add_past_state()
 
