@@ -306,6 +306,13 @@ def test_properties():
     assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
 
+    # an old bug
+    d = QUSO()
+    d.set_mapping({0: 0})
+    d[(0,)] += 1
+    assert d.num_binary_variables == 1
+    assert d.variables == {0}
+
 
 def test_round():
 

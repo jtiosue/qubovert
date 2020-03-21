@@ -327,6 +327,13 @@ def test_properties():
     d.add_constraint_eq_zero(temp)
     assert d.constraints == {'eq': [temp]}
 
+    # an old bug
+    d = PCBO()
+    d.set_mapping({0: 0})
+    d[(0,)] += 1
+    assert d.num_binary_variables == 1
+    assert d.variables == {0}
+
 
 def test_round():
 
