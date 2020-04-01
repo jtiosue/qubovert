@@ -21,7 +21,7 @@ Metropolis algorithm to simulate PUSOs.
 
 from qubovert.utils import puso_value
 import random
-from numpy import exp
+from math import exp
 
 
 __all__ = 'PUSOSimulation',

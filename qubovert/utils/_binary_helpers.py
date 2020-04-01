@@ -18,7 +18,7 @@ This file contains the multiple generic helper functions.
 
 """
 
-from numpy import log2, ceil
+from math import log2, ceil
 
 
 __all__ = 'solution_type', 'num_bits'

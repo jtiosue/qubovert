@@ -19,7 +19,7 @@ See ``help(qubovert.problems.JobSequencing)``.
 
 """
 
-from numpy import log2
+from math import log2
 from qubovert.utils import (
     QUBOMatrix, decimal_to_boolean, solution_type, spin_to_boolean
 )

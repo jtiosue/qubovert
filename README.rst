@@ -10,7 +10,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://github.com/jiosue/qubovert/actions?query=workflow%3Abuild+branch%3Amaster
     :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
-    :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
+    :target: https://qubovert.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jiosue/qubovert/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/jiosue/qubovert
@@ -25,7 +25,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://github.com/jiosue/qubovert/actions?query=workflow%3Abuild+branch%3Adev
     :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
-    :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
+    :target: https://qubovert.readthedocs.io/en/dev/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jiosue/qubovert/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/jiosue/qubovert

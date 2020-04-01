@@ -25,6 +25,7 @@ from qubovert.utils import (
 from . import PUSOSimulation, QUSOSimulation, AnnealResults
 import random
 import numpy as np
+from math import log
 
 __all__ = (
     'anneal_qubo', 'anneal_quso', 'anneal_pubo', 'anneal_puso',
@@ -114,8 +115,8 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
 
     # now ensure that the bolzmann weight satisfy the desired probabilities.
     # ie exp(-del_energy / T) = prob
-    T0 = -max_del_energy / np.log(start_flip_prob) if start_flip_prob else 0
-    Tf = -min_del_energy / np.log(end_flip_prob) if end_flip_prob else 0
+    T0 = -max_del_energy / log(start_flip_prob) if start_flip_prob else 0
+    Tf = -min_del_energy / log(end_flip_prob) if end_flip_prob else 0
     return float(T0), float(Tf)
 
 
