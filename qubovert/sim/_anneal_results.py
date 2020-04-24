@@ -92,6 +92,22 @@ class AnnealResult:
             self.spin == other.spin
         ))
 
+    def __lt__(self, other):
+        """__lt__.
+
+        ``self < other`` iff ``self.value < other.value``.
+
+        Parameters
+        ----------
+        other : AnnealResult object.
+
+        Returns
+        -------
+        res : bool.
+
+        """
+        return self.value < other.value
+
     def copy(self):
         """copy.
 
@@ -181,7 +197,7 @@ class AnnealResults(list):
     >>>     print(r.state, r.value)
 
     The user can sort the results from best to worst with
-    ``res.sort_by_value()``. Then iterating through ``res`` will be in that
+    ``res.sort()``. Then iterating through ``res`` will be in that
     order.
 
     The user can also convert each result state to/from boolean and spin
@@ -294,14 +310,6 @@ class AnnealResults(list):
         for r in self:
             res.append(r.to_spin())
         return res
-
-    def sort_by_value(self):
-        """sort_by_value.
-
-        Sort the results in ``self`` in increasing order of their values.
-
-        """
-        self.sort(key=lambda x: x.value)
 
     def __str__(self):
         """__str__.

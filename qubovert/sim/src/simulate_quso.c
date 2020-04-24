@@ -15,7 +15,6 @@
 #include "pcg_basic.h"
 #include "simulate_quso.h"
 #include <stdlib.h>
-#include <stdint.h>
 #include <math.h>
 #include <time.h>
 
@@ -43,7 +42,7 @@ void compute_flip_dE(
     double *flip_spin_dE,
     int len_state, int *state, double *h,
     int *num_neighbors, int *neighbors, double *J,
-    int *index
+    long *index
 ) {
     /*
     Determine the energy of the subgraph around a certain spin.
@@ -88,7 +87,7 @@ void compute_flip_dE(
 void recompute_flip_dE(
     int spin, double *flip_spin_dE, int *state,
     int *num_neighbors, int *neighbors, double *J,
-    int32_t *index
+    long *index
 ) {
     /*
     `flip_spin_dE` points to an array such that `flip_spin_dE[i]` is
@@ -213,7 +212,7 @@ void simulate_quso(
 
     // index[i] points to where the information for spin i starts
     // in the J and neighbor arrays.
-    int32_t *index; index = (int32_t*)malloc(len_state * sizeof(int32_t));
+    long *index = (long*)malloc(len_state * sizeof(long));
     index[0] = 0;
     for(i=1; i<len_state; i++) {
         index[i] = index[i-1] + num_neighbors[i-1];

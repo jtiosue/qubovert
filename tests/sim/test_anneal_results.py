@@ -43,6 +43,41 @@ def test_annealresult():
     str(res)
 
 
+def test_annealresult_comparison():
+
+    res1 = AnnealResult({1: 0, 2: 1}, 2, False)
+    res2 = AnnealResult({1: 0, 2: 1}, 1, False)
+    res3 = AnnealResult({1: 0, 2: 0}, 2, False)
+    res4 = AnnealResult({1: 0, 2: 0}, 1, False)
+
+    assert res1.copy() == res1
+    assert res2 < res1
+    assert res1 > res2
+    assert res1 != res2
+    assert res4 < res1
+    assert res1 > res4
+    assert res1 != res4
+    assert res4 < res3
+    assert res3 > res4
+    assert res3 != res4
+
+    res1 = AnnealResult({1: 1, 2: -1}, 2, True)
+    res2 = AnnealResult({1: 1, 2: -1}, 1, True)
+    res3 = AnnealResult({1: 1, 2: 1}, 2, True)
+    res4 = AnnealResult({1: 1, 2: 1}, 1, True)
+
+    assert res1.copy() == res1
+    assert res2 < res1
+    assert res1 > res2
+    assert res1 != res2
+    assert res4 < res1
+    assert res1 > res4
+    assert res1 != res4
+    assert res4 < res3
+    assert res3 > res4
+    assert res3 != res4
+
+
 def test_annealresults():
 
     states = [
@@ -90,7 +125,7 @@ def test_annealresults():
     assert res[:2] == anneal_states[:2]
     assert isinstance(res[1:3], AnnealResults)
 
-    res.sort_by_value()
+    res.sort()
     count = 0
     for s in res:
         assert s == AnnealResult(*sorted_states[count], True)
@@ -101,7 +136,7 @@ def test_annealresults():
 
     assert res[:2] == anneal_sorted_states[:2]
 
-    boolean_res.sort_by_value()
+    boolean_res.sort()
     assert res == anneal_sorted_states
     assert boolean_res == [x.to_boolean() for x in anneal_sorted_states]
 

@@ -24,7 +24,7 @@ __version__ = "1.1.7"
 __author__ = "Joseph T. Iosue"
 __authoremail__ = "joe.iosue@yahoo.com"
 __license__ = "Apache Software License 2.0"
-__sourceurl__ = "https://github.com/jiosue/qubovert"
+__sourceurl__ = "https://github.com/jtiosue/qubovert"
 __docsurl__ = "https://qubovert.readthedocs.io"
 __description__ = (
     "A package for formulating, simulating, and solving "
