@@ -17,7 +17,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        make cython_install
+        make dev_install
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

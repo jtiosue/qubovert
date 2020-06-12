@@ -18,8 +18,7 @@ This file contains the multiple generic helper functions.
 
 """
 
-from numpy import log2, ceil
-
+from math import ceil
 
 __all__ = 'solution_type', 'num_bits'
 
@@ -106,4 +105,5 @@ def num_bits(val, log_trick=True):
     """
     if val < 0:
         raise ValueError("``val`` must be >= 0")
-    return int(ceil(log2(val + 1) if log_trick else val))
+    val = int(ceil(val))
+    return int.bit_length(val) if log_trick else val

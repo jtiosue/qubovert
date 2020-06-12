@@ -86,20 +86,6 @@ class BO(Conversions):
         return self._reverse_mapping.copy()
 
     @property
-    def num_binary_variables(self):
-        """num_binary_variables.
-
-        Return the number of binary variables in the problem.
-
-        Return
-        ------
-        n : int.
-            Number of binary variables in the problem.
-
-        """
-        return self._next_label
-
-    @property
     def max_index(self):
         """max_index.
 

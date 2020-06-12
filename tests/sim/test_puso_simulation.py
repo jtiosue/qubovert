@@ -113,8 +113,7 @@ def test_pusosimulation_updates():
     assert sim.state == state
     sim.schedule_update([(5, 0), (3, 0)])
     assert sim.state == state
-
-    with assert_raises(ValueError):
-        sim.update(4, -1)
+    sim.update(4, -1)
+    assert sim.state == state
 
     sim.update(4, 4, in_order=True)

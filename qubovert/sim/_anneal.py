@@ -25,6 +25,7 @@ from qubovert.utils import (
 from . import PUSOSimulation, QUSOSimulation, AnnealResults
 import random
 import numpy as np
+from math import log
 
 __all__ = (
     'anneal_qubo', 'anneal_quso', 'anneal_pubo', 'anneal_puso',
@@ -114,8 +115,8 @@ def anneal_temperature_range(model, start_flip_prob=0.5,
 
     # now ensure that the bolzmann weight satisfy the desired probabilities.
     # ie exp(-del_energy / T) = prob
-    T0 = -max_del_energy / np.log(start_flip_prob) if start_flip_prob else 0
-    Tf = -min_del_energy / np.log(end_flip_prob) if end_flip_prob else 0
+    T0 = -max_del_energy / log(start_flip_prob) if start_flip_prob else 0
+    Tf = -min_del_energy / log(end_flip_prob) if end_flip_prob else 0
     return float(T0), float(Tf)
 
 
@@ -361,7 +362,7 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
     >>> print(anneal_res.best.state)
     {0: 1, 1: -1, 2: 1, 3: -1, 4: 1}
     >>> # now sort the results
-    >>> anneal_res.sort_by_value()
+    >>> anneal_res.sort()
     >>>
     >>> # now iterate through all of the results in the sorted order
     >>> for res in anneal_res:
@@ -383,9 +384,9 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
     """anneal_pubo.
 
     Run a simulated annealing algorithm to try to find the minimum of the PUBO
-    given by ``P``. ``anneal_pubo`` uses a cooling schedule with the
-    ``qubovert.sim.PUBOSimulation`` object. Please see all of the parameters
-    for details.
+    given by ``P``. ``anneal_pubo`` converts ``P`` to a PUSO and then uses a
+    cooling schedule with the ``qubovert.sim.PUSOSimulation`` object. Please
+    see all of the parameters for details.
 
     **Please note** that the ``qv.sim.anneal_qubo`` function performs much
     faster than the ``qv.sim.anneal_pubo`` function since the former is written
@@ -476,7 +477,7 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
     >>> print(anneal_res.best.state)
     {0: 0, 1: 1, 2: 0, 3: 1, 4: 0}
     >>> # now sort the results
-    >>> anneal_res.sort_by_value()
+    >>> anneal_res.sort()
     >>>
     >>> # now iterate through all of the results in the sorted order
     >>> for res in anneal_res:
@@ -500,7 +501,7 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     Run a simulated annealing algorithm to try to find the minimum of the QUSO
     given by ``L``. ``anneal_quso`` uses a cooling schedule with the
-    ``qubovert.sim.PUSOSimulation`` object. Please see all of the parameters
+    ``qubovert.sim.QUSOSimulation`` object. Please see all of the parameters
     for details.
 
     Parameters
@@ -586,7 +587,7 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
     >>> print(anneal_res.best.state)
     {0: 1, 1: -1, 2: 1, 3: -1, 4: 1}
     >>> # now sort the results
-    >>> anneal_res.sort_by_value()
+    >>> anneal_res.sort()
     >>>
     >>> # now iterate through all of the results in the sorted order
     >>> for res in anneal_res:
@@ -608,9 +609,9 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
     """anneal_qubo.
 
     Run a simulated annealing algorithm to try to find the minimum of the QUBO
-    given by ``Q``. ``anneal_qubo`` uses a cooling schedule with the
-    ``qubovert.sim.PUBOSimulation`` object. Please see all of the parameters
-    for details.
+    given by ``Q``. ``anneal_qubo`` converts ``Q`` to a QUSO and then uses a
+    cooling schedule with the ``qubovert.sim.QUSOSimulation`` object. Please
+    see all of the parameters for details.
 
     Parameters
     ----------
@@ -696,7 +697,7 @@ def anneal_qubo(Q, num_anneals=1, anneal_duration=1000, initial_state=None,
     >>> print(anneal_res.best.state)
     {0: 0, 1: 1, 2: 0, 3: 1, 4: 0}
     >>> # now sort the results
-    >>> anneal_res.sort_by_value()
+    >>> anneal_res.sort()
     >>>
     >>> # now iterate through all of the results in the sorted order
     >>> for res in anneal_res:

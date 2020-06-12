@@ -27,4 +27,6 @@ __all__ = (
     __all_asc__
 )
 
+del __all_asc__
+
 name = "benchmarking"

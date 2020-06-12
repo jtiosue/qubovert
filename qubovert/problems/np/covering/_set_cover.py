@@ -18,7 +18,8 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 
 """
 
-from numpy import log2, allclose
+from numpy import allclose
+from math import log2
 from qubovert.utils import (
     QUBOMatrix, solve_qubo_bruteforce, solution_type, spin_to_boolean
 )

@@ -21,7 +21,7 @@ Metropolis algorithm to simulate PUSOs.
 
 from qubovert.utils import puso_value
 import random
-from numpy import exp
+from math import exp
 
 
 __all__ = 'PUSOSimulation',
@@ -304,8 +304,6 @@ class PUSOSimulation:
             random.seed(seed)
 
         for T, n in schedule:
-            if n < 0:
-                raise ValueError("Cannot update a negative number of times")
             for _ in range(n):
                 self._add_past_state()
 

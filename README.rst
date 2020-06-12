@@ -6,29 +6,29 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 
 *master branch*
 
-.. image:: https://github.com/jiosue/qubovert/workflows/build/badge.svg?branch=master
-    :target: https://github.com/jiosue/qubovert/actions/
+.. image:: https://github.com/jtiosue/qubovert/workflows/build/badge.svg?branch=master
+    :target: https://github.com/jtiosue/qubovert/actions?query=workflow%3Abuild+branch%3Amaster
     :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=latest
-    :target: https://qubovert.readthedocs.io/en/latest/?badge=latest
+    :target: https://qubovert.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://codecov.io/gh/jiosue/qubovert/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jiosue/qubovert
+.. image:: https://codecov.io/gh/jtiosue/qubovert/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/jtiosue/qubovert
     :alt: Code Coverage
-.. image:: https://img.shields.io/lgtm/grade/python/g/jiosue/qubovert.svg?logo=lgtm&logoWidth=18
-    :target: https://lgtm.com/projects/g/jiosue/qubovert/context:python
+.. image:: https://img.shields.io/lgtm/grade/python/g/jtiosue/qubovert.svg?logo=lgtm&logoWidth=18
+    :target: https://lgtm.com/projects/g/jtiosue/qubovert/context:python
     :alt: Code Quality
 
 *dev branch*
 
-.. image:: https://github.com/jiosue/qubovert/workflows/build/badge.svg?branch=dev
-    :target: https://github.com/jiosue/qubovert/actions/
+.. image:: https://github.com/jtiosue/qubovert/workflows/build/badge.svg?branch=dev
+    :target: https://github.com/jtiosue/qubovert/actions?query=workflow%3Abuild+branch%3Adev
     :alt: GitHub Actions CI
 .. image:: https://readthedocs.org/projects/qubovert/badge/?version=dev
-    :target: https://qubovert.readthedocs.io/en/latest/?badge=dev
+    :target: https://qubovert.readthedocs.io/en/dev/
     :alt: Documentation Status
-.. image:: https://codecov.io/gh/jiosue/qubovert/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/jiosue/qubovert
+.. image:: https://codecov.io/gh/jtiosue/qubovert/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/jtiosue/qubovert
     :alt: Code Coverage
 
 *pypi distribution*
@@ -41,7 +41,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :alt: pypi dist downloads
 
 
-Please see the `Repository <https://github.com/jiosue/qubovert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_.
+Please see the `Repository <https://github.com/jtiosue/qubovert>`_ and `Docs <https://qubovert.readthedocs.io>`_. For examples/tutorials, see the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_.
 
 
 .. contents::
@@ -63,7 +63,7 @@ Or to install from source:
 
 .. code:: shell
 
-  git clone https://github.com/jiosue/qubovert.git
+  git clone https://github.com/jtiosue/qubovert.git
   cd qubovert
   pip install -e .
 
@@ -81,7 +81,7 @@ Note that to install from source on Windows you will need `Microsoft Visual C++ 
 Example of the typical workflow
 -------------------------------
 
-Here we show an example of formulating a pseudo-boolean objective function. We can also make spin objective functions (Hamiltonians) in a very similar manner. See the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for examples.
+Here we show an example of formulating a pseudo-boolean objective function. We can also make spin objective functions (Hamiltonians) in a very similar manner. See the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for examples.
 
 
 Create the boolean objective function to minimize
@@ -184,7 +184,7 @@ Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
 - PCBO: Polynomial Constrained Boolean Optimization (``qubovert.PCBO``)
 - PCSO: Polynomial Constrained Spin Optimization (``qubovert.PCSO``)
 
-Each of the objects has many methods and arbitary arithmetic defined; see the docstrings of each object and the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for more info. A boolean optimization model is one whose variables can be assigned to be either 0 or 1, while a spin optimization model is one whose variables can be assigned to be either 1 or -1. The ``qubovert.boolean_var(name)`` function will create a PCBO representing the boolean variable with name ``name``. Similarly, the ``qubovert.spin_var(name)`` function will create a PCSO representing the spin variable with name ``name``.
+Each of the objects has many methods and arbitary arithmetic defined; see the docstrings of each object and the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info. A boolean optimization model is one whose variables can be assigned to be either 0 or 1, while a spin optimization model is one whose variables can be assigned to be either 1 or -1. The ``qubovert.boolean_var(name)`` function will create a PCBO representing the boolean variable with name ``name``. Similarly, the ``qubovert.spin_var(name)`` function will create a PCSO representing the spin variable with name ``name``.
 
 
 There are many utilities in the *utils* library that can be helpful. Some examples of utility functions are listed here.
@@ -204,7 +204,7 @@ There are many utilities in the *utils* library that can be helpful. Some exampl
 See ``qubovert.utils.__all__`` for more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that *qubovert* uses everywhere.
 
 
-The PCBO and PCSO objects have constraint methods; for example, the ``.add_constraint_le_zero`` method will enforce that an expression is less than or equal to zero by adding a penalty to the model whenever it does not. The PCBO object also has constraint methods for satisfiability expressions; for example, the ``.add_constraint_OR`` will enforce that the OR of the given boolean expression evaluates to True by adding a penalty to the model whenever it does not. See the docstrings and `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for more info.
+The PCBO and PCSO objects have constraint methods; for example, the ``.add_constraint_le_zero`` method will enforce that an expression is less than or equal to zero by adding a penalty to the model whenever it does not. The PCBO object also has constraint methods for satisfiability expressions; for example, the ``.add_constraint_OR`` will enforce that the OR of the given boolean expression evaluates to True by adding a penalty to the model whenever it does not. See the docstrings and `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info.
 
 
 For more utilities on satisfiability expressions, *qubovert* also has a *sat* library; see ``qubovert.sat.__all__``. Consider the following 3-SAT example. We have variables ``x0, x1, x2, x3``, labeled by ``0, 1, 2, 3``. We can create an expression ``C`` that evaluates to 1 whenever the 3-SAT conditions are satisfied.
@@ -225,7 +225,7 @@ For more utilities on satisfiability expressions, *qubovert* also has a *sat* li
 Basic examples of common functionality
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for many fully worked out examples. Here we will just show some basic and brief examples.
+See the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for many fully worked out examples. Here we will just show some basic and brief examples.
 
 
 The basic building block of a binary optimization model is a Python dictionary. The keys of the dictionary are tuples of variable names, and the values are their corresponding coefficients. For example, in the below code block, ``model1``, ``model2``, and ``model3`` are equivalent.
@@ -357,7 +357,7 @@ We use a Metropolis algorithm to simulate spin and boolean system. Below we show
 Convert common problems to quadratic form (the *problems* library)
 ------------------------------------------------------------------
 
-One of the goals of *qubovert* is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. Please see the `notebooks <https://github.com/jiosue/qubovert/tree/master/notebook_examples>`_ for a few more examples as well.
+One of the goals of *qubovert* is to become a large collection of problems mapped to QUBO and QUSO forms in order to aid the recent increase in study of these problems due to quantum optimization algorithms. Use Python's ``help`` function! I have very descriptive doc strings on all the functions and classes. Please see the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for a few more examples as well.
 
 
 See the following Set Cover example.

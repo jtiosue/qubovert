@@ -107,7 +107,7 @@ def test_puso_checkkey():
         PUSO({0: -1})
 
 
-def test_quso_default_valid():
+def test_puso_default_valid():
 
     d = PUSO()
     assert d[(0, 0)] == 0
@@ -120,7 +120,7 @@ def test_quso_default_valid():
     assert d == {(0, 1): 1}
 
 
-def test_quso_remove_value_when_zero():
+def test_puso_remove_value_when_zero():
 
     d = PUSO()
     d[(0, 1)] += 1
@@ -128,13 +128,13 @@ def test_quso_remove_value_when_zero():
     assert d == {}
 
 
-def test_quso_reinitialize_dictionary():
+def test_puso_reinitialize_dictionary():
 
     d = PUSO({(0, 0): 1, ('1', 0): 2, (2, 0): 0, (0, '1'): 1})
     assert d in ({(): 1, ('1', 0): 3}, {(): 1, (0, '1'): 3})
 
 
-def test_quso_update():
+def test_puso_update():
 
     d = PUSO({('0',): 1, ('0', 1): 2})
     d.update({('0', '0'): 0, (1, '0'): 1, (1, 1): -1})
@@ -149,7 +149,7 @@ def test_quso_update():
     assert d.offset == -2
 
 
-def test_quso_num_binary_variables():
+def test_puso_num_binary_variables():
 
     d = PUSO({(0,): 1, (0, 3): 2})
     assert d.num_binary_variables == 2
@@ -178,7 +178,7 @@ def test_puso_degree():
     assert d.degree == 5
 
 
-def test_quso_addition():
+def test_puso_addition():
 
     temp = PUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {('0',): -1, (1, '0'): 3}
@@ -221,7 +221,7 @@ def test_quso_addition():
     assert g == PUSO(temp3[0])*-1
 
 
-def test_quso_multiplication():
+def test_puso_multiplication():
 
     temp = PUSO({('0', '0'): 1, ('0', 1): 2})
     temp1 = {(): 3, (1, '0'): 6}, {(): 3, ('0', 1): 6}
@@ -315,6 +315,13 @@ def test_properties():
     d.set_mapping({1: 0, 0: 1})
     assert d.to_quso() == {(1,): 1, (0,): 2}
     assert d.mapping == d.reverse_mapping == {0: 1, 1: 0}
+
+    # an old bug
+    d = PUSO()
+    d.set_mapping({0: 0})
+    d[(0,)] += 1
+    assert d.num_binary_variables == 1
+    assert d.variables == {0}
 
 
 def test_round():

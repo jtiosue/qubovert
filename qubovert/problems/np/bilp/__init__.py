@@ -32,4 +32,6 @@ __all__ = (
     __all_bilp__
 )
 
+del __all_bilp__
+
 name = "bilp"

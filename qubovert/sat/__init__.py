@@ -27,4 +27,6 @@ __all__ = (
     __all_sat__
 )
 
+del __all_sat__
+
 name = "sat"
