@@ -353,7 +353,7 @@ class AnnealResults(list):
         super().clear()
 
     @staticmethod
-    def from_list(l, spin):
+    def from_list(anneal_results_list, spin):
         """from_list.
 
         Create an ``AnnealResults`` object from a list of ``AnnealResult``
@@ -361,7 +361,8 @@ class AnnealResults(list):
 
         Parameters
         ----------
-        l : list.
+        anneal_results_list : list.
+            List of ``AnnealResult`` objects.
 
         Returns
         -------
@@ -369,7 +370,7 @@ class AnnealResults(list):
 
         """
         res = AnnealResults(spin)
-        for i in l:
+        for i in anneal_resuls_list:
             res.append(i.copy())
         return res
 
