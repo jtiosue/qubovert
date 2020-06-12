@@ -108,6 +108,22 @@ class AnnealResult:
         """
         return self.value < other.value
 
+    def __le__(self, other):
+        """__le__.
+
+        ``self <= other`` iff ``self.value <= other.value``.
+
+        Parameters
+        ----------
+        other : AnnealResult object.
+
+        Returns
+        -------
+        res : bool.
+
+        """
+        return self.value <= other.value
+
     def copy(self):
         """copy.
 
@@ -370,7 +386,7 @@ class AnnealResults(list):
 
         """
         res = AnnealResults(spin)
-        for i in anneal_resuls_list:
+        for i in anneal_results_list:
             res.append(i.copy())
         return res
 
