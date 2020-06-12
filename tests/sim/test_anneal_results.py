@@ -52,14 +52,21 @@ def test_annealresult_comparison():
 
     assert res1.copy() == res1
     assert res2 < res1
+    assert res2 <= res1
     assert res1 > res2
+    assert res1 >= res2
     assert res1 != res2
     assert res4 < res1
+    assert res4 <= res1
     assert res1 > res4
+    assert res1 >= res4
     assert res1 != res4
     assert res4 < res3
+    assert res4 <= res3
     assert res3 > res4
+    assert res3 >= res4
     assert res3 != res4
+    assert res2 <= res4 and res2 >= res4
 
     res1 = AnnealResult({1: 1, 2: -1}, 2, True)
     res2 = AnnealResult({1: 1, 2: -1}, 1, True)
