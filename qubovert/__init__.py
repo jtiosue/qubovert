@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""``qubovert`` is a module for converting problems into QUBO/QUSO form.
+"""A module for converting problems into QUBO/QUSO form.
 
 QUBO stands for Quadratic Unconstrained Boolean Optimization. QUBO problems
 have a one-to-one mapping to classical QUSO problems, and most optimization

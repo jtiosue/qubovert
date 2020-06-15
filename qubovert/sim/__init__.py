@@ -18,29 +18,19 @@ See ``__all__`` for a list of uses.
 
 """
 
-# import order here is important!
-from ._puso_simulation import *
-from ._pubo_simulation import *
-from ._quso_simulation import *
-from ._qubo_simulation import *
+# import order here is important
+from ._anneal_temperature_range import *
 from ._anneal_results import *
 from ._anneal import *
 
-from ._puso_simulation import __all__ as __all_pusosim__
-from ._pubo_simulation import __all__ as __all_pubosim__
-from ._quso_simulation import __all__ as __all_qusosim__
-from ._qubo_simulation import __all__ as __all_qubosim__
+from ._anneal_temperature_range import __all__ as __all_tr__
 from ._anneal_results import __all__ as __all_results__
 from ._anneal import __all__ as __all_anneal__
 
 
-__all__ = (
-    __all_pusosim__ + __all_pubosim__ + __all_qusosim__ + __all_qubosim__ +
-    __all_results__ + __all_anneal__
-)
+__all__ = __all_tr__ + __all_results__ + __all_anneal__
 
-del __all_pusosim__, __all_pubosim__, __all_qusosim__, __all_qubosim__
-del __all_results__, __all_anneal__
+del __all_tr__, __all_results__, __all_anneal__
 
 
 name = "sim"

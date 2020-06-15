@@ -18,7 +18,9 @@ Contains the QUBO class. See ``help(qubovert.QUBO)``.
 
 """
 
-from .utils import BO, QUBOMatrix, PUBOMatrix, solution_type, spin_to_boolean
+from .utils import (
+    BO, QUBOMatrix, PUBOMatrix, is_solution_spin, spin_to_boolean
+)
 
 
 __all__ = 'QUBO',
@@ -228,8 +230,7 @@ class QUBO(BO, QUBOMatrix):
         {'a': 1, 'b': 1, 'c': 0}
 
         """
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'spin':
+        if is_solution_spin(solution, spin):
             solution = spin_to_boolean(solution)
         return {
             self._reverse_mapping[i]: solution[i]

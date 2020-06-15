@@ -20,11 +20,11 @@ This file contains the multiple generic helper functions.
 
 from math import ceil
 
-__all__ = 'solution_type', 'num_bits'
+__all__ = 'is_solution_spin', 'num_bits'
 
 
-def solution_type(solution, default='bool'):
-    """solution_type.
+def is_solution_spin(solution, default=False):
+    """is_solution_spin.
 
     Figure out if the ``solution`` is a solution to a boolean or a spin model.
     If it cannot be determined (ie if ``solution`` is all 1s), then return
@@ -37,41 +37,47 @@ def solution_type(solution, default='bool'):
         with values. If ``solution`` is a bin type, then all the values should
         be either a 0 or 1. If ``solution`` is a spin type, then all the values
         should be either a 1 or -1.
-    default : str (optional, defaults to ``'bool'``).
+    default : bool (optional, defaults to ``False``).
         The default answer to return if the solution type cannot be determined.
 
     Returns
     -------
-    res : str.
+    res : bool.
         If it is determined that ``solution`` is the solution to a spin model,
-        then ``res`` will be ``'spin'``. If it is determined that ``solution``
-        is the solution to a boolean model, then `res`` will be ``'bool'``.
+        then ``res`` will be ``True``. If it is determined that ``solution``
+        is the solution to a boolean model, then `res`` will be ``False``.
         Otherwise, ``res`` will be ``default``.
 
     Examples
     --------
-    >>> solution_type((0, 1, 1, 0))
-    'bool'
+    >>> is_solution_spin((0, 1, 1, 0))
+    False
 
-    >>> solution_type((1, -1, -1, 1))
-    'spin'
+    >>> is_solution_spin((1, -1, -1, 1))
+    True
+
+    >>> is_solution_spin(dict(enumerate((0, 1, 1, 0))))
+    False
+
+    >>> is_solution_spin(dict(enumerate((1, -1, -1, 1))))
+    True
 
     In these cases, the default is invoked.
 
-    >>> solution_type((1, 1, 1, 1))
-    'bool'
-    >>> solution_type((1, 1, 1, 1), default='bool')
-    'bool'
-    >>> solution_type((1, 1, 1, 1), default=='spin')
-    'spin'
+    >>> is_solution_spin((1, 1, 1, 1))
+    False
+    >>> is_solution_spin((1, 1, 1, 1), default=False)
+    False
+    >>> is_solution_spin((1, 1, 1, 1), default=True)
+    True
 
     """
     sol = solution.values() if isinstance(solution, dict) else solution
     for v in sol:
         if v == 0:
-            return 'bool'
+            return False
         elif v == -1:
-            return 'spin'
+            return True
     return default
 
 

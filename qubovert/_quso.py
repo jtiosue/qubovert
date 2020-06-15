@@ -19,7 +19,7 @@ Contains the QUSO class. See ``help(qubovert.QUSO)``.
 """
 
 from .utils import (
-    BO, QUSOMatrix, PUSOMatrix, solution_type, boolean_to_spin
+    BO, QUSOMatrix, PUSOMatrix, is_solution_spin, boolean_to_spin
 )
 
 
@@ -230,8 +230,7 @@ class QUSO(BO, QUSOMatrix):
         {'a': 1, 'b': 1, 'c': -1}
 
         """
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'bool':
+        if not is_solution_spin(solution, spin):
             solution = boolean_to_spin(solution)
         return {
             self._reverse_mapping[i]: solution[i]

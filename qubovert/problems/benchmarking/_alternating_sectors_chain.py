@@ -18,7 +18,7 @@ Contains the AlternatingSectorsChain class. See
 ``help(qubovert.problems.AlternatingSectorsChain)``.
 """
 
-from qubovert.utils import QUSOMatrix, boolean_to_spin, solution_type
+from qubovert.utils import QUSOMatrix, boolean_to_spin, is_solution_spin
 from qubovert.problems import Problem
 
 
@@ -203,8 +203,7 @@ class AlternatingSectorsChain(Problem):
         """
         if isinstance(solution, dict):
             solution = tuple(v for _, v in sorted(solution.items()))
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'bool':
+        if not is_solution_spin(solution, spin):
             return boolean_to_spin(solution)
         return solution
 
