@@ -13,7 +13,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://qubovert.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jtiosue/qubovert
+    :target: https://codecov.io/gh/jtiosue/qubovert/branch/master
     :alt: Code Coverage
 .. image:: https://img.shields.io/lgtm/grade/python/g/jtiosue/qubovert.svg?logo=lgtm&logoWidth=18
     :target: https://lgtm.com/projects/g/jtiosue/qubovert/context:python
@@ -28,7 +28,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://qubovert.readthedocs.io/en/dev/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/jtiosue/qubovert
+    :target: https://codecov.io/gh/jtiosue/qubovert/branch/master
     :alt: Code Coverage
 
 *pypi distribution*
