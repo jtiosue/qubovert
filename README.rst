@@ -28,7 +28,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://qubovert.readthedocs.io/en/dev/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/jtiosue/qubovert/branch/master
+    :target: https://codecov.io/gh/jtiosue/qubovert/branch/dev
     :alt: Code Coverage
 
 *pypi distribution*
