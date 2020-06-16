@@ -235,3 +235,21 @@ class PUSOMatrix(PUBOMatrix):
 
         """
         return puso_value(x, self)
+
+    def pretty_str(self, var_prefix='z'):
+        """pretty_str.
+
+        Return a pretty string representation of the spin model.
+        ``z`` indicates variables in {1, -1}.
+
+        Parameters
+        ----------
+        var_prefix : str.
+            The prefix for the variables.
+
+        Return
+        ------
+        res : str.
+
+        """
+        return PUBOMatrix.pretty_str(self, var_prefix)

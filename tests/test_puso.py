@@ -25,6 +25,29 @@ from numpy import allclose
 from numpy.testing import assert_raises
 
 
+def test_pretty_str():
+
+    def equal(expression, string):
+        assert expression.pretty_str() == string
+        assert PUSO.pretty_str(dict(expression)) == string
+
+    z = [PUSO() + {(i,): 1} for i in range(3)]
+    a, b = Symbol('a'), Symbol('b')
+
+    equal(z[0], "z(0)")
+    equal(-z[0], "-z(0)")
+    equal(z[0] * 0, "")
+    equal(2*z[0]*z[1] - 3*z[2], "2 z(0) z(1) - 3 z(2)")
+    equal(0*z[0] + 1, "1")
+    equal(0*z[0] - 1, "-1")
+    equal(0*z[0] + a, "(a)")
+    equal(0*z[0] + a * b, "(a*b)")
+    equal((a+b)*(z[0]*z[1] - z[2]), "(a + b) z(0) z(1) + (-a - b) z(2)")
+    equal(2*z[0]*z[1] - z[2], "2 z(0) z(1) - z(2)")
+    equal(-z[2] + z[0]*z[1], "-z(2) + z(0) z(1)")
+    equal(-2*z[2] + 2*z[0]*z[1], "-2 z(2) + 2 z(0) z(1)")
+
+
 class Problem:
 
     def __init__(self, problem, solution, obj):
