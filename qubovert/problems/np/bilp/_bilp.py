@@ -18,7 +18,7 @@ Contains the BILP class. See ``help(qubovert.problems.BILP)``.
 
 """
 
-from qubovert.utils import QUBOMatrix, solution_type, spin_to_boolean
+from qubovert.utils import QUBOMatrix, is_solution_spin, spin_to_boolean
 from qubovert.problems import Problem
 import numpy as np
 
@@ -238,8 +238,7 @@ class BILP(Problem):
             An array representing the :math:`\mathbf{x}` vector.
 
         """
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'spin':
+        if is_solution_spin(solution, spin):
             solution = spin_to_boolean(solution)
         return np.array([int(bool(solution[i])) for i in range(self._N)])
 

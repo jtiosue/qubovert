@@ -1,6 +1,6 @@
 Copyright
 =========
 
-Joseph T. Iosue, joe.iosue@yahoo.com.
+Joseph T. Iosue, jtiosue@gmail.com.
 
 .. include:: ../LICENSE

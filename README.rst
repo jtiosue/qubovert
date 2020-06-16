@@ -13,7 +13,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://qubovert.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jtiosue/qubovert
+    :target: https://codecov.io/gh/jtiosue/qubovert/branch/master
     :alt: Code Coverage
 .. image:: https://img.shields.io/lgtm/grade/python/g/jtiosue/qubovert.svg?logo=lgtm&logoWidth=18
     :target: https://lgtm.com/projects/g/jtiosue/qubovert/context:python
@@ -28,7 +28,7 @@ The one-stop package for formulating, simulating, and solving problems in boolea
     :target: https://qubovert.readthedocs.io/en/dev/
     :alt: Documentation Status
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/dev/graph/badge.svg
-    :target: https://codecov.io/gh/jtiosue/qubovert
+    :target: https://codecov.io/gh/jtiosue/qubovert/branch/dev
     :alt: Code Coverage
 
 *pypi distribution*
@@ -325,33 +325,6 @@ Now we have to convert the solution in terms of the QUBO/QUSO variables back to 
 
     converted_quso_solution = model.convert_solution(quso_solution)
     print(model.is_solution_valid(converted_quso_solution))
-
-
-Simulating spin and boolean systems
------------------------------------
-
-We use a Metropolis algorithm to simulate spin and boolean system. Below we show an example for simulating a spin system (specifically, a 1D ferromagnetic chain). Similar functionality exists for QUBO, PUBO, and PUSO simulation with ``qubovert.sim.QUBOSimulation``, ``qubovert.sim.PUBOSimulation``, ``qubovert.sim.PUSOSimulation``. Please note that `QUSOSimulation`` and ``QUBOSimulation`` are much faster than ``PUSOSimulation`` and ``PUBOSimulation`` because the former are implemented in C. If you have a degree 2 or less model, use the QUBO and QUSO simulations!
-
-.. code:: python
-
-    import qubovert as qv
-
-    length = 50
-    spin_system = sum(
-        -qv.spin_var(i) * qv.spin_var(i+1) for i in range(length)
-    )
-
-    # initial state is all spin down
-    initial_state = {i: -1 for i in range(length)}
-    sim = qv.sim.QUSOSimulation(spin_system, initial_state)
-
-    # define a schedule. here we simulate at temperature 4 for 25 time
-    # steps, then temperature 2 for 25 time steps, then temperature 1 for
-    # 10 time steps.
-    schedule = (4, 25), (2, 25), (1, 10)
-    sim.schedule_update(schedule)
-
-    print("final state", sim.state)
 
 
 Convert common problems to quadratic form (the *problems* library)
