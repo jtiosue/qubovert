@@ -473,3 +473,45 @@ class PUBOMatrix(DictArithmetic):
 
         """
         return pubo_value(x, self)
+
+    def pretty_str(self, var_prefix='x'):
+        """pretty_str.
+
+        Return a pretty string representation of the boolean model.
+        ``x`` indicates variables in {0, 1}.
+
+        Parameters
+        ----------
+        var_prefix : str.
+            The prefix for the variables.
+
+        Return
+        ------
+        res : str.
+
+        """
+        res, first = "", True
+        for prod, coef in self.items():
+            try:
+                if not coef:
+                    continue
+                elif coef > 0 and (coef != 1 or not prod):
+                    res += "%s " % coef
+                elif coef < 0:
+                    if coef == -1:
+                        if first:
+                            res += "-" if prod else "-1 "
+                        else:
+                            res = res[:-2] + ('- ' if prod else "- 1 ")
+                    else:
+                        if first:
+                            res += "%s " % coef
+                        else:
+                            res = res[:-2] + '- %s ' % abs(coef)
+            except TypeError:  # coef must be sympy symbolic
+                res += "(%s) " % str(coef)
+            for x in prod:
+                res += "%s(%s) " % (var_prefix, x)
+            res += "+ "
+            first = False
+        return res[:-2].strip()

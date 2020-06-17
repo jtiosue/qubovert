@@ -32,7 +32,7 @@ Indices and tables
    :caption: Boolean/Spin Simulation
 
    sim/anneal
-   sim/simulation
+   sim/anneal_results
 
 
 .. toctree::

@@ -21,7 +21,7 @@ See ``help(qubovert.problems.JobSequencing)``.
 
 from math import log2
 from qubovert.utils import (
-    QUBOMatrix, decimal_to_boolean, solution_type, spin_to_boolean
+    QUBOMatrix, decimal_to_boolean, is_solution_spin, spin_to_boolean
 )
 from qubovert.problems import Problem
 
@@ -367,8 +367,7 @@ class JobSequencing(Problem):
             of the tuple is a set of jobs that are assigned to that worker.
 
         """
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'spin':
+        if is_solution_spin(solution, spin):
             solution = spin_to_boolean(solution)
         res = tuple(set() for _ in range(self._m))
         for worker in range(self._m):

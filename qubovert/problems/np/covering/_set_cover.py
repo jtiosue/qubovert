@@ -21,7 +21,7 @@ Contains the SetCover class. See ``help(qubovert.problems.SetCover)``.
 from numpy import allclose
 from math import log2
 from qubovert.utils import (
-    QUBOMatrix, solve_qubo_bruteforce, solution_type, spin_to_boolean
+    QUBOMatrix, solve_qubo_bruteforce, is_solution_spin, spin_to_boolean
 )
 from qubovert.problems import Problem
 
@@ -398,8 +398,7 @@ class SetCover(Problem):
             ``V[0]``, ``V[2]``, and ``V[3]``.
 
         """
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'spin':
+        if is_solution_spin(solution, spin):
             solution = spin_to_boolean(solution)
         return set(i for i in range(self._N) if solution[i])
 

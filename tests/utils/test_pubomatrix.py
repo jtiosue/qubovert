@@ -22,6 +22,32 @@ from numpy import allclose
 from numpy.testing import assert_raises
 
 
+def test_pretty_str():
+
+    def equal(expression, string):
+        assert expression.pretty_str() == string
+        assert PUBOMatrix.pretty_str(dict(expression)) == string
+
+    x = [PUBOMatrix() + {(i,): 1} for i in range(3)]
+    a, b = Symbol('a'), Symbol('b')
+
+    equal(x[0], "x(0)")
+    equal(-x[0], "-x(0)")
+    equal(x[0] * 0, "")
+    equal(2*x[0]*x[1] - 3*x[2], "2 x(0) x(1) - 3 x(2)")
+    equal(0*x[0] + 1, "1")
+    equal(0*x[0] - 1, "-1")
+    equal(0*x[0] + a, "(a)")
+    equal(0*x[0] + a * b, "(a*b)")
+    equal((a+b)*(x[0]*x[1] - x[2]), "(a + b) x(0) x(1) + (-a - b) x(2)")
+    equal(2*x[0]*x[1] - x[2], "2 x(0) x(1) - x(2)")
+    equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
+    equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
+
+    # test when there is a zero element
+    assert PUBOMatrix.pretty_str({(0,): 1, (1, 2): 0}, 'y') == "y(0)"
+
+
 def test_pubo_checkkey():
 
     with assert_raises(KeyError):

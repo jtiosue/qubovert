@@ -27,6 +27,29 @@ from numpy import allclose
 from numpy.testing import assert_raises
 
 
+def test_pretty_str():
+
+    def equal(expression, string):
+        assert expression.pretty_str() == string
+        assert QUBO.pretty_str(dict(expression)) == string
+
+    x = [QUBO() + {(i,): 1} for i in range(3)]
+    a, b = Symbol('a'), Symbol('b')
+
+    equal(x[0], "x(0)")
+    equal(-x[0], "-x(0)")
+    equal(x[0] * 0, "")
+    equal(2*x[0]*x[1] - 3*x[2], "2 x(0) x(1) - 3 x(2)")
+    equal(0*x[0] + 1, "1")
+    equal(0*x[0] - 1, "-1")
+    equal(0*x[0] + a, "(a)")
+    equal(0*x[0] + a * b, "(a*b)")
+    equal((a+b)*(x[0]*x[1] - x[2]), "(a + b) x(0) x(1) + (-a - b) x(2)")
+    equal(2*x[0]*x[1] - x[2], "2 x(0) x(1) - x(2)")
+    equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
+    equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
+
+
 problem = QUBO({('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2})
 solution = {'c': 1, 'b': 1, 'a': 1}
 obj = -8

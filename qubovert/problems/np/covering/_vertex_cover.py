@@ -21,7 +21,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 from qubovert import PCBO
 from qubovert.problems import Problem
 from qubovert.utils import (
-    solution_type, spin_to_boolean, QUBOMatrix, hash_function
+    is_solution_spin, spin_to_boolean, QUBOMatrix, hash_function
 )
 
 
@@ -239,8 +239,7 @@ class VertexCover(Problem):
         """
         if not isinstance(solution, dict):
             solution = dict(enumerate(solution))
-        sol_type = solution_type(solution, 'spin' if spin else 'bool')
-        if sol_type == 'spin':
+        if is_solution_spin(solution, spin):
             solution = spin_to_boolean(solution)
         return set(
             self._index_to_vertex[i] for i, x in solution.items() if x

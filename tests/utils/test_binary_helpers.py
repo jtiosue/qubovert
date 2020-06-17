@@ -16,23 +16,23 @@
 Contains tests for functions in the _binary_helpers.py file.
 """
 
-from qubovert.utils import solution_type, num_bits
+from qubovert.utils import is_solution_spin, num_bits
 from numpy.testing import assert_raises
 
 
-def test_solution_type():
+def test_is_solution_spin():
 
-    assert solution_type((0, 1, 1, 0)) == 'bool'
-    assert solution_type((1, -1, -1, 1)) == 'spin'
-    assert solution_type((1, 1, 1, 1), 'testing') == 'testing'
-    assert solution_type((1, 1, 1, 1)) == 'bool'
-    assert solution_type((1, 1, 1, 1), 'spin') == 'spin'
+    assert not is_solution_spin((0, 1, 1, 0))
+    assert is_solution_spin((1, -1, -1, 1))
+    assert is_solution_spin((1, 1, 1, 1), None) is None
+    assert not is_solution_spin((1, 1, 1, 1))
+    assert is_solution_spin((1, 1, 1, 1), True)
 
-    assert solution_type(dict(enumerate((0, 1, 1, 0)))) == 'bool'
-    assert solution_type(dict(enumerate((1, -1, -1, 1)))) == 'spin'
-    assert solution_type(dict(enumerate((1, 1, 1, 1))), 'testing') == 'testing'
-    assert solution_type(dict(enumerate((1, 1, 1, 1)))) == 'bool'
-    assert solution_type(dict(enumerate((1, 1, 1, 1))), 'spin') == 'spin'
+    assert not is_solution_spin(dict(enumerate((0, 1, 1, 0))))
+    assert is_solution_spin(dict(enumerate((1, -1, -1, 1))))
+    assert is_solution_spin(dict(enumerate((1, 1, 1, 1))), None) is None
+    assert not is_solution_spin(dict(enumerate((1, 1, 1, 1))))
+    assert is_solution_spin(dict(enumerate((1, 1, 1, 1))), True)
 
 
 def test_num_bits():
