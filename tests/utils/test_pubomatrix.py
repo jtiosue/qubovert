@@ -44,6 +44,9 @@ def test_pretty_str():
     equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
     equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
 
+    # test when there is a zero element
+    assert PUBOMatrix.pretty_str({(0,): 1, (1, 2): 0}, 'y') == "y(0)"
+
 
 def test_pubo_checkkey():
 
