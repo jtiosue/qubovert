@@ -32,14 +32,14 @@ def test_pretty_str():
 
     def equal(expression, string):
         assert expression.pretty_str() == string
-        assert PCSO.pretty_str(dict(expression)) == string
 
     z = [PCSO() + {(i,): 1} for i in range(3)]
     a, b = Symbol('a'), Symbol('b')
 
+    equal(z[0] * 0, "0")
     equal(z[0], "z(0)")
     equal(-z[0], "-z(0)")
-    equal(z[0] * 0, "")
+    equal(z[0] * 0, "0")
     equal(2*z[0]*z[1] - 3*z[2], "2 z(0) z(1) - 3 z(2)")
     equal(0*z[0] + 1, "1")
     equal(0*z[0] - 1, "-1")
@@ -49,6 +49,19 @@ def test_pretty_str():
     equal(2*z[0]*z[1] - z[2], "2 z(0) z(1) - z(2)")
     equal(-z[2] + z[0]*z[1], "-z(2) + z(0) z(1)")
     equal(-2*z[2] + 2*z[0]*z[1], "-2 z(2) + 2 z(0) z(1)")
+
+
+def test_create_var():
+
+    d = PCSO.create_var(0)
+    assert d == {(0,): 1}
+    assert d.name == 0
+    assert type(d) == PCSO
+
+    d = PCSO.create_var('x')
+    assert d == {('x',): 1}
+    assert d.name == 'x'
+    assert type(d) == PCSO
 
 
 """ TESTS FOR THE METHODS THAT PCSO INHERITS FROM PUSO """

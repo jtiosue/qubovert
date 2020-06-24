@@ -26,14 +26,13 @@ def test_pretty_str():
 
     def equal(expression, string):
         assert expression.pretty_str() == string
-        assert PUSOMatrix.pretty_str(dict(expression)) == string
 
     z = [PUSOMatrix() + {(i,): 1} for i in range(3)]
     a, b = Symbol('a'), Symbol('b')
 
     equal(z[0], "z(0)")
     equal(-z[0], "-z(0)")
-    equal(z[0] * 0, "")
+    equal(z[0] * 0, "0")
     equal(2*z[0]*z[1] - 3*z[2], "2 z(0) z(1) - 3 z(2)")
     equal(0*z[0] + 1, "1")
     equal(0*z[0] - 1, "-1")
@@ -43,6 +42,19 @@ def test_pretty_str():
     equal(2*z[0]*z[1] - z[2], "2 z(0) z(1) - z(2)")
     equal(-z[2] + z[0]*z[1], "-z(2) + z(0) z(1)")
     equal(-2*z[2] + 2*z[0]*z[1], "-2 z(2) + 2 z(0) z(1)")
+
+
+def test_create_var():
+
+    d = PUSOMatrix.create_var(0)
+    assert d == {(0,): 1}
+    assert d.name == 0
+    assert type(d) == PUSOMatrix
+
+    d = PUSOMatrix.create_var(1)
+    assert d == {(1,): 1}
+    assert d.name == 1
+    assert type(d) == PUSOMatrix
 
 
 def test_qubo_checkkey():

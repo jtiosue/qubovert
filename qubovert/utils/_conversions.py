@@ -26,9 +26,189 @@ import qubovert as qv
 
 
 __all__ = (
+    'boolean_to_spin', 'spin_to_boolean',
+    'decimal_to_spin', 'spin_to_decimal',
+    'decimal_to_boolean', 'boolean_to_decimal',
     'qubo_to_quso', 'quso_to_qubo', 'pubo_to_puso', 'puso_to_pubo',
     'Conversions'
 )
+
+
+def boolean_to_spin(x):
+    """boolean_to_spin.
+
+    Convert a boolean number in {0, 1} to a spin in {1, -1}, in that order.
+
+    Parameters
+    ----------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
+
+    Returns
+    -------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 1 or -1.
+
+    Example
+    -------
+    >>> boolean_to_spin(0)  # will print 1
+    >>> boolean_to_spin(1)  # will print -1
+    >>> boolean_to_spin([0, 1, 1])  # will print [1, -1, -1]
+    >>> boolean_to_spin({"a": 0, "b": 1})  # will print {"a": 1, "b": -1}
+
+    """
+    convert = {0: 1, 1: -1}
+    if isinstance(x, (int, float)) and x in convert:
+        return convert[x]
+    elif isinstance(x, dict):
+        return {k: convert[v] for k, v in x.items()}
+    return type(x)(convert[i] for i in x)
+
+
+def spin_to_boolean(z):
+    """spin_to_boolean.
+
+    Convert a spin in {1, -1} to a boolean variable in {0, 1}, in that order.
+
+    Parameters
+    ----------
+    z : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 1 or -1.
+
+    Returns
+    -------
+    x : int, iterable of ints, or dict mapping labels to ints.
+        Each integer is either 0 or 1.
+
+    Example
+    -------
+    >>> spin_to_boolean(-1)  # will print 1
+    >>> spin_to_boolean(1)  # will print 0
+    >>> spin_to_boolean([-1, 1, 1])  # will print [1, 0, 0]
+    >>> spin_to_boolean({"a": -1, "b": 1})  # will print {"a": 1, "b": 0}
+
+    """
+    convert = {-1: 1, 1: 0}
+    if isinstance(z, (int, float)) and z in convert:
+        return convert[z]
+    elif isinstance(z, dict):
+        return {k: convert[v] for k, v in z.items()}
+    return type(z)(convert[i] for i in z)
+
+
+def decimal_to_boolean(d, num_bits=None):
+    """decimal_to_boolean.
+
+    Convert the integer ``d`` to its boolean representation.
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_bits : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_bits is None``, then
+        the minimum number of bits required will be used.
+
+    Returns
+    -------
+    b : tuple of length ``num_bits``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_boolean(10, 7)
+    (0, 0, 0, 1, 0, 1, 0)
+
+    >>> decimal_to_boolean(10)
+    (1, 0, 1, 0)
+
+    """
+    if int(d) != d or d < 0:
+        raise ValueError("``d`` must be an integer >- 0.")
+    b = bin(d)[2:]
+    lb = len(b)
+    if num_bits is None:
+        num_bits = lb
+    elif num_bits < lb:
+        raise ValueError("Not enough bits to represent the number.")
+    return (0,) * (num_bits - lb) + tuple(int(x) for x in b)
+
+
+def boolean_to_decimal(b):
+    """boolean_to_decimal.
+
+    Convert a bit string to its decimal form.
+
+    Parameters
+    ----------
+    b : tuple or list of 0s and 1s.
+        The binary bit string.
+
+    Returns
+    -------
+    d : int.
+
+    Examples
+    --------
+    >>> boolean_to_decimal((1, 1, 0))
+    6
+
+    """
+    return int("".join(str(x) for x in b), base=2) if b else 0
+
+
+def decimal_to_spin(d, num_spins=None):
+    """decimal_to_spin.
+
+    Convert the integer ``d`` to its spin representation (ie its binary
+    representation, but with 1 and -1 instead of 0 and 1).
+
+    Parameters
+    ----------
+    d : int >= 0.
+        Number to convert to binary.
+    num_spins : int >= 0 (optional, defaults to None).
+        Number of bits in the representation. If ``num_spins is None``, then
+        the minimum number of bits required will be used.
+
+    Returns
+    -------
+    b : tuple of length ``num_spins``.
+        Each element of ``b`` is a 0 or 1.
+
+    Example
+    -------
+    >>> decimal_to_spin(10, 7)
+    (1, 1, 1, -1, 1, -1, 1)
+
+    >>> decimal_to_spin(10)
+    (-1, 1, -1, 1)
+
+    """
+    return boolean_to_spin(decimal_to_boolean(d, num_spins))
+
+
+def spin_to_decimal(b):
+    """spin_to_decimal.
+
+    Convert a spin string to its decimal form.
+
+    Parameters
+    ----------
+    b : tuple or list of 1s and -1s.
+        The spin bit string.
+
+    Returns
+    -------
+    d : int.
+
+    Examples
+    --------
+    >>> spin_to_decimal((-1, -1, 1))
+    6
+
+    """
+    return boolean_to_decimal(spin_to_boolean(b))
 
 
 def qubo_to_quso(Q):

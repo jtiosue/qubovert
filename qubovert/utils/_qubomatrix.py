@@ -19,7 +19,7 @@ This file contains the QUBOMatrix object.
 """
 
 import numpy as np
-from . import PUBOMatrix
+from . import PUBOMatrix, qubo_value, solve_qubo_bruteforce
 
 
 __all__ = 'QUBOMatrix', 'matrix_to_qubo', 'qubo_to_matrix'
@@ -150,6 +150,75 @@ class QUBOMatrix(PUBOMatrix):
                 "Key formatted incorrectly, must be tuple of <= 2 integers "
                 "See PUBOMatrix instead.")
         return k
+
+    def value(self, x):
+        r"""value.
+
+        Find the value of the QUBO. Calling
+        ``self.value(x)`` is the same as calling
+        ``qubovert.utils.qubo_value(x, self)``.
+
+        Parameters
+        ----------
+        x : dict or iterable.
+            Maps boolean variable indices to their boolean values, 0 or 1. Ie
+            ``x[i]`` must be the boolean value of variable i.
+
+        Return
+        ------
+        value : float.
+            The value of the QUBO with the given assignment `x`. Ie
+
+        Example
+        -------
+        >>> from qubovert.utils import QUBOMatrix, PUBOMatrix
+        >>> from qubovert import QUBO, PUBO
+
+        >>> P = PUBOMatrix({(0, 0): 1, (0, 1): -1})
+        >>> x = {0: 1, 1: 0}
+        >>> P.value(x)
+        1
+
+        >>> Q = QUBOMatrix({(0, 0): 1, (0, 1): -1})
+        >>> x = {0: 1, 1: 0}
+        >>> Q.value(x)
+        1
+
+        >>> P = PUBO({(0, 0): 1, (0, 1): -1})
+        >>> x = {0: 1, 1: 0}
+        >>> P.value(x)
+        1
+
+        >>> Q = QUBO({(0, 0): 1, (0, 1): -1})
+        >>> x = {0: 1, 1: 0}
+        >>> Q.value(x)
+        1
+
+        """
+        return qubo_value(x, self)
+
+    def solve_bruteforce(self, all_solutions=False):
+        """solve_bruteforce.
+
+        Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
+        PROBLEMS! This is the exact same as calling
+        ``qubovert.utils.solve_qubo_bruteforce(
+            self, all_solutions, self.is_solution_valid)[1]``.
+
+        Parameters
+        ----------
+        all_solutions : bool.
+            See the description of the ``all_solutions`` parameter in
+            ``qubovert.utils.solve_qubo_bruteforce``.
+
+        Return
+        ------
+        res : the second element of the two element tuple that is returned from
+            ``qubovert.utils.solve_qubo_bruteforce``.
+
+        """
+        return solve_qubo_bruteforce(self,
+                                     all_solutions, self.is_solution_valid)[1]
 
     @property
     def Q(self):

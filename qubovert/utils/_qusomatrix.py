@@ -18,7 +18,7 @@ This file contains the QUSOMatrix object.
 
 """
 
-from . import PUSOMatrix
+from . import PUSOMatrix, quso_value, solve_quso_bruteforce
 
 
 __all__ = 'QUSOMatrix',
@@ -140,6 +140,75 @@ class QUSOMatrix(PUSOMatrix):
                 "Key formatted incorrectly, must be tuple of <= 2 integers "
                 "See PUSOMatrix instead.")
         return k
+
+    def value(self, z):
+        r"""value.
+
+        Find the value of the QUSO. Calling
+            ``self.value(z)`` is the same as calling
+            ``qubovert.utils.quso_value(z, self)``.
+
+        Parameters
+        ----------
+        z: dict or iterable.
+            Maps variable labels to their values, -1 or 1. Ie z[i] must be the
+            value of variable i.
+
+        Return
+        ------
+        value : float.
+            The value of the QUSO with the given assignment `z`.
+
+        Example
+        -------
+        >>> from qubovert.utils import QUSOMatrix, PUSOMatrix
+        >>> from qubovert import QUSO, PUSO
+
+        >>> H = PUSOMatrix({(0, 1): -1, (0,): 1})
+        >>> z = {0: -1, 1: 1}
+        >>> H.value(z)
+        0
+
+        >>> H = PUSO({(0, 1): -1, (0,): 1})
+        >>> z = {0: -1, 1: 1}
+        >>> H.value(z)
+        0
+
+        >>> L = QUSOMatrix({(0, 1): -1, (0,): 1})
+        >>> z = {0: -1, 1: 1}
+        >>> L.value(z)
+        0
+
+        >>> L = QUSO({(0, 1): -1, (0,): 1})
+        >>> z = {0: -1, 1: 1}
+        >>> L.value(z)
+        0
+
+        """
+        return quso_value(z, self)
+
+    def solve_bruteforce(self, all_solutions=False):
+        """solve_bruteforce.
+
+        Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
+        PROBLEMS! This is the exact same as calling
+        ``qubovert.utils.solve_quso_bruteforce(
+            self, all_solutions, self.is_solution_valid)[1]``.
+
+        Parameters
+        ----------
+        all_solutions : bool.
+            See the description of the ``all_solutions`` parameter in
+            ``qubovert.utils.solve_quso_bruteforce``.
+
+        Return
+        ------
+        res : the second element of the two element tuple that is returned from
+            ``qubovert.utils.solve_quso_bruteforce``.
+
+        """
+        return solve_quso_bruteforce(self, all_solutions,
+                                     self.is_solution_valid)[1]
 
     @property
     def h(self):
