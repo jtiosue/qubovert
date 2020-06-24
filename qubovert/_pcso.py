@@ -72,10 +72,13 @@ def spin_var(name):
      {'z0': 1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
      {'z0': 1, 'z1': -1, 'z2': 1, 'z3': 1, 'z4': 1}]
 
+    Notes
+    -----
+    ``qubovert.spin_var(name)`` is equivalent to
+    ``qubovert.PCSO.create_var(name)``.
+
     """
-    pcso = PCSO({(name,): 1})
-    pcso.name = name
-    return pcso
+    return PCSO.create_var(name)
 
 
 def _empty_pcbo(pcso):

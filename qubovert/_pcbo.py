@@ -224,10 +224,13 @@ def boolean_var(name):
     >>> print(pcbo.solve_bruteforce())
     {'x0': 0, 'x1': 0, 'x2': 1, 'x3': 1, 'x4': 1}
 
+    Notes
+    -----
+    ``qubovert.boolean_var(name)`` is equivalent to
+    ``qubovert.PCBO.create_var(name)``.
+
     """
-    pcbo = PCBO({(name,): 1})
-    pcbo.name = name
-    return pcbo
+    return PCBO.create_var(name)
 
 
 def integer_var(prefix, num_bits, log_trick=True):

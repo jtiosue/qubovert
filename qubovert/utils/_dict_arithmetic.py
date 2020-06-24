@@ -190,6 +190,49 @@ class DictArithmetic(dict):
         """
         self._name = name
 
+    @classmethod
+    def create_var(cls, name):
+        """create_var.
+
+        Create the variable with name ``name``.
+
+        Parameters
+        ----------
+        name : hashable object allowed as a key.
+            Name of the variable.
+
+        Return
+        ------
+        res : cls object.
+            The model representing the variable with type ``cls``.
+
+        Examples
+        --------
+        >>> from qubovert.utils import DictArithmetic
+        >>>
+        >>> x = DictArithmetic.create_var('x')
+        >>> x == DictArithmetic({('x',): 1})
+        True
+        >>> isinstance(x, DictArithmetic)
+        True
+        >>> x.name
+        'x'
+
+        >>> from qubovert import QUSO
+        >>>
+        >>> z = QUSO.create_var('z')
+        >>> print(z)
+        {('z',): 1}
+        >>> print(isinstance(z, QUSO))
+        True
+        >>> print(z.name)
+        'z'
+
+        """
+        d = cls({(name,): 1})
+        d.name = name
+        return d
+
     def __getitem__(self, key):
         """__getitem__.
 
@@ -915,3 +958,44 @@ class DictArithmetic(dict):
                 self[k] = v.simplify() * 1.  # make everything a float
             except AttributeError:
                 self[k] *= 1.  # make it a float
+
+    def pretty_str(self, var_prefix='x'):
+        """pretty_str.
+
+        Return a pretty string representation of the model.
+
+        Parameters
+        ----------
+        var_prefix : str (optional, defaults to ``'x'``).
+            The prefix for the variables.
+
+        Return
+        ------
+        res : str.
+
+        """
+        if not any(x for x in self.values()):
+            return '0'
+        res, first = "", True
+        for prod, coef in self.items():
+            try:
+                if coef > 0 and (coef != 1 or not prod):
+                    res += "%s " % coef
+                elif coef < 0:
+                    if coef == -1:
+                        if first:
+                            res += "-" if prod else "-1 "
+                        else:
+                            res = res[:-2] + ('- ' if prod else "- 1 ")
+                    else:
+                        if first:
+                            res += "%s " % coef
+                        else:
+                            res = res[:-2] + '- %s ' % abs(coef)
+            except TypeError:  # coef must be sympy symbolic
+                res += "(%s) " % str(coef)
+            for x in prod:
+                res += "%s(%s) " % (var_prefix, x)
+            res += "+ "
+            first = False
+        return res[:-2].strip()

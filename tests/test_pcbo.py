@@ -38,7 +38,7 @@ def test_pretty_str():
 
     equal(x[0], "x(0)")
     equal(-x[0], "-x(0)")
-    equal(x[0] * 0, "")
+    equal(x[0] * 0, "0")
     equal(2*x[0]*x[1] - 3*x[2], "2 x(0) x(1) - 3 x(2)")
     equal(0*x[0] + 1, "1")
     equal(0*x[0] - 1, "-1")
@@ -48,6 +48,19 @@ def test_pretty_str():
     equal(2*x[0]*x[1] - x[2], "2 x(0) x(1) - x(2)")
     equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
     equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
+
+
+def test_create_var():
+
+    d = PCBO.create_var(0)
+    assert d == {(0,): 1}
+    assert d.name == 0
+    assert type(d) == PCBO
+
+    d = PCBO.create_var('x')
+    assert d == {('x',): 1}
+    assert d.name == 'x'
+    assert type(d) == PCBO
 
 
 """ TESTS FOR THE METHODS THAT PCBO INHERITS FROM PUBO """

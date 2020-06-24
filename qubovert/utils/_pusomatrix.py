@@ -172,7 +172,8 @@ class PUSOMatrix(PUBOMatrix):
 
         Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
         PROBLEMS! This is the exact same as calling
-        ``qubovert.utils.solve_puso_bruteforce(self, all_solutions)[1]``.
+        ``qubovert.utils.solve_puso_bruteforce(
+            self, all_solutions, self.is_solution_valid)[1]``.
 
         Parameters
         ----------
@@ -189,7 +190,7 @@ class PUSOMatrix(PUBOMatrix):
         return solve_puso_bruteforce(self, all_solutions,
                                      self.is_solution_valid)[1]
 
-    def value(self, x):
+    def value(self, z):
         r"""value.
 
         Find the value of
@@ -234,17 +235,17 @@ class PUSOMatrix(PUBOMatrix):
         0
 
         """
-        return puso_value(x, self)
+        return puso_value(z, self)
 
+    # override default var_prefix='x' from DictArithmetic
     def pretty_str(self, var_prefix='z'):
         """pretty_str.
 
-        Return a pretty string representation of the spin model.
-        ``z`` indicates variables in {1, -1}.
+        Return a pretty string representation of the model.
 
         Parameters
         ----------
-        var_prefix : str.
+        var_prefix : str (optional, defaults to ``'z'``).
             The prefix for the variables.
 
         Return
@@ -252,4 +253,4 @@ class PUSOMatrix(PUBOMatrix):
         res : str.
 
         """
-        return PUBOMatrix.pretty_str(self, var_prefix)
+        return super().pretty_str(var_prefix)

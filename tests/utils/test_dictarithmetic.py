@@ -21,6 +21,28 @@ from sympy import Symbol
 from numpy.testing import assert_raises
 
 
+def test_pretty_str():
+
+    def equal(expression, string):
+        assert expression.pretty_str() == string
+
+    x = [DictArithmetic() + {(i,): 1} for i in range(3)]
+    a, b = Symbol('a'), Symbol('b')
+
+    equal(x[0] * 0, "0")
+    equal(x[0], "x(0)")
+    equal(-x[0], "-x(0)")
+    equal(2*x[0]*x[1] - 3*x[2], "2 x(0) x(1) - 3 x(2)")
+    equal(0*x[0] + 1, "1")
+    equal(0*x[0] - 1, "-1")
+    equal(0*x[0] + a, "(a)")
+    equal(0*x[0] + a * b, "(a*b)")
+    equal((a+b)*(x[0]*x[1] - x[2]), "(a + b) x(0) x(1) + (-a - b) x(2)")
+    equal(2*x[0]*x[1] - x[2], "2 x(0) x(1) - x(2)")
+    equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
+    equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
+
+
 def test_name():
 
     d = DictArithmetic({(0,): 1, (1, 2): -1})
@@ -29,6 +51,19 @@ def test_name():
     assert d.name == 'd'
     d.name = 1
     assert d.name == 1
+
+
+def test_create_var():
+
+    d = DictArithmetic.create_var(0)
+    assert d == {(0,): 1}
+    assert d.name == 0
+    assert type(d) == DictArithmetic
+
+    d = DictArithmetic.create_var('x')
+    assert d == {('x',): 1}
+    assert d.name == 'x'
+    assert type(d) == DictArithmetic
 
 
 def test_num_terms():

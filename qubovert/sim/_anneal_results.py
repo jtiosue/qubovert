@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_annea_resultsl.py.
+"""_anneal_results.py.
 
 This file contains the objects to deal with anneal results.
 
@@ -337,7 +337,7 @@ class AnnealResults(list):
         s : str.
 
         """
-        return "AnnealResults\n" + "\n\n".join(str(x) for x in self)
+        return "AnnealResults\n\n" + "\n\n".join(str(x) for x in self)
 
     def __getitem__(self, index):
         """__getitem__.

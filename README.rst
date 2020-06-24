@@ -161,7 +161,7 @@ Solving the model with D-Wave's simulated annealer
     dwave_qubo = qubo.Q
 
     # solve with D-Wave
-    res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo, num_runs=10)
+    res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo, num_reads=10)
     qubo_solution = res.first.sample
 
     # convert the qubo solution back to the solution to the model
@@ -397,4 +397,4 @@ To see problem specifics, run
 
 ====
 
-.. image:: https://emoji.slack-edge.com/T24940PQV/qvfire/8fdd5c5b7e9b5f15.png
+.. image:: https://raw.githubusercontent.com/jtiosue/qubovert/master/assets/qvfire.png

@@ -26,14 +26,13 @@ def test_pretty_str():
 
     def equal(expression, string):
         assert expression.pretty_str() == string
-        assert QUBOMatrix.pretty_str(dict(expression)) == string
 
     x = [QUBOMatrix() + {(i,): 1} for i in range(3)]
     a, b = Symbol('a'), Symbol('b')
 
     equal(x[0], "x(0)")
     equal(-x[0], "-x(0)")
-    equal(x[0] * 0, "")
+    equal(x[0] * 0, "0")
     equal(2*x[0]*x[1] - 3*x[2], "2 x(0) x(1) - 3 x(2)")
     equal(0*x[0] + 1, "1")
     equal(0*x[0] - 1, "-1")
@@ -43,6 +42,19 @@ def test_pretty_str():
     equal(2*x[0]*x[1] - x[2], "2 x(0) x(1) - x(2)")
     equal(-x[2] + x[0]*x[1], "-x(2) + x(0) x(1)")
     equal(-2*x[2] + 2*x[0]*x[1], "-2 x(2) + 2 x(0) x(1)")
+
+
+def test_create_var():
+
+    d = QUBOMatrix.create_var(0)
+    assert d == {(0,): 1}
+    assert d.name == 0
+    assert type(d) == QUBOMatrix
+
+    d = QUBOMatrix.create_var(1)
+    assert d == {(1,): 1}
+    assert d.name == 1
+    assert type(d) == QUBOMatrix
 
 
 def test_qubo_checkkey():
