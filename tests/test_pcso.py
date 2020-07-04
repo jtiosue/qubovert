@@ -21,7 +21,7 @@ from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
     puso_value, pubo_to_puso, boolean_to_spin,
-    QUBOVertWarning
+    QUBOVertWarning, PUSOMatrix
 )
 from sympy import Symbol
 from numpy import allclose
@@ -440,6 +440,14 @@ def test_spin_var():
     assert all(z[i].name == i for i in range(5))
 
 
+def test_to_enumerated():
+
+    d = PCSO({('a', 'b'): 1, ('a',): 2})
+    dt = d.to_enumerated()
+    assert type(dt) == PUSOMatrix
+    assert dt == d.to_puso()
+
+
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
@@ -487,6 +495,29 @@ def test_pcso_eq_constraint():
         allclose(e, obj)
     ))
 
+    # lam = 0
+    H = PCSO(pubo_to_puso({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_eq_zero(
+        pubo_to_puso({('a',): 1, ('b',): 1, ('b', 'c'): -1}),
+        lam=0
+    )
+
+    sol = H.solve_bruteforce()
+    assert all((
+        H.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(H.to_pubo())
+    sol = H.convert_solution(sol, False)
+    assert all((
+        not H.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
 
 def test_pcso_ne_constraint_logtrick():
 
@@ -496,13 +527,37 @@ def test_pcso_ne_constraint_logtrick():
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
+    for i in range(1 << 4):
+        P = pubo_to_puso(integer_var('a', 4)) - i
+        H = PCSO(P).add_constraint_ne_zero(P, lam=0)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = pubo_to_puso(integer_var('a', 2)) - i
+        H = PCSO().add_constraint_ne_zero(P)
+        for sol in solve_puso_bruteforce(H, True)[1]:
+            assert P.value(sol)
+
 
 def test_pcso_ne_constraint():
 
-    for i in range(1 << 3):
-        P = pubo_to_puso(integer_var('a', 3)) - i
+    for i in range(1 << 2):
+        P = pubo_to_puso(integer_var('a', 2)) - i
         H = PCSO().add_constraint_ne_zero(P, log_trick=False)
         for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = pubo_to_puso(integer_var('a', 2)) - i
+        H = PCSO(P).add_constraint_ne_zero(P, lam=0, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = pubo_to_puso(integer_var('a', 2)) - i
+        H = PCSO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in solve_puso_bruteforce(H, True)[1]:
             assert P.value(sol)
 
 
@@ -551,6 +606,30 @@ def test_pcso_lt_constraint_logtrick():
         problem.is_solution_valid(sol),
         sol == solution,
         allclose(e, obj)
+    ))
+
+    # lam = 0
+    H = PCSO(pubo_to_puso({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_lt_zero(
+        pubo_to_puso({('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3}),
+        lam=0
+    )
+
+    sol = H.remove_ancilla_from_solution(H.solve_bruteforce())
+    assert all((
+        H.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(H.to_pubo())
+    sol = H.convert_solution(sol, spin=False)
+    sol = H.remove_ancilla_from_solution(sol)
+    assert all((
+        not H.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
     ))
 
 
@@ -652,6 +731,33 @@ def test_pcso_le_constraint_logtrick():
         allclose(e, obj)
     ))
 
+    # lam = 0
+    H = PCSO(pubo_to_puso({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_le_zero(
+        pubo_to_puso(
+            {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3}
+        ),
+        lam=0
+    )
+
+    sol = H.remove_ancilla_from_solution(H.solve_bruteforce())
+    assert all((
+        H.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(H.to_pubo())
+    sol = H.convert_solution(sol, spin=False)
+    sol = H.remove_ancilla_from_solution(sol)
+    assert all((
+        not H.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
 
 def test_pcso_le_constraint():
 
@@ -751,6 +857,30 @@ def test_pcso_gt_constraint_logtrick():
         allclose(e, obj)
     ))
 
+    # lam = 0
+    H = PCSO(pubo_to_puso({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    }))
+    H.add_constraint_gt_zero(
+        pubo_to_puso({('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3}),
+        lam=0
+    )
+
+    sol = H.remove_ancilla_from_solution(H.solve_bruteforce())
+    assert all((
+        H.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(H.to_pubo())
+    sol = H.convert_solution(sol, spin=False)
+    sol = H.remove_ancilla_from_solution(sol)
+    assert all((
+        not H.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
 
 def test_pcso_gt_constraint():
 
@@ -848,6 +978,33 @@ def test_pcso_ge_constraint_logtrick():
         problem.is_solution_valid(sol),
         sol == solution,
         allclose(e, obj)
+    ))
+
+    # lam = 0
+    H = PCSO(pubo_to_puso({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    }))
+    H.add_constraint_ge_zero(
+        pubo_to_puso(
+            {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3}
+        ),
+        lam=0
+    )
+
+    sol = H.remove_ancilla_from_solution(H.solve_bruteforce())
+    assert all((
+        H.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(H.to_pubo())
+    sol = H.convert_solution(sol, spin=False)
+    sol = H.remove_ancilla_from_solution(sol)
+    assert all((
+        not H.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
     ))
 
 

@@ -26,15 +26,15 @@ __all__ = (
 def pubo_value(x, P):
     r"""pubo_value.
 
-    Find the value of
-    :math:`\sum_{i,...,j} P_{i...j} x_{i} ... x_{j}`
+    Find the value of the PUBO for a given assignment of the boolean variables
+    ``x``.
 
     Parameters
     ----------
     x : dict or iterable.
         Maps boolean variable indices to their boolean values, 0 or 1. Ie
         ``x[i]`` must be the boolean value of variable i.
-    P : dict, qubovert.utils.PUBOMatrix, or qubovert.PUBO object.
+    P : dict, or any object in ``qv.BOOLEAN_MODELS``.
         Maps tuples of boolean variables indices to the P value.
 
     Returns
@@ -44,20 +44,25 @@ def pubo_value(x, P):
 
     Example
     -------
-    >>> P = {(0, 0): 1, (0, 1): -1}
+    >>> P = {(0,): 1, (0, 1): -1}
     >>> x = {0: 1, 1: 0}
     >>> pubo_value(x, P)
     1
 
     """
-    return sum(v for k, v in P.items() if all(x[i] for i in k))
+    # map is faster than all(x[i] for i in k)
+    return sum(v for k, v in P.items() if all(map(lambda i: x[i], k)))
 
 
 def qubo_value(x, Q):
     r"""qubo_value.
 
-    Find the value of
-    :math:`\sum_{i,j} Q_{ij} x_{i} x_{j}`
+    Find the value of the QUBO for a given assignment of the boolean variables
+    ``x``.
+
+    Please note that THIS FUNCTION WILL NOT RAISE AN EXCEPTION IF ``Q`` IS
+    NOT A QUBO!! If you input a ``Q`` that is, for example, degree 3 instead
+    of degree 2, then this function will return an incorrect value!
 
     Parameters
     ----------
@@ -72,34 +77,36 @@ def qubo_value(x, Q):
     value : float.
         The value of the QUBO with the given assignment `x`. Ie
 
-        >>> sum(
-                Q[(i, j)] * x[i] * x[j]
-                for i in range(n) for j in range(n)
-            )
-
     Example
     -------
-    >>> Q = {(0, 0): 1, (0, 1): -1}
+    >>> Q = {(0,): 1, (0, 1): -1}
     >>> x = {0: 1, 1: 0}
     >>> qubo_value(x, Q)
     1
 
     """
-    return pubo_value(x, Q)
+    # we could just return pubo_value(x, Q), but instead let's take
+    # advantage of a maximum degree of 2 to not have to loop through keys
+    return sum(
+        v for k, v in Q.items() if (
+            not k or (len(k) == 1 and x[k[0]]) or
+            (len(k) == 2 and x[k[0]] and x[k[1]])
+        )
+    )
 
 
 def puso_value(z, H):
     r"""puso_value.
 
-    Find the value of
-        :math:`\sum_{i,...,j} H_{i...j} z_{i} ... z_{j}`.
+    Find the value of the PUSO for a given assignment of the spin variables
+    ``z``.
 
     Parameters
     ----------
     z: dict or iterable.
         Maps variable labels to their values, 1 or -1. Ie z[i] must be the
         value of variable i.
-    H : dict, qubovert.utils.PUSOMatrix, or qubovert.PUSO object.
+    H : dict, or any object in ``qv.SPIN_MODELS``.
         Maps spin labels to values.
 
     Returns
@@ -124,11 +131,12 @@ def puso_value(z, H):
 def quso_value(z, L):
     r"""quso_value.
 
-    Find the value of
-        :math:`\sum_{i,j} J_{ij} z_{i} z_{j} + \sum_{i} h_{i} z_{i}`.
+    Find the value of the QUSO for a given assignment of the spin variables
+    ``z``.
 
-    The J's are encoded by keys with pairs of labels in L, and the h's are
-    encoded by keys with a single label in L.
+    Please note that THIS FUNCTION WILL NOT RAISE AN EXCEPTION IF ``L`` IS
+    NOT A QUSO!! If you input a ``L`` that is, for example, degree 3 instead
+    of degree 2, then this function will return an incorrect value!
 
     Parameters
     ----------
@@ -151,4 +159,9 @@ def quso_value(z, L):
     0
 
     """
-    return puso_value(z, L)
+    # we could just return puso_value(z, L), but instead let's take
+    # advantage of a maximum degree of 2 to not have to loop through keys
+    return sum(
+        v * (z[k[0]] if k else 1) * (z[k[1]] if len(k) > 1 else 1)
+        for k, v in L.items()
+    )

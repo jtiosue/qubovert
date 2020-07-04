@@ -223,3 +223,37 @@ class BO(Conversions):
                 self._mapping[i] = self._next_label
                 self._reverse_mapping[self._next_label] = i
                 self._next_label += 1
+
+    def to_enumerated(self):
+        """to_enumerated.
+
+        Return the default enumerated Matrix object.
+
+        If ``self`` is a QUBO,
+        ``self.to_enumerated()`` is equivalent to ``self.to_qubo()``.
+
+        If ``self`` is a QUSO,
+        ``self.to_enumerated()`` is equivalent to ``self.to_quso()``.
+
+        If ``self`` is a PUBO or PCBO,
+        ``self.to_enumerated()`` is equivalent to ``self.to_pubo()``.
+
+        If ``self`` is a PUSO or PCSO,
+        ``self.to_enumerated()`` is equivalent to ``self.to_puso()``.
+
+        Returns
+        -------
+        res : QUBOMatrix, QUSOMatrix, PUBOMatrix, or PUSOMatrix object.
+            If ``self`` is a QUBO type, then this method returns the
+            corresponding QUBOMatrix type. If ``self`` is a QUSO type,
+            then this method returns the corresponding QUSOMatrix type.
+            If ``self`` is a PUBO or PCBO type, then this method returns the
+            corresponding PUBOMatrix type. If ``self`` is a PUSO or PCSO type,
+            then this method returns the corresponding PUSOMatrix type.
+
+        """
+        # we replace c with u so that pcbo and pcso go to pubo and puso.
+        return getattr(
+            self,
+            "to_" + self.__class__.__name__.lower().replace('c', 'u')
+        )()

@@ -20,7 +20,7 @@ This file contains the multiple generic helper functions.
 
 from math import ceil
 
-__all__ = 'is_solution_spin', 'num_bits'
+__all__ = 'is_solution_spin', 'num_bits', 'sum'
 
 
 def is_solution_spin(solution, default=False):
@@ -113,3 +113,41 @@ def num_bits(val, log_trick=True):
         raise ValueError("``val`` must be >= 0")
     val = int(ceil(val))
     return int.bit_length(val) if log_trick else val
+
+
+def sum(iterable, start=0):
+    """sum.
+
+    A utility for summing qubovert types. This will perform way faster than
+    Python's built-in ``sum`` function when you use it with qubovert types.
+
+    Parameters
+    ----------
+    iterable : any iterable.
+    start : numeric or qubovert type (optional, defaults to 0).
+
+    Returns
+    -------
+    res : same type as ``sum(iterable, start)`` with Python's builtin ``sum``.
+
+    Examples
+    --------
+    >>> import time
+    >>> import qubovert as qv
+    >>>
+    >>> xs = [qv.boolean_var(i) for i in range(1000)]
+
+    >>> t0 = time.time()
+    >>> sum(xs)
+    >>> print(time.time() - t0)
+    3.345559597015381
+
+    >>> t0 = time.time()
+    >>> qv.utils.sum(xs)
+    >>> print(time.time() - t0)
+    0.011152505874633789
+
+    """
+    for i in iterable:
+        start += i
+    return start

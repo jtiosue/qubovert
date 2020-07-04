@@ -730,6 +730,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("eq", P)
+        if not lam:
+            return self
 
         if _special_constraints_eq_zero(self, P, lam):
             return self
@@ -849,6 +851,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("ne", P)
+        if not lam:
+            return self
 
         min_val, max_val = _get_bounds(P, bounds)
 
@@ -984,6 +988,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("lt", P)
+        if not lam:
+            return self
 
         min_val, max_val = _get_bounds(P, bounds)
 
@@ -1100,6 +1106,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("le", P)
+        if not lam:
+            return self
 
         bounds = min_val, max_val = _get_bounds(P, bounds)
         if _special_constraints_le_zero(self, P, lam, log_trick, bounds):
@@ -1216,6 +1224,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("gt", P)
+        if not lam:
+            return self
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
         self.add_constraint_lt_zero(
@@ -1320,6 +1330,8 @@ class PCBO(PUBO):
         """
         P = PUBO(P)
         self._append_constraint("ge", P)
+        if not lam:
+            return self
         min_val, max_val = _get_bounds(P, bounds)
         bounds = -max_val, -min_val
         self.add_constraint_le_zero(

@@ -20,7 +20,7 @@ from qubovert import PCBO, boolean_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
-    pubo_value, decimal_to_boolean, QUBOVertWarning
+    pubo_value, decimal_to_boolean, QUBOVertWarning, PUBOMatrix
 )
 from sympy import Symbol
 from numpy import allclose
@@ -460,6 +460,14 @@ def test_integer_var():
     assert var.name == 'b'
 
 
+def test_to_enumerated():
+
+    d = PCBO({('a', 'b'): 1, ('a',): 2})
+    dt = d.to_enumerated()
+    assert type(dt) == PUBOMatrix
+    assert dt == d.to_pubo()
+
+
 """ TESTS FOR THE CONSTRAINT METHODS """
 
 
@@ -507,6 +515,29 @@ def test_pcbo_eq_constraint():
         allclose(e, obj)
     ))
 
+    # lam = 0
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_eq_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): -1},
+        lam=0
+    )
+
+    sol = P.solve_bruteforce()
+    assert all((
+        P.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(P.to_pubo())
+    sol = problem.convert_solution(sol)
+    assert all((
+        not P.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
 
 def test_pcbo_ne_constraint_logtrick():
 
@@ -516,13 +547,37 @@ def test_pcbo_ne_constraint_logtrick():
         for sol in H.solve_bruteforce(True):
             assert P.value(sol)
 
+    for i in range(1 << 4):
+        P = integer_var('a', 4) - i
+        H = PCBO(P).add_constraint_ne_zero(P, lam=0)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = integer_var('a', 2) - i
+        H = PCBO().add_constraint_ne_zero(P)
+        for sol in solve_pubo_bruteforce(H, True)[1]:
+            assert P.value(sol)
+
 
 def test_pcbo_ne_constraint():
 
-    for i in range(1 << 3):
-        P = integer_var('a', 3) - i
+    for i in range(1 << 2):
+        P = integer_var('a', 2) - i
         H = PCBO().add_constraint_ne_zero(P, log_trick=False)
         for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = integer_var('a', 2) - i
+        H = PCBO(P).add_constraint_ne_zero(P, lam=0, log_trick=False)
+        for sol in H.solve_bruteforce(True):
+            assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = integer_var('a', 2) - i
+        H = PCBO().add_constraint_ne_zero(P, log_trick=False)
+        for sol in solve_pubo_bruteforce(H, True)[1]:
             assert P.value(sol)
 
     with assert_warns(QUBOVertWarning):  # never satisfied
@@ -585,6 +640,30 @@ def test_pcbo_lt_constraint_logtrick():
         problem.is_solution_valid(sol),
         sol == solution,
         allclose(e, obj)
+    ))
+
+    # lam = 0
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_lt_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, (): -3},
+        lam=0
+    )
+
+    sol = P.remove_ancilla_from_solution(P.solve_bruteforce())
+    assert all((
+        P.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(P.to_pubo())
+    sol = P.convert_solution(sol)
+    sol = P.remove_ancilla_from_solution(sol)
+    assert all((
+        not P.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
     ))
 
 
@@ -682,6 +761,31 @@ def test_pcbo_le_constraint_logtrick():
         problem.is_solution_valid(sol),
         sol == solution,
         allclose(e, obj)
+    ))
+
+    # lam = 0
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_le_zero(
+        {('a',): 1, ('b',): 1, ('b', 'c'): 1, ('d',): 1, (): -3},
+        lam=0
+    )
+
+    sol = P.remove_ancilla_from_solution(P.solve_bruteforce())
+    assert all((
+        P.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(P.to_pubo())
+    sol = P.convert_solution(sol)
+    sol = P.remove_ancilla_from_solution(sol)
+    assert all((
+        not P.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
     ))
 
 
@@ -826,6 +930,30 @@ def test_pcbo_gt_constraint_logtrick():
         allclose(e, obj)
     ))
 
+    # lam = 0
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2
+    })
+    P.add_constraint_gt_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, (): 3},
+        lam=0
+    )
+
+    sol = P.remove_ancilla_from_solution(P.solve_bruteforce())
+    assert all((
+        P.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(P.to_pubo())
+    sol = P.convert_solution(sol)
+    sol = P.remove_ancilla_from_solution(sol)
+    assert all((
+        not P.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
+    ))
+
 
 def test_pcbo_gt_constraint():
 
@@ -921,6 +1049,31 @@ def test_pcbo_ge_constraint_logtrick():
         problem.is_solution_valid(sol),
         sol == solution,
         allclose(e, obj)
+    ))
+
+    # lam = 0
+    P = PCBO({
+        ('a',): -1, ('b',): 2, ('a', 'b'): -3, ('b', 'c'): -4, (): -2,
+        ('d',): -1
+    })
+    P.add_constraint_ge_zero(
+        {('a',): -1, ('b',): -1, ('b', 'c'): -1, ('d',): -1, (): 3},
+        lam=0
+    )
+
+    sol = P.remove_ancilla_from_solution(P.solve_bruteforce())
+    assert all((
+        P.is_solution_valid(sol),
+        sol == solution
+    ))
+
+    e, sol = solve_pubo_bruteforce(P.to_pubo())
+    sol = P.convert_solution(sol)
+    sol = P.remove_ancilla_from_solution(sol)
+    assert all((
+        not P.is_solution_valid(sol),
+        sol != solution,
+        not allclose(e, obj)
     ))
 
 

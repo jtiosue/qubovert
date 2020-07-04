@@ -19,7 +19,7 @@ This file contains bruteforce solvers for QUBO/PUBO and QUSO/PUSO.
 """
 
 import itertools
-from . import pubo_value, puso_value
+from . import pubo_value, puso_value, qubo_value, quso_value
 
 __all__ = (
     'solve_pubo_bruteforce', 'solve_qubo_bruteforce',
@@ -27,10 +27,11 @@ __all__ = (
 )
 
 
-def _solve_bruteforce(D, all_solutions, valid, spin):
+def _solve_bruteforce(D, all_solutions, valid, spin, value):
     """_solve_bruteforce.
 
-    Helper function for solve_pubo_bruteforce and solve_puso_bruteforce.
+    Helper function for solve_pubo_bruteforce, solve_puso_bruteforce,
+    solve_qubo_bruteforce, and solve_quso_bruteforce.
 
     Iterate through all the possible solutions to a BO formulated problem
     and find the best one (the one that gives the minimum objective value). Do
@@ -50,6 +51,9 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
         indicating whether that bitstring or spinstring is a valid solutions.
     spin : bool.
         Whether we're bruteforce solving a spin model or boolean model.
+    value : function.
+        One of ``qubo_value``, ``quso_value``, ``pubo_value``, or
+        ``puso_value``.
 
     Returns
     -------
@@ -102,7 +106,7 @@ def _solve_bruteforce(D, all_solutions, valid, spin):
         x = {mapping[i]: v for i, v in enumerate(test_sol)}
         if not valid(x):
             continue
-        v = puso_value(x, D) if spin else pubo_value(x, D)
+        v = value(x, D)
         if all_solutions and (best[0] is None or v <= best[0]):
             best = v, x
             all_sols.setdefault(v, []).append(x)
@@ -177,7 +181,7 @@ def solve_pubo_bruteforce(P, all_solutions=False, valid=lambda x: True):
     is 0, :math:`x_2` is 1.
 
     """
-    return _solve_bruteforce(P, all_solutions, valid, False)
+    return _solve_bruteforce(P, all_solutions, valid, False, pubo_value)
 
 
 def solve_qubo_bruteforce(Q, all_solutions=False, valid=lambda x: True):
@@ -244,7 +248,10 @@ def solve_qubo_bruteforce(Q, all_solutions=False, valid=lambda x: True):
     is 0, :math:`x_2` is 1.
 
     """
-    return solve_pubo_bruteforce(Q, all_solutions, valid)
+    # we could just do the same as we did in solve_pubo_bruteforce, but the
+    # qubo_value function is much faster than the pubo_value function, so this
+    # will be much faster!
+    return _solve_bruteforce(Q, all_solutions, valid, False, qubo_value)
 
 
 def solve_puso_bruteforce(H, all_solutions=False, valid=lambda x: True):
@@ -309,7 +316,7 @@ def solve_puso_bruteforce(H, all_solutions=False, valid=lambda x: True):
     is -1, :math:`z_2` is 1.
 
     """
-    return _solve_bruteforce(H, all_solutions, valid, True)
+    return _solve_bruteforce(H, all_solutions, valid, True, puso_value)
 
 
 def solve_quso_bruteforce(L, all_solutions=False, valid=lambda x: True):
@@ -374,4 +381,7 @@ def solve_quso_bruteforce(L, all_solutions=False, valid=lambda x: True):
     is -1, :math:`z_2` is 1.
 
     """
-    return solve_puso_bruteforce(L, all_solutions, valid)
+    # we could just do the same as we did in solve_puso_bruteforce, but the
+    # quso_value function is much faster than the puso_value function, so this
+    # will be much faster!
+    return _solve_bruteforce(L, all_solutions, valid, True, quso_value)

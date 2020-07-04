@@ -72,6 +72,8 @@ Approximate Extrema
 Useful functions
 ----------------
 
+.. autofunction:: qubovert.utils.sum
+
 .. autofunction:: qubovert.utils.subgraph
 
 .. autofunction:: qubovert.utils.subvalue
