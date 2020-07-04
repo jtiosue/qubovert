@@ -18,7 +18,7 @@ Contains the PUSO class. See ``help(qubovert.PUSO)``.
 
 """
 
-from .utils import BO, PUSOMatrix, puso_to_pubo
+from .utils import BO, PUSOMatrix, puso_to_pubo, QUSOMatrix
 from . import QUSO
 
 
@@ -350,6 +350,52 @@ class PUSO(BO, PUSOMatrix):
 
         """
         return self._create_pubo().to_qubo(lam, pairs)
+
+    def to_quso(self, lam=None, pairs=None):
+        """to_quso.
+
+        Create and return upper triangular QUSO representing the problem.
+        The labels will be integers from 0 to n-1. We introduce ancilla
+        variables in order to reduce the degree of the PUSO to a QUSO. The
+        solution to the PUSO can be read from the solution to the QUSO by
+        using the ``convert_solution`` method.
+
+        Parameters
+        ----------
+        lam : function (optional, defaults to None).
+            If ``lam`` is None, the function ``PUBO.default_lam`` will be used.
+            ``lam`` is the penalty factor to introduce in order to enforce the
+            ancilla constraints. When we reduce the degree of the PUSO to a
+            QUSO, we add penalties to the QUSO in order to enforce ancilla
+            variable constraints. These constraints will be multiplied by
+            ``lam(v)``, where ``v`` is the value associated with the term that
+            it is reducing. For example, a term ``(0, 1, 2): 3`` in the PUSO
+            may be reduced to a term ``(0, 3): 3`` for the QUSO, and then the
+            fact that ``3`` should be the product of ``1`` and ``2`` will be
+            enforced with a penalty weight ``lam(3)``.
+        pairs : set (optional, defaults to None).
+            A set of tuples of variable pairs to prioritize pairing together in
+            to degree reduction. If a pair in ``pairs`` is found together in
+            the PUSO, it will be chosen as a pair to reduce to a single
+            ancilla. You should supply this parameter if you have a good idea
+            of an efficient way to reduce the degree of the PUSO. If ``pairs``
+            is None, then it will be the empty set ``set()``. In other words,
+            no variable pairs will be prioritized, and instead variable pairs
+            will be chosen to reduce to an ancilla bases solely on frequency
+            of occurrance.
+
+        Return
+        ------
+        L : qubovert.utils.QUSOMatrix object.
+            The upper triangular QUSO matrix, an QUSOMatrix object.
+            For most practical purposes, you can use QUSOMatrix in the
+            same way as an ordinary dictionary. For more information,
+            see ``help(qubovert.utils.QUSOMatrix)``.
+
+        """
+        if self.degree <= 2:
+            return QUSOMatrix(self._to_puso())
+        return super().to_quso(lam, pairs)
 
     def convert_solution(self, solution, spin=True):
         """convert_solution.

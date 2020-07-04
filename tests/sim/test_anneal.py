@@ -50,6 +50,10 @@ def _anneal_puso(type_):
     with assert_warns(QUBOVertWarning):
         anneal_puso(H, temperature_range=(1, 2), schedule=[3, 2])
 
+    with assert_warns(QUBOVertWarning):
+        # a quadratic model warns that you shouldn't use anneal_puso
+        anneal_puso({(0, 1): 1})
+
     with assert_raises(ValueError):
         anneal_puso(H, temperature_range=(1, 2))
 
@@ -59,7 +63,9 @@ def _anneal_puso(type_):
     empty_result = AnnealResults(True)
     for _ in range(4):
         empty_result.add_state({}, 2)
-    assert anneal_puso({(): 2}, num_anneals=4) == empty_result
+    # less than quadratic model so will warn
+    with assert_warns(QUBOVertWarning):
+        assert anneal_puso({(): 2}, num_anneals=4) == empty_result
 
     assert anneal_puso(H, num_anneals=0) == AnnealResults(True)
     assert anneal_puso(H, num_anneals=-1) == AnnealResults(True)
@@ -72,7 +78,9 @@ def _anneal_puso(type_):
 
     # check to see if we find the groundstate of a simple but largeish model.
     H = type_({(i, i+1): -1 for i in range(30)})
-    res = anneal_puso(H, num_anneals=4, seed=0)
+    # quadratic model so will warn
+    with assert_warns(QUBOVertWarning):
+        res = anneal_puso(H, num_anneals=4, seed=0)
     assert res.best.state in (
         dict(enumerate([1]*31)), dict(enumerate([-1]*31))
     )
@@ -80,7 +88,9 @@ def _anneal_puso(type_):
     assert len([x for x in res]) == 4
 
     # check to see if we find the groundstate of same but out of order
-    res = anneal_puso(H, num_anneals=4, in_order=False, seed=0)
+    # quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        res = anneal_puso(H, num_anneals=4, in_order=False, seed=0)
     assert res.best.state in (
         dict(enumerate([1]*31)), dict(enumerate([-1]*31))
     )
@@ -89,7 +99,9 @@ def _anneal_puso(type_):
 
     # make sure we run branch where an explicit schedule is given and no
     # temperature range is supplied
-    anneal_puso(H, schedule=[3, 2])
+    # quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        anneal_puso(H, schedule=[3, 2])
 
     # make sure it works with fields
     res = anneal_puso(
@@ -106,11 +118,11 @@ def _anneal_puso(type_):
         type_(
             {(i, j, j + 1): 1 for i in range(100) for j in range(i+1, 100)}
         ),
-        num_anneals=50
+        num_anneals=20
     )
-    assert len(res) == 50
+    assert len(res) == 20
     res.sort()
-    for i in range(49):
+    for i in range(19):
         assert res[i].value <= res[i + 1].value
 
 
@@ -188,11 +200,11 @@ def _anneal_quso(type_):
     # big ordering
     res = anneal_quso(
         type_({(i, j): 1 for i in range(100) for j in range(i+1, 100)}),
-        num_anneals=50
+        num_anneals=20
     )
-    assert len(res) == 50
+    assert len(res) == 20
     res.sort()
-    for i in range(49):
+    for i in range(19):
         assert res[i].value <= res[i + 1].value
 
 
@@ -217,6 +229,10 @@ def _anneal_pubo(type_):
     with assert_warns(QUBOVertWarning):
         anneal_pubo(P, temperature_range=(1, 2), schedule=[3, 2])
 
+    with assert_warns(QUBOVertWarning):
+        # a quadratic model warns that you shouldn't use anneal_pubo
+        anneal_pubo({(0, 1): 1})
+
     with assert_raises(ValueError):
         anneal_pubo(P, temperature_range=(1, 2))
 
@@ -226,7 +242,9 @@ def _anneal_pubo(type_):
     empty_result = AnnealResults(False)
     for _ in range(4):
         empty_result.add_state({}, 2)
-    assert anneal_pubo({(): 2}, num_anneals=4) == empty_result
+    # less than quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        assert anneal_pubo({(): 2}, num_anneals=4) == empty_result
 
     assert anneal_pubo(P, num_anneals=0) == AnnealResults(False)
     assert anneal_pubo(P, num_anneals=-1) == AnnealResults(False)
@@ -239,7 +257,9 @@ def _anneal_pubo(type_):
 
     # check to see if we find the groundstate of a simple but largeish model.
     P = type_(puso_to_pubo({(i, i+1): -1 for i in range(30)}))
-    res = anneal_pubo(P, num_anneals=4, seed=0)
+    # quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        res = anneal_pubo(P, num_anneals=4, seed=0)
     assert res.best.state in (
         dict(enumerate([0]*31)), dict(enumerate([1]*31))
     )
@@ -247,7 +267,9 @@ def _anneal_pubo(type_):
     assert len([x for x in res]) == 4
 
     # check to see if we find the groundstate of same but out of order
-    res = anneal_pubo(P, num_anneals=4, in_order=False, seed=0)
+    # quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        res = anneal_pubo(P, num_anneals=4, in_order=False, seed=0)
     assert res.best.state in (
         dict(enumerate([0]*31)), dict(enumerate([1]*31))
     )
@@ -256,7 +278,9 @@ def _anneal_pubo(type_):
 
     # make sure we run branch where an explicit schedule is given and no
     # temperature range is supplied
-    anneal_pubo(P, schedule=[3] * 10 + [2] * 15)
+    # quadratic so will warn
+    with assert_warns(QUBOVertWarning):
+        anneal_pubo(P, schedule=[3] * 10 + [2] * 15)
 
     # make sure it works with fields
     res = anneal_pubo(type_({(0, 1, 2): 1, (1,): -1, (): 2}), num_anneals=10)
@@ -270,11 +294,11 @@ def _anneal_pubo(type_):
         type_(
             {(i, j, j + 1): 1 for i in range(100) for j in range(i+1, 100)}
         ),
-        num_anneals=50
+        num_anneals=20
     )
-    assert len(res) == 50
+    assert len(res) == 20
     res.sort()
-    for i in range(49):
+    for i in range(19):
         assert res[i].value <= res[i + 1].value
 
 
@@ -352,11 +376,11 @@ def _anneal_qubo(type_):
     # big ordering
     res = anneal_qubo(
         type_({(i, j): 1 for i in range(100) for j in range(i+1, 100)}),
-        num_anneals=50
+        num_anneals=20
     )
-    assert len(res) == 50
+    assert len(res) == 20
     res.sort()
-    for i in range(49):
+    for i in range(19):
         assert res[i].value <= res[i + 1].value
 
 
@@ -373,16 +397,14 @@ def test_anneal_quso_vs_anneal_puso():
                 kwargs['in_order'] = in_order
                 for anneal_duration in (10, 100, 1000):
                     kwargs['anneal_duration'] = anneal_duration
-                    for num_anneals in range(7):
+                    for num_anneals in range(1, 7):
                         kwargs['num_anneals'] = num_anneals
                         for T0 in (.1, 1, 10):
                             kwargs['temperature_range'] = T0, T0 / 2
-                            res = (
-                                anneal_quso(L, **kwargs)
-                                ==
-                                anneal_puso(L, **kwargs)
-                            )
-                            assert res
+                            # quadratic so anneal_puso will warn
+                            with assert_warns(QUBOVertWarning):
+                                respuso = anneal_puso(L, **kwargs)
+                            assert respuso == anneal_quso(L, **kwargs)
 
 
 def test_anneal_qubo_vs_anneal_pubo():
@@ -398,13 +420,11 @@ def test_anneal_qubo_vs_anneal_pubo():
                 kwargs['in_order'] = in_order
                 for anneal_duration in (10, 100, 1000):
                     kwargs['anneal_duration'] = anneal_duration
-                    for num_anneals in range(7):
+                    for num_anneals in range(1, 7):
                         kwargs['num_anneals'] = num_anneals
                         for T0 in (.1, 1, 10):
                             kwargs['temperature_range'] = T0, T0 / 2
-                            res = (
-                                anneal_qubo(Q, **kwargs)
-                                ==
-                                anneal_pubo(Q, **kwargs)
-                            )
-                            assert res
+                            # quadratic so anneal_pubo will warn
+                            with assert_warns(QUBOVertWarning):
+                                respubo = anneal_pubo(Q, **kwargs)
+                            assert respubo == anneal_qubo(Q, **kwargs)

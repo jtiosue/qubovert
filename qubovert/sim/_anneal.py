@@ -233,6 +233,9 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
     qubovert.utils.QUBOVertWarning
         If both the ``temperature_range`` and explicit ``schedule`` arguments
         are provided.
+    qubovert.utils.QUBOVertWarning
+        If the degree of the model is 2 or less then a warning is issued that
+        says you should use the ``anneal_qubo`` or ``anneal_quso`` functions.
 
     Example
     -------
@@ -278,6 +281,14 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
         N = H.num_binary_variables
         model = H.to_puso()
         reverse_mapping = H.reverse_mapping
+
+    if model.degree <= 2:
+        QUBOVertWarning.warn(
+            "The input problem has degree <= 2; consider using the "
+            "``qubovert.sim.anneal_qubo`` or ``qubovert.sim.anneal_quso`` "
+            "functions, which are significantly faster than this function "
+            "because they take advantage of the low degree."
+        )
 
     # solve `model`, convert solutions back to `H`
 
@@ -561,6 +572,9 @@ def anneal_pubo(P, num_anneals=1, anneal_duration=1000, initial_state=None,
     qubovert.utils.QUBOVertWarning
         If both the ``temperature_range`` and explicit ``schedule`` arguments
         are provided.
+    qubovert.utils.QUBOVertWarning
+        If the degree of the model is 2 or less then a warning is issued that
+        says you should use the ``anneal_qubo`` or ``anneal_quso`` functions.
 
     Example
     -------

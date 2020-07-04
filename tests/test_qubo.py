@@ -20,7 +20,7 @@ from qubovert import QUBO
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
-    qubo_value
+    qubo_value, QUBOMatrix
 )
 from sympy import Symbol
 from numpy import allclose
@@ -394,3 +394,11 @@ def test_set_mapping():
     d = QUBO({('a', 'b'): 1, ('a',): 2})
     d.set_reverse_mapping({0: 'a', 2: 'b'})
     assert d.to_qubo() == {(0, 2): 1, (0,): 2}
+
+
+def test_to_enumerated():
+
+    d = QUBO({('a', 'b'): 1, ('a',): 2})
+    dt = d.to_enumerated()
+    assert type(dt) == QUBOMatrix
+    assert dt == d.to_qubo()

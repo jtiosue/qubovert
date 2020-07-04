@@ -399,6 +399,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("eq", H)
+        if not lam:
+            return self
 
         h = _empty_pcbo(self).add_constraint_eq_zero(
             puso_to_pubo(H), lam=lam,
@@ -463,6 +465,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("ne", H)
+        if not lam:
+            return self
         h = _empty_pcbo(self).add_constraint_ne_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -540,6 +544,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("lt", H)
+        if not lam:
+            return self
         h = _empty_pcbo(self).add_constraint_lt_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -620,6 +626,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("le", H)
+        if not lam:
+            return self
         h = _empty_pcbo(self).add_constraint_le_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -696,6 +704,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("gt", H)
+        if not lam:
+            return self
         h = _empty_pcbo(self).add_constraint_gt_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
@@ -775,6 +785,8 @@ class PCSO(PUSO):
         """
         H = PUSO(H)
         self._append_constraint("ge", H)
+        if not lam:
+            return self
         h = _empty_pcbo(self).add_constraint_ge_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
