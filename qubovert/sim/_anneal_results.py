@@ -221,30 +221,20 @@ class AnnealResults(list):
 
     """
 
-    def __init__(self, spin):
+    def __init__(self, iterable=()):
         """__init__.
 
         Parameters
         ----------
-        spin : bool.
-            Indicates whether the results are coming from a boolean or spin
-            model.
+        iterable : any iterable (optional, defaults to ``()``).
+            The iterable should contain only ``qubovert.sim.AnnealResult``
+            objects.
 
         """
         super().__init__()
-        self._spin, self.best = spin, None
-
-    @property
-    def spin(self):
-        """spin.
-
-        Return
-        ------
-        spin : bool.
-            Whether ``self`` contains spin or boolean results.
-
-        """
-        return self._spin
+        self.best = None
+        for x in iterable:
+            self.append(x)
 
     def copy(self):
         """copy.
@@ -255,9 +245,9 @@ class AnnealResults(list):
             A deep copy of ``self``.
 
         """
-        return AnnealResults.from_list(self, self._spin)
+        return AnnealResults(self)
 
-    def add_state(self, state, value):
+    def add_state(self, state, value, spin):
         """add_state.
 
         Add the state to the record.
@@ -268,13 +258,15 @@ class AnnealResults(list):
             Maps variable labels to their values.
         value : number.
             The value of the model with ``state``.
+        spin : bool.
+            Whether it is from a spin or boolean model.
 
         Returns
         -------
         None.
 
         """
-        self.append(AnnealResult(state, value, self._spin))
+        self.append(AnnealResult(state, value, spin))
 
     def append(self, result):
         """append.
@@ -306,10 +298,7 @@ class AnnealResults(list):
         res : AnnealResults object.
 
         """
-        res = AnnealResults(False)
-        for r in self:
-            res.append(r.to_boolean())
-        return res
+        return AnnealResults(r.to_boolean() for r in self)
 
     def to_spin(self):
         """to_spin.
@@ -322,10 +311,7 @@ class AnnealResults(list):
         res : AnnealResults object.
 
         """
-        res = AnnealResults(True)
-        for r in self:
-            res.append(r.to_spin())
-        return res
+        return AnnealResults(r.to_spin() for r in self)
 
     def __str__(self):
         """__str__.
@@ -356,7 +342,7 @@ class AnnealResults(list):
         """
         res = super().__getitem__(index)
         if isinstance(index, slice):
-            res = AnnealResults.from_list(res, self._spin)
+            res = AnnealResults(res)
         return res
 
     def clear(self):
@@ -367,28 +353,6 @@ class AnnealResults(list):
         """
         self.best = None
         super().clear()
-
-    @staticmethod
-    def from_list(anneal_results_list, spin):
-        """from_list.
-
-        Create an ``AnnealResults`` object from a list of ``AnnealResult``
-        objects.
-
-        Parameters
-        ----------
-        anneal_results_list : list.
-            List of ``AnnealResult`` objects.
-
-        Returns
-        -------
-        res : qubovert.sim.AnnealResults object.
-
-        """
-        res = AnnealResults(spin)
-        for i in anneal_results_list:
-            res.append(i.copy())
-        return res
 
     def filter(self, func):
         """filter.
@@ -428,10 +392,7 @@ class AnnealResults(list):
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
 
         """
-        return AnnealResults.from_list(
-            filter(func, self),
-            self._spin
-        )
+        return AnnealResults(filter(func, self))
 
     def filter_states(self, func):
         """filter_states.
@@ -471,10 +432,7 @@ class AnnealResults(list):
          AnnealResult(state={0: 0, 1: 0}, value=0, spin=False)]
 
         """
-        return AnnealResults.from_list(
-            filter(lambda x: func(x.state), self),
-            self._spin
-        )
+        return AnnealResults(filter(lambda x: func(x.state), self))
 
     def apply_function(self, func):
         """apply_function.
@@ -514,10 +472,7 @@ class AnnealResults(list):
          AnnealResult(state={'a': 0, 'b': 0}, value=0, spin=False)]
 
         """
-        return AnnealResults.from_list(
-            [func(x) for x in self],
-            self._spin
-        )
+        return AnnealResults(func(x) for x in self)
 
     def convert_states(self, func):
         """convert_states.
@@ -571,7 +526,48 @@ class AnnealResults(list):
         res : qubovert.sim.AnnealResults object.
 
         """
-        return AnnealResults.from_list(super().__add__(other), self._spin)
+        return AnnealResults(super().__add__(other))
+
+    def __iadd__(self, other):
+        """__iadd__.
+
+        Override ``list.__iadd__`` to keep track of ``best`` attribute.
+
+        Parameters
+        ----------
+        other : qubovert.sim.AnnealResults object.
+
+        Returns
+        -------
+        self : qubovert.sim.AnnealResults object.
+
+        """
+        if isinstance(other, AnnealResults):
+            if other.best < self.best:
+                self.best = other.best
+            return super().__iadd__(other)
+
+        self.extend(other)
+        return self
+
+    def extend(self, other):
+        """extend.
+
+        Override ``list.extend`` to keep track of ``best`` attribute.
+        Updates in place.
+
+        Parameters
+        ----------
+        other : qubovert.sim.AnnealResults object or iterable.
+
+        """
+        if isinstance(other, AnnealResults):
+            if other.best < self.best:
+                self.best = other.best
+            super().extend(other)
+        else:
+            for x in other:
+                self.append(x)
 
     def __mul__(self, other):
         """__mul__.
@@ -587,4 +583,4 @@ class AnnealResults(list):
         res : qubovert.sim.AnnealResults object.
 
         """
-        return AnnealResults.from_list(super().__mul__(other), self._spin)
+        return AnnealResults(super().__mul__(other))
