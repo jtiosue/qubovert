@@ -239,14 +239,28 @@ def test_extend_add():
     res1 = AnnealResults(AnnealResult({}, 1, True) for _ in range(3))
     assert res1.best.value == 1
 
-    temp = res0.copy()
     assert (res0 + res1).best.value == 1
     assert type(res0 + res1) == AnnealResults
 
+    temp = res0.copy()
     temp += res1
     assert temp.best.value == 1
     assert type(temp) == AnnealResults
 
-    res0.extend(res1)
-    assert res0.best.value == 1
-    assert type(res0) == AnnealResults
+    temp = res0.copy()
+    temp.extend(res1)
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
+
+    assert (res1 + res0).best.value == 1
+    assert type(res1 + res0) == AnnealResults
+
+    temp = res1.copy()
+    temp += res0
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
+
+    temp = res1.copy()
+    temp.extend(res0)
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
