@@ -273,7 +273,7 @@ def test_annealresults_insert_remove_pop():
     res0 = AnnealResults([
         AnnealResult({}, 2, True), AnnealResult({}, 1, True)
     ])
-    a0 = AnnealResult({}, 1, True) 
+    a0 = AnnealResult({}, 1, True)
     a1 = AnnealResult({}, 2, True)
     assert res0.best == a0
 
@@ -311,7 +311,7 @@ def test_annealresults_insert_remove_pop():
     temp.remove(a0)
     assert len(temp) == 1 and temp.best == a1
     temp.remove(a1)
-    assert temp and temp.best is None
+    assert not temp and temp.best is None
     with assert_raises(ValueError):
         temp.remove(a0)
 
@@ -326,6 +326,6 @@ def test_annealresults_insert_remove_pop():
     t = temp.pop(0)
     assert len(temp) == 1 and temp.best == a1 and t == a0
     t = temp.pop(0)
-    assert not len(temp) and temp.best is None and t == a1
+    assert not temp and temp.best is None and t == a1
     with assert_raises(IndexError):
         temp.pop(0)
