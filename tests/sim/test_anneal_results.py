@@ -315,6 +315,26 @@ def test_annealresults_insert_remove_pop():
     with assert_raises(ValueError):
         temp.remove(a0)
 
+    temp = res0.copy() + [a0]
+    temp.remove(a1)
+    assert len(temp) == 2 and temp.best == a0
+
+    temp = res0.copy() + [a0]
+    temp.remove(a0)
+    assert len(temp) == 2 and temp.best == a0
+    temp.remove(a0)
+    assert len(temp) == 1 and temp.best == a0
+
+    temp = res0.copy() + [a1]
+    temp.remove(a1)
+    assert len(temp) == 2 and temp.best == a0
+
+    temp = res0.copy() + [a1]
+    temp.remove(a0)
+    assert len(temp) == 2 and temp.best == a1
+    temp.remove(a1)
+    assert len(temp) == 1 and temp.best == a1
+
     # pop
     temp = res0.copy()
     t = temp.pop(1)
