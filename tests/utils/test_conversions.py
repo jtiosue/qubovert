@@ -33,12 +33,22 @@ def test_qubo_to_quso_to_qubo():
     qubo = {(0,): 1, (0, 1): 1, (1,): -1, (1, 2): .2, (): -2, (2,): 1}
     assert qubo == quso_to_qubo(qubo_to_quso(qubo))
 
+    # type asserting
+    assert type(qubo_to_quso(qubo)) == QUSO
+    assert type(qubo_to_quso(QUBOMatrix(qubo))) == QUSOMatrix
+    assert type(qubo_to_quso(QUBO(qubo))) == QUSO
+
     qubo = {
         ('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .2, (): -2, ('2',): 1,
         (0, 0): 1
     }
-    # need to reformatt qubo so it is sorted with the same hash
+    # need to reformat qubo so it is sorted with the same hash
     assert QUBO(qubo) == quso_to_qubo(qubo_to_quso(qubo))
+
+    # type asserting
+    assert type(qubo_to_quso(qubo)) == QUSO
+    assert type(qubo_to_quso(QUBOMatrix(qubo))) == QUSOMatrix
+    assert type(qubo_to_quso(QUBO(qubo))) == QUSO
 
 
 def test_quso_to_qubo_to_quso():
@@ -46,9 +56,19 @@ def test_quso_to_qubo_to_quso():
     quso = {(0, 1): -4, (0, 2): 3, (): -2, (0,): 1, (2,): -2}
     assert quso == qubo_to_quso(quso_to_qubo(quso))
 
+    # type asserting
+    assert type(quso_to_qubo(quso)) == QUBO
+    assert type(quso_to_qubo(QUSOMatrix(quso))) == QUBOMatrix
+    assert type(quso_to_qubo(QUSO(quso))) == QUBO
+
     quso = {('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2', '2'): -2}
     # need to reformat quso so it is sorted with the same hash and squashed key
     assert QUSO(quso) == qubo_to_quso(quso_to_qubo(quso))
+
+    # type asserting
+    assert type(quso_to_qubo(quso)) == QUBO
+    assert type(quso_to_qubo(QUSOMatrix(quso))) == QUBOMatrix
+    assert type(quso_to_qubo(QUSO(quso))) == QUBO
 
 
 def test_pubo_to_puso_to_pubo():
@@ -59,6 +79,11 @@ def test_pubo_to_puso_to_pubo():
     }
     assert pubo == puso_to_pubo(pubo_to_puso(pubo))
 
+    # type asserting
+    assert type(pubo_to_puso(pubo)) == PUSO
+    assert type(pubo_to_puso(PUBOMatrix(pubo))) == PUSOMatrix
+    assert type(pubo_to_puso(PUBO(pubo))) == PUSO
+
     pubo = {
         ('0',): 1, ('0', 1): 1, (1,): -1, (1, '2'): .5, (): -2, ('2',): 1,
         ('0', '2', 3): -3, ('0', 1, '2'): -2, ('0', '0', 1, '0', '2', '2'): -9,
@@ -66,6 +91,11 @@ def test_pubo_to_puso_to_pubo():
     }
     # need to reformat pubo so it is sorted with the same hash and squashed key
     assert PUBO(pubo) == puso_to_pubo(pubo_to_puso(pubo))
+
+    # type asserting
+    assert type(pubo_to_puso(pubo)) == PUSO
+    assert type(pubo_to_puso(PUBOMatrix(pubo))) == PUSOMatrix
+    assert type(pubo_to_puso(PUBO(pubo))) == PUSO
 
 
 def test_puso_to_pubo_to_puso():
@@ -76,6 +106,11 @@ def test_puso_to_pubo_to_puso():
     }
     assert puso == pubo_to_puso(puso_to_pubo(puso))
 
+    # type asserting
+    assert type(puso_to_pubo(puso)) == PUBO
+    assert type(puso_to_pubo(PUSOMatrix(puso))) == PUBOMatrix
+    assert type(puso_to_pubo(PUSO(puso))) == PUBO
+
     puso = {
         ('0', 1): -4, ('0', '2'): 3, (): -2, ('0',): 1, ('2',): -2,
         ('0', 1, '2'): 3, ('0', '2', 3): -1,
@@ -83,6 +118,11 @@ def test_puso_to_pubo_to_puso():
     }
     # need to reformat qubo so it is sorted with the same hash
     assert PUSO(puso) == pubo_to_puso(puso_to_pubo(puso))
+
+    # type asserting
+    assert type(puso_to_pubo(puso)) == PUBO
+    assert type(puso_to_pubo(PUSOMatrix(puso))) == PUBOMatrix
+    assert type(puso_to_pubo(PUSO(puso))) == PUBO
 
 
 def test_qubo_to_quso_eq_pubo_to_puso():
