@@ -20,7 +20,7 @@ from qubovert.utils import (
     qubo_to_quso, quso_to_qubo, pubo_to_puso, puso_to_pubo,
     boolean_to_spin, spin_to_boolean, decimal_to_boolean, decimal_to_spin,
     qubo_to_matrix, matrix_to_qubo, boolean_to_decimal, spin_to_decimal,
-    QUBOMatrix
+    QUBOMatrix, QUSOMatrix, PUBOMatrix, PUSOMatrix
 )
 from qubovert import QUBO, QUSO, PUBO, PUSO
 from sympy import Symbol
