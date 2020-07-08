@@ -47,7 +47,6 @@ def test_qubo_to_quso_to_qubo():
 
     # type asserting
     assert type(qubo_to_quso(qubo)) == QUSO
-    assert type(qubo_to_quso(QUBOMatrix(qubo))) == QUSOMatrix
     assert type(qubo_to_quso(QUBO(qubo))) == QUSO
 
 
@@ -67,7 +66,6 @@ def test_quso_to_qubo_to_quso():
 
     # type asserting
     assert type(quso_to_qubo(quso)) == QUBO
-    assert type(quso_to_qubo(QUSOMatrix(quso))) == QUBOMatrix
     assert type(quso_to_qubo(QUSO(quso))) == QUBO
 
 
@@ -94,7 +92,6 @@ def test_pubo_to_puso_to_pubo():
 
     # type asserting
     assert type(pubo_to_puso(pubo)) == PUSO
-    assert type(pubo_to_puso(PUBOMatrix(pubo))) == PUSOMatrix
     assert type(pubo_to_puso(PUBO(pubo))) == PUSO
 
 
@@ -121,7 +118,6 @@ def test_puso_to_pubo_to_puso():
 
     # type asserting
     assert type(puso_to_pubo(puso)) == PUBO
-    assert type(puso_to_pubo(PUSOMatrix(puso))) == PUBOMatrix
     assert type(puso_to_pubo(PUSO(puso))) == PUBO
 
 
