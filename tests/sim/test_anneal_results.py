@@ -318,14 +318,14 @@ def test_annealresults_insert_remove_pop():
     # pop
     temp = res0.copy()
     t = temp.pop(1)
-    assert len(temp) == 1 and temp.best == a0 and t == a1
+    assert len(temp) == 1 and temp.best == a1 and t == a0
     t = temp.pop(0)
-    assert not len(temp) and temp.best is None and t == a0
+    assert not len(temp) and temp.best is None and t == a1
 
     temp = res0.copy()
     t = temp.pop(0)
-    assert len(temp) == 1 and temp.best == a1 and t == a0
+    assert len(temp) == 1 and temp.best == a0 and t == a1
     t = temp.pop(0)
-    assert not temp and temp.best is None and t == a1
+    assert not temp and temp.best is None and t == a0
     with assert_raises(IndexError):
         temp.pop(0)
