@@ -146,10 +146,10 @@ def _package_spin_results(states, values, offset, reverse_mapping):
     res : qubovert.sim.AnnealResults object.
 
     """
-    res = AnnealResults(True)
+    res = AnnealResults()
     for i in range(len(states)):
         state = {reverse_mapping[k]: v for k, v in enumerate(states[i])}
-        res.add_state(state, values[i] + offset)
+        res.add_state(state, values[i] + offset, True)  # spin is True
     return res
 
 
@@ -263,7 +263,7 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     """
     if num_anneals <= 0:
-        return AnnealResults(True)
+        return AnnealResults()
 
     Ts = _create_spin_schedule(
         H, anneal_duration, temperature_range, schedule
@@ -293,9 +293,8 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
     # solve `model`, convert solutions back to `H`
 
     if not N:
-        return AnnealResults.from_list(
-            [AnnealResult({}, model.offset, True)] * num_anneals,
-            True
+        return AnnealResults(
+            AnnealResult({}, model.offset, True) for _ in range(num_anneals)
         )
 
     if initial_state is not None:
@@ -424,7 +423,7 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
 
     """
     if num_anneals <= 0:
-        return AnnealResults(True)
+        return AnnealResults()
 
     Ts = _create_spin_schedule(
         L, anneal_duration, temperature_range, schedule
@@ -448,9 +447,8 @@ def anneal_quso(L, num_anneals=1, anneal_duration=1000, initial_state=None,
     # solve `model`, convert solutions back to `L`
 
     if not N:
-        return AnnealResults.from_list(
-            [AnnealResult({}, model.offset, True)] * num_anneals,
-            True
+        return AnnealResults(
+            AnnealResult({}, model.offset, True) for _ in range(num_anneals)
         )
 
     if initial_state is not None:

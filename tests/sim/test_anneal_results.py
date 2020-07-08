@@ -96,16 +96,15 @@ def test_annealresults():
     anneal_states = [AnnealResult(*s, True) for s in states]
     anneal_sorted_states = [AnnealResult(*s, True) for s in sorted_states]
 
-    res, boolean_res = AnnealResults(True), AnnealResults(False)
+    res, boolean_res = AnnealResults(), AnnealResults()
     for s in states:
-        res.add_state(*s)
-        boolean_res.add_state(spin_to_boolean(s[0]), s[1])
+        res.add_state(*s, True)
+        boolean_res.add_state(spin_to_boolean(s[0]), s[1], False)
 
     for s in states:
         assert AnnealResult(*s, True) in res
         assert AnnealResult(s[0], s[1]+1, True) not in res
 
-    assert res.spin
     assert len(res) == 3
     assert len(boolean_res) == 3
     assert res.best.state == states[2][0]
@@ -174,7 +173,7 @@ def test_annealresults_filter():
         AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
         AnnealResult({0: -1, 1: -1, 'a': -1}, -3, True)
     ]
-    res = AnnealResults.from_list(states, True)
+    res = AnnealResults(states)
     filtered_res = res.filter(lambda x: x.state[0] == -1)
     assert filtered_res == filtered_states
 
@@ -190,7 +189,7 @@ def test_annealresults_filter_states():
         AnnealResult({0: -1, 1: 1, 'a': -1}, 1, True),
         AnnealResult({0: 1, 1: 1, 'a': -1}, 9, True)
     ]
-    res = AnnealResults.from_list(states, True)
+    res = AnnealResults(states)
     filtered_res = res.filter_states(lambda x: x[1] == 1)
     assert filtered_res == filtered_states
 
@@ -207,7 +206,7 @@ def test_annealresults_apply_function():
         AnnealResult({0: 1, 1: 1, 'a': -1}, 9+2, True),
         AnnealResult({0: -1, 1: -1, 'a': -1}, -3+2, True)
     ]
-    res = AnnealResults.from_list(states, True)
+    res = AnnealResults(states)
     new_res = res.apply_function(
         lambda x: AnnealResult(x.state, x.value + 2, x.spin)
     )
@@ -226,8 +225,42 @@ def test_annealresults_convert_states():
         AnnealResult({'b': 1, 1: 1, 'a': -1}, 9, True),
         AnnealResult({'b': -1, 1: -1, 'a': -1}, -3, True)
     ]
-    res = AnnealResults.from_list(states, True)
+    res = AnnealResults(states)
     new_res = res.convert_states(
         lambda x: {k if k else 'b': v for k, v in x.items()}
     )
     assert new_res == new_states
+
+
+def test_extend_add():
+
+    res0 = AnnealResults(AnnealResult({}, 2, True) for _ in range(4))
+    assert res0.best.value == 2
+    res1 = AnnealResults(AnnealResult({}, 1, True) for _ in range(3))
+    assert res1.best.value == 1
+
+    assert (res0 + res1).best.value == 1
+    assert type(res0 + res1) == AnnealResults
+
+    temp = res0.copy()
+    temp += res1
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
+
+    temp = res0.copy()
+    temp.extend(res1)
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
+
+    assert (res1 + res0).best.value == 1
+    assert type(res1 + res0) == AnnealResults
+
+    temp = res1.copy()
+    temp += res0
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults
+
+    temp = res1.copy()
+    temp.extend(res0)
+    assert temp.best.value == 1
+    assert type(temp) == AnnealResults

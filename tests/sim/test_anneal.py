@@ -60,15 +60,15 @@ def _anneal_puso(type_):
     with assert_raises(ValueError):
         anneal_puso(H, schedule='something')
 
-    empty_result = AnnealResults(True)
+    empty_result = AnnealResults()
     for _ in range(4):
-        empty_result.add_state({}, 2)
+        empty_result.add_state({}, 2, True)
     # less than quadratic model so will warn
     with assert_warns(QUBOVertWarning):
         assert anneal_puso({(): 2}, num_anneals=4) == empty_result
 
-    assert anneal_puso(H, num_anneals=0) == AnnealResults(True)
-    assert anneal_puso(H, num_anneals=-1) == AnnealResults(True)
+    assert anneal_puso(H, num_anneals=0) == AnnealResults()
+    assert anneal_puso(H, num_anneals=-1) == AnnealResults()
 
     # just make sure everything runs
     anneal_puso(H, schedule='linear')
@@ -116,7 +116,7 @@ def _anneal_puso(type_):
     # bigish ordering
     res = anneal_puso(
         type_(
-            {(i, j, j + 1): 1 for i in range(100) for j in range(i+1, 100)}
+            {(i, j, j + 1): 1 for i in range(70) for j in range(i+1, 70)}
         ),
         num_anneals=20
     )
@@ -155,13 +155,13 @@ def _anneal_quso(type_):
     with assert_raises(ValueError):
         anneal_quso(L, schedule='something')
 
-    empty_result = AnnealResults(True)
+    empty_result = AnnealResults()
     for _ in range(4):
-        empty_result.add_state({}, 2)
+        empty_result.add_state({}, 2, True)
     assert anneal_quso({(): 2}, num_anneals=4) == empty_result
 
-    assert anneal_quso(L, num_anneals=0) == AnnealResults(True)
-    assert anneal_quso(L, num_anneals=-1) == AnnealResults(True)
+    assert anneal_quso(L, num_anneals=0) == AnnealResults()
+    assert anneal_quso(L, num_anneals=-1) == AnnealResults()
 
     # just make sure everything runs
     anneal_quso(L, schedule='linear')
@@ -199,7 +199,7 @@ def _anneal_quso(type_):
 
     # big ordering
     res = anneal_quso(
-        type_({(i, j): 1 for i in range(100) for j in range(i+1, 100)}),
+        type_({(i, j): 1 for i in range(70) for j in range(i+1, 70)}),
         num_anneals=20
     )
     assert len(res) == 20
@@ -239,15 +239,15 @@ def _anneal_pubo(type_):
     with assert_raises(ValueError):
         anneal_pubo(P, schedule='something')
 
-    empty_result = AnnealResults(False)
+    empty_result = AnnealResults()
     for _ in range(4):
-        empty_result.add_state({}, 2)
+        empty_result.add_state({}, 2, False)
     # less than quadratic so will warn
     with assert_warns(QUBOVertWarning):
         assert anneal_pubo({(): 2}, num_anneals=4) == empty_result
 
-    assert anneal_pubo(P, num_anneals=0) == AnnealResults(False)
-    assert anneal_pubo(P, num_anneals=-1) == AnnealResults(False)
+    assert anneal_pubo(P, num_anneals=0) == AnnealResults()
+    assert anneal_pubo(P, num_anneals=-1) == AnnealResults()
 
     # just make sure everything runs
     anneal_pubo(P, schedule='linear')
@@ -292,7 +292,7 @@ def _anneal_pubo(type_):
     # bigish ordering
     res = anneal_pubo(
         type_(
-            {(i, j, j + 1): 1 for i in range(100) for j in range(i+1, 100)}
+            {(i, j, j + 1): 1 for i in range(70) for j in range(i+1, 70)}
         ),
         num_anneals=20
     )
@@ -331,13 +331,13 @@ def _anneal_qubo(type_):
     with assert_raises(ValueError):
         anneal_qubo(Q, schedule='something')
 
-    empty_result = AnnealResults(False)
+    empty_result = AnnealResults()
     for _ in range(4):
-        empty_result.add_state({}, 2)
+        empty_result.add_state({}, 2, False)
     assert anneal_qubo({(): 2}, num_anneals=4) == empty_result
 
-    assert anneal_qubo(Q, num_anneals=0) == AnnealResults(False)
-    assert anneal_qubo(Q, num_anneals=-1) == AnnealResults(False)
+    assert anneal_qubo(Q, num_anneals=0) == AnnealResults()
+    assert anneal_qubo(Q, num_anneals=-1) == AnnealResults()
 
     # just make sure everything runs
     anneal_qubo(Q, schedule='linear')
@@ -375,7 +375,7 @@ def _anneal_qubo(type_):
 
     # big ordering
     res = anneal_qubo(
-        type_({(i, j): 1 for i in range(100) for j in range(i+1, 100)}),
+        type_({(i, j): 1 for i in range(70) for j in range(i+1, 70)}),
         num_anneals=20
     )
     assert len(res) == 20

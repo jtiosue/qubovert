@@ -256,7 +256,7 @@ def qubo_to_quso(Q):
     else:
         squash_key = qv.QUBO.squash_key
 
-    L = QUSOMatrix() if type(Q) == QUBOMatrix else qv.QUBO()
+    L = QUSOMatrix() if type(Q) == QUBOMatrix else qv.QUSO()
 
     for kp, v in Q.items():
         k = squash_key(kp)
@@ -357,7 +357,7 @@ def pubo_to_puso(P):
 
     Returns
     -------
-    H : qubovert.utils.PUSOMatrix object.
+    H : qubovert.utils.PUSOMatrix object or qubovert.PUSO object.
         tuple of spin labels map to PUSO values. If ``P`` is a
         ``qubovert.utils.PUBOMatrix`` object, then ``H`` will be a
         ``qubovert.utils.PUSOMatrix``, otherwise ``H`` will be a
@@ -372,7 +372,7 @@ def pubo_to_puso(P):
 
     >>> P = {(0,): 1, (0, 1): -1, (1,): 3}
     >>> H = pubo_to_puso(P)
-    >>> isinstance(H, qubovert.QUSO)
+    >>> isinstance(H, qubovert.PUSO)
     True
 
     """
@@ -431,7 +431,7 @@ def puso_to_pubo(H):
 
     Returns
     -------
-    P : qubovert.utils.PUBOMatrix object.
+    P : qubovert.utils.PUBOMatrix object or qubovert.PUBO object.
         If ``H`` is a ``qubovert.utils.PUSOMatrix`` object, then ``P`` will
         be a ``qubovert.utils.PUBOMatrix``, otherwise ``P`` will be a
         ``qubovert.PUBO`` object. See ``help(qubovert.PUBO)`` and
