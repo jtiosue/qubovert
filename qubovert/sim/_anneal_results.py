@@ -24,6 +24,31 @@ from qubovert.utils import spin_to_boolean, boolean_to_spin
 __all__ = 'AnnealResult', 'AnnealResults'
 
 
+# helper for AnnealResults
+
+def _recompute_best(results):
+    """_recompute_best.
+
+    Internal helper function for the AnnealResults class. Computes the best
+    AnnealResult in an AnnealResults object.
+
+    Parameters
+    ----------
+    results : AnnealResults object.
+
+    Returns
+    -------
+    res : AnnealResult object.
+        The AnnealResult from ``results`` with the lowest value.
+
+    """
+    best = None
+    for r in results:
+        if best is None or r.value < best.value:
+            best = r
+    return best
+
+
 class AnnealResult:
     """AnnealResult.
 
@@ -271,7 +296,8 @@ class AnnealResults(list):
     def append(self, result):
         """append.
 
-        Add the result to the record.
+        Add the result to the record at the end and update the
+        ``best`` attribute if needed.
 
         Parameters
         ----------
@@ -286,6 +312,68 @@ class AnnealResults(list):
         if self.best is None or result.value < self.best.value:
             self.best = result
         super().append(result)
+
+    def insert(self, index, result):
+        """insert.
+
+        Add the result to the record at index ``index`` and update the
+        ``best`` attribute if needed.
+
+        Parameters
+        ----------
+        result : AnnealResult object.
+            See ``help(qubovert.sim.AnnealResult)``.
+
+        Returns
+        -------
+        None.
+
+        """
+        if self.best is None or result.value < self.best.value:
+            self.best = result
+        super().insert(index, result)
+
+    def remove(self, result):
+        """remove.
+
+        Override ``list.remove`` so we also update the ``best`` attribute.
+        Remove the first occurrence of ``result``, or raise ValueError.
+
+        Parameters
+        ----------
+        result : AnnealResult object.
+            See ``help(qubovert.sim.AnnealResult)``.
+
+        Returns
+        -------
+        None
+
+        """
+        super().remove(result)
+        if result == self.best:
+            self.best = _recompute_best(self)
+
+    def pop(self, index):
+        """pop.
+
+        Override ``list.pop`` so we also update the ``best`` attribute.
+        Remove and return the element in the ``index`` index, or raise
+        an IndexError.
+
+        Parameters
+        ----------
+        index : int.
+
+        Returns
+        -------
+        res : AnnealResult object.
+            The element at ``index``.
+
+        """
+        res = super().pop(index)
+        if res == self.best:
+            self.best = _recompute_best(self)
+        return res
 
     def to_boolean(self):
         """to_boolean.
