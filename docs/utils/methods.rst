@@ -81,3 +81,7 @@ Useful functions
 .. autofunction:: qubovert.utils.normalize
 
 .. autofunction:: qubovert.utils.num_bits
+
+.. autofunction:: qubovert.utils.get_info
+
+.. autofunction:: qubovert.utils.create_from_info
