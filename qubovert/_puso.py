@@ -80,27 +80,6 @@ class PUSO(BO, PUSOMatrix):
 
     Note
     ----
-    Note that keys will end up sorted by their hash. Hashes will not be
-    consistent across Python sessions (unless they are integers)! For example,
-    both of the following can happen:
-
-    >>> print(PUSO({('a', 0): 1, (0, 1): -1}))
-    {('a', 0): 1, (0, 1): -1}
-
-    or
-
-    >>> print(PUSO({('a', 0): 1, (0, 1): -1}))
-    {(0, 'a'): 1, (0, 1): -1}
-
-    But the following will never happen:
-
-    >>> print(PUSO({('a', 0): 1, (0, 1): -1}))
-    {('a', 0): 1, (1, 0): -1}
-
-    Ie integers will always be correctly sorted.
-
-    Note
-    ----
     For efficiency, many internal variables including mappings are computed as
     the problemis being built. This can cause these
     values to be wrong for some specific situations. Calling ``refresh``

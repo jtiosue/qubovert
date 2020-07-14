@@ -21,7 +21,7 @@ Contains the VertexCover class. See ``help(qubovert.problems.VertexCover)``.
 from qubovert import PCBO
 from qubovert.problems import Problem
 from qubovert.utils import (
-    is_solution_spin, spin_to_boolean, QUBOMatrix, hash_function
+    is_solution_spin, spin_to_boolean, QUBOMatrix, ordering_key
 )
 
 
@@ -91,7 +91,7 @@ class VertexCover(Problem):
         self._vertices = {y for x in edges for y in x}
         self._vertex_to_index = {
             x: i
-            for i, x in enumerate(sorted(self._vertices, key=hash_function))
+            for i, x in enumerate(sorted(self._vertices, key=ordering_key))
         }
         self._index_to_vertex = {
             i: x for x, i in self._vertex_to_index.items()

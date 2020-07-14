@@ -12,23 +12,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_hash.py.
+"""_ordering_key.py.
 
-This file contains the hash function that we use to sort keys in the matrices,
-used in PUBOMatrix, PUSOMatrix, QUBOMatrix, QUSOMatrix, and all of their
-subclasses.
+This file contains the ordering key function that we use to sort keys in
+qubovert objects. It is used in PUBOMatrix, PUSOMatrix, QUBOMatrix,
+QUSOMatrix, and all of their subclasses.
 
 """
 
-__all__ = 'hash_function',
+__all__ = 'ordering_key',
 
 
-def hash_function(x):
-    """hash_function.
+def ordering_key(x):
+    """ordering_key.
 
-    Function to return (usually) unique hashes for ``x`` such
-    that multiple ``x`` s can be ordered. Note that the hash is not consistent
-    across Python sessions (except for when ``x`` is an integer)!
+    Return a key to sort keys of qubovert types with. We sort by
+    type first, and then by object.
 
     Parameters
     ----------
@@ -36,9 +35,12 @@ def hash_function(x):
 
     Returns
     -------
-    res : int.
-        If ``x`` is an integer, then ``res == x``. Otherwise,
-        ``res == hash(x)``.
+    res : tuple.
+
+    Example
+    -------
+    >>> sorted([2, 0, 'a'], key=ordering_key)
+    [0, 2, 'a']
 
     """
-    return x if isinstance(x, int) else hash(x)
+    return str(type(x)), x
