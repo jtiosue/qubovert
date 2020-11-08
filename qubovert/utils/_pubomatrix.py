@@ -144,7 +144,8 @@ class PUBOMatrix(DictArithmetic):
             Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """
-        self._degree, self._variables, self._num_binary_variables = 0, set(), 0
+        self._degree = -float("inf")
+        self._variables, self._num_binary_variables = set(), 0
         super().__init__(*args, **kwargs)
 
     def refresh(self):

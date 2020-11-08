@@ -203,7 +203,7 @@ def test_num_terms():
 def test_pubo_degree():
 
     d = PUBO()
-    assert d.degree == 0
+    assert d.degree == -float("inf")
     d[(0,)] += 2
     assert d.degree == 1
     d[(1,)] -= 3
