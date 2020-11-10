@@ -37,6 +37,7 @@ def test_constraints():
     assert d.constraints == {'eq': [temp]}
     str(d)
     repr(d)
+    d.num_ancillas
 
 
 def test_round():
@@ -168,6 +169,12 @@ def test_booleanconstraints_ne_constraint():
             P, log_trick=False).to_penalty()
         for sol in solve_pubo_bruteforce(H, True)[1]:
             assert P.value(sol)
+
+    for i in range(1 << 2):
+        P = integer_var('a', 2) - i
+        H = BooleanConstraints().add_constraint_ne_zero(
+            P, lam=0, log_trick=False)
+        assert H.constraints["ne"] == [P]
 
     with assert_warns(QUBOVertWarning):  # never satisfied
         BooleanConstraints().add_constraint_ne_zero({})

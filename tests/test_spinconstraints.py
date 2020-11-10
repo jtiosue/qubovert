@@ -146,9 +146,8 @@ def test_spinconstraints_ne_constraint():
     for i in range(1 << 2):
         P = pubo_to_puso(integer_var('a', 2)) - i
         H = SpinConstraints().add_constraint_ne_zero(
-            P, log_trick=False).to_penalty()
-        for sol in solve_puso_bruteforce(H, True)[1]:
-            assert P.value(sol)
+            P, lam=0, log_trick=False)
+        assert H.constraints["ne"] == [P]     
 
 
 def test_spinconstraints_lt_constraint_logtrick():
