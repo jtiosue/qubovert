@@ -12,104 +12,43 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""_pcso.py.
+"""_spinconstraints.py.
 
-Contains the PCSO class. See ``help(qubovert.PCSO)``.
+Contains the SpinConstraints class. See ``help(qubovert.SpinConstraints)``.
 
 """
 
-from . import PUSO, PCBO
+from . import PUSO, BooleanConstraints
 from .utils import puso_to_pubo, pubo_to_puso
 
 
-__all__ = 'PCSO', 'spin_var'
+__all__ = 'SpinConstraints',
 
 
-def spin_var(name):
-    """spin_var.
+def _empty_booleanconstraints(spinconstraints):
+    """_empty_booleanconstraints.
 
-    Create a PCSO (see ``qubovert.PCSO``) from a single spin variable.
-
-    Parameters
-    ----------
-    name : any hashable object.
-        Name of the spin variable.
-
-    Return
-    ------
-    pcso : qubovert.PCSO object.
-        The model representing the spin variable.
-
-    Examples
-    --------
-    >>> from qubovert import spin_var, PCSO
-    >>>
-    >>> z0 = spin_var("z0")
-    >>> print(z0)
-    {('z0',): 1}
-    >>> print(isinstance(z0, PCSO))
-    True
-    >>> print(z0.name)
-    z0
-
-    >>> z = [spin_var('z{}'.format(i)) for i in range(5)]
-    >>> pcso = sum(z)
-    >>> print(pcso)
-    {('z0',): 1, ('z1',): 1, ('z2',): 1, ('z3',): 1, ('z4',): 1}
-    >>> pcso **= 2
-    >>> print(pcso)
-    {(): 5, ('z0', 'z1'): 2, ('z2', 'z0'): 2, ('z3', 'z0'): 2, ('z0', 'z4'): 2,
-     ('z2', 'z1'): 2, ('z3', 'z1'): 2, ('z4', 'z1'): 2, ('z3', 'z2'): 2,
-     ('z2', 'z4'): 2, ('z3', 'z4'): 2}
-    >>> pcso *= -1
-    >>> print(pcso.solve_bruteforce(all_solutions=True))
-    [{'z0': -1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
-     {'z0': 1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1}]
-    >>> pcso.add_constraint_eq_zero(z[0] + z[1])
-    >>> print(pcso.solve_bruteforce(all_solutions=True))
-    [{'z0': -1, 'z1': 1, 'z2': -1, 'z3': -1, 'z4': -1},
-     {'z0': -1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1},
-     {'z0': 1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
-     {'z0': 1, 'z1': -1, 'z2': 1, 'z3': 1, 'z4': 1}]
-
-    Notes
-    -----
-    ``qubovert.spin_var(name)`` is equivalent to
-    ``qubovert.PCSO.create_var(name)``.
-
-    """
-    return PCSO.create_var(name)
-
-
-def _empty_pcbo(pcso):
-    """_empty_pcbo.
-
-    Create an empty PCBO whose ancilla variables begin at
-    ``pcso.num_ancillas``.
+    Create an empty BooleanConstraints object whose ancilla variables begin at
+    ``spinconstraints.num_ancillas``.
 
     Parameters
     ----------
-    pcso : PCSO object.
+    spinconstraints : SpinConstraints object.
 
     Return
     ------
-    pcbo : PCBO object.
+    booleanconstraints : BooleanConstraints object.
 
     """
-    h = PCBO()
-    h._ancilla = pcso._ancilla
+    h = BooleanConstraints()
+    h._ancilla = spinconstraints._ancilla
     return h
 
 
-class PCSO(PUSO):
-    """PCBO.
+class SpinConstraints:
+    """SpinConstraints.
 
-    This class deals with Polynomial Constrained Spin Optimization. PCSO
-    inherits some methods and attributes from the ``PUSO`` class. See
-    ``help(qubovert.PUSO)``.
-
-    ``PCSO`` has all the same methods as ``PUSO``, but adds some constraint
-    methods; namely
+    This class deals spin constraints.
 
     - ``add_constraint_eq_zero(H, lam=1, ...)`` enforces that ``H == 0`` by
       penalizing with ``lam``,
@@ -133,28 +72,15 @@ class PCSO(PUSO):
     - Variables names that begin with ``"__a"`` should not be used since they
       are used internally to deal with some ancilla variables to enforce
       constraints.
-    - The ``self.solve_bruteforce`` method will solve the PCSO ensuring that
-      all the inputted constraints are satisfied. Whereas
-      ``qubovert.utils.solve_puso_bruteforce(self)`` or
-      ``qubovert.utils.solve_puso_bruteforce(self.to_pubo())`` will solve the
-      PUSO created from the PCSO. If the inputted constraints are not
-      enforced strong enough (ie too small lagrange multipliers) then these may
-      not give the correct result, whereas ``self.solve_bruteforce()`` will
-      always give the correct result (ie one that satisfies all the
-      constraints).
 
     Examples
     --------
-    See ``qubovert.PUSO`` for more examples of using PCSO without
-    constraints. See ``qubovert.PCBO`` for many constraint examples in PUBO
-    form. ``PCSO`` is the same but converting to PUSO.
-
-    >>> H = PCSO()
+    >>> H = SpinConstraints()
     >>> H.add_constraint_eq_zero({('a', 1): 2, (1, 2): -1, (): -1})
-    >>> H
+    >>> H.to_penalty()
     {(): 6, ('a', 2): -4, ('a', 1): -4, (1, 2): 2}
 
-    >>> H = PCSO()
+    >>> H = SpinConstraints()
     >>> H.add_constraint_eq_zero(
             {(0, 1): 1}
         ).add_constraint_lt_zero(
@@ -163,189 +89,43 @@ class PCSO(PUSO):
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """__init__.
 
-        This class deals with polynomial constrained spin optimization.
-        Note that it is generally more efficient to initialize an empty PCSO
-        object and then build the PCSO, rather than initialize a PCSO object
-        with an already built dict.
-
-        Parameters
-        ----------
-        arguments : define a dictionary with ``dict(*args, **kwargs)``.
-            The dictionary will be initialized to follow all the convensions of
-            the class. Alternatively, ``args[0]`` can be a PCSO.
-
-        Examples
-        --------
-        >>> pcso = PCSO()
-        >>> pcso[('a',)] += 5
-        >>> pcso[(0, 'a')] -= 2
-        >>> pcso -= 1.5
-        >>> pcso
-        {('a',): 5, ('a', 0): -2, (): -1.5}
-        >>> pcso.add_constraint_eq_zero({('a',): 1, ('b',): 1}, lam=5)
-        >>> pcso
-        {('a',): 5, ('a', 0): -2, (): 8.5, ('a', 'b'): 10}
-
-        >>> pcso = PCSO({('a',): 5, (0, 'a', 1): -2, (): -1.5})
-        >>> pcso
-        {('a',): 5, ('a', 0, 1): -2, (): -1.5}
+        Initialize a SpinConstraints object.
 
         """
-        PCBO.__init__(self, *args, **kwargs)
+        self._constraints, self._penalty, self._ancilla = {}, PUSO(), 0
 
-    def update(self, *args, **kwargs):
-        """update.
+    __repr__ = BooleanConstraints.__repr__
 
-        Update the PCSO but following all the conventions of this class.
+    __str__ = BooleanConstraints.__str__
 
-        Parameters
-        ----------
-        ``*args/**kwargs`` : defines a dictionary or PCSO.
-            Ie ``d = dict(*args, **kwargs)``.
-            Each element in d will be added in place to this instance following
-            all the required convensions.
+    __iter__ = BooleanConstraints.__iter__
 
-        """
-        PCBO.update(self, *args, **kwargs)
+    num_ancillas = BooleanConstraints.num_ancillas
 
-    @property
-    def constraints(self):
-        """constraints.
+    _next_ancilla = BooleanConstraints._next_ancilla
 
-        Return the constraints of the PCSO.
+    remove_ancilla_from_solution = (
+        BooleanConstraints.remove_ancilla_from_solution
+    )
 
-        Return
-        ------
-        res : dict.
-            The keys of ``res`` are ``'eq'``, ``'ne'``, ``'lt'``, ``'le'``,
-            ``'gt'``, and ``'ge'``. The values are lists of ``qubovert.PUSO``
-            objects. For a given key, value pair ``k, v``, the ``v[i]`` element
-            represents the PUSO ``v[i]`` being
-            == 0 if ``k == 'eq'``, != 0 if ``k == 'ne'``,
-            < 0 if ``k == 'lt'``, <= 0 if ``k == 'le'``,
-            > 0 if ``k == 'gt'``, >= 0 if ``k == 'ge'``.
+    constraints = BooleanConstraints.constraints
 
-        """
-        return {k: [x.copy() for x in v] for k, v in self._constraints.items()}
+    _append_constraint = BooleanConstraints._append_constraint
 
-    def _append_constraint(self, key, constraint):
-        """_append_constraint.
+    _pop_constraint = BooleanConstraints._pop_constraint
 
-        Internal method to add a constraint to the constraints dictionary.
+    is_solution_valid = BooleanConstraints.is_solution_valid
 
-        Parameters
-        ----------
-        key : str.
-            One of ``'eq'``, ``'lt'``, ``'le'``, ``'gt'``, or ``'ge'``.
-        constraint : qubovert.PUSO object.
+    copy = BooleanConstraints.copy
 
-        """
-        PCBO._append_constraint(self, key, constraint)
+    __round__ = BooleanConstraints.__round__
 
-    @property
-    def num_ancillas(self):
-        """num_ancillas.
+    subs = BooleanConstraints.subs
 
-        Return the number of ancilla variables introduced to the PCSO in
-        order to enforce the inputted constraints.
-
-        Returns
-        -------
-        num : int.
-            Number of ancillas in the PCSO.
-
-        """
-        return self._ancilla
-
-    @classmethod
-    def remove_ancilla_from_solution(cls, solution):
-        """remove_ancilla_from_solution.
-
-        Take a solution to the PCSO and remove all the ancilla variables, (
-        represented by `_a` prefixes).
-
-        Parameters
-        ----------
-        solution : dict.
-            Must be the solution in terms of the original variables. Thus if
-            ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
-            formulations, then you should first call ``self.convert_solution``.
-            See ``help(self.convert_solution)``.
-
-        Return
-        ------
-        res : dict.
-            The same as ``solution`` but with all the ancilla bits removed.
-
-        """
-        return PCBO.remove_ancilla_from_solution(solution)
-
-    def is_solution_valid(self, solution):
-        """is_solution_valid.
-
-        Finds whether or not the given solution satisfies the constraints.
-
-        Parameters
-        ----------
-        solution : dict.
-            Must be the solution in terms of the original variables. Thus if
-            ``solution`` is the solution to the ``self.to_pubo``,
-            ``self.to_qubo``, ``self.to_puso``, or ``self.to_quso``
-            formulations, then you should first call ``self.convert_solution``.
-            See ``help(self.convert_solution)``.
-
-        Return
-        ------
-        valid : bool.
-            Whether or not the given solution satisfies the constraints.
-
-        """
-        return PCBO.is_solution_valid(self, solution)
-
-    # override
-    def __round__(self, ndigits=None):
-        """round.
-
-        Round values of the PCSO object.
-
-        Parameters
-        ----------
-        ndigits : int.
-            Number of decimal digits to round to.
-
-        Returns
-        -------
-        res : PCSO object.
-            Copy of self but with each value rounded to ``ndigits`` decimal
-            digits. Each value has a type according to the docstring
-            specifications of ``round``, see ``help(round)``.
-
-        """
-        return PCBO.__round__(self, ndigits)
-
-    # override
-    def subs(self, *args, **kwargs):
-        """subs.
-
-        Replace any ``sympy`` symbols that are used in the dict with values.
-        Please see ``help(sympy.Symbol.subs)`` for more info.
-
-        Parameters
-        ----------
-        arguments : substitutions.
-            Same parameters as are inputted into ``sympy.Symbol.subs``.
-
-        Returns
-        -------
-        res : a PCSO object.
-            Same as ``self`` but with all the symbols replaced with values.
-
-        """
-        return PCBO.subs(self, *args, **kwargs)
+    to_penalty = BooleanConstraints.to_penalty
 
     def add_constraint_eq_zero(self,
                                H, lam=1,
@@ -376,20 +156,20 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Examples
         --------
         The following enforces that :math:`\sum_{i=1}^{3} i z_i z_{i+1} == 0`.
 
-        >>> H = PCSO()
+        >>> H = SpinConstraints()
         >>> H.add_constraint_eq_zero({(1, 2): 1, (2, 3): 2, (3, 4): 3})
 
         Here we show how operations can be strung together.
 
-        >>> H = PCSO()
+        >>> H = SpinConstraints()
         >>> H.add_constraint_lt_zero(
                 {(0, 1): 1}
             ).add_constraint_eq_zero(
@@ -402,12 +182,12 @@ class PCSO(PUSO):
         if not lam:
             return self
 
-        h = _empty_pcbo(self).add_constraint_eq_zero(
+        h = _empty_booleanconstraints(self).add_constraint_eq_zero(
             puso_to_pubo(H), lam=lam,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self
 
     def add_constraint_ne_zero(self,
@@ -443,9 +223,9 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Notes
         -----
@@ -467,12 +247,12 @@ class PCSO(PUSO):
         self._append_constraint("ne", H)
         if not lam:
             return self
-        h = _empty_pcbo(self).add_constraint_ne_zero(
+        h = _empty_booleanconstraints(self).add_constraint_ne_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self
 
     def add_constraint_lt_zero(self,
@@ -508,9 +288,9 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Notes
         -----
@@ -522,13 +302,13 @@ class PCSO(PUSO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = PCSO()
+          >>> H = SpinConstraints()
           >>> H.add_constraint_lt_zero(
           >>>     {(0,): 0.5, (): 1.65, (1,): 1.0, (2,): -0.25})
           >>> test_sol = {0: -1, 1: -1, 2: 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(test_sol)
+          >>> H.to_penalty().value(test_sol)
           0.01
 
           {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
@@ -546,12 +326,12 @@ class PCSO(PUSO):
         self._append_constraint("lt", H)
         if not lam:
             return self
-        h = _empty_pcbo(self).add_constraint_lt_zero(
+        h = _empty_booleanconstraints(self).add_constraint_lt_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self
 
     def add_constraint_le_zero(self,
@@ -586,9 +366,9 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Notes
         -----
@@ -600,17 +380,13 @@ class PCSO(PUSO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = PCSO()
+          >>> H = SpinConstraints()
           >>> H.add_constraint_le_zero(
                   {(0,): 0.5, (): 1.15, (1,): 1.0, (2,): -0.75})
-          >> H
-          {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
-           (2,): -2.4749999999999996, ('__a0', 0): 0.5, ('__a0',): 1.65,
-           (1, 2): -1.5, ('__a0', 1): 1.0, ('__a0', 2): -0.75}
           >>> test_sol = {0: -1, 1: -1, 2: 1, '__a0': 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(test_sol)
+          >>> H.to_penalty().value(test_sol)
           0.01
 
           {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
@@ -628,12 +404,12 @@ class PCSO(PUSO):
         self._append_constraint("le", H)
         if not lam:
             return self
-        h = _empty_pcbo(self).add_constraint_le_zero(
+        h = _empty_booleanconstraints(self).add_constraint_le_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self
 
     def add_constraint_gt_zero(self,
@@ -668,9 +444,9 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Notes
         -----
@@ -682,13 +458,13 @@ class PCSO(PUSO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = PCSO()
+          >>> H = SpinConstraints()
           >>> H.add_constraint_gt_zero(
                   {(0,): -0.5, (): -1.65, (1,): -1.0, (2,): 0.25})
           >>> test_sol = {0: -1, 1: -1, 2: 1}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(sol)
+          >>> H.to_penalty().value(sol)
           0.01
 
           {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
@@ -706,12 +482,12 @@ class PCSO(PUSO):
         self._append_constraint("gt", H)
         if not lam:
             return self
-        h = _empty_pcbo(self).add_constraint_gt_zero(
+        h = _empty_booleanconstraints(self).add_constraint_gt_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self
 
     def add_constraint_ge_zero(self,
@@ -746,9 +522,9 @@ class PCSO(PUSO):
 
         Return
         ------
-        self : PCSO.
-            Updates the PCSO in place, but returns ``self`` so that operations
-            can be strung together.
+        self : SpinConstraints.
+            Updates the SpinConstraints in place, but returns ``self`` so
+            that operations can be strung together.
 
         Notes
         -----
@@ -760,16 +536,12 @@ class PCSO(PUSO):
           of ``lam`` be set small, since valid solutions may still recieve a
           penalty to the objective function. For example,
 
-          >>> H = PCSO()
+          >>> H = SpinConstraints()
           >>> H.add_constraint_ge_zero(
                   {(0,): -0.5, (): -1.15, (1,): -1.0, (2,): 0.75})
-          >>> H
-          {(0,): 1.65, (): 4.785, (0, 1): 1.0, (1,): 3.3, (0, 2): -0.75,
-           (2,): -2.4749999999999996, ('__a0', 0): 0.5, ('__a0',): 1.65,
-           (1, 2): -1.5, ('__a0', 1): 1.0, ('__a0', 2): -0.75}
           >>> H.is_solution_valid(test_sol)
           True
-          >>> H.value(test_sol)
+          >>> H.to_penalty().value(test_sol)
           0.01
 
           {0: -1, 1: -1, 2: 1} is a valid solution to ``H``, but it will still
@@ -787,10 +559,10 @@ class PCSO(PUSO):
         self._append_constraint("ge", H)
         if not lam:
             return self
-        h = _empty_pcbo(self).add_constraint_ge_zero(
+        h = _empty_booleanconstraints(self).add_constraint_ge_zero(
             puso_to_pubo(H), lam=lam, log_trick=log_trick,
             bounds=bounds, suppress_warnings=suppress_warnings
         )
         self._ancilla = h._ancilla
-        self += pubo_to_puso(h)
+        self._penalty += pubo_to_puso(h._penalty)
         return self

@@ -19,7 +19,7 @@ Contains tests for the subgraph function.
 from qubovert.utils import subgraph, subvalue
 from sympy import Symbol
 from qubovert.utils import QUBOMatrix, PUBOMatrix, QUSOMatrix, PUSOMatrix
-from qubovert import QUBO, PUBO, QUSO, PUSO, PCBO, PCSO
+from qubovert import QUBO, PUBO, QUSO, PUSO
 from numpy.testing import assert_raises
 
 
@@ -34,7 +34,7 @@ def test_subgraph():
 
     a = Symbol('a')
 
-    for t in (QUBO, PUBO, QUSO, PUSO, PCBO, PCSO,
+    for t in (QUBO, PUBO, QUSO, PUSO,
               QUBOMatrix, PUBOMatrix, QUSOMatrix, PUSOMatrix):
         S = subgraph(t(G), {0, 1}, {2: a})
         assert type(S) == t
@@ -52,7 +52,7 @@ def test_subvalue():
 
     a = Symbol('a')
 
-    for t in (QUBO, PUBO, QUSO, PUSO, PCBO, PCSO,
+    for t in (QUBO, PUBO, QUSO, PUSO,
               QUBOMatrix, PUBOMatrix, QUSOMatrix, PUSOMatrix):
         S = subvalue({2: a}, t(G))
         assert type(S) == t

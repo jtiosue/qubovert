@@ -32,23 +32,23 @@ from ._qubo import *
 from ._quso import *
 from ._pubo import *
 from ._puso import *
-from ._pcbo import *
-from ._pcso import *
+from ._booleanconstraints import *
+from ._spinconstraints import *
 
 from ._qubo import __all__ as __all_qubo__
 from ._quso import __all__ as __all_quso__
 from ._pubo import __all__ as __all_pubo__
 from ._puso import __all__ as __all_puso__
-from ._pcbo import __all__ as __all_pcbo__
-from ._pcso import __all__ as __all_pcso__
+from ._booleanconstraints import __all__ as __all_bc__
+from ._spinconstraints import __all__ as __all_sc__
 
 __all__ = (
     __all_qubo__ +
     __all_quso__ +
     __all_pubo__ +
     __all_puso__ +
-    __all_pcbo__ +
-    __all_pcso__
+    __all_bc__ +
+    __all_sc__
 )
 
 from . import sat
@@ -58,10 +58,10 @@ from . import problems
 
 del __all_qubo__, __all_quso__
 del __all_pubo__, __all_puso__
-del __all_pcbo__, __all_pcso__
+del __all_bc__, __all_sc__
 
-BOOLEAN_MODELS = QUBO, PUBO, PCBO, utils.QUBOMatrix, utils.PUBOMatrix
-SPIN_MODELS = QUSO, PUSO, PCSO, utils.QUSOMatrix, utils.PUSOMatrix
+BOOLEAN_MODELS = QUBO, PUBO, utils.QUBOMatrix, utils.PUBOMatrix
+SPIN_MODELS = QUSO, PUSO, utils.QUSOMatrix, utils.PUSOMatrix
 
 
 name = "qubovert"

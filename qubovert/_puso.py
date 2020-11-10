@@ -22,7 +22,57 @@ from .utils import BO, PUSOMatrix, puso_to_pubo, QUSOMatrix
 from . import QUSO
 
 
-__all__ = 'PUSO',
+__all__ = 'PUSO', 'spin_var'
+
+
+def spin_var(name):
+    """spin_var.
+
+    Create a PUSO (see ``qubovert.PUSO``) from a single spin variable.
+
+    Parameters
+    ----------
+    name : any hashable object.
+        Name of the spin variable.
+
+    Return
+    ------
+    puso : qubovert.PUSO object.
+        The model representing the spin variable.
+
+    Examples
+    --------
+    >>> from qubovert import spin_var, PUSO
+    >>>
+    >>> z0 = spin_var("z0")
+    >>> print(z0)
+    {('z0',): 1}
+    >>> print(isinstance(z0, PUSO))
+    True
+    >>> print(z0.name)
+    z0
+
+    >>> z = [spin_var('z{}'.format(i)) for i in range(5)]
+    >>> puso = sum(z)
+    >>> print(puso)
+    {('z0',): 1, ('z1',): 1, ('z2',): 1, ('z3',): 1, ('z4',): 1}
+    >>> puso **= 2
+    >>> print(puso)
+    {(): 5, ('z0', 'z1'): 2, ('z2', 'z0'): 2, ('z3', 'z0'): 2, ('z0', 'z4'): 2,
+     ('z2', 'z1'): 2, ('z3', 'z1'): 2, ('z4', 'z1'): 2, ('z3', 'z2'): 2,
+     ('z2', 'z4'): 2, ('z3', 'z4'): 2}
+    >>> puso *= -1
+    >>> print(puso.solve_bruteforce(all_solutions=True))
+    [{'z0': -1, 'z1': -1, 'z2': -1, 'z3': -1, 'z4': -1},
+     {'z0': 1, 'z1': 1, 'z2': 1, 'z3': 1, 'z4': 1}]
+
+    Notes
+    -----
+    ``qubovert.spin_var(name)`` is equivalent to
+    ``qubovert.PUSO.create_var(name)``.
+
+    """
+    return PUSO.create_var(name)
 
 
 class PUSO(BO, PUSOMatrix):

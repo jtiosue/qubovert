@@ -14,7 +14,7 @@
 
 """ Contains tests for the PUSO class. """
 
-from qubovert import PUSO
+from qubovert import PUSO, spin_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
@@ -413,6 +413,16 @@ def test_set_mapping():
     d = PUSO({('a', 'b'): 1, ('a',): 2})
     d.set_reverse_mapping({0: 'a', 2: 'b'})
     assert d.to_puso() == {(0, 2): 1, (0,): 2}
+
+
+def test_spin_var():
+
+    z = [spin_var(i) for i in range(5)]
+    assert all(z[i] == {(i,): 1} for i in range(5))
+    assert z[0] * z[1] * z[2] == {(0, 1, 2): 1}
+    assert sum(z) == {(i,): 1 for i in range(5)}
+    assert isinstance(z[0], PUSO)
+    assert all(z[i].name == i for i in range(5))
 
 
 def test_to_enumerated():

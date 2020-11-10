@@ -24,7 +24,7 @@ from qubovert.utils import (
     puso_to_pubo, quso_to_qubo, QUBOVertWarning,
     QUBOMatrix, QUSOMatrix, PUBOMatrix, PUSOMatrix
 )
-from qubovert import QUBO, QUSO, PUBO, PUSO, PCBO, PCSO
+from qubovert import QUBO, QUSO, PUBO, PUSO
 from numpy.testing import assert_raises, assert_warns
 import numpy as np
 
@@ -34,7 +34,6 @@ def test_anneal_puso():
     _anneal_puso(dict)
     _anneal_puso(PUSOMatrix)
     _anneal_puso(PUSO)
-    _anneal_puso(PCSO)
 
 
 def _anneal_puso(type_):
@@ -133,7 +132,6 @@ def test_anneal_quso():
     _anneal_quso(PUSOMatrix)
     _anneal_quso(QUSO)
     _anneal_quso(PUSO)
-    _anneal_quso(PCSO)
 
 
 def _anneal_quso(type_):
@@ -213,7 +211,6 @@ def test_anneal_pubo():
     _anneal_pubo(dict)
     _anneal_pubo(PUBOMatrix)
     _anneal_pubo(PUBO)
-    _anneal_pubo(PCBO)
 
 
 def _anneal_pubo(type_):
@@ -309,7 +306,6 @@ def test_anneal_qubo():
     _anneal_qubo(PUBOMatrix)
     _anneal_qubo(QUBO)
     _anneal_qubo(PUBO)
-    _anneal_qubo(PCBO)
 
 
 def _anneal_qubo(type_):

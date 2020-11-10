@@ -39,7 +39,7 @@ def BUFFER(x):
     Return
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(x)``.
-        If ``x`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``x`` is a ``qubovert.QUBO``
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(x)``. Otherwise, ``type(P) == type(x)``.
 
@@ -78,7 +78,7 @@ def BUFFER(x):
     >>> P.value({'x': 0})
     0
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     if isinstance(x, qv.BOOLEAN_MODELS):
@@ -100,7 +100,7 @@ def NOT(x):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(x)``.
         The boolean expression for the logic operation.
-        If ``x`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``x`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(x)``. Otherwise, ``type(P) == type(x)``.
 
@@ -137,7 +137,7 @@ def NOT(x):
     >>> P.value({'x': 0})
     1
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     return 1 - BUFFER(x)
@@ -159,7 +159,7 @@ def AND(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -191,7 +191,7 @@ def AND(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = AND(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     if not variables:
@@ -220,7 +220,7 @@ def NAND(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -252,7 +252,7 @@ def NAND(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = NAND(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     return NOT(AND(*variables))
@@ -274,7 +274,7 @@ def OR(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -306,7 +306,7 @@ def OR(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = OR(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     if not variables:
@@ -334,7 +334,7 @@ def NOR(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -366,7 +366,7 @@ def NOR(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = NOR(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     """
     return NOT(OR(*variables))
@@ -391,7 +391,7 @@ def XOR(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -423,7 +423,7 @@ def XOR(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = XOR(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     The following test will pass.
 
@@ -468,7 +468,7 @@ def XNOR(*variables):
     ------
     P : ``qubovert.PUBO`` object or same type as ``type(variables[0])``.
         The boolean expression for the logic operation.
-        If ``variables[0]`` is a ``qubovert.QUBO``, ``qubovert.PCBO``,
+        If ``variables[0]`` is a ``qubovert.QUBO``,
         ``qubovert.utils.QUBOMatrix``, or ``qubovert.utils.PUBOMatrix`` object,
         then ``type(P) == type(variables[0])``. Otherwise,
         ``type(P) == type(variables[0])``.
@@ -500,7 +500,7 @@ def XNOR(*variables):
     >>> x, y = boolean_var('x'), boolean_var('y')
     >>> P = XNOR(x, y)
     >>> type(P)
-    qubovert.PCBO
+    qubovert.PUBO
 
     The following test will pass.
 

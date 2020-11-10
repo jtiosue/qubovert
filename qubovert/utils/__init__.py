@@ -34,7 +34,6 @@ from ._qubomatrix import *
 from ._qusomatrix import *
 from ._conversions import *
 from ._bo_parentclass import *
-from ._info import *
 
 from ._warn import __all__ as __all_warn__
 from ._binary_helpers import __all__ as __all_bh__
@@ -51,7 +50,6 @@ from ._qubomatrix import __all__ as __all_qubomatrix__
 from ._qusomatrix import __all__ as __all_qusomatrix__
 from ._conversions import __all__ as __all_conversions__
 from ._bo_parentclass import __all__ as __all_bo__
-from ._info import __all__ as __all_info__
 
 
 __all__ = (
@@ -69,15 +67,14 @@ __all__ = (
     __all_qubomatrix__ +
     __all_qusomatrix__ +
     __all_conversions__ +
-    __all_bo__ +
-    __all_info__
+    __all_bo__
 )
 
 del __all_warn__, __all_bh__, __all_ae__, __all_ordering_key__
 del __all_subgraph__, __all_normalize__, __all_values__
 del __all_solve_bruteforce__, __all_dict_arithmetic__, __all_pubomatrix__,
 del __all_pusomatrix__, __all_qubomatrix__, __all_qusomatrix__
-del __all_conversions__, __all_bo__, __all_info__
+del __all_conversions__, __all_bo__
 
 
 name = "utils"

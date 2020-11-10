@@ -20,7 +20,7 @@ See ``help(qubovert.problems.GraphPartitioning)``.
 """
 
 from qubovert.utils import QUSOMatrix
-from qubovert import PCSO
+from qubovert import SpinConstraints
 from qubovert.problems import Problem
 
 
@@ -239,8 +239,8 @@ class GraphPartitioning(Problem):
         L = QUSOMatrix()
 
         # encode H_A (equation 8)
-        L += PCSO().add_constraint_eq_zero(
-            {(i,): 1 for i in range(self._N)}, lam=A)
+        L += SpinConstraints().add_constraint_eq_zero(
+            {(i,): 1 for i in range(self._N)}, lam=A).to_penalty()
 
         # encode H_B (equation 9)
         L += B * sum(self._edges.values()) / 2
@@ -249,20 +249,6 @@ class GraphPartitioning(Problem):
               self._vertex_to_index[v])] -= w * B / 2
 
         return L
-
-        # slower because we convert to PCSO and then to QUSOMatrix
-        # H = PCSO()
-        # H.set_mapping(self._vertex_to_index)
-
-        # # encode H_A (equation 8)
-        # H.add_constraint_eq_zero({(i,): 1 for i in self._vertices}, lam=A)
-
-        # # encode H_B (equation 9)
-        # H += B * sum(self._edges.values()) / 2
-        # for e, w in self._edges.items():
-        #     H[e] -= w * B / 2
-
-        # return H.to_quso()
 
     def convert_solution(self, solution, spin=False):
         """convert_solution.

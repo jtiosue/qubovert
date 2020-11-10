@@ -18,7 +18,7 @@ Contains tests for functions in the _binary_helpers.py file.
 
 from qubovert.utils import is_solution_spin, num_bits
 from qubovert.utils import sum as qvsum
-from qubovert import boolean_var, spin_var, PCBO, PCSO
+from qubovert import boolean_var, spin_var, PUBO, PUSO
 from numpy.testing import assert_raises
 
 
@@ -56,9 +56,9 @@ def test_sum():
     xs = [boolean_var(i) for i in range(100)]
     assert sum(xs) == qvsum(xs) == qvsum(xs[i] for i in range(100))
     assert sum(xs, 2) == qvsum(xs, 2)
-    assert isinstance(qvsum(xs), PCBO)
+    assert isinstance(qvsum(xs), PUBO)
 
     zs = [spin_var(i) for i in range(100)]
     assert sum(zs) == qvsum(zs) == qvsum(zs[i] for i in range(100))
     assert sum(zs, 2) == qvsum(zs, 2)
-    assert isinstance(qvsum(zs), PCSO)
+    assert isinstance(qvsum(zs), PUSO)

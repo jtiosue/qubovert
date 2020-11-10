@@ -164,19 +164,22 @@ class PUSOMatrix(PUBOMatrix):
             key=ordering_key
         ))
 
-    def solve_bruteforce(self, all_solutions=False):
+    def solve_bruteforce(self, all_solutions=False, valid=lambda x: True):
         """solve_bruteforce.
 
         Solve the problem bruteforce. THIS SHOULD NOT BE USED FOR LARGE
         PROBLEMS! This is the exact same as calling
         ``qubovert.utils.solve_puso_bruteforce(
-            self, all_solutions, self.is_solution_valid)[1]``.
+            self, all_solutions, valid)[1]``.
 
         Parameters
         ----------
         all_solutions : bool.
             See the description of the ``all_solutions`` parameter in
             ``qubovert.utils.solve_puso_bruteforce``.
+        valid : function (optional, defaults to ``lambda x: True``).
+            ``valid`` takes in a bitstring and outputs a boolean
+            indicating whether that bitstring is a valid solutions.
 
         Return
         ------
@@ -184,8 +187,7 @@ class PUSOMatrix(PUBOMatrix):
             ``qubovert.utils.solve_puso_bruteforce``.
 
         """
-        return solve_puso_bruteforce(self, all_solutions,
-                                     self.is_solution_valid)[1]
+        return solve_puso_bruteforce(self, all_solutions, valid)[1]
 
     def value(self, z):
         r"""value.

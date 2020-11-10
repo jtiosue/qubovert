@@ -18,12 +18,12 @@ Indices and tables
    :maxdepth: 2
    :caption: Boolean/Spin Optimization
 
-   BO/PCBO
-   BO/PCSO
    BO/PUBO
    BO/PUSO
    BO/QUBO
    BO/QUSO
+   BO/BooleanConstraints
+   BO/SpinConstraints
    BO/sat
 
 

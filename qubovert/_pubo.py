@@ -21,13 +21,103 @@ Contains the PUBO class. See ``help(qubovert.PUBO)``.
 from collections import defaultdict
 from .utils import BO, PUBOMatrix, QUBOMatrix
 from . import QUBO
-# in PUBO._reduce_degree, we use PCBO.add_constraint_AND. But PCBO inherits
-# from PUBO, so can't say `from . import PCBO` here. Instead, just import
-# qubovert
+# need to import BooleanConstraints for the ._reduce_degree method.
+# will cause circular imports if done directly
 import qubovert as qv
 
 
-__all__ = 'PUBO',
+__all__ = 'PUBO', 'boolean_var', 'integer_var'
+
+
+def boolean_var(name):
+    """boolean_var.
+
+    Create a PUBO (see ``qubovert.PUBO``) from a single boolean variable.
+
+    Parameters
+    ----------
+    name : any hashable object.
+        Name of the boolean variable.
+
+    Return
+    ------
+    pubo : qubovert.PUBO object.
+        The model representing the boolean variable.
+
+    Examples
+    --------
+    >>> from qubovert import boolean_var, PUBO
+    >>>
+    >>> x0 = boolean_var("x0")
+    >>> print(x0)
+    {('x0',): 1}
+    >>> print(isinstance(x0, PUBO))
+    True
+    >>> print(x0.name)
+    x0
+
+    >>> x = [boolean_var('x{}'.format(i)) for i in range(5)]
+    >>> pubo = sum(x)
+    >>> print(pubo)
+    {('x0',): 1, ('x1',): 1, ('x2',): 1, ('x3',): 1, ('x4',): 1}
+    >>> pubo **= 2
+    >>> print(pubo)
+    {('x0',): 1, ('x0', 'x1'): 2, ('x2', 'x0'): 2, ('x3', 'x0'): 2,
+     ('x4', 'x0'): 2, ('x1',): 1, ('x2', 'x1'): 2, ('x3', 'x1'): 2,
+     ('x4', 'x1'): 2, ('x2',): 1, ('x2', 'x3'): 2, ('x2', 'x4'): 2, ('x3',): 1,
+     ('x4', 'x3'): 2, ('x4',): 1}
+    >>> pubo *= -1
+    >>> print(pubo.solve_bruteforce())
+    {'x0': 1, 'x1': 1, 'x2': 1, 'x3': 1, 'x4': 1}
+
+    Notes
+    -----
+    ``qubovert.boolean_var(name)`` is equivalent to
+    ``qubovert.PUBO.create_var(name)``.
+
+    """
+    return PUBO.create_var(name)
+
+
+def integer_var(prefix, num_bits, log_trick=True):
+    """integer_var.
+
+    Return a PUBO object representing an integer variable with `num_bits`
+    bits.
+
+    Parameters
+    ----------
+    prefix : str.
+        The prefix for the boolean variable names.
+    num_bits : int.
+        Number of bits to represent the integer variable with.
+    log_trick : bool (optional, defaults to True).
+        Whether or not to use a log encoding for the integer.
+
+    Return
+    ------
+    i : qubovert.PUBO object.
+
+    Example
+    -------
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+    >>> print(var.name)
+    a
+
+    >>> from qubovert import integer_var
+    >>> var = integer_var('a', 4, log_trick=False)
+    >>> print(var)
+    {('a0',): 1, ('a1',): 1, ('a2',): 1, ('a3',): 1}
+
+    """
+    var = PUBO()
+    var.name = prefix
+    for i in range(num_bits):
+        var[(str(prefix) + str(i),)] = pow(2, i) if log_trick else 1
+    return var
 
 
 class PUBO(BO, PUBOMatrix):
@@ -288,9 +378,9 @@ class PUBO(BO, PUBOMatrix):
                 # multiple times.
 
                 # enforce that z == x y
-                D += qv.PCBO().add_constraint_eq_AND(
+                D += qv.BooleanConstraints().add_constraint_eq_AND(
                     z, x, y, lam=func_lam(v)
-                )
+                ).to_penalty()
 
                 # key is sorted, but it is not necessarily the case that
                 # z > all of the other elements in key. So let's efficiently

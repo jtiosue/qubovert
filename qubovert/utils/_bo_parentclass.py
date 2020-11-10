@@ -235,10 +235,10 @@ class BO(Conversions):
         If ``self`` is a QUSO,
         ``self.to_enumerated()`` is equivalent to ``self.to_quso()``.
 
-        If ``self`` is a PUBO or PCBO,
+        If ``self`` is a PUBO,
         ``self.to_enumerated()`` is equivalent to ``self.to_pubo()``.
 
-        If ``self`` is a PUSO or PCSO,
+        If ``self`` is a PUSO,
         ``self.to_enumerated()`` is equivalent to ``self.to_puso()``.
 
         Returns
@@ -247,8 +247,8 @@ class BO(Conversions):
             If ``self`` is a QUBO type, then this method returns the
             corresponding QUBOMatrix type. If ``self`` is a QUSO type,
             then this method returns the corresponding QUSOMatrix type.
-            If ``self`` is a PUBO or PCBO type, then this method returns the
-            corresponding PUBOMatrix type. If ``self`` is a PUSO or PCSO type,
+            If ``self`` is a PUBO type, then this method returns the
+            corresponding PUBOMatrix type. If ``self`` is a PUSO type,
             then this method returns the corresponding PUSOMatrix type.
 
         """

@@ -89,7 +89,7 @@ Create the boolean objective function to minimize
 
 .. code:: python
 
-    from qubovert import boolean_var
+    from qubovert import boolean_var, BooleanConstraints
 
     N = 10
 
@@ -101,13 +101,17 @@ Create the boolean objective function to minimize
     for i in range(N-1):
         model += (1 - 2 * x[i]) * x[i+1]
 
+    constraints = BooleanConstraints()
     # subject to the constraint that x_1 equals the XOR of x_3 and x_5
     # enforce with a penalty factor of 3
-    model.add_constraint_eq_XOR(x[1], x[3], x[5], lam=3)
+    constraints.add_constraint_eq_XOR(x[1], x[3], x[5], lam=3)
 
     # subject to the constraints that the sum of all variables is less than 4
     # enforce with a penalty factor of 5
-    model.add_constraint_lt_zero(sum(x.values()) - 4, lam=5)
+    constraints.add_constraint_lt_zero(sum(x.values()) - 4, lam=5)
+
+    # create our objective to minimize, where penalties enforce constraints
+    obj = model + constraints.to_penalty()
 
 
 Next we will show multiple ways to solve the model.
@@ -121,10 +125,11 @@ Before using the bruteforce solver, always check that ``model.num_binary_variabl
 
 .. code:: python
 
-    model_solution = model.solve_bruteforce()
-    print("Variable assignment:", model_solution)
-    print("Model value:", model.value(model_solution))
-    print("Constraints satisfied?", model.is_solution_valid(model_solution))
+    obj_solution = obj.solve_bruteforce()
+    print("Variable assignment:", obj_solution)
+    print("Objective value:", obj.value(obj_solution))
+    print("Model value:", model.value(obj_solution))
+    print("Constraints satisfied?", constraints.is_solution_valid(obj_solution))
 
 
 Solving the model with *qubovert*'s simulated annealing
@@ -136,12 +141,13 @@ Please see the definition of PUBO in the next section. We will anneal the PUBO.
 
     from qubovert.sim import anneal_pubo
 
-    res = anneal_pubo(model, num_anneals=10)
-    model_solution = res.best.state
+    res = anneal_pubo(obj, num_anneals=10)
+    obj_solution = res.best.state
 
-    print("Variable assignment:", model_solution)
-    print("Model value:", res.best.value)
-    print("Constraints satisfied?", model.is_solution_valid(model_solution))
+    print("Variable assignment:", obj_solution)
+    print("Objective value:", res.best.value)
+    print("Model value:", model.value(obj_solution))
+    print("Constraints satisfied?", constraints.is_solution_valid(obj_solution))
 
 
 Solving the model with D-Wave's simulated annealer
@@ -153,8 +159,8 @@ Solving the model with D-Wave's simulated annealer
 
     from neal import SimulatedAnnealingSampler
 
-    # Get the QUBO form of the model
-    qubo = model.to_qubo()
+    # Get the QUBO form of the objective
+    qubo = obj.to_qubo()
 
     # D-Wave accept QUBOs in a different format than qubovert's format
     # to get the qubo in this form, use the .Q property
@@ -165,15 +171,16 @@ Solving the model with D-Wave's simulated annealer
     qubo_solution = res.first.sample
 
     # convert the qubo solution back to the solution to the model
-    model_solution = model.convert_solution(qubo_solution)
+    obj_solution = obj.convert_solution(qubo_solution)
 
-    print("Variable assignment:", model_solution)
-    print("Model value:", model.value(model_solution))
-    print("Constraints satisfied?", model.is_solution_valid(model_solution))
+    print("Variable assignment:", obj_solution)
+    print("Objective value:", obj.value(obj_solution))
+    print("Model value:", model.value(obj_solution))
+    print("Constraints satisfied?", constraints.is_solution_valid(obj_solution))
 
 
-Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
-------------------------------------------------------------
+Managing QUBO, QUSO, PUBO, and PUSO formulations
+------------------------------------------------
 
 *qubovert* defines, among many others, the following objects.
 
@@ -181,10 +188,8 @@ Managing QUBO, QUSO, PUBO, PUSO, PCBO, and PCSO formulations
 - QUSO: Quadratic Unconstrained Spin Optimization (``qubovert.QUSO``)
 - PUBO: Polynomial Unconstrained Boolean Optimization (``qubovert.PUBO``)
 - PUSO: Polynomial Unconstrained Spin Optimization (``qubovert.PUSO``)
-- PCBO: Polynomial Constrained Boolean Optimization (``qubovert.PCBO``)
-- PCSO: Polynomial Constrained Spin Optimization (``qubovert.PCSO``)
 
-Each of the objects has many methods and arbitary arithmetic defined; see the docstrings of each object and the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info. A boolean optimization model is one whose variables can be assigned to be either 0 or 1, while a spin optimization model is one whose variables can be assigned to be either 1 or -1. The ``qubovert.boolean_var(name)`` function will create a PCBO representing the boolean variable with name ``name``. Similarly, the ``qubovert.spin_var(name)`` function will create a PCSO representing the spin variable with name ``name``.
+Each of the objects has many methods and arbitary arithmetic defined; see the docstrings of each object and the `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info. A boolean optimization model is one whose variables can be assigned to be either 0 or 1, while a spin optimization model is one whose variables can be assigned to be either 1 or -1. The ``qubovert.boolean_var(name)`` function will create a PUBO representing the boolean variable with name ``name``. Similarly, the ``qubovert.spin_var(name)`` function will create a PUSO representing the spin variable with name ``name``.
 
 
 There are many utilities in the *utils* library that can be helpful. Some examples of utility functions are listed here.
@@ -204,7 +209,14 @@ There are many utilities in the *utils* library that can be helpful. Some exampl
 See ``qubovert.utils.__all__`` for more. Please note that all conversions between boolean and spin map {0, 1} to/from {1, -1} in that order! This is the convention that *qubovert* uses everywhere.
 
 
-The PCBO and PCSO objects have constraint methods; for example, the ``.add_constraint_le_zero`` method will enforce that an expression is less than or equal to zero by adding a penalty to the model whenever it does not. The PCBO object also has constraint methods for satisfiability expressions; for example, the ``.add_constraint_OR`` will enforce that the OR of the given boolean expression evaluates to True by adding a penalty to the model whenever it does not. See the docstrings and `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info.
+Adding constraints
+^^^^^^^^^^^^^^^^^^
+
+- BooleanConstraints (``qubovert.BooleanConstraints``)
+- SpinConstraints (``qubovert.SpinConstraints``)
+
+
+The BooleanConstraints and SpinConstraints objects have constraint methods; for example, the ``.add_constraint_le_zero`` method will enforce that an expression is less than or equal to zero by constructing a penalty function whenever it does not. The BooleanConstraints object also has constraint methods for satisfiability expressions; for example, the ``.add_constraint_OR`` will enforce that the OR of the given boolean expression evaluates to True by constructing a penalty whenever it does not. See the docstrings and `notebooks <https://github.com/jtiosue/qubovert/tree/master/notebook_examples>`_ for more info.
 
 
 For more utilities on satisfiability expressions, *qubovert* also has a *sat* library; see ``qubovert.sat.__all__``. Consider the following 3-SAT example. We have variables ``x0, x1, x2, x3``, labeled by ``0, 1, 2, 3``. We can create an expression ``C`` that evaluates to 1 whenever the 3-SAT conditions are satisfied.
@@ -260,29 +272,38 @@ Let's take the same model from above (ie define :code:`model = model1.copy()`). 
 .. code:: python
 
     from sympy import Symbol
+    from qubovert import SpinConstraints
 
+    constraints = SpinConstraints()
     lam = Symbol('lam')
-    model.add_constraint_lt_zero(z0 + z1 + z2, lam=lam)
-    model.add_constraint_eq_zero(z0 * z1 - 1, lam=lam)
+    constraints.add_constraint_lt_zero(z0 + z1 + z2, lam=lam)
+    constraints.add_constraint_eq_zero(z0 * z1 - 1, lam=lam)
 
 
 Note that constraint methods can also be strung together if you want. So we could have written this as
 
 .. code:: python
 
-    model.add_constraint_lt_zero(
+    constraints.add_constraint_lt_zero(
         z0 + z1 + z2, lam=lam
     ).add_constraint_eq_zero(
         z0 * z1 - 1, lam=lam
     )
 
 
-The first thing you notice if you :code:`print(model.variables)` is that there are now new variables in the model called ``'__a0'`` and ``'__a1'``. These are auxillary or *ancilla* variables that are needed to enforce the constraints. The next thing to notice if you :code:`print(model.degree)` is that the model is a polynomial of degree 3. Many solvers (for example D-Wave's solvers) only solve degree 2 models. To get a QUBO or QUSO (which are degree two modes) from ``model``, simply call the ``.to_qubo`` or ``.to_quso`` methods, which will reduce the degree to 2 by introducing more variables.
+Now we create an objective function that enforces the constraints by adding a penalty to the original model.
 
 .. code:: python
 
-    qubo = model.to_qubo()
-    quso = model.to_quso()
+    obj = model + constraints.to_penalty()
+
+
+The first thing you notice if you :code:`print(obj.variables)` is that there are now new variables in the model called ``'__a0'`` and ``'__a1'``. These are auxillary or *ancilla* variables that are needed to enforce the constraints. The next thing to notice if you :code:`print(obj.degree)` is that the model is a polynomial of degree 3. Many solvers (for example D-Wave's solvers) only solve degree 2 models. To get a QUBO or QUSO (which are degree two modes) from ``obj``, simply call the ``.to_qubo`` or ``.to_quso`` methods, which will reduce the degree to 2 by introducing more variables.
+
+.. code:: python
+
+    qubo = obj.to_qubo()
+    quso = obj.to_quso()
 
 
 Next let's solve the QUBO and/or QUSO formulations. First we have to substitute a value in for our placeholder symbol ``lam`` that is used to enforce the constraints. We'll just use ``lam=3`` for now.
@@ -320,11 +341,11 @@ Now we have to convert the solution in terms of the QUBO/QUSO variables back to 
 
 .. code:: python
 
-    converted_qubo_solution = model.convert_solution(qubo_solution)
-    print(model.is_solution_valid(converted_qubo_solution))
+    converted_qubo_solution = obj.convert_solution(qubo_solution)
+    print(constraints.is_solution_valid(converted_qubo_solution))
 
-    converted_quso_solution = model.convert_solution(quso_solution)
-    print(model.is_solution_valid(converted_quso_solution))
+    converted_quso_solution = obj.convert_solution(quso_solution)
+    print(constraints.is_solution_valid(converted_quso_solution))
 
 
 Convert common problems to quadratic form (the *problems* library)

@@ -23,7 +23,7 @@ from qubovert.utils import (
     pubo_to_puso, qubo_to_quso, QUBOVertWarning, boolean_to_spin,
     QUSOMatrix, PUSOMatrix
 )
-from qubovert import QUSO, PUSO, PCSO
+from qubovert import QUSO, PUSO
 from . import anneal_temperature_range, AnnealResults, AnnealResult
 import numpy as np
 from itertools import chain
@@ -274,10 +274,10 @@ def anneal_puso(H, num_anneals=1, anneal_duration=1000, initial_state=None,
         N = H.max_index + 1
         model = H
         reverse_mapping = dict(enumerate(range(N)))
-    elif type(H) not in (QUSO, PUSO, PCSO):
+    elif type(H) not in (QUSO, PUSO):
         H = PUSO(H)
 
-    if type(H) in (QUSO, PUSO, PCSO):
+    if type(H) in (QUSO, PUSO):
         N = H.num_binary_variables
         model = H.to_puso()
         reverse_mapping = H.reverse_mapping

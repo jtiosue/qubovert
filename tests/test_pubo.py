@@ -16,7 +16,7 @@
 Contains tests for the PUBO class.
 """
 
-from qubovert import PUBO
+from qubovert import PUBO, boolean_var, integer_var
 from qubovert.utils import (
     solve_qubo_bruteforce, solve_quso_bruteforce,
     solve_pubo_bruteforce, solve_puso_bruteforce,
@@ -412,6 +412,27 @@ def test_set_mapping():
     d = PUBO({('a', 'b'): 1, ('a',): 2})
     d.set_reverse_mapping({0: 'a', 2: 'b'})
     assert d.to_pubo() == {(0, 2): 1, (0,): 2}
+
+
+def test_boolean_var():
+
+    x = [boolean_var(i) for i in range(5)]
+    assert all(x[i] == {(i,): 1} for i in range(5))
+    assert x[0] * x[1] * x[2] == {(0, 1, 2): 1}
+    assert sum(x) == {(i,): 1 for i in range(5)}
+    assert isinstance(x[0], PUBO)
+    assert all(x[i].name == i for i in range(5))
+
+
+def test_integer_var():
+
+    var = integer_var('a', 4)
+    assert var == {('a0',): 1, ('a1',): 2, ('a2',): 4, ('a3',): 8}
+    assert var.name == 'a'
+
+    var = integer_var('b', 4, log_trick=False)
+    assert var == {('b0',): 1, ('b1',): 1, ('b2',): 1, ('b3',): 1}
+    assert var.name == 'b'
 
 
 def test_to_enumerated():

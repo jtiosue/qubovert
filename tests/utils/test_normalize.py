@@ -20,7 +20,7 @@ from qubovert.utils import normalize
 from qubovert.utils import (
     DictArithmetic, QUBOMatrix, PUBOMatrix, QUSOMatrix, PUSOMatrix
 )
-from qubovert import QUBO, PUBO, QUSO, PUSO, PCBO, PCSO
+from qubovert import QUBO, PUBO, QUSO, PUSO
 
 
 def test_subgraph():
@@ -31,7 +31,7 @@ def test_subgraph():
     temp1 = {(0,): -4, (1,): 2}
     assert normalize(temp1) == {k: v / 4 for k, v in temp1.items()}
 
-    for t in (QUBO, PUBO, QUSO, PUSO, PCBO, PCSO, DictArithmetic,
+    for t in (QUBO, PUBO, QUSO, PUSO, DictArithmetic,
               QUBOMatrix, PUBOMatrix, QUSOMatrix, PUSOMatrix):
         n = normalize(t(temp0))
         assert type(n) == t
