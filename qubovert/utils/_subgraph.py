@@ -125,6 +125,8 @@ def subvalue(values, G):
 
     """
     D = type(G)()
+    if not isinstance(values, dict):
+        values = dict(enumerate(values))
     for k, v in G.items():
         if not isinstance(k, tuple):
             raise ValueError("Keys must be tuples")

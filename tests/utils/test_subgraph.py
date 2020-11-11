@@ -65,3 +65,5 @@ def test_subvalue():
     # edge case
     assert subvalue({}, G) == G
     assert subvalue({0: 0, 1: 0, 2: 0}, G) == {(): 2}
+    assert subvalue([], G) == G
+    assert subvalue([0] * 3, G) == {(): 2}
