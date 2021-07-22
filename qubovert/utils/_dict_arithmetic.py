@@ -780,6 +780,8 @@ class DictArithmetic(dict):
         {(0, 1): 0.25, (1, 2, 'x'): -1}
 
         """
+        if not self:
+            return
         mult = value / max(abs(v) for v in self.values())
         for k in self:
             self[k] *= mult
