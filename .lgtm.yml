@@ -3,6 +3,9 @@ queries:
   - exclude: py/missing-equals
   - exclude: py/init-calls-subclass
   - exclude: py/similar-function
+  - exclude: py/missing-call-to-init
+  - exclude: py/conflicting-attributes
+  - exclude: py/incomplete-ordering
 extraction:
   python:
     python_setup:
