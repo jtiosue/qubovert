@@ -241,6 +241,10 @@ def test_normalize():
     d.normalize()
     assert d == {k: v / 4 for k, v in temp.items()}
 
+    d = DictArithmetic({})
+    d.normalize()
+    assert d == {}
+
 
 def test_subgraph():
 

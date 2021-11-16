@@ -19,7 +19,7 @@ This file contains the PUSOMatrix object.
 """
 
 from . import (
-    PUBOMatrix, hash_function,
+    PUBOMatrix, ordering_key,
     puso_value, solve_puso_bruteforce
 )
 
@@ -157,14 +157,11 @@ class PUSOMatrix(PUBOMatrix):
         """
         # if f is not None, then it is the squashed key. See QUSOMatrix.
         f = cls._check_key_valid(key)
-        # here we use hash because some other classes that are subclasses of
-        # this class will allow elements of the key to be strings! So we want
-        # to still have something consistent to sort by. But for this class,
-        # it doesn't make a difference, because hash_function(i) == i when i is
-        # an int.
+        # use ordering_key here because in subclasses x may not always
+        # be an int.
         return f or tuple(sorted(
             (x for x in set(key) if key.count(x) % 2),
-            key=lambda x: hash_function(x)
+            key=ordering_key
         ))
 
     def solve_bruteforce(self, all_solutions=False):

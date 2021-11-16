@@ -200,7 +200,7 @@ def test_num_terms():
 def test_puso_degree():
 
     d = PUSO()
-    assert d.degree == 0
+    assert d.degree == -float("inf")
     d[(0,)] += 2
     assert d.degree == 1
     d[(1,)] -= 3

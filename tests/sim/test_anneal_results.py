@@ -18,6 +18,7 @@ Contains tests for the objects in the ``qubovert.sim._anneal_results.py`` file.
 
 from qubovert.sim import AnnealResult, AnnealResults
 from qubovert.utils import spin_to_boolean
+from numpy.testing import assert_raises
 
 
 def test_annealresult():
@@ -232,7 +233,7 @@ def test_annealresults_convert_states():
     assert new_res == new_states
 
 
-def test_extend_add():
+def test_annealresults_extend_add():
 
     res0 = AnnealResults(AnnealResult({}, 2, True) for _ in range(4))
     assert res0.best.value == 2
@@ -264,3 +265,87 @@ def test_extend_add():
     temp.extend(res0)
     assert temp.best.value == 1
     assert type(temp) == AnnealResults
+
+
+def test_annealresults_insert_remove_pop():
+
+    # make sure the best attribute is updated
+    res0 = AnnealResults([
+        AnnealResult({}, 2, True), AnnealResult({}, 1, True)
+    ])
+    a0 = AnnealResult({}, 1, True)
+    a1 = AnnealResult({}, 2, True)
+    assert res0.best == a0
+
+    # insert
+    temp = res0.copy()
+    temp.insert(0, a0)
+    assert len(temp) == 3
+
+    r = AnnealResults([a0.copy()])
+    assert r.best == a0
+    temp = r.copy()
+    temp.insert(0, a1)
+    assert temp.best == a0
+    temp = r.copy()
+    temp.insert(1, a1)
+    assert temp.best == a0
+
+    r = AnnealResults([a1.copy()])
+    assert r.best == a1
+    temp = r.copy()
+    temp.insert(0, a0)
+    assert temp.best == a0
+    temp = r.copy()
+    temp.insert(1, a0)
+    assert temp.best == a0
+
+    # remove
+    temp = res0.copy()
+    temp.remove(a1)
+    assert len(temp) == 1 and temp.best == a0
+    temp.remove(a0)
+    assert not len(temp) and temp.best is None
+
+    temp = res0.copy()
+    temp.remove(a0)
+    assert len(temp) == 1 and temp.best == a1
+    temp.remove(a1)
+    assert not temp and temp.best is None
+    with assert_raises(ValueError):
+        temp.remove(a0)
+
+    temp = res0.copy() + [a0]
+    temp.remove(a1)
+    assert len(temp) == 2 and temp.best == a0
+
+    temp = res0.copy() + [a0]
+    temp.remove(a0)
+    assert len(temp) == 2 and temp.best == a0
+    temp.remove(a0)
+    assert len(temp) == 1 and temp.best == a1
+
+    temp = res0.copy() + [a1]
+    temp.remove(a1)
+    assert len(temp) == 2 and temp.best == a0
+
+    temp = res0.copy() + [a1]
+    temp.remove(a0)
+    assert len(temp) == 2 and temp.best == a1
+    temp.remove(a1)
+    assert len(temp) == 1 and temp.best == a1
+
+    # pop
+    temp = res0.copy()
+    t = temp.pop(1)
+    assert len(temp) == 1 and temp.best == a1 and t == a0
+    t = temp.pop(0)
+    assert not len(temp) and temp.best is None and t == a1
+
+    temp = res0.copy()
+    t = temp.pop(0)
+    assert len(temp) == 1 and temp.best == a0 and t == a1
+    t = temp.pop(0)
+    assert not temp and temp.best is None and t == a0
+    with assert_raises(IndexError):
+        temp.pop(0)

@@ -19,7 +19,7 @@ This file contains the PUBOMatrix object.
 """
 
 from . import (
-    DictArithmetic, hash_function,
+    DictArithmetic, ordering_key,
     pubo_value, solve_pubo_bruteforce
 )
 
@@ -144,7 +144,8 @@ class PUBOMatrix(DictArithmetic):
             Defined in child classes or in ``qubovert.utils.DictArithmetic``.
 
         """
-        self._degree, self._variables, self._num_binary_variables = 0, set(), 0
+        self._degree = -float("inf")
+        self._variables, self._num_binary_variables = set(), 0
         super().__init__(*args, **kwargs)
 
     def refresh(self):
@@ -303,12 +304,9 @@ class PUBOMatrix(DictArithmetic):
         """
         # if f is not None, then it is the squashed key (see QUBOMatrix)
         f = cls._check_key_valid(key)
-        # here we use hash because some other classes that are subclasses of
-        # this class will allow elements of the key to be strings! So we want
-        # to still have something consistent to sort by. But for this class,
-        # it doesn't make a difference, because hash_funcition(i) == i when i
-        # is an int.
-        return f or tuple(sorted(set(key), key=lambda x: hash_function(x)))
+        # use ordering_key here because in subclasses x may not always
+        # be an int.
+        return f or tuple(sorted(set(key), key=ordering_key))
 
     @staticmethod
     def _check_key_valid(key):

@@ -96,7 +96,7 @@ def test_quso_remove_value_when_zero():
     assert d == {}
 
     d.refresh()
-    assert d.degree == 0
+    assert d.degree == -float("inf")
     assert d.num_binary_variables == 0
     assert d.variables == set()
 
@@ -135,7 +135,7 @@ def test_quso_max_index():
 def test_quso_degree():
 
     d = QUSOMatrix()
-    assert d.degree == 0
+    assert d.degree == -float("inf")
     d[(0,)] += 2
     assert d.degree == 1
     d[(1,)] -= 3
