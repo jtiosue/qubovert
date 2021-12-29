@@ -96,7 +96,7 @@ Create the boolean objective function to minimize
     # create the variables
     x = {i: boolean_var('x(%d)' % i) for i in range(N)}
 
-    # minimize \sum_{i=0}^{N-1} (1-2x_{i}) x_{i+1}
+    # minimize \sum_{i=0}^{N-2} (1-2x_{i}) x_{i+1}
     model = 0
     for i in range(N-1):
         model += (1 - 2 * x[i]) * x[i+1]
