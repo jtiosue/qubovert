@@ -69,3 +69,7 @@ def test_subvalue():
     # edge case
     assert subvalue({}, G) == G
     assert subvalue({0: 0, 1: 0, 2: 0}, G) == {(): 2}
+
+    # from Issue #38 in GitHub
+    G = {(2,): 1, (2, 3): -1}
+    assert subvalue({3: 1}, G) == {}
