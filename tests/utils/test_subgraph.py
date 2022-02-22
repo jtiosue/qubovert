@@ -44,6 +44,10 @@ def test_subgraph():
     with assert_raises(ValueError):
         subgraph({0: 1, (0, 1): 1}, {})
 
+    # from Issue #38 in GitHub
+    G = {(2,): 1, (2, 3): -1}
+    assert subgraph(G, {2}, {3: 1}) == {}
+
 
 def test_subvalue():
 
