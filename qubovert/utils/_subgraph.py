@@ -90,6 +90,8 @@ def subgraph(G, nodes, connections=None):
         value += D.get(key, 0)
         if value:
             D[key] = value
+        else:
+            D.pop(key, 0)
 
     return D
 
@@ -134,5 +136,7 @@ def subvalue(values, G):
         value += D.get(key, 0)
         if value:
             D[key] = value
+        else:
+            D.pop(key, 0)
 
     return D
