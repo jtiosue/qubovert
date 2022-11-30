@@ -1,0 +1,19 @@
+paths-ignore:
+  - .git
+  - docs
+  - tests
+query-filters:
+  - exclude:
+      id: py/import-own-module
+  - exclude:
+      id: py/missing-equals
+  - exclude:
+      id: py/init-calls-subclass
+  - exclude:
+      id: py/similar-function
+  - exclude:
+      id: py/missing-call-to-init
+  - exclude:
+      id: py/conflicting-attributes
+  - exclude:
+      id: py/incomplete-ordering
