@@ -15,9 +15,6 @@ The one-stop package for formulating, simulating, and solving problems in boolea
 .. image:: https://codecov.io/gh/jtiosue/qubovert/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/jtiosue/qubovert/branch/master
     :alt: Code Coverage
-.. image:: https://img.shields.io/lgtm/grade/python/g/jtiosue/qubovert.svg?logo=lgtm&logoWidth=18
-    :target: https://lgtm.com/projects/g/jtiosue/qubovert/context:python
-    :alt: Code Quality
 
 *dev branch*
 
